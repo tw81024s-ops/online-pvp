@@ -4745,6 +4745,7 @@ function useItem(u, silent = false) {
         let sd = DB.skills[d.sk];
         let reqLv = (player.cls === 'mage' ? sd.reqM : player.cls === 'knight' ? sd.reqK : sd.reqE);
         if(sd.darkOnly && !player.darkelf) { logSys(`「${sd.n}」是黑妖專屬技能，只有黑妖能學習。`); return; }
+        if(player.darkelf && sd.reqM !== undefined) { logSys(`黑妖是近戰刺客，無法學習法師魔法「${sd.n}」。`); return; }
         if(reqLv === undefined) { logSys(`你的職業無法學習「${sd.n}」。`); return; }
         if(player.lv < reqLv) { logSys(`等級不足，需要等級 ${reqLv} 才能學習「${sd.n}」。`); return; }
         
@@ -5336,7 +5337,7 @@ player.inv.forEach(i => {
     if (d.type === 'skillbk') {
         let sk = DB.skills[d.sk];
         // 檢查該技能是否屬於該職業可學習範圍
-        let isClsPossible = ((player.cls === 'mage' ? sk.reqM : (player.cls === 'knight' ? sk.reqK : sk.reqE)) !== undefined) && !(sk.darkOnly && !player.darkelf);
+        let isClsPossible = ((player.cls === 'mage' ? sk.reqM : (player.cls === 'knight' ? sk.reqK : sk.reqE)) !== undefined) && !(sk.darkOnly && !player.darkelf) && !(player.darkelf && sk.reqM !== undefined);
         
         if (player.skills.includes(d.sk)) {
             statusTag = '<span class="text-slate-500 text-[10px] font-bold">[已學習]</span>';
