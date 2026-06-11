@@ -146,7 +146,12 @@
     function btnStyle(bg) { return `background:${bg};color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:bold;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.45);`; }
     fab.append(statusEl, btnAdmin, btnArena, btnLoginFab);
     function setStatus(s, bad) { statusEl.style.display = 'block'; statusEl.textContent = s; statusEl.style.color = bad ? '#fca5a5' : '#86efac'; }
-    function refreshAdminBtn() { btnAdmin.style.display = isAdmin ? 'block' : 'none'; }
+    function refreshAdminBtn() {
+        // 雙重隱藏：必須是管理員帳號，且網址結尾加上 #admin 才顯示按鈕（朋友與一般情況都看不到）
+        const wantAdmin = (location.hash || '').toLowerCase().indexOf('admin') !== -1;
+        btnAdmin.style.display = (isAdmin && wantAdmin) ? 'block' : 'none';
+    }
+    window.addEventListener('hashchange', refreshAdminBtn);
 
     // ============ 通用 Modal ============
     function modal(title, bodyEl, opts) {

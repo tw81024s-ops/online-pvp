@@ -14,7 +14,14 @@ const store = require('./store');
 // ====== App ======
 const app = express();
 app.use(express.json({ limit: '5mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+    setHeaders: (res, filePath) => {
+        // 讓瀏覽器每次都向伺服器確認 js/html 是否更新，避免改版後讀到舊快取
+        if (filePath.endsWith('.js') || filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache');
+        }
+    }
+}));
 
 function makeToken() { return crypto.randomBytes(24).toString('hex'); }
 function auth(req, res, next) {
