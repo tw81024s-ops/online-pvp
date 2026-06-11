@@ -95,16 +95,17 @@
             return r;
         };
     }
+    function activeSlot() { return parseInt(localStorage.getItem('de_active_slot')) || 1; }
     async function uploadSave() {
         try {
             const raw = localStorage.getItem('lineage_idle_save');
             if (!raw) return;
-            await api('/api/save', 'PUT', { data: JSON.parse(raw) });
-            setStatus('☁️ 已同步');
+            await api('/api/save?slot=' + activeSlot(), 'PUT', { data: JSON.parse(raw) });
+            setStatus('☁️ 已同步（角色' + activeSlot() + '）');
         } catch (e) { setStatus('☁️ 同步失敗', true); }
     }
     async function downloadSave() {
-        const j = await api('/api/save');
+        const j = await api('/api/save?slot=' + activeSlot());
         if (j.data) {
             localStorage.setItem('lineage_idle_save', typeof j.data === 'string' ? j.data : JSON.stringify(j.data));
             return true;
@@ -147,9 +148,10 @@
     const statusEl = el('div', { style: 'background:rgba(15,23,42,.9);color:#cbd5e1;font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid #334155;display:none;' });
     const btnArena = el('button', { style: btnStyle('#b45309') }, '⚔️ 競技場');
     const btnLoginFab = el('button', { style: btnStyle('#1d4ed8') }, '🌐 線上登入');
+    const btnSlots = el('button', { style: btnStyle('#0f766e') + 'display:none;' }, '👤 角色欄位');
     const btnAdmin = el('button', { style: btnStyle('#7c3aed') + 'display:none;' }, '🛠️ 管理員');
     function btnStyle(bg) { return `background:${bg};color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:bold;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.45);`; }
-    fab.append(statusEl, btnAdmin, btnArena, btnLoginFab);
+    fab.append(statusEl, btnAdmin, btnSlots, btnArena, btnLoginFab);
     function setStatus(s, bad) { statusEl.style.display = 'block'; statusEl.textContent = s; statusEl.style.color = bad ? '#fca5a5' : '#86efac'; }
     function refreshAdminBtn() {
         // 雙重隱藏：必須是管理員帳號，且網址結尾加上 #admin 才顯示按鈕（朋友與一般情況都看不到）
@@ -247,6 +249,7 @@
     async function afterLogin(isNew) {
         toast('歡迎，' + myName + '！', '#14532d');
         btnLoginFab.textContent = '🚪 登出';
+        btnSlots.style.display = 'block';
         refreshAdminBtn();
         hookSave();
         connectWS();
@@ -269,6 +272,8 @@
         localStorage.removeItem(LS_TOKEN); localStorage.removeItem(LS_USER);
         if (ws) try { ws.close(); } catch (e) { }
         btnLoginFab.textContent = '🌐 線上登入';
+        btnSlots.style.display = 'none';
+        localStorage.removeItem('de_active_slot');
         statusEl.style.display = 'none';
         refreshAdminBtn();
         if (!silent) toast('已登出');
@@ -304,6 +309,47 @@
             arenaListEl.append(row);
         });
     }
+    async function switchSlot(n) {
+        const cur = activeSlot();
+        if (n === cur) return;
+        if (!confirm('要切換到「角色欄位 ' + n + '」嗎？\n目前的角色會先自動存檔。')) return;
+        try {
+            toast('切換中…請稍候');
+            if (typeof window.saveGame === 'function') { try { window.saveGame(); } catch (e) { } }
+            const raw = localStorage.getItem('lineage_idle_save');
+            if (raw) { try { await api('/api/save?slot=' + cur, 'PUT', { data: JSON.parse(raw) }); } catch (e) { } }
+            localStorage.setItem('de_active_slot', String(n));
+            let j = {};
+            try { j = await api('/api/save?slot=' + n); } catch (e) { }
+            if (j && j.data) localStorage.setItem('lineage_idle_save', typeof j.data === 'string' ? j.data : JSON.stringify(j.data));
+            else localStorage.removeItem('lineage_idle_save');
+            location.reload();   // 乾淨重開，載入該欄位的角色
+        } catch (e) { toast('切換失敗：' + e.message, '#7f1d1d'); }
+    }
+    async function showSlots() {
+        if (!token) { showLogin(); return; }
+        let info = {};
+        try { const r = await api('/api/slots'); info = r.slots || {}; } catch (e) { toast('讀取角色欄位失敗', '#7f1d1d'); return; }
+        const cur = activeSlot();
+        const wrap = el('div');
+        wrap.append(el('div', { style: 'color:#94a3b8;font-size:13px;margin-bottom:10px;' }, '一個帳號最多 4 個角色，切換時會自動存檔。'));
+        for (let s = 1; s <= 4; s++) {
+            const occ = !!info[s];
+            const row = el('div', { style: 'display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;background:#0f172a;border:1px solid #334155;border-radius:10px;margin-bottom:8px;' });
+            const left = el('div', {});
+            left.append(el('div', { style: 'font-weight:bold;color:#e2e8f0;' }, '角色欄位 ' + s + (s === 1 ? '（原本角色）' : '')));
+            left.append(el('div', { style: 'font-size:12px;color:' + (s === cur ? '#fbbf24' : (occ ? '#86efac' : '#64748b')) + ';' }, s === cur ? '✅ 目前使用中' : (occ ? '有角色' : '空格')));
+            row.append(left);
+            if (s !== cur) {
+                const b = el('button', { style: 'background:' + (occ ? '#0f766e' : '#475569') + ';color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;white-space:nowrap;font-weight:bold;' }, occ ? '切換' : '建新角色');
+                b.onclick = () => switchSlot(s);
+                row.append(b);
+            }
+            wrap.append(row);
+        }
+        modal('👤 角色欄位', wrap);
+    }
+    btnSlots.onclick = showSlots;
     btnArena.onclick = showArena;
 
     function showIncoming(m) {
@@ -603,6 +649,7 @@
         hookSave();
         if (token) {
             btnLoginFab.textContent = '🚪 登出';
+            btnSlots.style.display = 'block';
             connectWS();
         }
     }

@@ -21,6 +21,12 @@ function flush() {
     }, 300);
 }
 
+// 角色欄位：第 1 格沿用原本 key（userId），第 2~4 格用 userId:slot（純新增、不動到原存檔）
+function slotKey(userId, slot) {
+    const n = Number(slot) || 1;
+    return n === 1 ? userId : (userId + ':' + n);
+}
+
 module.exports = {
     // users
     findUser(username) { return data.users.find(u => u.username === username) || null; },
@@ -42,6 +48,7 @@ module.exports = {
         const u = this.findUser(username); if (!u) return false;
         data.users = data.users.filter(x => x.id !== u.id);
         delete data.saves[u.id];
+        for (let sl = 2; sl <= 4; sl++) delete data.saves[u.id + ':' + sl];
         for (const t in data.tokens) if (data.tokens[t] === u.id) delete data.tokens[t];
         flush(); return true;
     },
@@ -49,8 +56,9 @@ module.exports = {
     addToken(token, userId) { data.tokens[token] = userId; flush(); },
     removeToken(token) { delete data.tokens[token]; flush(); },
     // saves
-    getSave(userId) { return data.saves[userId] || null; },
-    putSave(userId, json) { data.saves[userId] = { data: json, updated_at: new Date().toISOString() }; flush(); },
+    getSave(userId, slot) { return data.saves[slotKey(userId, slot)] || null; },
+    putSave(userId, json, slot) { data.saves[slotKey(userId, slot)] = { data: json, updated_at: new Date().toISOString() }; flush(); },
+    slotsInfo(userId) { const o = {}; for (let s = 1; s <= 4; s++) o[s] = !!data.saves[slotKey(userId, s)]; return o; },
     // battles
     addBattle(a, b, winner) {
         data.battles.push({ a_name: a, b_name: b, winner, created_at: new Date().toISOString() });

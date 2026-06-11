@@ -83,8 +83,12 @@ app.post('/api/logout', auth, (req, res) => {
 });
 
 // 雲端存檔
+function reqSlot(req) {
+    const n = parseInt(req.query.slot || (req.body && req.body.slot)) || 1;
+    return Math.min(4, Math.max(1, n));   // 限制 1~4
+}
 app.get('/api/save', auth, (req, res) => {
-    const row = store.getSave(req.user.id);
+    const row = store.getSave(req.user.id, reqSlot(req));
     if (!row) return res.json({ data: null });
     res.json({ data: row.data, updatedAt: row.updated_at });
 });
@@ -92,8 +96,12 @@ app.put('/api/save', auth, (req, res) => {
     const data = JSON.stringify(req.body && req.body.data ? req.body.data : null);
     if (!data || data === 'null') return res.status(400).json({ error: '存檔資料為空' });
     if (data.length > 4 * 1024 * 1024) return res.status(400).json({ error: '存檔過大' });
-    store.putSave(req.user.id, data);
+    store.putSave(req.user.id, data, reqSlot(req));
     res.json({ ok: true });
+});
+// 角色欄位：回傳哪些格子有角色
+app.get('/api/slots', auth, (req, res) => {
+    res.json({ slots: store.slotsInfo(req.user.id) });
 });
 
 // 對戰紀錄
