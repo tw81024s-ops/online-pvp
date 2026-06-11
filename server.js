@@ -6,6 +6,7 @@ const { WebSocketServer } = require('ws');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const path = require('path');
+const fs = require('fs');
 
 const PORT = process.env.PORT || 3000;
 const { simulate, clampProfile } = require('./battle');
@@ -22,6 +23,21 @@ app.use(express.static(path.join(__dirname, 'public'), {
         }
     }
 }));
+
+// 後備：部分素材檔名被解壓工具轉成 #Uxxxx 跳脫形式（中文檔名）。
+// 當遊戲用「中文檔名」要圖、static 找不到時，自動轉成 #Uxxxx 形式再找一次。
+app.use('/assets', (req, res, next) => {
+    let decoded;
+    try { decoded = decodeURIComponent(req.path); } catch (e) { return next(); }
+    if (!/[^\x00-\x7F]/.test(decoded)) return next();   // 純 ASCII 檔名不處理
+    let escaped = '';
+    for (const ch of decoded) {
+        const code = ch.codePointAt(0);
+        escaped += code > 127 ? '#U' + code.toString(16).padStart(4, '0') : ch;
+    }
+    const filePath = path.join(__dirname, 'public', 'assets', escaped);
+    fs.access(filePath, fs.constants.R_OK, err => err ? next() : res.sendFile(filePath));
+});
 
 function makeToken() { return crypto.randomBytes(24).toString('hex'); }
 function isAdminUser(u) {

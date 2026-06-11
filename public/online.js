@@ -173,6 +173,50 @@
     function input(ph, type) { return el('input', { placeholder: ph, type: type || 'text', style: 'width:100%;background:#1e293b;border:1px solid #475569;border-radius:8px;padding:10px;color:#fff;margin-bottom:10px;font-size:14px;box-sizing:border-box;' }); }
     function bigBtn(txt, bg) { return el('button', { style: `width:100%;background:${bg};color:#fff;border:none;border-radius:8px;padding:11px;font-weight:bold;cursor:pointer;font-size:14px;margin-bottom:8px;` }, txt); }
 
+    // 可搜尋 + 可分類瀏覽的道具清單；onGive(id, item) 由呼叫端決定給誰
+    function buildItemBrowser(onGive) {
+        const _DB = getDB();
+        const box = el('div');
+        const search = input('搜尋道具名（或往下展開分類瀏覽全部）'); search.style.marginBottom = '6px';
+        const out = el('div', { style: 'max-height:300px;overflow-y:auto;font-size:13px;' });
+        box.append(search, out);
+        if (!_DB || !_DB.items) { out.textContent = '讀取不到物品資料'; return box; }
+        const all = Object.entries(_DB.items);
+        const CATS = [['wpn', '武器'], ['arm', '防具'], ['acc', '飾品'], ['pot', '藥水'], ['scroll', '卷軸'], ['skillbk', '技能書']];
+        const known = CATS.map(c => c[0]);
+        function itemRow(id, it) {
+            const r = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;padding:3px 8px;background:#1e293b;border-radius:6px;margin-bottom:3px;' });
+            r.append(el('span', {}, `${it.n} <span style="color:#475569">${id}</span>`));
+            const b = el('button', { style: 'background:#15803d;color:#fff;border:none;border-radius:4px;padding:3px 12px;cursor:pointer;white-space:nowrap;' }, '給予');
+            b.onclick = () => onGive(id, it);
+            r.append(b); return r;
+        }
+        function group(t) {
+            return t === 'misc' ? all.filter(([id, it]) => known.indexOf(it.type) === -1) : all.filter(([id, it]) => it.type === t);
+        }
+        function renderCats() {
+            out.innerHTML = '';
+            CATS.concat([['misc', '其他']]).forEach(([t, label]) => {
+                const items = group(t);
+                if (!items.length) return;
+                const d = el('details', { style: 'margin-bottom:5px;' });
+                d.append(el('summary', { style: 'cursor:pointer;color:#fbbf24;font-weight:bold;padding:4px 0;' }, `${label}（${items.length}）`));
+                let loaded = false;
+                d.addEventListener('toggle', () => { if (d.open && !loaded) { loaded = true; items.forEach(([id, it]) => d.append(itemRow(id, it))); } });
+                out.append(d);
+            });
+        }
+        function renderSearch(q) {
+            out.innerHTML = '';
+            const hits = all.filter(([id, it]) => (it.n || '').includes(q)).slice(0, 80);
+            if (!hits.length) { out.append(el('div', { style: 'color:#64748b;padding:8px;' }, '找不到符合的道具')); return; }
+            hits.forEach(([id, it]) => out.append(itemRow(id, it)));
+        }
+        search.oninput = () => { const q = search.value.trim(); q ? renderSearch(q) : renderCats(); };
+        renderCats();
+        return box;
+    }
+
     // ============ 登入 / 註冊 ============
     function showLogin() {
         const wrap = el('div');
@@ -346,28 +390,13 @@
         const fExp = field('經驗', p.exp || 0);
         const fBonus = field('可分配屬性點', p.bonus || 0);
 
-        wrap.append(el('div', { style: 'color:#fbbf24;font-weight:bold;margin:10px 0 6px;' }, '🎁 給這位玩家道具'));
-        const psearch = input('搜尋道具名稱（例：魔杖）');
-        const pres = el('div', { style: 'max-height:140px;overflow-y:auto;font-size:13px;margin-bottom:6px;' });
-        const padded = el('div', { style: 'font-size:12px;color:#86efac;margin-bottom:8px;' });
-        const _DB = getDB();
-        psearch.oninput = () => {
-            pres.innerHTML = '';
-            const q = psearch.value.trim(); if (!q || !_DB) return;
-            Object.entries(_DB.items).filter(([id, it]) => (it.n || '').includes(q)).slice(0, 30).forEach(([id, it]) => {
-                const rr = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;padding:4px 8px;background:#1e293b;border-radius:6px;margin-bottom:4px;' });
-                rr.append(el('span', {}, it.n));
-                const b = el('button', { style: 'background:#15803d;color:#fff;border:none;border-radius:4px;padding:3px 10px;cursor:pointer;' }, '加入');
-                b.onclick = () => {
-                    if (!Array.isArray(p.inv)) p.inv = [];
-                    const newUid = (typeof uid === 'function') ? uid() : Math.random().toString(36).slice(2, 11);
-                    p.inv.push({ id: id, uid: newUid, cnt: 1, en: 0, bless: false, anc: false, attr: false, lock: false, junk: false });
-                    padded.textContent = '待加入：' + (padded.textContent ? padded.textContent.replace('待加入：', '') + '、' : '') + it.n;
-                };
-                rr.append(b); pres.append(rr);
-            });
-        };
-        wrap.append(psearch, pres, padded);
+        wrap.append(el('div', { style: 'color:#fbbf24;font-weight:bold;margin:10px 0 6px;' }, '🎁 給這位玩家道具（點分類展開，或搜尋）'));
+        wrap.append(buildItemBrowser((id, it) => {
+            if (!Array.isArray(p.inv)) p.inv = [];
+            const newUid = (typeof uid === 'function') ? uid() : Math.random().toString(36).slice(2, 11);
+            p.inv.push({ id: id, uid: newUid, cnt: 1, en: 0, bless: false, anc: false, attr: false, lock: false, junk: false });
+            toast('待加入 ' + it.n + '（記得按下方儲存）', '#1e3a5f');
+        }));
 
         const adv = el('details', { style: 'margin-bottom:10px;' });
         adv.append(el('summary', { style: 'cursor:pointer;color:#94a3b8;font-size:13px;' }, '進階：直接編輯存檔 JSON（會覆蓋上面欄位）'));
@@ -412,22 +441,10 @@
         row(null, '＋金幣', v => { const n = parseInt(v) || 100000; player.gold += n; refreshGame(); toast(`金幣 +${n}`); }, true, '金額（預設 100000）');
         row(null, '＋屬性點', v => { const n = parseInt(v) || 10; player.bonus = (player.bonus || 0) + n; refreshGame(); toast(`可分配屬性點 +${n}`); }, true, '點數（預設 10）');
         row('補滿 HP / MP', '執行', () => { player.hp = player.mhp; player.mp = player.mmp; refreshGame(); toast('已補滿'); });
-        section('🎁 取得物品');
-        const search = input('輸入關鍵字搜尋物品（例：魔杖）'); search.style.marginBottom = '6px';
-        const results = el('div', { style: 'max-height:160px;overflow-y:auto;font-size:13px;margin-bottom:8px;' });
-        search.oninput = () => {
-            results.innerHTML = '';
-            const q = search.value.trim();
-            const _DB = getDB(); if (!q || !_DB) return;
-            Object.entries(_DB.items).filter(([id, it]) => (it.n || '').includes(q)).slice(0, 30).forEach(([id, it]) => {
-                const r = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;padding:4px 8px;background:#1e293b;border-radius:6px;margin-bottom:4px;' });
-                r.append(el('span', {}, `${it.n} <span style="color:#64748b">(${id})</span>`));
-                const b = el('button', { style: 'background:#15803d;color:#fff;border:none;border-radius:4px;padding:3px 10px;cursor:pointer;' }, '取得');
-                b.onclick = () => { try { gainItem(id, 1, true, true); refreshGame(); toast('已取得 ' + it.n); } catch (e) { toast('失敗：' + e.message, '#7f1d1d'); } };
-                r.append(b); results.append(r);
-            });
-        };
-        wrap.append(search, results);
+        section('🎁 取得物品（點分類展開瀏覽，或搜尋）');
+        wrap.append(buildItemBrowser((id, it) => {
+            try { gainItem(id, 1, true, true); refreshGame(); toast('已取得 ' + it.n); } catch (e) { toast('失敗：' + e.message, '#7f1d1d'); }
+        }));
         section('👥 玩家管理（檢視 / 編輯其他人）');
         const userList = el('div', { style: 'font-size:13px;margin-bottom:8px;max-height:170px;overflow-y:auto;' });
         api('/api/admin/users').then(j => {
