@@ -192,6 +192,7 @@ function clampProfile(p) {
     return {
         name: sanitize(p.name || '無名氏'),
         avatar: (typeof p.avatar === 'string' && p.avatar) ? sanitize(p.avatar) : null,
+        darkelf: !!p.darkelf,
         cls: ['knight', 'mage', 'elf'].includes(p.cls) ? p.cls : 'knight',
         lv: n(p.lv, 1, 999, 1),
         mhp: n(p.mhp, 1, 999999, 100), mmp: n(p.mmp, 0, 999999, 0),

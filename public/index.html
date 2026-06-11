@@ -229,6 +229,8 @@
                             <button onclick="selectClass('f_mage')" id="btn-class-f_mage" class="btn py-2 text-base font-bold">女法師</button>
                             <button onclick="selectClass('m_elf')" id="btn-class-m_elf" class="btn py-2 text-base font-bold">男妖精</button>
                             <button onclick="selectClass('f_elf')" id="btn-class-f_elf" class="btn py-2 text-base font-bold">女妖精</button>
+                            <button onclick="selectClass('m_darkelf')" id="btn-class-m_darkelf" class="btn py-2 text-base font-bold">男黑妖</button>
+                            <button onclick="selectClass('f_darkelf')" id="btn-class-f_darkelf" class="btn py-2 text-base font-bold">女黑妖</button>
                         </div>
                         <div id="class-desc" class="mt-4 text-slate-300 text-sm leading-relaxed flex-1 overflow-y-auto pr-1"></div>
                     </div>
@@ -2211,6 +2213,14 @@ d.mr += (baseMr + bonusMr);
 
     d.spdMult = spdMult;   // 速度倍率（受加速/勇敢藥水/精靈餅乾/變身影響），供自動施法間隔使用
     d.aspd = d.aspd * spdMult;
+
+    // 黑妖：暗系妖精分支——偏攻擊（高爆擊、高攻速、防禦較脆）
+    if (p.darkelf) {
+        d.meleeCrit += 7; d.rangedCrit += 7;
+        d.meleeCritDmg += 20; d.rangedCritDmg += 20;
+        d.er = (d.er || 0) + 3;
+        d.ac += 2;
+    }
 
     p.hp = Math.min(p.hp, p.mhp);
     p.mp = Math.min(p.mp, p.mmp);
@@ -5090,6 +5100,7 @@ function updateUI() {
     if (player.cls === 'knight') clsDisplayName = '騎士';
     else if (player.cls === 'mage') clsDisplayName = '法師';
     else if (player.cls === 'elf') clsDisplayName = '妖精';
+    if (player.darkelf) clsDisplayName = '黑妖';
     if(document.getElementById('st-classname')) document.getElementById('st-classname').innerText = clsDisplayName;
     if(!window._editingName) document.getElementById('st-class').innerText = (player.name || '');   // 未取名則不顯示任何文字（仍可點擊命名）
     
@@ -7352,7 +7363,7 @@ function selectClass(c) {
     curCreate.rawCls = c; // 記住玩家選的具體選項 (例如 f_knight)
     
     // 1. 更新按鈕外觀 (先移除所有按鈕的 active，再幫目前點擊的加上 active)
-    const btnIds = ['m_knight', 'f_knight', 'm_mage', 'f_mage', 'm_elf', 'f_elf'];
+    const btnIds = ['m_knight', 'f_knight', 'm_mage', 'f_mage', 'm_elf', 'f_elf', 'm_darkelf', 'f_darkelf'];
     btnIds.forEach(id => {
         let btn = document.getElementById('btn-class-' + id);
         if(btn) btn.classList.remove('active');
@@ -7372,6 +7383,7 @@ function selectClass(c) {
     if(c.includes('knight')) curCreate.cls = 'knight';
     else if(c.includes('mage')) curCreate.cls = 'mage';
     else if(c.includes('elf')) curCreate.cls = 'elf';
+    curCreate.darkelf = c.includes('darkelf');   // 黑妖：底層走妖精，另記旗標
 
     // 3. 更新說明文字
     if (curCreate.cls === 'knight') {
@@ -7382,6 +7394,7 @@ function selectClass(c) {
         document.getElementById('class-desc').innerText = "妖精：在妖精森林建立據點的自然化身。這個種族既愛護人類,同時表現出冷靜與果斷。以均衡能力操控各種武器,是多才多藝的職業。";
     }
     
+    if (curCreate.darkelf) document.getElementById('class-desc').innerText = "黑妖：背棄光明、流亡闇影的妖精。以匕首與奇襲為武，攻擊狠辣、爆擊致命、身手敏捷，但防禦較脆弱，是高風險高回報的暗影刺客。";
     document.getElementById('stat-allocation').style = "";
     curCreate.str = 0; curCreate.dex = 0; curCreate.con = 0; curCreate.int = 0; curCreate.wis = 0; curCreate.cha = 0;
     updateCreateUI();
@@ -7412,10 +7425,12 @@ function startGame() {
     const avatarMap = {
         'm_knight': '男騎士', 'f_knight': '女騎士',
         'm_mage': '男法師', 'f_mage': '女法師',
-        'm_elf': '男妖精', 'f_elf': '女妖精'
+        'm_elf': '男妖精', 'f_elf': '女妖精',
+        'm_darkelf': 'darkelf_m', 'f_darkelf': 'darkelf_f'
     };
     player.avatar = avatarMap[curCreate.rawCls] || '男騎士';
-    player.cls = curCreate.cls; 
+    player.cls = curCreate.cls;
+    player.darkelf = !!curCreate.darkelf;   // 黑妖旗標
     player.name = null;   // 預設未取名，狀態欄顯示「點擊取名」，玩家可點擊命名
     
     let b = createBase[curCreate.cls];

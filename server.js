@@ -204,8 +204,8 @@ wss.on('connection', (ws) => {
 
             const payload = {
                 type: 'battle_start',
-                a: { name: pA.name, user: c.from, mhp: pA.mhp, mmp: pA.mmp, cls: pA.cls, lv: pA.lv, avatar: pA.avatar },
-                b: { name: pB.name, user: ws.username, mhp: pB.mhp, mmp: pB.mmp, cls: pB.cls, lv: pB.lv, avatar: pB.avatar },
+                a: { name: pA.name, user: c.from, mhp: pA.mhp, mmp: pA.mmp, cls: pA.cls, lv: pA.lv, avatar: pA.avatar, darkelf: pA.darkelf },
+                b: { name: pB.name, user: ws.username, mhp: pB.mhp, mmp: pB.mmp, cls: pB.cls, lv: pB.lv, avatar: pB.avatar, darkelf: pB.darkelf },
                 startAt: Date.now() + 1500,   // 雙方 1.5 秒後依同一時鐘開播
                 events: result.events,
                 winner: result.winner

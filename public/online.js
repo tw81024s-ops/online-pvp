@@ -69,7 +69,7 @@
             if (dice && (!heal || (s.tier || 1) > (heal.tier || 1))) heal = { name: s.n || id, dice: dice, mp: s.mp || 5, tier: s.tier || 1 };
         });
         return {
-            name: p.name || myName, cls: p.cls, lv: p.lv, avatar: p.avatar || null,
+            name: p.name || myName, cls: p.cls, lv: p.lv, avatar: p.avatar || null, darkelf: !!p.darkelf,
             mhp: p.mhp, mmp: p.mmp,
             ac: d.ac, mr: d.mr, er: d.er, dr: d.dr || 0,
             meleeHit: d.meleeHit, meleeDmg: d.meleeDmg, meleeCrit: d.meleeCrit, meleeCritDmg: d.meleeCritDmg,
@@ -353,7 +353,7 @@
             } else av.textContent = emoji[s.cls] || '⚔️';
             box.append(av);
             box.append(el('div', { style: `font-weight:bold;color:${color};font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;` }, s.name));
-            box.append(el('div', { style: 'font-size:11px;color:#94a3b8;margin-bottom:6px;' }, `Lv.${s.lv}・${clsZh[s.cls] || ''}`));
+            box.append(el('div', { style: 'font-size:11px;color:#94a3b8;margin-bottom:6px;' }, `Lv.${s.lv}・${s.darkelf ? '黑妖' : (clsZh[s.cls] || '')}`));
             const hpOut = el('div', { style: 'background:#1e293b;border-radius:6px;height:14px;overflow:hidden;border:1px solid #334155;' });
             const hpIn = el('div', { style: 'background:linear-gradient(90deg,#dc2626,#f87171);height:100%;width:100%;transition:width .25s;' });
             hpOut.append(hpIn);
