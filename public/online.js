@@ -11,6 +11,10 @@
     let onlineUsers = [];
     let saveTimer = null;
 
+    // 遊戲用 let 宣告 player/DB（不掛在 window 上），用存取器安全取得
+    function getPlayer() { try { return (typeof player !== 'undefined' && player) ? player : (typeof window !== 'undefined' ? window.player : null) || null; } catch (e) { return null; } }
+    function getDB() { try { return (typeof DB !== 'undefined' && DB) ? DB : (typeof window !== 'undefined' ? window.DB : null) || null; } catch (e) { return null; } }
+
     // ============ 小工具 ============
     const $ = (id) => document.getElementById(id);
     function el(tag, attrs, html) {
@@ -38,17 +42,18 @@
     // ============ 戰鬥數值打包（calcStats 之後的衍生值）============
     function buildProfile() {
         try { if (typeof calcStats === 'function') calcStats(); } catch (e) { }
-        const p = window.player, d = p.d;
+        const p = getPlayer(); if (!p) return null; const d = p.d;
+        const _DB = getDB();
         // 武器
         let weapon = null;
-        if (p.eq && p.eq.wpn && window.DB && DB.items[p.eq.wpn.id]) {
-            const w = DB.items[p.eq.wpn.id];
+        if (p.eq && p.eq.wpn && _DB && _DB.items[p.eq.wpn.id]) {
+            const w = _DB.items[p.eq.wpn.id];
             weapon = { dice: w.dmgS || 2, spd: w.spd || 1.5, ranged: !!w.ranged };
         }
         // 最強攻擊魔法（取階級最高者）
         let spell = null;
         (p.skills || []).forEach(id => {
-            const s = window.DB && DB.skills[id];
+            const s = _DB && _DB.skills[id];
             if (!s || s.dmgType === 'physical') return;
             if (!(s.dmgDice || s.multiDmg)) return;
             if (!spell || (s.tier || 1) > (spell.tier || 1)) {
@@ -58,7 +63,7 @@
         // 治癒魔法
         let heal = null;
         (p.skills || []).forEach(id => {
-            const s = window.DB && DB.skills[id];
+            const s = _DB && _DB.skills[id];
             if (!s) return;
             const dice = s.healDice || (s.type === 'heal' && s.valDice) || null;
             if (dice && (!heal || (s.tier || 1) > (heal.tier || 1))) heal = { name: s.n || id, dice: dice, mp: s.mp || 5, tier: s.tier || 1 };
@@ -133,7 +138,7 @@
     }
 
     // ============ UI：浮動按鈕 + 狀態 ============
-    const fab = el('div', { style: 'position:fixed;right:14px;bottom:14px;z-index:9990;display:flex;flex-direction:column;gap:8px;align-items:flex-end;' });
+    const fab = el('div', { id: 'online-fab', style: 'position:fixed;right:14px;bottom:14px;z-index:9990;display:flex;flex-direction:column;gap:8px;align-items:flex-end;' });
     const statusEl = el('div', { style: 'background:rgba(15,23,42,.9);color:#cbd5e1;font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid #334155;display:none;' });
     const btnArena = el('button', { style: btnStyle('#b45309') }, '⚔️ 競技場');
     const btnLoginFab = el('button', { style: btnStyle('#1d4ed8') }, '🌐 線上登入');
@@ -220,7 +225,7 @@
     let arenaListEl = null;
     function showArena() {
         if (!token || !wsReady) { toast('請先登入線上模式', '#7f1d1d'); if (!token) showLogin(); return; }
-        if (!window.player || !player.cls) { toast('請先建立或載入角色再進入競技場', '#7f1d1d'); return; }
+        const _p = getPlayer(); if (!_p || !_p.cls) { toast('請先建立或載入角色再進入競技場', '#7f1d1d'); return; }
         const wrap = el('div');
         wrap.append(el('div', { style: 'color:#94a3b8;font-size:13px;margin-bottom:10px;' }, '點選在線玩家發起挑戰，雙方將即時觀看同一場自動對戰。'));
         arenaListEl = el('div');
@@ -254,7 +259,7 @@
         wrap.append(acc, dec);
         const ov = modal('收到挑戰', wrap, { noClose: true });
         acc.onclick = () => {
-            if (!window.player || !player.cls) { toast('你還沒有角色，無法應戰', '#7f1d1d'); return; }
+            const _p = getPlayer(); if (!_p || !_p.cls) { toast('你還沒有角色，無法應戰', '#7f1d1d'); return; }
             ws.send(JSON.stringify({ type: 'challenge_accept', id: m.id, profile: buildProfile() }));
             ov.remove();
         };
@@ -337,8 +342,8 @@
         search.oninput = () => {
             results.innerHTML = '';
             const q = search.value.trim();
-            if (!q || !window.DB) return;
-            Object.entries(DB.items).filter(([id, it]) => (it.n || '').includes(q)).slice(0, 30).forEach(([id, it]) => {
+            const _DB = getDB(); if (!q || !_DB) return;
+            Object.entries(_DB.items).filter(([id, it]) => (it.n || '').includes(q)).slice(0, 30).forEach(([id, it]) => {
                 const r = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;padding:4px 8px;background:#1e293b;border-radius:6px;margin-bottom:4px;' });
                 r.append(el('span', {}, `${it.n} <span style="color:#64748b">(${id})</span>`));
                 const b = el('button', { style: 'background:#15803d;color:#fff;border:none;border-radius:4px;padding:3px 10px;cursor:pointer;' }, '取得');
@@ -366,7 +371,36 @@
     };
 
     // ============ 啟動 ============
+    function injectMobileCSS() {
+        const css = `
+@media (max-width: 860px) {
+  html, body { height: auto !important; min-height: 100%; overflow-x: hidden !important; }
+  body { display: block !important; padding: 8px !important; }
+
+  /* 創角畫面：原本固定 1000px，改成佔滿手機寬、內容直排 */
+  #creation-screen { position: relative !important; width: 100% !important; max-width: 100% !important; margin: 0 auto !important; padding: 16px !important; }
+  #creation-panel { flex-direction: column !important; }
+  #creation-panel > * { width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+
+  /* 主畫面三欄：改成上下堆疊、各佔滿寬 */
+  #game-screen { flex-direction: column !important; width: 100% !important; max-width: 100% !important; height: auto !important; gap: 10px !important; }
+  #game-screen > div { width: 100% !important; max-width: 100% !important; min-width: 0 !important; flex: 0 0 auto !important; }
+
+  /* 內部固定寬的小區塊不要撐爆畫面 */
+  #game-screen [class*="w-["], #creation-screen [class*="w-["] { max-width: 100% !important; }
+
+  /* 可捲動面板給合理高度，避免被壓扁或無限長 */
+  #game-screen [id^="tab-"], #game-screen .panel.flex-1 { max-height: 65vh; }
+
+  /* 右下浮動按鈕縮小一點，手機才不擋畫面 */
+  #online-fab button { padding: 9px 13px !important; font-size: 13px !important; }
+}`;
+        const s = document.createElement('style');
+        s.textContent = css;
+        document.head.appendChild(s);
+    }
     function init() {
+        injectMobileCSS();
         document.body.appendChild(fab);
         hookSave();
         if (token) {
