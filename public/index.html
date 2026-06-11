@@ -511,15 +511,26 @@ function getExpGainMult(lv) {
 
 const DB = {
         items: {
+        // ===== 三職業技能書 =====
+        "bk_kn_berserk": { type: "skillbk", n: "騎士技能書(狂戰士)", p: 30000, sk: "sk_kn_berserk", gachaWeight: 0 },
+        "bk_kn_rage": { type: "skillbk", n: "騎士技能書(怒氣)", p: 20000, sk: "sk_kn_rage", gachaWeight: 0 },
+        "bk_kn_warcry": { type: "skillbk", n: "騎士技能書(戰吼)", p: 15000, sk: "sk_kn_warcry", gachaWeight: 0 },
+        "bk_kn_wpnmastery": { type: "skillbk", n: "騎士技能書(武器精通)", p: 25000, sk: "sk_kn_wpnmastery", gachaWeight: 0 },
+        "bk_kn_ironbody": { type: "skillbk", n: "騎士技能書(鋼鐵之軀)", p: 30000, sk: "sk_kn_ironbody", gachaWeight: 0 },
+        "bk_kn_counterbarrier": { type: "skillbk", n: "騎士技能書(反擊屏障)", p: 40000, sk: "sk_kn_counterbarrier", gachaWeight: 0 },
+        "bk_mg_timewarp": { type: "skillbk", n: "魔法書(時空扭曲)", p: 50000, sk: "sk_mg_timewarp", gachaWeight: 0 },
+        "bk_mg_archward": { type: "skillbk", n: "魔法書(大魔導師結界)", p: 50000, sk: "sk_mg_archward", gachaWeight: 0 },
+        "bk_ef_kingarrow": { type: "skillbk", n: "精靈水晶(精靈王之箭)", p: 50000, sk: "sk_ef_kingarrow", gachaWeight: 0 },
+        "bk_ef_naturewrath": { type: "skillbk", n: "精靈水晶(自然之怒)", p: 50000, sk: "sk_ef_naturewrath", gachaWeight: 0 },
         // ===== 黑妖裝備 + 法師魔杖（自動合併） =====
-        "de_claw_demon": { darkOnly: true, n: "魔族鋼爪", type: "wpn", dmgS: 6, dmgL: 9, hit: 1, spd: 0.9, req: "elf", safe: 0, p: 800, gachaWeight: 0, img: "assets/icons/weapons/匕首.png" },
-        "de_claw_steel": { darkOnly: true, n: "暗鋼爪", type: "wpn", dmgS: 10, dmgL: 15, hit: 2, spd: 0.9, req: "elf", safe: 6, p: 45000, gachaWeight: 0, img: "assets/icons/weapons/匕首.png" },
-        "de_claw_spirit": { darkOnly: true, n: "靈幽暗鋼爪", type: "wpn", dmgS: 13, dmgL: 19, hit: 3, spd: 0.9, req: "elf", safe: 6, p: 150000, gachaWeight: 0, img: "assets/icons/weapons/精靈匕首.png" },
-        "de_blade_silver": { darkOnly: true, n: "銀光雙刀", type: "wpn", dmgS: 9, dmgL: 21, hit: 1, spd: 1.0, req: "elf", safe: 6, p: 110000, gachaWeight: 0, img: "assets/icons/weapons/長劍.png" },
-        "de_gauntlet": { darkOnly: true, n: "暗影手甲", type: "wpn", isBow: true, ranged: true, dmgS: 7, dmgL: 9, hit: 2, spd: 1.0, req: "elf", safe: 6, p: 50000, gachaWeight: 0, img: "assets/icons/weapons/弓.png" },
-        "de_blade_gloom": { darkOnly: true, n: "幽暗雙刀", type: "wpn", dmgS: 15, dmgL: 10, hit: 3, dmgBonus: 1, spd: 1.0, req: "elf", safe: 6, p: 80000, gachaWeight: 0, img: "assets/icons/weapons/de_blade_gloom.jpg" },
-        "de_blade_lindr": { darkOnly: true, n: "倫得雙刀", type: "wpn", dmgS: 18, dmgL: 8, hit: 7, dmgBonus: 5, str: 2, spd: 1.0, req: "elf", safe: 6, p: 260000, gachaWeight: 0, ignoreEva: 2, procs: [{ name: "地裂術", rate: 0.08, min: 8, max: 20, ele: "earth", color: "#d97706" }], img: "assets/icons/weapons/de_blade_lindr.jpg" },
-        "de_blade_demonlord": { darkOnly: true, n: "惡魔王雙刀", type: "wpn", dmgS: 18, dmgL: 16, hit: 5, dmgBonus: 4, spd: 1.0, req: "elf", safe: 6, p: 320000, gachaWeight: 0, ignoreEva: 1, procs: [{ name: "疾病術", rate: 0.10, min: 6, max: 14, ele: null, color: "#65a30d" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/de_blade_demonlord.jpg" },
+        "de_claw_demon": { darkOnly: true, n: "魔族鋼爪", type: "wpn", dmgS: 8, dmgL: 11, hit: 2, spd: 0.9, req: "elf", safe: 0, p: 800, gachaWeight: 0, img: "assets/icons/weapons/匕首.png" },
+        "de_claw_steel": { darkOnly: true, n: "暗鋼爪", type: "wpn", dmgS: 12, dmgL: 18, hit: 3, spd: 0.9, req: "elf", safe: 6, p: 45000, gachaWeight: 0, img: "assets/icons/weapons/匕首.png" },
+        "de_claw_spirit": { darkOnly: true, n: "靈幽暗鋼爪", type: "wpn", dmgS: 16, dmgL: 23, hit: 4, spd: 0.9, req: "elf", safe: 6, p: 150000, gachaWeight: 0, img: "assets/icons/weapons/精靈匕首.png" },
+        "de_blade_silver": { darkOnly: true, n: "銀光雙刀", type: "wpn", dmgS: 11, dmgL: 24, hit: 2, spd: 1.0, req: "elf", safe: 6, p: 110000, gachaWeight: 0, img: "assets/icons/weapons/長劍.png" },
+        "de_gauntlet": { darkOnly: true, n: "暗影手甲", type: "wpn", isBow: true, ranged: true, dmgS: 9, dmgL: 11, hit: 3, spd: 1.0, req: "elf", safe: 6, p: 50000, gachaWeight: 0, img: "assets/icons/weapons/弓.png" },
+        "de_blade_gloom": { darkOnly: true, n: "幽暗雙刀", type: "wpn", dmgS: 17, dmgL: 12, hit: 4, dmgBonus: 2, spd: 1.0, req: "elf", safe: 6, p: 80000, gachaWeight: 0, img: "assets/icons/weapons/de_blade_gloom.jpg" },
+        "de_blade_lindr": { darkOnly: true, n: "倫得雙刀", type: "wpn", dmgS: 20, dmgL: 11, hit: 8, dmgBonus: 6, str: 2, spd: 1.0, req: "elf", safe: 6, p: 260000, gachaWeight: 0, ignoreEva: 2, procs: [{ name: "地裂術", rate: 0.08, min: 8, max: 20, ele: "earth", color: "#d97706" }], img: "assets/icons/weapons/de_blade_lindr.jpg" },
+        "de_blade_demonlord": { darkOnly: true, n: "惡魔王雙刀", type: "wpn", dmgS: 20, dmgL: 19, hit: 6, dmgBonus: 5, spd: 1.0, req: "elf", safe: 6, p: 320000, gachaWeight: 0, ignoreEva: 1, procs: [{ name: "疾病術", rate: 0.10, min: 6, max: 14, ele: null, color: "#65a30d" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/de_blade_demonlord.jpg" },
         "mw_holycrystal": { n: "聖晶魔杖", type: "wpn", dmgS: 5, dmgL: 6, hit: 31, dmgBonus: 28, mdmg: 15, mpR: 15, spd: 1.0, req: "mage", safe: 6, p: 400000, gachaWeight: 0, procs: [{ name: "極道落雷", rate: 0.17, min: 20, max: 45, ele: "wind", color: "#fde047" }], img: "assets/icons/weapons/mw_holycrystal.jpg" },
         "mw_aris": { n: "艾莉絲魔杖", type: "wpn", dmgS: 29, dmgL: 26, hit: 27, dmgBonus: 23, mdmg: 13, mpR: 15, spd: 1.0, req: "mage", safe: 6, p: 360000, gachaWeight: 0, procs: [{ name: "流星雨", rate: 0.05, min: 30, max: 60, ele: "fire", color: "#fb923c" }], img: "assets/icons/weapons/mw_aris.jpg" },
         "mw_giran": { n: "吉倫的魔杖", type: "wpn", dmgS: 27, dmgL: 24, hit: 20, dmgBonus: 13, mdmg: 8, mpR: 15, spd: 1.0, req: "mage", safe: 6, p: 300000, gachaWeight: 0, ignoreEva: 2, procs: [{ name: "格蘭肯的詛咒", rate: 0.10, min: 12, max: 28, ele: null, color: "#a78bfa" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/mw_giran.jpg" },
@@ -1306,6 +1317,17 @@ const DB = {
     },
 	
 	skills: {
+        // ===== 三職業新技能（騎士/法師/妖精） =====
+        "sk_kn_berserk": { n: "狂戰士", type: "buff", tier: 3, reqK: 45, mp: 20, dur: 600, d: { meleeDmg: 15, meleeHit: 5, ac: -8 } },
+        "sk_kn_rage": { n: "怒氣", type: "buff", tier: 2, reqK: 30, mp: 10, dur: 1200, d: { meleeDmg: 8, extraDmg: 3 } },
+        "sk_kn_warcry": { n: "戰吼", type: "buff", tier: 1, reqK: 25, mp: 8, dur: 1200, d: { str: 3, con: 3 } },
+        "sk_kn_wpnmastery": { n: "武器精通", type: "buff", tier: 2, reqK: 35, mp: 10, dur: 1200, d: { meleeHit: 6, extraDmg: 5 } },
+        "sk_kn_ironbody": { n: "鋼鐵之軀", type: "buff", tier: 2, reqK: 40, mp: 12, dur: 1200, d: { dr: 6, mr: 8 } },
+        "sk_kn_counterbarrier": { n: "反擊屏障", type: "buff", tier: 3, reqK: 50, mp: 15, dur: 300, d: { er: 12, dr: 5 } },
+        "sk_mg_timewarp": { n: "時空扭曲", type: "buff", tier: 5, reqM: 50, mp: 40, dur: 600, d: { magicDmg: 25, mpR: 10, int: 5 } },
+        "sk_mg_archward": { n: "大魔導師結界", type: "buff", tier: 5, reqM: 50, mp: 40, dur: 1200, d: { ac: 5, mr: 15, resFire: 10, resWater: 10, resEarth: 10, resWind: 10 } },
+        "sk_ef_kingarrow": { n: "精靈王之箭", type: "buff", tier: 5, reqE: 50, mp: 30, dur: 1200, d: { rangedDmg: 20, rangedHit: 8, dex: 4 } },
+        "sk_ef_naturewrath": { n: "自然之怒", type: "buff", tier: 5, reqE: 50, mp: 30, dur: 1200, d: { meleeDmg: 10, rangedDmg: 10, extraDmg: 8, er: 8 } },
         // ===== 黑妖技能（自動合併） =====
         "sk_de_str":     { darkOnly: true, n: "力量提升", type: "buff", tier: 1, reqE: 15, mp: 10, dur: 1200, d: { str: 5 } },
         "sk_de_shield":  { darkOnly: true, n: "影之防護", type: "buff", tier: 1, reqE: 15, mp: 12, dur: 1200, d: { ac: 3, mr: 5 } },
