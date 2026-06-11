@@ -195,10 +195,11 @@
         const known = CATS.map(c => c[0]);
         function itemRow(id, it) {
             const r = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;padding:3px 8px;background:#1e293b;border-radius:6px;margin-bottom:3px;' });
-            r.append(el('span', {}, `${it.n} <span style="color:#475569">${id}</span>`));
-            const b = el('button', { style: 'background:#15803d;color:#fff;border:none;border-radius:4px;padding:3px 12px;cursor:pointer;white-space:nowrap;' }, '給予');
-            b.onclick = () => onGive(id, it);
-            r.append(b); return r;
+            r.append(el('span', { style: 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;' }, `${it.n} <span style="color:#475569">${id}</span>`));
+            const qty = el('input', { type: 'number', value: '1', min: '1', style: 'width:54px;flex:none;margin:0 6px 0 0;padding:3px 6px;background:#0f172a;color:#e2e8f0;border:1px solid #334155;border-radius:4px;text-align:center;' });
+            const b = el('button', { style: 'background:#15803d;color:#fff;border:none;border-radius:4px;padding:3px 12px;cursor:pointer;white-space:nowrap;flex:none;' }, '給予');
+            b.onclick = () => { let n = parseInt(qty.value) || 1; if (n < 1) n = 1; onGive(id, it, n); };
+            r.append(qty, b); return r;
         }
         function group(t) {
             return t === 'misc' ? all.filter(([id, it]) => known.indexOf(it.type) === -1) : all.filter(([id, it]) => it.type === t);
@@ -500,11 +501,17 @@
         const fBonus = field('可分配屬性點', p.bonus || 0);
 
         wrap.append(el('div', { style: 'color:#fbbf24;font-weight:bold;margin:10px 0 6px;' }, '🎁 給這位玩家道具（點分類展開，或搜尋）'));
-        wrap.append(buildItemBrowser((id, it) => {
+        wrap.append(buildItemBrowser((id, it, qty) => {
             if (!Array.isArray(p.inv)) p.inv = [];
-            const newUid = (typeof uid === 'function') ? uid() : Math.random().toString(36).slice(2, 11);
-            p.inv.push({ id: id, uid: newUid, cnt: 1, en: 0, bless: false, anc: false, attr: false, lock: false, junk: false });
-            toast('待加入 ' + it.n + '（記得按下方儲存）', '#1e3a5f');
+            qty = parseInt(qty) || 1; if (qty < 1) qty = 1;
+            const mkUid = () => (typeof uid === 'function') ? uid() : Math.random().toString(36).slice(2, 11);
+            const stackable = ['wpn', 'arm', 'acc'].indexOf(it.type) === -1;   // 裝備不可疊，拆成多件
+            if (stackable) {
+                p.inv.push({ id: id, uid: mkUid(), cnt: qty, en: 0, bless: false, anc: false, attr: false, lock: false, junk: false });
+            } else {
+                for (let i = 0; i < qty; i++) p.inv.push({ id: id, uid: mkUid(), cnt: 1, en: 0, bless: false, anc: false, attr: false, lock: false, junk: false });
+            }
+            toast('待加入 ' + it.n + ' ×' + qty + '（記得按下方儲存）', '#1e3a5f');
         }));
 
         const adv = el('details', { style: 'margin-bottom:10px;' });
@@ -551,8 +558,8 @@
         row(null, '＋屬性點', v => { const n = parseInt(v) || 10; player.bonus = (player.bonus || 0) + n; refreshGame(); toast(`可分配屬性點 +${n}`); }, true, '點數（預設 10）');
         row('補滿 HP / MP', '執行', () => { player.hp = player.mhp; player.mp = player.mmp; refreshGame(); toast('已補滿'); });
         section('🎁 取得物品（點分類展開瀏覽，或搜尋）');
-        wrap.append(buildItemBrowser((id, it) => {
-            try { gainItem(id, 1, true, true); refreshGame(); toast('已取得 ' + it.n); } catch (e) { toast('失敗：' + e.message, '#7f1d1d'); }
+        wrap.append(buildItemBrowser((id, it, qty) => {
+            try { gainItem(id, qty || 1, true, true); refreshGame(); toast('已取得 ' + it.n + ' ×' + (qty || 1)); } catch (e) { toast('失敗：' + e.message, '#7f1d1d'); }
         }));
         section('👥 玩家管理（檢視 / 編輯其他人）');
         const userList = el('div', { style: 'font-size:13px;margin-bottom:8px;max-height:170px;overflow-y:auto;' });
