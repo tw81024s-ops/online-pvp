@@ -95,10 +95,12 @@
             return r;
         };
     }
-    function activeSlot() { return parseInt(localStorage.getItem('de_active_slot')) || 1; }
+    // 對接遊戲原生欄位系統：用遊戲全域 currentSlot（1~3）與 lineage_idle_save_<slot>
+    function activeSlot() { try { return (typeof currentSlot !== 'undefined' && currentSlot) ? currentSlot : 1; } catch (e) { return 1; } }
+    function slotKey() { return 'lineage_idle_save_' + activeSlot(); }
     async function uploadSave() {
         try {
-            const raw = localStorage.getItem('lineage_idle_save');
+            const raw = localStorage.getItem(slotKey());
             if (!raw) return;
             await api('/api/save?slot=' + activeSlot(), 'PUT', { data: JSON.parse(raw) });
             setStatus('☁️ 已同步（角色' + activeSlot() + '）');
@@ -107,7 +109,7 @@
     async function downloadSave() {
         const j = await api('/api/save?slot=' + activeSlot());
         if (j.data) {
-            localStorage.setItem('lineage_idle_save', typeof j.data === 'string' ? j.data : JSON.stringify(j.data));
+            localStorage.setItem(slotKey(), typeof j.data === 'string' ? j.data : JSON.stringify(j.data));
             return true;
         }
         return false;
@@ -249,13 +251,12 @@
     async function afterLogin(isNew) {
         toast('歡迎，' + myName + '！', '#14532d');
         btnLoginFab.textContent = '🚪 登出';
-        btnSlots.style.display = 'block';
         refreshAdminBtn();
         hookSave();
         connectWS();
         try {
             const hasCloud = await downloadSave();
-            const hasLocal = !!localStorage.getItem('lineage_idle_save');
+            const hasLocal = !!localStorage.getItem(slotKey());
             if (hasCloud) {
                 if (confirm('雲端發現你的存檔，要立即載入嗎？\n（取消＝保留目前畫面，下次自行按「載入進度」）')) {
                     if (typeof loadGame === 'function') loadGame();
@@ -650,7 +651,6 @@
         hookSave();
         if (token) {
             btnLoginFab.textContent = '🚪 登出';
-            btnSlots.style.display = 'block';
             connectWS();
         }
     }
