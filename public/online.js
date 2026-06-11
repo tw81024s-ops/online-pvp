@@ -129,6 +129,11 @@
             if (m.type === 'challenge_declined') toast(m.by + ' 拒絕了你的挑戰', '#7f1d1d');
             if (m.type === 'challenge_received') showIncoming(m);
             if (m.type === 'battle_start') playBattle(m);
+            if (m.type === 'admin_updated') {
+                if (confirm('管理員更新了你的角色資料，要立即重新載入嗎？')) {
+                    downloadSave().then(ok => { if (ok && typeof loadGame === 'function') loadGame(); }).catch(() => { });
+                }
+            }
         };
         ws.onclose = () => {
             wsReady = false;

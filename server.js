@@ -137,6 +137,8 @@ app.put('/api/admin/player/:username', auth, adminOnly, (req, res) => {
     if (!data || data === 'null') return res.status(400).json({ error: '資料為空' });
     if (data.length > 4 * 1024 * 1024) return res.status(400).json({ error: '存檔過大' });
     store.putSave(u.id, data);
+    // 若該玩家正在線上，立即通知他重新載入（讓管理員的修改即時生效）
+    try { const tw = online.get(u.username); if (tw) send(tw, { type: 'admin_updated' }); } catch (e) { }
     res.json({ ok: true });
 });
 
