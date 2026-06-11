@@ -133,21 +133,27 @@ app.post('/api/admin/delete-user', auth, adminOnly, (req, res) => {
 app.get('/api/admin/player/:username', auth, adminOnly, (req, res) => {
     const u = store.findUser(req.params.username);
     if (!u) return res.status(404).json({ error: '找不到帳號' });
-    const save = store.getSave(u.id);
-    res.json({ username: u.username, data: save ? save.data : null, updatedAt: save ? save.updated_at : null });
+    // 掃描 4 個角色欄位，挑「有資料且最近更新」的那個（玩家可能在欄位 2~4）
+    let best = null, bestSlot = 1;
+    for (let s = 1; s <= 4; s++) {
+        const sv = store.getSave(u.id, s);
+        if (sv && sv.data && (!best || (sv.updated_at || '') > (best.updated_at || ''))) { best = sv; bestSlot = s; }
+    }
+    res.json({ username: u.username, data: best ? best.data : null, updatedAt: best ? best.updated_at : null, slot: bestSlot });
 });
 
 // 覆寫某玩家的存檔（管理員編輯）
 app.put('/api/admin/player/:username', auth, adminOnly, (req, res) => {
     const u = store.findUser(req.params.username);
     if (!u) return res.status(404).json({ error: '找不到帳號' });
+    const slot = Math.min(4, Math.max(1, parseInt(req.body && req.body.slot) || 1));   // 寫回 admin 載入時的同一個角色欄位
     const data = JSON.stringify(req.body && req.body.data ? req.body.data : null);
     if (!data || data === 'null') return res.status(400).json({ error: '資料為空' });
     if (data.length > 4 * 1024 * 1024) return res.status(400).json({ error: '存檔過大' });
-    store.putSave(u.id, data);
+    store.putSave(u.id, data, slot);
     // 若該玩家正在線上，立即通知他重新載入（讓管理員的修改即時生效）
     try { const tw = online.get(u.username); if (tw) send(tw, { type: 'admin_updated' }); } catch (e) { }
-    res.json({ ok: true });
+    res.json({ ok: true, slot });
 });
 
 // ====== WebSocket：在線、挑戰、即時對戰 ======

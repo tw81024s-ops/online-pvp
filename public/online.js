@@ -478,6 +478,7 @@
         try { j = await api('/api/admin/player/' + encodeURIComponent(username)); }
         catch (e) { return toast(e.message, '#7f1d1d'); }
         if (!j.data) return toast(username + ' 還沒有雲端存檔（對方要先在遊戲裡存過檔）', '#7f1d1d');
+        const targetSlot = j.slot || 1;   // admin 載入到的角色欄位，儲存時要寫回同一格
         let save;
         try { save = JSON.parse(typeof j.data === 'string' ? j.data : JSON.stringify(j.data)); }
         catch (e) { return toast('存檔解析失敗', '#7f1d1d'); }
@@ -524,7 +525,7 @@
                 out.p.exp = parseFloat(fExp.value) || 0;
                 out.p.bonus = parseInt(fBonus.value) || 0;
             }
-            try { await api('/api/admin/player/' + encodeURIComponent(username), 'PUT', { data: out }); toast('已儲存 ' + username + ' 的變更', '#14532d'); ov.remove(); }
+            try { await api('/api/admin/player/' + encodeURIComponent(username), 'PUT', { data: out, slot: targetSlot }); toast('已儲存 ' + username + ' 的變更', '#14532d'); ov.remove(); }
             catch (e) { toast(e.message, '#7f1d1d'); }
         };
     }
