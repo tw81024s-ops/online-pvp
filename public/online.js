@@ -583,8 +583,21 @@
         s.textContent = css;
         document.head.appendChild(s);
     }
+    function injectLogSkin() {
+        if (document.getElementById('log-skin-css')) return;
+        const s = document.createElement('style'); s.id = 'log-skin-css';
+        s.textContent = `
+#combat-log {
+  background-image: linear-gradient(rgba(8,10,22,.80), rgba(8,10,22,.90)), url('assets/background/battlelog_bg.jpg') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}`;
+        document.head.appendChild(s);
+    }
     function init() {
         injectMobileCSS();
+        injectLogSkin();
         makeCollapsible();
         document.body.appendChild(fab);
         hookSave();
