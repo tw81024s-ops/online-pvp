@@ -322,6 +322,77 @@
     }
 
     // ============ 管理員面板 ============
+    async function openPlayerEditor(username) {
+        let j;
+        try { j = await api('/api/admin/player/' + encodeURIComponent(username)); }
+        catch (e) { return toast(e.message, '#7f1d1d'); }
+        if (!j.data) return toast(username + ' 還沒有雲端存檔（對方要先在遊戲裡存過檔）', '#7f1d1d');
+        let save;
+        try { save = JSON.parse(typeof j.data === 'string' ? j.data : JSON.stringify(j.data)); }
+        catch (e) { return toast('存檔解析失敗', '#7f1d1d'); }
+        const p = save.p || (save.p = {});
+        const wrap = el('div');
+        const clsName = { knight: '騎士', mage: '法師', elf: '妖精' }[p.cls] || p.cls || '?';
+        wrap.append(el('div', { style: 'color:#cbd5e1;font-size:13px;margin-bottom:10px;line-height:1.7;' },
+            `帳號：<b style="color:#fbbf24">${username}</b>　職業：${clsName}　等級：${p.lv || 1}<br>金幣：${(p.gold || 0).toLocaleString()}　HP：${p.mhp || 0}　MP：${p.mmp || 0}`));
+        function field(label, val) {
+            const r = el('div', { style: 'display:flex;gap:8px;align-items:center;margin-bottom:8px;' });
+            r.append(el('div', { style: 'flex:1;font-size:14px;color:#cbd5e1;' }, label));
+            const i = input(''); i.type = 'number'; i.value = val; i.style.margin = '0'; i.style.width = '130px'; i.style.flex = 'none';
+            r.append(i); wrap.append(r); return i;
+        }
+        const fGold = field('金幣', p.gold || 0);
+        const fLv = field('等級', p.lv || 1);
+        const fExp = field('經驗', p.exp || 0);
+        const fBonus = field('可分配屬性點', p.bonus || 0);
+
+        wrap.append(el('div', { style: 'color:#fbbf24;font-weight:bold;margin:10px 0 6px;' }, '🎁 給這位玩家道具'));
+        const psearch = input('搜尋道具名稱（例：魔杖）');
+        const pres = el('div', { style: 'max-height:140px;overflow-y:auto;font-size:13px;margin-bottom:6px;' });
+        const padded = el('div', { style: 'font-size:12px;color:#86efac;margin-bottom:8px;' });
+        const _DB = getDB();
+        psearch.oninput = () => {
+            pres.innerHTML = '';
+            const q = psearch.value.trim(); if (!q || !_DB) return;
+            Object.entries(_DB.items).filter(([id, it]) => (it.n || '').includes(q)).slice(0, 30).forEach(([id, it]) => {
+                const rr = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;padding:4px 8px;background:#1e293b;border-radius:6px;margin-bottom:4px;' });
+                rr.append(el('span', {}, it.n));
+                const b = el('button', { style: 'background:#15803d;color:#fff;border:none;border-radius:4px;padding:3px 10px;cursor:pointer;' }, '加入');
+                b.onclick = () => {
+                    if (!Array.isArray(p.inv)) p.inv = [];
+                    const newUid = (typeof uid === 'function') ? uid() : Math.random().toString(36).slice(2, 11);
+                    p.inv.push({ id: id, uid: newUid, cnt: 1, en: 0, bless: false, anc: false, attr: false, lock: false, junk: false });
+                    padded.textContent = '待加入：' + (padded.textContent ? padded.textContent.replace('待加入：', '') + '、' : '') + it.n;
+                };
+                rr.append(b); pres.append(rr);
+            });
+        };
+        wrap.append(psearch, pres, padded);
+
+        const adv = el('details', { style: 'margin-bottom:10px;' });
+        adv.append(el('summary', { style: 'cursor:pointer;color:#94a3b8;font-size:13px;' }, '進階：直接編輯存檔 JSON（會覆蓋上面欄位）'));
+        const ta = el('textarea', { style: 'width:100%;height:170px;background:#020617;color:#cbd5e1;border:1px solid #334155;border-radius:6px;padding:8px;font-size:11px;font-family:monospace;box-sizing:border-box;margin-top:6px;' });
+        ta.value = JSON.stringify(save, null, 2);
+        adv.append(ta); wrap.append(adv);
+
+        const saveBtn = bigBtn('💾 儲存變更到這位玩家', '#15803d');
+        wrap.append(saveBtn, el('div', { style: 'font-size:12px;color:#94a3b8;margin-top:4px;' }, '註：對方若正在線上遊玩，需重新整理才會看到變更。'));
+        const ov = modal('✏️ 編輯玩家：' + username, wrap, { w: '520px' });
+        saveBtn.onclick = async () => {
+            let out = save;
+            if (adv.open) { try { out = JSON.parse(ta.value); } catch (e) { return toast('JSON 格式錯誤，無法儲存', '#7f1d1d'); } }
+            else {
+                out.p = out.p || {};
+                out.p.gold = parseInt(fGold.value) || 0;
+                out.p.lv = parseInt(fLv.value) || 1;
+                out.p.exp = parseFloat(fExp.value) || 0;
+                out.p.bonus = parseInt(fBonus.value) || 0;
+            }
+            try { await api('/api/admin/player/' + encodeURIComponent(username), 'PUT', { data: out }); toast('已儲存 ' + username + ' 的變更', '#14532d'); ov.remove(); }
+            catch (e) { toast(e.message, '#7f1d1d'); }
+        };
+    }
+
     btnAdmin.onclick = () => {
         const wrap = el('div');
         function section(t) { wrap.append(el('div', { style: 'color:#fbbf24;font-weight:bold;margin:12px 0 6px;' }, t)); }
@@ -357,10 +428,16 @@
             });
         };
         wrap.append(search, results);
-        section('👥 帳號管理（伺服器）');
-        const userList = el('div', { style: 'font-size:13px;margin-bottom:8px;max-height:120px;overflow-y:auto;' });
+        section('👥 玩家管理（檢視 / 編輯其他人）');
+        const userList = el('div', { style: 'font-size:13px;margin-bottom:8px;max-height:170px;overflow-y:auto;' });
         api('/api/admin/users').then(j => {
-            j.users.forEach(u => userList.append(el('div', { style: 'padding:3px 0;color:#cbd5e1;' }, `${u.is_admin ? '👑 ' : ''}${u.username} <span style="color:#475569">（${u.created_at}）</span>`)));
+            j.users.forEach(u => {
+                const r = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;padding:4px 6px;background:#1e293b;border-radius:6px;margin-bottom:4px;' });
+                r.append(el('span', { style: 'color:#cbd5e1;' }, `${u.is_admin ? '👑 ' : ''}${u.username}`));
+                const eb = el('button', { style: 'background:#2563eb;color:#fff;border:none;border-radius:4px;padding:3px 10px;cursor:pointer;font-weight:bold;white-space:nowrap;' }, '✏️ 編輯角色');
+                eb.onclick = () => openPlayerEditor(u.username);
+                r.append(eb); userList.append(r);
+            });
         }).catch(e => userList.textContent = e.message);
         wrap.append(userList);
         row(null, '重設密碼', async v => {
@@ -376,6 +453,20 @@
     };
 
     // ============ 啟動 ============
+    function makeCollapsible() {
+        // 只在手機尺寸啟用收合
+        if (!window.matchMedia || !window.matchMedia('(max-width: 860px)').matches) return;
+        document.querySelectorAll('.panel > .panel-header').forEach(h => {
+            if (h.dataset.collapsible) return;       // 避免重複綁定
+            h.dataset.collapsible = '1';
+            h.addEventListener('click', (e) => {
+                // 點到標題裡的按鈕/輸入/可點元素時不收合，避免誤觸（例如改名）
+                if (e.target.closest('button, input, select, a, [onclick]')) return;
+                h.parentElement.classList.toggle('collapsed');
+            });
+        });
+    }
+
     function injectMobileCSS() {
         const css = `
 @media (max-width: 860px) {
@@ -399,6 +490,16 @@
 
   /* 右下浮動按鈕縮小一點，手機才不擋畫面 */
   #online-fab button { padding: 9px 13px !important; font-size: 13px !important; }
+
+  /* 會拉很長的面板：給高度上限，超出就在框內捲動（不再撐長整頁） */
+  #game-screen [id^="tab-"], #game-screen .panel.flex-1, #log-container, #town-npc-container { max-height: 48vh !important; overflow-y: auto !important; }
+
+  /* 可收合面板：點標題收合，畫面馬上變短 */
+  .panel > .panel-header { cursor: pointer; user-select: none; }
+  .panel > .panel-header::after { content: " ▾"; float: right; color: #94a3b8; font-weight: normal; }
+  .panel.collapsed > .panel-header::after { content: " ▸"; }
+  .panel.collapsed > :not(.panel-header) { display: none !important; }
+  .panel.collapsed { flex: 0 0 auto !important; min-height: 0 !important; height: auto !important; }
 }`;
         const s = document.createElement('style');
         s.textContent = css;
@@ -406,6 +507,7 @@
     }
     function init() {
         injectMobileCSS();
+        makeCollapsible();
         document.body.appendChild(fab);
         hookSave();
         if (token) {

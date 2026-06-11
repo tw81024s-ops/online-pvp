@@ -24,6 +24,9 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 
 function makeToken() { return crypto.randomBytes(24).toString('hex'); }
+function isAdminUser(u) {
+    return !!(u && (u.is_admin || (process.env.ADMIN_USERNAME && u.username === process.env.ADMIN_USERNAME)));
+}
 function auth(req, res, next) {
     const tok = req.headers['x-token'];
     if (!tok) return res.status(401).json({ error: '未登入' });
@@ -40,11 +43,12 @@ app.post('/api/register', (req, res) => {
     if (!/^[\w\u4e00-\u9fff]{2,16}$/.test(username)) return res.status(400).json({ error: '帳號需 2~16 字（中英數字或底線）' });
     if (!password || String(password).length < 4) return res.status(400).json({ error: '密碼至少 4 碼' });
     if (store.findUser(username)) return res.status(400).json({ error: '帳號已存在' });
-    const isFirst = store.userCount() === 0;
-    const u = store.createUser(username, bcrypt.hashSync(String(password), 10), isFirst);
+    // 指定了 ADMIN_USERNAME → 只有該帳號是管理員；否則沿用「第一個註冊＝管理員」
+    const makeAdmin = process.env.ADMIN_USERNAME ? (username === process.env.ADMIN_USERNAME) : (store.userCount() === 0);
+    const u = store.createUser(username, bcrypt.hashSync(String(password), 10), makeAdmin);
     const token = makeToken();
     store.addToken(token, u.id);
-    res.json({ token, username, isAdmin: isFirst });
+    res.json({ token, username, isAdmin: isAdminUser(u) });
 });
 
 // 登入
@@ -54,7 +58,7 @@ app.post('/api/login', (req, res) => {
     if (!u || !bcrypt.compareSync(String(password || ''), u.pass_hash)) return res.status(401).json({ error: '帳號或密碼錯誤' });
     const token = makeToken();
     store.addToken(token, u.id);
-    res.json({ token, username: u.username, isAdmin: !!u.is_admin });
+    res.json({ token, username: u.username, isAdmin: isAdminUser(u) });
 });
 
 app.post('/api/logout', auth, (req, res) => {
@@ -83,7 +87,7 @@ app.get('/api/battles', auth, (req, res) => {
 
 // ====== 管理員 API ======
 function adminOnly(req, res, next) {
-    if (!req.user.is_admin) return res.status(403).json({ error: '需要管理員權限' });
+    if (!isAdminUser(req.user)) return res.status(403).json({ error: '需要管理員權限' });
     next();
 }
 app.get('/api/admin/users', auth, adminOnly, (req, res) => {
@@ -98,6 +102,25 @@ app.post('/api/admin/delete-user', auth, adminOnly, (req, res) => {
     const name = req.body && req.body.username;
     if (name === req.user.username) return res.status(400).json({ error: '不能刪除自己' });
     if (!store.deleteUser(name)) return res.status(404).json({ error: '找不到帳號' });
+    res.json({ ok: true });
+});
+
+// 取得某玩家的存檔（管理員檢視/編輯用）
+app.get('/api/admin/player/:username', auth, adminOnly, (req, res) => {
+    const u = store.findUser(req.params.username);
+    if (!u) return res.status(404).json({ error: '找不到帳號' });
+    const save = store.getSave(u.id);
+    res.json({ username: u.username, data: save ? save.data : null, updatedAt: save ? save.updated_at : null });
+});
+
+// 覆寫某玩家的存檔（管理員編輯）
+app.put('/api/admin/player/:username', auth, adminOnly, (req, res) => {
+    const u = store.findUser(req.params.username);
+    if (!u) return res.status(404).json({ error: '找不到帳號' });
+    const data = JSON.stringify(req.body && req.body.data ? req.body.data : null);
+    if (!data || data === 'null') return res.status(400).json({ error: '資料為空' });
+    if (data.length > 4 * 1024 * 1024) return res.status(400).json({ error: '存檔過大' });
+    store.putSave(u.id, data);
     res.json({ ok: true });
 });
 
@@ -129,7 +152,7 @@ wss.on('connection', (ws) => {
             if (old && old !== ws) { send(old, { type: 'kicked' }); try { old.close(); } catch (e) { } }
             ws.username = row.username;
             online.set(row.username, ws);
-            send(ws, { type: 'auth_ok', username: row.username, isAdmin: !!row.is_admin });
+            send(ws, { type: 'auth_ok', username: row.username, isAdmin: isAdminUser(row) });
             broadcastOnline();
             return;
         }
