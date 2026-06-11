@@ -566,6 +566,24 @@
             });
         }).catch(e => userList.textContent = e.message);
         wrap.append(userList);
+        section('🔍 雲端存檔診斷');
+        row('列出所有帳號的雲端存檔狀態', '檢查', async () => {
+            let j;
+            try { j = await api('/api/admin/saves'); } catch (e) { return toast(e.message, '#7f1d1d'); }
+            const box = el('div', { style: 'font-size:12px;line-height:1.6;max-height:60vh;overflow:auto;' });
+            if (!j.users || !j.users.length) { box.textContent = '雲端沒有任何帳號。'; }
+            else j.users.forEach(u => {
+                const parts = [];
+                for (let s = 1; s <= 4; s++) {
+                    const d = u.slots[s];
+                    if (d) parts.push(`格${s}: ${d.bytes}B (${(d.updatedAt || '').replace('T', ' ').slice(5, 16)})`);
+                }
+                const has = parts.length > 0;
+                box.append(el('div', { style: `padding:5px 8px;border-radius:6px;margin-bottom:4px;background:${has ? '#14532d' : '#7f1d1d'};color:#e2e8f0;` },
+                    `${u.username}　${has ? parts.join('　') : '（雲端無存檔）'}`));
+            });
+            modal('🔍 雲端存檔診斷（綠=有存檔 紅=沒有）', box, { w: '520px' });
+        });
         row(null, '重設密碼', async v => {
             const parts = (v || '').split(/\s+/);
             if (parts.length < 2) return toast('格式：帳號 新密碼', '#7f1d1d');

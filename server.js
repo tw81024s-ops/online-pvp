@@ -156,6 +156,19 @@ app.put('/api/admin/player/:username', auth, adminOnly, (req, res) => {
     res.json({ ok: true, slot });
 });
 
+// 管理員診斷：列出所有帳號在雲端各格存檔的狀態（看雲端到底有沒有收到存檔）
+app.get('/api/admin/saves', auth, adminOnly, (req, res) => {
+    const out = store.allUsers().map(u => {
+        const slots = {};
+        for (let s = 1; s <= 4; s++) {
+            const sv = store.getSave(u.id, s);
+            slots[s] = (sv && sv.data) ? { bytes: String(sv.data).length, updatedAt: sv.updated_at } : null;
+        }
+        return { username: u.username, id: u.id, slots };
+    });
+    res.json({ users: out, total: out.length });
+});
+
 // ====== WebSocket：在線、挑戰、即時對戰 ======
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: '/ws' });
