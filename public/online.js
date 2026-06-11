@@ -69,7 +69,7 @@
             if (dice && (!heal || (s.tier || 1) > (heal.tier || 1))) heal = { name: s.n || id, dice: dice, mp: s.mp || 5, tier: s.tier || 1 };
         });
         return {
-            name: p.name || myName, cls: p.cls, lv: p.lv,
+            name: p.name || myName, cls: p.cls, lv: p.lv, avatar: p.avatar || null,
             mhp: p.mhp, mmp: p.mmp,
             ac: d.ac, mr: d.mr, er: d.er, dr: d.dr || 0,
             meleeHit: d.meleeHit, meleeDmg: d.meleeDmg, meleeCrit: d.meleeCrit, meleeCritDmg: d.meleeCritDmg,
@@ -322,49 +322,105 @@
 
     // ============ 對戰播放（雙方依伺服器時間軸同步）============
     let battleTimers = [];
+    function injectBattleCSS() {
+        if (document.getElementById('battle-css')) return;
+        const s = document.createElement('style'); s.id = 'battle-css';
+        s.textContent = `
+@keyframes dmgPop { 0%{opacity:1;transform:translate(-50%,0) scale(.8);} 25%{opacity:1;transform:translate(-50%,-14px) scale(1.25);} 100%{opacity:0;transform:translate(-50%,-52px) scale(1);} }
+@keyframes bShake { 0%,100%{transform:translateX(0);} 20%{transform:translateX(-6px);} 40%{transform:translateX(6px);} 60%{transform:translateX(-4px);} 80%{transform:translateX(4px);} }
+@keyframes bHitFlash { 0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,0);} 35%{box-shadow:0 0 22px 6px rgba(248,113,113,.95);} }
+@keyframes bCritShake { 0%,100%{transform:translateX(0);box-shadow:0 0 0 0 rgba(251,191,36,0);} 20%{transform:translateX(-7px);box-shadow:0 0 26px 7px rgba(251,191,36,.95);} 40%{transform:translateX(7px);} 60%{transform:translateX(-5px);box-shadow:0 0 26px 7px rgba(251,191,36,.95);} 80%{transform:translateX(5px);} }
+@keyframes healFlash { 0%,100%{box-shadow:0 0 0 0 rgba(134,239,172,0);} 40%{box-shadow:0 0 20px 5px rgba(134,239,172,.9);} }
+@keyframes bGlow { 0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,0);} 50%{box-shadow:0 0 18px 4px rgba(251,191,36,.85);} }
+@keyframes winPulse { 0%,100%{box-shadow:0 0 14px 3px rgba(251,191,36,.7);} 50%{box-shadow:0 0 30px 9px rgba(251,191,36,1);} }`;
+        document.head.appendChild(s);
+    }
+
     function playBattle(m) {
+        injectBattleCSS();
         battleTimers.forEach(t => clearTimeout(t)); battleTimers = [];
+        const emoji = { knight: '⚔️', mage: '🪄', elf: '🏹' };
+        const clsZh = { knight: '騎士', mage: '法師', elf: '妖精' };
         const wrap = el('div');
-        function sidePanel(s, color) {
-            const box = el('div', { style: 'flex:1;min-width:0;' });
-            box.append(el('div', { style: `font-weight:bold;color:${color};text-align:center;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;` }, `${s.name}（Lv.${s.lv}）`));
-            const hpOut = el('div', { style: 'background:#1e293b;border-radius:6px;height:16px;overflow:hidden;border:1px solid #334155;' });
-            const hpIn = el('div', { style: `background:${color};height:100%;width:100%;transition:width .25s;` });
+
+        function card(s, color) {
+            const box = el('div', { style: `flex:1;min-width:0;position:relative;background:#0f172a;border:1px solid #334155;border-radius:12px;padding:10px 8px;text-align:center;` });
+            const av = el('div', { style: `width:64px;height:64px;border-radius:50%;margin:0 auto 6px;overflow:hidden;border:2px solid ${color};display:flex;align-items:center;justify-content:center;font-size:30px;background:#1e293b;` });
+            if (s.avatar) {
+                const img = el('img', { src: 'assets/character/' + encodeURIComponent(s.avatar) + '.jpg', style: 'width:100%;height:100%;object-fit:cover;object-position:top;' });
+                img.onerror = () => { av.innerHTML = ''; av.textContent = emoji[s.cls] || '⚔️'; };
+                av.append(img);
+            } else av.textContent = emoji[s.cls] || '⚔️';
+            box.append(av);
+            box.append(el('div', { style: `font-weight:bold;color:${color};font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;` }, s.name));
+            box.append(el('div', { style: 'font-size:11px;color:#94a3b8;margin-bottom:6px;' }, `Lv.${s.lv}・${clsZh[s.cls] || ''}`));
+            const hpOut = el('div', { style: 'background:#1e293b;border-radius:6px;height:14px;overflow:hidden;border:1px solid #334155;' });
+            const hpIn = el('div', { style: 'background:linear-gradient(90deg,#dc2626,#f87171);height:100%;width:100%;transition:width .25s;' });
             hpOut.append(hpIn);
-            const hpTxt = el('div', { style: 'font-size:11px;color:#94a3b8;text-align:center;margin-top:2px;' }, `${s.mhp} / ${s.mhp}`);
-            box.append(hpOut, hpTxt);
-            return { box, hpIn, hpTxt };
+            const hpTxt = el('div', { style: 'font-size:10px;color:#cbd5e1;margin:1px 0 4px;' }, `HP ${s.mhp}/${s.mhp}`);
+            const mpOut = el('div', { style: 'background:#1e293b;border-radius:6px;height:9px;overflow:hidden;border:1px solid #334155;' });
+            const mpIn = el('div', { style: 'background:linear-gradient(90deg,#2563eb,#60a5fa);height:100%;width:100%;transition:width .25s;' });
+            mpOut.append(mpIn);
+            const mpTxt = el('div', { style: 'font-size:10px;color:#93c5fd;margin-top:1px;' }, `MP ${s.mmp}/${s.mmp}`);
+            box.append(hpOut, hpTxt, mpOut, mpTxt);
+            return { box, hpIn, hpTxt, mpIn, mpTxt };
         }
-        const A = sidePanel(m.a, '#38bdf8'), B = sidePanel(m.b, '#f87171');
-        const top = el('div', { style: 'display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;' });
-        top.append(A.box, el('div', { style: 'color:#fbbf24;font-weight:bold;padding-top:14px;' }, 'VS'), B.box);
-        const log = el('div', { style: 'background:#020617;border:1px solid #334155;border-radius:8px;height:260px;overflow-y:auto;padding:10px;font-size:13px;line-height:1.7;' });
-        const count = el('div', { style: 'text-align:center;color:#fbbf24;font-weight:bold;font-size:15px;margin-bottom:8px;' }, '即將開始…');
-        wrap.append(count, top, log);
+        const A = card(m.a, '#38bdf8'), B = card(m.b, '#f87171');
+        const top = el('div', { style: 'display:flex;gap:10px;align-items:stretch;margin-bottom:10px;' });
+        top.append(A.box, el('div', { style: 'color:#fbbf24;font-weight:bold;display:flex;align-items:center;font-size:18px;' }, 'VS'), B.box);
+        const banner = el('div', { style: 'text-align:center;color:#fbbf24;font-weight:bold;font-size:16px;min-height:22px;margin-bottom:6px;' }, '');
+        const log = el('div', { style: 'background:#020617;border:1px solid #334155;border-radius:8px;height:190px;overflow-y:auto;padding:10px;font-size:13px;line-height:1.7;' });
+        const count = el('div', { style: 'text-align:center;color:#fbbf24;font-weight:bold;font-size:22px;margin-bottom:8px;' }, '即將開始…');
+        wrap.append(count, top, banner, log);
         const ov = modal('⚔️ 競技場對戰', wrap, { w: '560px', noClose: true });
 
+        const sideObj = { A, B };
+        const refMhp = { A: m.a.mhp, B: m.b.mhp }, refMmp = { A: m.a.mmp || 1, B: m.b.mmp || 1 };
         const colors = { attack: '#e2e8f0', crit: '#fbbf24', magic: '#67e8f9', heal: '#86efac', miss: '#64748b', evade: '#64748b', start: '#fbbf24', end: '#f0abfc' };
+
+        function anim(node, name, dur) { node.style.animation = 'none'; void node.offsetWidth; node.style.animation = `${name} ${dur}`; }
+        function popNum(box, text, color, big) {
+            const n = el('div', { style: `position:absolute;left:50%;top:34%;font-weight:bold;color:${color};font-size:${big ? 30 : 21}px;text-shadow:0 2px 5px #000;pointer-events:none;z-index:6;animation:dmgPop 1.1s ease-out forwards;` }, text);
+            box.appendChild(n); setTimeout(() => n.remove(), 1100);
+        }
         function addLog(e) {
             const d = el('div', { style: `color:${colors[e.kind] || '#e2e8f0'};${e.kind === 'end' ? 'font-weight:bold;font-size:15px;margin-top:6px;' : ''}` },
                 (e.kind === 'start' || e.kind === 'end' ? '' : `<span style="color:#475569">[${(e.t / 10).toFixed(1)}s]</span> `) + e.text);
             log.append(d); log.scrollTop = log.scrollHeight;
-            A.hpIn.style.width = Math.max(0, e.hpA / m.a.mhp * 100) + '%';
-            B.hpIn.style.width = Math.max(0, e.hpB / m.b.mhp * 100) + '%';
-            A.hpTxt.textContent = `${Math.max(0, e.hpA)} / ${m.a.mhp}`;
-            B.hpTxt.textContent = `${Math.max(0, e.hpB)} / ${m.b.mhp}`;
+            A.hpIn.style.width = Math.max(0, e.hpA / refMhp.A * 100) + '%';
+            B.hpIn.style.width = Math.max(0, e.hpB / refMhp.B * 100) + '%';
+            A.hpTxt.textContent = `HP ${Math.max(0, e.hpA)}/${refMhp.A}`;
+            B.hpTxt.textContent = `HP ${Math.max(0, e.hpB)}/${refMhp.B}`;
+            A.mpIn.style.width = Math.max(0, e.mpA / refMmp.A * 100) + '%';
+            B.mpIn.style.width = Math.max(0, e.mpB / refMmp.B * 100) + '%';
+            A.mpTxt.textContent = `MP ${Math.max(0, e.mpA)}/${refMmp.A}`;
+            B.mpTxt.textContent = `MP ${Math.max(0, e.mpB)}/${refMmp.B}`;
+            if (e.side !== 'A' && e.side !== 'B') return;
+            const actor = sideObj[e.side];
+            const target = e.kind === 'heal' ? sideObj[e.side] : sideObj[e.side === 'A' ? 'B' : 'A'];
+            if (e.kind === 'heal') { anim(target.box, 'healFlash', '.5s'); popNum(target.box, '+' + e.dmg, '#86efac', false); }
+            else if (e.kind === 'crit') { anim(actor.box, 'bGlow', '.5s'); anim(target.box, 'bCritShake', '.5s'); popNum(target.box, '-' + e.dmg, '#fbbf24', true); banner.textContent = '💥 爆擊！'; setTimeout(() => { if (banner.textContent === '💥 爆擊！') banner.textContent = ''; }, 900); }
+            else if (e.kind === 'magic') { anim(actor.box, 'bGlow', '.5s'); anim(target.box, 'bHitFlash', '.4s'); popNum(target.box, '-' + e.dmg, '#67e8f9', false); }
+            else if (e.kind === 'attack') { anim(actor.box, 'bGlow', '.4s'); anim(target.box, 'bShake', '.35s'); popNum(target.box, '-' + e.dmg, '#fca5a5', false); }
+            else if (e.kind === 'miss') { popNum(target.box, 'MISS', '#64748b', false); }
+            else if (e.kind === 'evade') { popNum(target.box, '閃避', '#94a3b8', false); }
         }
         const wait = Math.max(0, m.startAt - Date.now());
         let cd = Math.ceil(wait / 1000);
-        const cdT = setInterval(() => { cd--; count.textContent = cd > 0 ? `${cd}…` : '開戰！'; if (cd <= 0) clearInterval(cdT); }, 1000);
+        const cdT = setInterval(() => { cd--; count.textContent = cd > 0 ? `${cd}…` : '開戰！'; if (cd <= 0) { clearInterval(cdT); count.style.color = '#f87171'; } }, 1000);
         count.textContent = cd > 0 ? `${cd}…` : '開戰！';
         m.events.forEach(e => {
             battleTimers.push(setTimeout(() => {
                 addLog(e);
                 if (e.kind === 'end') {
-                    count.textContent = e.text;
-                    const close = bigBtn('關閉', '#475569');
-                    close.onclick = () => ov.remove();
-                    wrap.append(close);
+                    count.textContent = e.text; count.style.fontSize = '20px'; count.style.color = '#fbbf24'; banner.textContent = '';
+                    if (m.winner === 'A' || m.winner === 'B') {
+                        const win = sideObj[m.winner], lose = sideObj[m.winner === 'A' ? 'B' : 'A'];
+                        win.box.style.animation = 'winPulse 1.2s infinite'; win.box.style.borderColor = '#fbbf24';
+                        win.box.insertAdjacentHTML('afterbegin', '<div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:26px;z-index:7;">👑</div>');
+                        lose.box.style.opacity = '0.45'; lose.box.style.filter = 'grayscale(70%)';
+                    }
+                    const close = bigBtn('關閉', '#475569'); close.onclick = () => ov.remove(); wrap.append(close);
                 }
             }, wait + e.t * 100));
         });
