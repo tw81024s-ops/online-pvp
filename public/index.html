@@ -486,6 +486,26 @@ function getExpGainMult(lv) {
 
 const DB = {
         items: {
+        "bk_de_str":     { type: "skillbk", n: "黑魔法書(力量提升)", p: 1000,  sk: "sk_de_str",     gachaWeight: 0 },
+        "bk_de_shield":  { type: "skillbk", n: "黑魔法書(影之防護)", p: 1000,  sk: "sk_de_shield",  gachaWeight: 0 },
+        "bk_de_dex":     { type: "skillbk", n: "黑魔法書(敏捷提升)", p: 2000,  sk: "sk_de_dex",     gachaWeight: 0 },
+        "bk_de_will":    { type: "skillbk", n: "黑魔法書(燃燒鬥志)", p: 5000,  sk: "sk_de_will",    gachaWeight: 0 },
+        "bk_de_double":  { type: "skillbk", n: "黑魔法書(雙重破壞)", p: 20000, sk: "sk_de_double",  gachaWeight: 0 },
+        "bk_de_evasion": { type: "skillbk", n: "黑魔法書(暗影閃避)", p: 30000, sk: "sk_de_evasion", gachaWeight: 0 },
+        "de_claw_demon": { n: "魔族鋼爪", type: "wpn", dmgS: 6, dmgL: 9, hit: 1, spd: 0.9, req: "elf", safe: 0, p: 800, gachaWeight: 0, img: "assets/icons/weapons/匕首.png" },
+        "de_claw_steel": { n: "暗鋼爪", type: "wpn", dmgS: 10, dmgL: 15, hit: 2, spd: 0.9, req: "elf", safe: 6, p: 45000, gachaWeight: 0, img: "assets/icons/weapons/匕首.png" },
+        "de_claw_spirit": { n: "靈幽暗鋼爪", type: "wpn", dmgS: 13, dmgL: 19, hit: 3, spd: 0.9, req: "elf", safe: 6, p: 150000, gachaWeight: 0, img: "assets/icons/weapons/精靈匕首.png" },
+        "de_blade_silver": { n: "銀光雙刀", type: "wpn", dmgS: 9, dmgL: 21, hit: 1, spd: 1.0, req: "elf", safe: 6, p: 110000, gachaWeight: 0, img: "assets/icons/weapons/長劍.png" },
+        "de_gauntlet": { n: "暗影手甲", type: "wpn", isBow: true, ranged: true, dmgS: 7, dmgL: 9, hit: 2, spd: 1.0, req: "elf", safe: 6, p: 50000, gachaWeight: 0, img: "assets/icons/weapons/弓.png" },
+        "de_helm_shadow": { n: "影子面具", type: "arm", slot: "helm", ac: 3, mr: 5, er: 2, req: "elf", safe: 6, p: 30000, gachaWeight: 0, img: "assets/icons/armors/死亡騎士頭盔.png" },
+        "de_helm_dark": { n: "黑暗頭飾", type: "arm", slot: "helm", ac: 2, mr: 8, int: 1, req: "elf", safe: 6, p: 25000, gachaWeight: 0, img: "assets/icons/armors/抗魔法頭盔.png" },
+        "de_body_chiyou": { n: "蚩尤鎧甲", type: "arm", slot: "armor", ac: 8, mr: 5, resEarth: 5, mmp: 31, req: "elf", safe: 6, p: 90000, gachaWeight: 0, img: "assets/icons/armors/死亡騎士盔甲.png" },
+        "de_bracer": { n: "古代鬥士臂甲", type: "arm", slot: "gloves", ac: 2, str: 2, req: "elf", safe: 6, p: 80000, gachaWeight: 0, img: "assets/icons/armors/死亡騎士手套.png" },
+        "de_cloak_dark": { n: "黑暗斗篷", type: "arm", slot: "cloak", ac: 2, er: 3, hpR: 5, req: "elf", safe: 6, p: 35000, gachaWeight: 0, img: "assets/icons/armors/抗魔法斗篷.png" },
+        "de_boots_dark": { n: "黑暗長靴", type: "arm", slot: "boots", ac: 2, er: 2, req: "elf", safe: 6, p: 18000, gachaWeight: 0, img: "assets/icons/armors/死亡騎士長靴.png" },
+        "de_tshirt_str": { n: "強化力量內衣", type: "arm", slot: "tshirt", ac: 1, str: 1, req: "elf", safe: 5, p: 20000, gachaWeight: 0, img: "assets/icons/armors/死亡騎士手套.png" },
+        "de_ring_dark": { n: "黑妖之戒", type: "acc", slot: "ring", str: 2, dex: 2, hpR: 3, req: "elf", safe: 6, p: 60000, gachaWeight: 0, img: "assets/icons/accessories/傳送控制戒指.png" },
+        "de_amulet_shadow": { n: "暗影護符", type: "acc", slot: "amulet", mr: 5, er: 3, mpR: 3, req: "elf", safe: 6, p: 55000, gachaWeight: 0, img: "assets/icons/accessories/傳送控制戒指.png" },
         "wpn_alien": { n: "亞連", type: "wpn", dmgS: 4, dmgL: 4, hit: 2, spd: 1.3, req: "all", safe: 6, p: 14, gachaWeight: 100 },
         "wpn_katana": { n: "武士刀", type: "wpn", dmgS: 10, dmgL: 12, hit: 1, spd: 1.1, req: "knight,elf", safe: 6, p: 28200, gachaWeight: 10 },
         "wpn_longsword": { n: "長劍", type: "wpn", dmgS: 8, dmgL: 12, hit: 0, spd: 1.1, req: "knight,elf", safe: 6, p: 4200, gachaWeight: 50 },
@@ -1234,6 +1254,13 @@ const DB = {
     },
 	
 	skills: {
+        // ================= 【黑妖魔法】 =================
+        "sk_de_str":     { n: "力量提升", type: "buff", tier: 1, reqE: 15, mp: 10, dur: 1200, d: { str: 5 } },
+        "sk_de_shield":  { n: "影之防護", type: "buff", tier: 1, reqE: 15, mp: 12, dur: 1200, d: { ac: 3, mr: 5 } },
+        "sk_de_dex":     { n: "敏捷提升", type: "buff", tier: 2, reqE: 30, mp: 10, dur: 1200, d: { dex: 5 } },
+        "sk_de_will":    { n: "燃燒鬥志", type: "buff", tier: 2, reqE: 30, mp: 20, dur: 600,  d: { meleeDmg: 8, rangedDmg: 8, extraDmg: 5 } },
+        "sk_de_double":  { n: "雙重破壞", type: "buff", tier: 3, reqE: 45, mp: 20, dur: 600,  d: { extraDmg: 10, meleeDmg: 6 } },
+        "sk_de_evasion": { n: "暗影閃避", type: "buff", tier: 3, reqE: 45, mp: 25, dur: 1200, d: { er: 30 } },
         // ================= 【法師魔法】 =================
         // 一階魔法 (Lv 4)
         "sk_heal1": { n: "初級治癒術", type: "heal", tier: 1, reqM: 4, reqE: 8, reqK: 16, mp: 4, valBase: 0, valDice: [1, 15], healDice: [1, 20], msg: "你感覺舒服了一點。" },
