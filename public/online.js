@@ -133,9 +133,11 @@
             if (m.type === 'challenge_received') showIncoming(m);
             if (m.type === 'battle_start') playBattle(m);
             if (m.type === 'admin_updated') {
-                if (confirm('管理員更新了你的角色資料，要立即重新載入嗎？')) {
-                    downloadSave().then(ok => { if (ok && typeof loadGame === 'function') loadGame(); }).catch(() => { });
-                }
+                // 自動重新載入雲端最新存檔（管理員的修改），避免線上玩家的自動存檔把修改蓋回去
+                toast('管理員更新了你的角色資料，正在重新載入…', '#1e3a5f');
+                downloadSave().then(ok => {
+                    if (ok && typeof loadGame === 'function') { loadGame(); toast('✅ 角色資料已更新', '#14532d'); }
+                }).catch(() => { });
             }
         };
         ws.onclose = () => {
@@ -475,20 +477,38 @@
     }
 
     // ============ 管理員面板 ============
-    async function openPlayerEditor(username) {
+    async function openPlayerEditor(username, forceSlot) {
         let j;
         try { j = await api('/api/admin/player/' + encodeURIComponent(username)); }
         catch (e) { return toast(e.message, '#7f1d1d'); }
         if (!j.data) return toast(username + ' 還沒有雲端存檔（對方要先在遊戲裡存過檔）', '#7f1d1d');
-        const targetSlot = j.slot || 1;   // admin 載入到的角色欄位，儲存時要寫回同一格
+        const slotsInfo = j.slots || {};
+        const slotNums = Object.keys(slotsInfo).map(Number).sort((a, b) => a - b);
+        const targetSlot = forceSlot || j.slot || slotNums[0] || 1;   // 要編輯/寫回的角色欄位
+        const slotData = (slotsInfo[targetSlot] && slotsInfo[targetSlot].data) ? slotsInfo[targetSlot].data : j.data;
         let save;
-        try { save = JSON.parse(typeof j.data === 'string' ? j.data : JSON.stringify(j.data)); }
+        try { save = JSON.parse(typeof slotData === 'string' ? slotData : JSON.stringify(slotData)); }
         catch (e) { return toast('存檔解析失敗', '#7f1d1d'); }
         const p = save.p || (save.p = {});
         const wrap = el('div');
         const clsName = { knight: '騎士', mage: '法師', elf: '妖精' }[p.cls] || p.cls || '?';
         wrap.append(el('div', { style: 'color:#cbd5e1;font-size:13px;margin-bottom:10px;line-height:1.7;' },
             `帳號：<b style="color:#fbbf24">${username}</b>　職業：${clsName}　等級：${p.lv || 1}<br>金幣：${(p.gold || 0).toLocaleString()}　HP：${p.mhp || 0}　MP：${p.mmp || 0}`));
+        // 角色欄位(格)選擇：玩家可能有多個角色，必須改到他「正在玩」的那一格才看得到
+        if (slotNums.length > 0) {
+            const sr = el('div', { style: 'display:flex;gap:8px;align-items:center;margin-bottom:8px;padding:8px;background:#0f172a;border:1px solid #334155;border-radius:6px;' });
+            sr.append(el('div', { style: 'font-size:13px;color:#fbbf24;font-weight:bold;white-space:nowrap;' }, '角色欄位'));
+            const sel = el('select', { style: 'flex:1;background:#020617;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:6px;font-size:13px;' });
+            slotNums.forEach(s => {
+                const info = slotsInfo[s] || {};
+                const o = el('option', { value: String(s) }, `格 ${s}　(${info.bytes || 0}B　${(info.updatedAt || '').replace('T', ' ').slice(5, 16)})${s === (j.slot || 1) ? ' ★最近遊玩' : ''}`);
+                if (s === targetSlot) o.selected = true;
+                sel.append(o);
+            });
+            sel.onchange = () => { ov.remove(); openPlayerEditor(username, parseInt(sel.value)); };
+            sr.append(sel); wrap.append(sr);
+            if (slotNums.length > 1) wrap.append(el('div', { style: 'font-size:12px;color:#f59e0b;margin:-2px 0 8px;line-height:1.5;' }, '⚠️ 此玩家有多個角色欄位，請選到他「正在玩」的那一格（通常是 ★最近遊玩）再給道具/存檔，否則改了也看不到。'));
+        }
         function field(label, val) {
             const r = el('div', { style: 'display:flex;gap:8px;align-items:center;margin-bottom:8px;' });
             r.append(el('div', { style: 'flex:1;font-size:14px;color:#cbd5e1;' }, label));

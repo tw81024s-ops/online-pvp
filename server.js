@@ -134,12 +134,17 @@ app.get('/api/admin/player/:username', auth, adminOnly, (req, res) => {
     const u = store.findUser(req.params.username);
     if (!u) return res.status(404).json({ error: '找不到帳號' });
     // 掃描 4 個角色欄位，挑「有資料且最近更新」的那個（玩家可能在欄位 2~4）
+    // 同時把每個有資料的欄位都回傳，讓管理員能自己選要改哪一格
     let best = null, bestSlot = 1;
+    const slots = {};
     for (let s = 1; s <= 4; s++) {
         const sv = store.getSave(u.id, s);
-        if (sv && sv.data && (!best || (sv.updated_at || '') > (best.updated_at || ''))) { best = sv; bestSlot = s; }
+        if (sv && sv.data) {
+            slots[s] = { data: sv.data, updatedAt: sv.updated_at, bytes: String(sv.data).length };
+            if (!best || (sv.updated_at || '') > (best.updated_at || '')) { best = sv; bestSlot = s; }
+        }
     }
-    res.json({ username: u.username, data: best ? best.data : null, updatedAt: best ? best.updated_at : null, slot: bestSlot });
+    res.json({ username: u.username, data: best ? best.data : null, updatedAt: best ? best.updated_at : null, slot: bestSlot, slots });
 });
 
 // 覆寫某玩家的存檔（管理員編輯）
