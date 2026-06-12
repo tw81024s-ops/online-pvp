@@ -1028,6 +1028,47 @@ const DB = {
     },
             
     mobs: {
+        // ===== 傲慢塔怪物（10層, lv50~78, BOSS） =====
+        "tw_medusa": { n: "梅杜莎", img: "assets/icons/monsters/medusa.png", lv: 50, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1400, ac: -16, mr: 25, exp: 3500, goldMin: 250, goldMax: 600, atkSpd: 1.8, dmg: [1, 75], db: 10, hit: 6 },
+        "tw_chimera": { n: "奇美拉", img: "assets/icons/monsters/chimera.png", lv: 50, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1400, ac: -16, mr: 25, exp: 3500, goldMin: 250, goldMax: 600, atkSpd: 1.8, dmg: [1, 75], db: 10, hit: 6 },
+        "tw_arian": { n: "亞力安", img: "assets/icons/monsters/亞力安.png", lv: 50, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1400, ac: -16, mr: 25, exp: 3500, goldMin: 250, goldMax: 600, atkSpd: 1.8, dmg: [1, 75], db: 10, hit: 6 },
+        "tw_zenis": { n: "潔尼斯女王", img: "assets/icons/monsters/zenis_queen.png", lv: 52, s: "L", beh: "主動", race: "傲慢之塔", boss: true, e: "none", hp: 15600, ac: -26, mr: 36, exp: 27040, goldMin: 1040, goldMax: 3120, atkSpd: 1.5, dmg: [1, 130], db: 13, hit: 8 },
+        "tw_succq": { n: "思克巴女皇", img: "assets/icons/monsters/思克巴女皇.png", lv: 53, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1484, ac: -17, mr: 26, exp: 3933, goldMin: 265, goldMax: 636, atkSpd: 1.8, dmg: [1, 80], db: 10, hit: 6 },
+        "tw_beholder": { n: "多眼怪", img: "assets/icons/monsters/多眼怪.png", lv: 53, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1484, ac: -17, mr: 26, exp: 3933, goldMin: 265, goldMax: 636, atkSpd: 1.8, dmg: [1, 80], db: 10, hit: 6 },
+        "tw_darkwolf": { n: "魔狼", img: "assets/icons/monsters/dark_wolf.png", lv: 53, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1484, ac: -17, mr: 26, exp: 3933, goldMin: 265, goldMax: 636, atkSpd: 1.8, dmg: [1, 80], db: 10, hit: 6 },
+        "tw_eye": { n: "幻象眼魔", img: "assets/icons/monsters/eye_monster.png", lv: 55, s: "L", beh: "主動", race: "傲慢之塔", boss: true, e: "none", hp: 16500, ac: -27, mr: 37, exp: 30250, goldMin: 1100, goldMax: 3300, atkSpd: 1.5, dmg: [1, 138], db: 13, hit: 9 },
+        "tw_nightmare": { n: "夢魘", img: "assets/icons/monsters/夢魘.png", lv: 56, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1568, ac: -18, mr: 28, exp: 4390, goldMin: 280, goldMax: 672, atkSpd: 1.8, dmg: [1, 84], db: 11, hit: 7 },
+        "tw_cerberus": { n: "地獄犬", img: "assets/icons/monsters/地獄犬.png", lv: 56, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1568, ac: -18, mr: 28, exp: 4390, goldMin: 280, goldMax: 672, atkSpd: 1.8, dmg: [1, 84], db: 11, hit: 7 },
+        "tw_ifrit": { n: "伊弗利特", img: "assets/icons/monsters/伊弗利特.png", lv: 56, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1568, ac: -18, mr: 28, exp: 4390, goldMin: 280, goldMax: 672, atkSpd: 1.8, dmg: [1, 84], db: 11, hit: 7 },
+        "tw_vampire": { n: "吸血鬼", img: "assets/icons/monsters/吸血鬼之吻.png", lv: 58, s: "L", beh: "主動", race: "傲慢之塔", boss: true, e: "none", hp: 17400, ac: -29, mr: 39, exp: 33640, goldMin: 1160, goldMax: 3480, atkSpd: 1.5, dmg: [1, 145], db: 14, hit: 9 },
+        "tw_ghoul": { n: "食屍鬼", img: "assets/icons/monsters/食屍鬼.png", lv: 59, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1652, ac: -19, mr: 29, exp: 4873, goldMin: 295, goldMax: 708, atkSpd: 1.8, dmg: [1, 88], db: 11, hit: 7 },
+        "tw_sparto": { n: "史巴托", img: "assets/icons/monsters/史巴托.png", lv: 59, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1652, ac: -19, mr: 29, exp: 4873, goldMin: 295, goldMax: 708, atkSpd: 1.8, dmg: [1, 88], db: 11, hit: 7 },
+        "tw_skelf": { n: "骷髏鬥士", img: "assets/icons/monsters/骷髏鬥士.png", lv: 59, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1652, ac: -19, mr: 29, exp: 4873, goldMin: 295, goldMax: 708, atkSpd: 1.8, dmg: [1, 88], db: 11, hit: 7 },
+        "tw_skels": { n: "骷髏神射手", img: "assets/icons/monsters/骷髏神射手.png", lv: 59, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1652, ac: -19, mr: 29, exp: 4873, goldMin: 295, goldMax: 708, atkSpd: 1.8, dmg: [1, 88], db: 11, hit: 7 },
+        "tw_zombieking": { n: "殭屍王", img: "assets/icons/monsters/zombie_king.png", lv: 61, s: "L", beh: "主動", race: "傲慢之塔", boss: true, e: "none", hp: 18300, ac: -30, mr: 40, exp: 37210, goldMin: 1220, goldMax: 3660, atkSpd: 1.5, dmg: [1, 152], db: 15, hit: 10 },
+        "tw_golem": { n: "高侖鋼鐵怪", img: "assets/icons/monsters/golem.png", lv: 62, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1736, ac: -20, mr: 31, exp: 5382, goldMin: 310, goldMax: 744, atkSpd: 1.8, dmg: [1, 93], db: 12, hit: 7 },
+        "tw_firemage": { n: "火焰魔法師", img: "assets/icons/monsters/fire_mage.png", lv: 62, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1736, ac: -20, mr: 31, exp: 5382, goldMin: 310, goldMax: 744, atkSpd: 1.8, dmg: [1, 93], db: 12, hit: 7 },
+        "tw_youngdragon": { n: "幼龍", img: "assets/icons/monsters/young_dragon.png", lv: 62, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1736, ac: -20, mr: 31, exp: 5382, goldMin: 310, goldMax: 744, atkSpd: 1.8, dmg: [1, 93], db: 12, hit: 7 },
+        "tw_bonedragon": { n: "骨龍", img: "assets/icons/monsters/bone_dragon.png", lv: 62, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1736, ac: -20, mr: 31, exp: 5382, goldMin: 310, goldMax: 744, atkSpd: 1.8, dmg: [1, 93], db: 12, hit: 7 },
+        "tw_panther": { n: "黑豹", img: "assets/icons/monsters/panther.png", lv: 64, s: "L", beh: "主動", race: "傲慢之塔", boss: true, e: "none", hp: 19200, ac: -32, mr: 42, exp: 40960, goldMin: 1280, goldMax: 3840, atkSpd: 1.5, dmg: [1, 160], db: 16, hit: 10 },
+        "tw_orczombie": { n: "妖魔殭屍", img: "assets/icons/monsters/妖魔殭屍.png", lv: 65, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1820, ac: -21, mr: 32, exp: 5915, goldMin: 325, goldMax: 780, atkSpd: 1.8, dmg: [1, 98], db: 13, hit: 8 },
+        "tw_elmore": { n: "艾爾摩士兵", img: "assets/icons/monsters/艾爾摩士兵.png", lv: 65, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1820, ac: -21, mr: 32, exp: 5915, goldMin: 325, goldMax: 780, atkSpd: 1.8, dmg: [1, 98], db: 13, hit: 8 },
+        "tw_mummyking": { n: "木乃伊王", img: "assets/icons/monsters/木乃伊.png", lv: 67, s: "L", beh: "主動", race: "傲慢之塔", boss: true, e: "none", hp: 20100, ac: -33, mr: 43, exp: 44890, goldMin: 1340, goldMax: 4020, atkSpd: 1.5, dmg: [1, 168], db: 16, hit: 11 },
+        "tw_lycan": { n: "萊肯", img: "assets/icons/monsters/萊肯.png", lv: 68, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1904, ac: -22, mr: 34, exp: 6474, goldMin: 340, goldMax: 816, atkSpd: 1.8, dmg: [1, 102], db: 13, hit: 8 },
+        "tw_icetiger": { n: "冰原老虎", img: "assets/icons/monsters/冰原老虎.png", lv: 68, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1904, ac: -22, mr: 34, exp: 6474, goldMin: 340, goldMax: 816, atkSpd: 1.8, dmg: [1, 102], db: 13, hit: 8 },
+        "tw_aris": { n: "艾莉絲", img: "assets/icons/monsters/aris.png", lv: 70, s: "L", beh: "主動", race: "傲慢之塔", boss: true, e: "none", hp: 21000, ac: -35, mr: 45, exp: 49000, goldMin: 1400, goldMax: 4200, atkSpd: 1.5, dmg: [1, 175], db: 17, hit: 11 },
+        "tw_bknight": { n: "黑騎士", img: "assets/icons/monsters/黑騎士.png", lv: 71, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1988, ac: -23, mr: 35, exp: 7057, goldMin: 355, goldMax: 852, atkSpd: 1.8, dmg: [1, 106], db: 14, hit: 8 },
+        "tw_firewarrior": { n: "火焰戰士", img: "assets/icons/monsters/火焰戰士.png", lv: 71, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1988, ac: -23, mr: 35, exp: 7057, goldMin: 355, goldMax: 852, atkSpd: 1.8, dmg: [1, 106], db: 14, hit: 8 },
+        "tw_succq2": { n: "思克巴女皇", img: "assets/icons/monsters/思克巴女皇.png", lv: 71, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 1988, ac: -23, mr: 35, exp: 7057, goldMin: 355, goldMax: 852, atkSpd: 1.8, dmg: [1, 106], db: 14, hit: 8 },
+        "tw_vander": { n: "騎士范德", img: "assets/icons/monsters/黑騎士.png", lv: 73, s: "L", beh: "主動", race: "傲慢之塔", boss: true, e: "none", hp: 21900, ac: -36, mr: 46, exp: 53290, goldMin: 1460, goldMax: 4380, atkSpd: 1.5, dmg: [1, 182], db: 18, hit: 12 },
+        "tw_fireelf": { n: "火精靈王", img: "assets/icons/monsters/火精靈王.png", lv: 74, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 2072, ac: -24, mr: 37, exp: 7666, goldMin: 370, goldMax: 888, atkSpd: 1.8, dmg: [1, 111], db: 14, hit: 9 },
+        "tw_windelf": { n: "風精靈王", img: "assets/icons/monsters/火精靈王.png", lv: 74, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 2072, ac: -24, mr: 37, exp: 7666, goldMin: 370, goldMax: 888, atkSpd: 1.8, dmg: [1, 111], db: 14, hit: 9 },
+        "tw_lich": { n: "巫妖", img: "assets/icons/monsters/lich.png", lv: 76, s: "L", beh: "主動", race: "傲慢之塔", boss: true, e: "none", hp: 22800, ac: -38, mr: 48, exp: 57760, goldMin: 1520, goldMax: 4560, atkSpd: 1.5, dmg: [1, 190], db: 19, hit: 12 },
+        "tw_zenis2": { n: "傲慢的潔尼斯女王", img: "assets/icons/monsters/zenis_queen.png", lv: 77, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 2156, ac: -25, mr: 38, exp: 8301, goldMin: 385, goldMax: 924, atkSpd: 1.8, dmg: [1, 116], db: 15, hit: 9 },
+        "tw_zking2": { n: "恐怖的殭屍王", img: "assets/icons/monsters/zombie_king.png", lv: 77, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 2156, ac: -25, mr: 38, exp: 8301, goldMin: 385, goldMax: 924, atkSpd: 1.8, dmg: [1, 116], db: 15, hit: 9 },
+        "tw_mummy2": { n: "木乃伊王", img: "assets/icons/monsters/木乃伊.png", lv: 77, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 2156, ac: -25, mr: 38, exp: 8301, goldMin: 385, goldMax: 924, atkSpd: 1.8, dmg: [1, 116], db: 15, hit: 9 },
+        "tw_aris2": { n: "艾莉絲", img: "assets/icons/monsters/aris.png", lv: 77, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 2156, ac: -25, mr: 38, exp: 8301, goldMin: 385, goldMax: 924, atkSpd: 1.8, dmg: [1, 116], db: 15, hit: 9 },
+        "tw_reaper": { n: "鐮刀死神", img: "assets/icons/monsters/死神.png", lv: 78, s: "L", beh: "主動", race: "傲慢之塔", boss: true, e: "none", hp: 23400, ac: -39, mr: 49, exp: 60840, goldMin: 1560, goldMax: 4680, atkSpd: 1.5, dmg: [1, 195], db: 19, hit: 13 },
         "orc": { n: "妖魔", lv: 2, s: "S", beh: "被動", race: "妖魔", e: "fire", hp: 6, ac: 10, mr: 0, exp: 5, goldMin: 10, goldMax: 30, atkSpd: 2, dmg: [1, 2], db: 0, hit: 0 },
         "goblin": { n: "哥布林", lv: 2, s: "S", beh: "被動", race: "哥布林", e: "earth", hp: 3, ac: 10, mr: 2, exp: 5, goldMin: 10, goldMax: 30, atkSpd: 2, dmg: [1, 2], db: 0, hit: 0 },
         "esti_enemy": { n: "依詩蒂", img: "assets/icons/monsters/依詩蒂.png", lv: 1, s: "S", beh: "主動", race: "血盟", wild: true, e: "none", pledgeEnemy: true, excludeAvatar: "女騎士", seeInsight: true, hp: 20, ac: -10, mr: 0, exp: 100, goldMin: 1136, goldMax: 1136, atkSpd: 0.67, dmg: [1, 10], db: 0, hit: 2, regenHp: 15, scale: { hpC: 20, acBase: -10, acDiv: 3, mrBase: 0, mrDiv: 5, dmgSides: 10, dbDiv: 2, hitBase: 2, hitDiv: 3, atkSpd: 0.67 }, mag: { skn: "衝擊之暈", cd: 50, chance: 0.2, type: "extra_attack", stunChance: 10 } },
@@ -1484,6 +1525,17 @@ const DB = {
     },
 
     maps: {
+        // ===== 傲慢塔 10層 =====
+        "tower_1f": ["tw_medusa", "tw_chimera", "tw_arian", "tw_zenis"],
+        "tower_2f": ["tw_succq", "tw_beholder", "tw_darkwolf", "tw_eye"],
+        "tower_3f": ["tw_nightmare", "tw_cerberus", "tw_ifrit", "tw_vampire"],
+        "tower_4f": ["tw_ghoul", "tw_sparto", "tw_skelf", "tw_skels", "tw_zombieking"],
+        "tower_5f": ["tw_golem", "tw_firemage", "tw_youngdragon", "tw_bonedragon", "tw_panther"],
+        "tower_6f": ["tw_orczombie", "tw_elmore", "tw_mummyking"],
+        "tower_7f": ["tw_lycan", "tw_icetiger", "tw_aris"],
+        "tower_8f": ["tw_bknight", "tw_firewarrior", "tw_succq2", "tw_vander"],
+        "tower_9f": ["tw_fireelf", "tw_windelf", "tw_lich"],
+        "tower_10f": ["tw_zenis2", "tw_zking2", "tw_mummy2", "tw_aris2", "tw_reaper"],
         "training": ["orc", "goblin", "orc_archer", "gremlin"],
         "dream_island": ["nm_038", "nm_039", "nm_040", "nm_036", "nm_041", "nm_042", "nm_043", "nm_044", "nm_023", "nm_024", "nm_045", "nm_028", "nm_029", "nm_030", "nm_031", "nm_032", "nm_037"],
         "kent_outer": ["siege_aton", "siege_julian", "siege_ovi", "siege_joe", "siege_senis", "siege_tros", "siege_esti", "siege_grit", "siege_gate"],
@@ -1574,6 +1626,44 @@ const DB = {
     // ===== 怪物專屬掉落表（依「怪物掉落資料.md」）=====
     // 格式：怪物顯示名稱: [[物品ID, 掉落機率(%)], ...]  每樣獨立判定一次
     const MOB_DROPS = {
+        // ===== 傲慢塔怪物掉落 =====
+        '梅杜莎': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '奇美拉': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '亞力安': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '潔尼斯女王': [['scroll_weapon',30],['scroll_armor',40],['scroll_acc',1],['scroll_revive',1],['wpn_katana',2],['arm_63',5],['potion_haste',1],['potion_blue',1]],
+        '思克巴女皇': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '多眼怪': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '魔狼': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '幻象眼魔': [['scroll_weapon',30],['scroll_armor',40],['scroll_acc',1],['scroll_revive',1],['wpn_katana',2],['arm_63',5],['potion_haste',1],['potion_blue',1]],
+        '夢魘': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '地獄犬': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '伊弗利特': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '吸血鬼': [['scroll_weapon',30],['scroll_armor',40],['scroll_acc',1],['scroll_revive',1],['wpn_katana',2],['arm_63',5],['potion_haste',1],['potion_blue',1]],
+        '食屍鬼': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '史巴托': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '骷髏鬥士': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '骷髏神射手': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '殭屍王': [['scroll_weapon',30],['scroll_armor',40],['scroll_acc',1],['scroll_revive',1],['wpn_katana',2],['arm_63',5],['potion_haste',1],['potion_blue',1]],
+        '高侖鋼鐵怪': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '火焰魔法師': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '幼龍': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '骨龍': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '黑豹': [['scroll_weapon',30],['scroll_armor',40],['scroll_acc',1],['scroll_revive',1],['wpn_katana',2],['arm_63',5],['potion_haste',1],['potion_blue',1]],
+        '妖魔殭屍': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '艾爾摩士兵': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '木乃伊王': [['scroll_weapon',30],['scroll_armor',40],['scroll_acc',1],['scroll_revive',1],['wpn_katana',2],['arm_63',5],['potion_haste',1],['potion_blue',1]],
+        '萊肯': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '冰原老虎': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '艾莉絲': [['scroll_weapon',30],['scroll_armor',40],['scroll_acc',1],['scroll_revive',1],['wpn_katana',2],['arm_63',5],['potion_haste',1],['potion_blue',1]],
+        '黑騎士': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '火焰戰士': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '騎士范德': [['scroll_weapon',30],['scroll_armor',40],['scroll_acc',1],['scroll_revive',1],['wpn_katana',2],['arm_63',5],['potion_haste',1],['potion_blue',1]],
+        '火精靈王': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '風精靈王': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '巫妖': [['scroll_weapon',30],['scroll_armor',40],['scroll_acc',1],['scroll_revive',1],['wpn_katana',2],['arm_63',5],['potion_haste',1],['potion_blue',1]],
+        '傲慢的潔尼斯女王': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '恐怖的殭屍王': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
+        '鐮刀死神': [['scroll_weapon',30],['scroll_armor',40],['scroll_acc',1],['scroll_revive',1],['wpn_katana',2],['arm_63',5],['potion_haste',1],['potion_blue',1]],
         '冰之女王侍女': [['bk_thunder_storm', 0.05], ['bk_cancel', 0.1]],
         '冰之女王': [['arm_88', 0.1], ['arm_63', 10], ['glv_crystal', 5], ['acc_116', 0.1], ['amu_int', 1], ['acc_122', 1], ['acc_128', 0.5], ['acc_129', 0.5], ['acc_130', 0.1], ['acc_131', 0.1], ['potion_haste', 1], ['scroll_weapon', 100], ['scroll_armor', 100], ['scroll_revive', 1], ['new_item_150', 1], ['new_item_151', 50], ['new_item_152', 5], ['bk_summon', 0.5], ['bk_invisible', 0.05], ['new_item_140', 1], ['potion_blue', 1], ['bk_fire_storm', 0.5], ['new_item_195', 1], ['bk_elf_winddash', 1], ['bk_elf_lifespring', 3], ['bk_elf_lifebless', 1], ['bk_elf_steelguard', 1], ['bk_magic_shield', 2], ['bk_dark_shadow', 1], ['bk_seal', 1]],
         '夢幻之島蘑菇': [['potion_haste',1], ['scroll_weapon',1], ['scroll_armor',2], ['potion_blue',1]],
@@ -4089,6 +4179,7 @@ setInterval(() => { try { renderAuditTab(); } catch(e) {} }, 2000);   // 開著�
 // killMob() 只負責「標記死亡＋發放獎勵/掉落」；輸送帶遞補與目標重映射延後到 settleDeadMobs()。
 // tick 內的擊殺由 gameLoop 在 tick 結束後統一清算；手動操作（點技能/道具）觸發的擊殺立即清算。
 // 好處：怪物迭代過程中陣列不再位移，徹底杜絕「怪物被跳過回合 / 索引指到錯的怪」這類隱性錯誤。
+function isTowerMap(m){ return typeof m==="string" && m.indexOf("tower_")===0; }
 function killMob(idx) {
     let mob = mapState.mobs[idx];
     if (!mob || mob._dead) return;        // 冪等保護：同一隻怪只結算一次獎勵
@@ -4096,7 +4187,7 @@ function killMob(idx) {
     if (mob.curHp > 0) mob.curHp = 0;     // 待清算期間不可被當成活目標
     if(typeof auditTrackKill === 'function') auditTrackKill(mob);   // 統計：累計經驗/擊殺
     logCombat(`擊敗了 <span class="${getMobColor(mob.lv)}">${mob.n}</span>！`, 'player-heavy');  // 👈 新增
-    player.exp += Math.floor(mob.exp * getExpGainMult(player.lv));
+    player.exp += Math.floor(mob.exp * getExpGainMult(player.lv) * (isTowerMap(mapState.current)?2:1));
     checkLvUp();
     // 精神(WIS)：擊殺敵人時立即額外恢復 MP
     { let mpKill = getWisMpOnKill(player.d.wis); if (mpKill > 0 && player.mp < player.mmp) player.mp = Math.min(player.mmp, player.mp + mpKill); }
@@ -4105,7 +4196,7 @@ function killMob(idx) {
         let gMin = mob.goldMin || (mob.lv * 5);
         let gMax = mob.goldMax || (mob.lv * 10);
         let g = gMin + Math.floor(Math.random() * (gMax - gMin + 1));
-        player.gold += g;
+        player.gold += g * (isTowerMap(mapState.current)?2:1);
         logSys(`獲得 <span class="text-yellow-400 font-bold">${g} 金幣</span>。`);
     }
 	// 誘捕判定（誘捕上限改於「使用肉」時以 floor(魅力/7) 判定）
@@ -4134,7 +4225,8 @@ function killMob(idx) {
 
     // === 怪物專屬掉落（依「怪物掉落資料.md」）：每樣物品各自獨立判定一次 ===
     let dropList = MOB_DROPS[mob.n] || [];
-    dropList.forEach(entry => {
+    let _twRolls = isTowerMap(mapState.current) ? 2 : 1;   // 傲慢塔：道具掉落加倍(擲兩次)
+    for (let _r = 0; _r < _twRolls; _r++) dropList.forEach(entry => {
         let itemId = entry[0];
         let ratePct = entry[1];               // 機率(%)
         if(!DB.items[itemId]) return;          // 該物品不存在於資料庫則略過
@@ -7104,6 +7196,18 @@ function switchTab(t, btn) {
 
 // ===== 地圖分類選單（村莊／野外／地監／特殊） =====
 const MAP_CATEGORIES = {
+    tower: [
+            {v:'tower_1f',t:'傲慢塔 1樓'},
+            {v:'tower_2f',t:'傲慢塔 2樓'},
+            {v:'tower_3f',t:'傲慢塔 3樓'},
+            {v:'tower_4f',t:'傲慢塔 4樓'},
+            {v:'tower_5f',t:'傲慢塔 5樓'},
+            {v:'tower_6f',t:'傲慢塔 6樓'},
+            {v:'tower_7f',t:'傲慢塔 7樓'},
+            {v:'tower_8f',t:'傲慢塔 8樓'},
+            {v:'tower_9f',t:'傲慢塔 9樓'},
+            {v:'tower_10f',t:'傲慢塔 10樓'},
+    ],
     village: [
         {v:'town_silver_knight',t:'銀騎士村'}, {v:'town_elf',t:'妖精森林'}, {v:'town_talking',t:'說話之島'},
         {v:'town_gludio',t:'燃柳村'}, {v:'town_giran',t:'奇岩'}, {v:'town_heine',t:'海音'},
@@ -7148,7 +7252,7 @@ function getSiegeAreas() {
 }
 function rebuildMapCategoryOptions() {
     let catSel = document.getElementById('map-category'); if (!catSel) return;
-    let opts = [['village','村莊'],['wild','野外'],['dungeon','地監'],['special','特殊']];
+    let opts = [['village','村莊'],['wild','野外'],['dungeon','地監'],['special','特殊'],['tower','傲慢塔']];
     if (player.siege && player.siege.active) opts.push(['siege','攻城']);
     if (siegeVictoryActive()) opts.push(['castle','城堡']);
     catSel.innerHTML = opts.map(o => `<option value="${o[0]}">${o[1]}</option>`).join('');
