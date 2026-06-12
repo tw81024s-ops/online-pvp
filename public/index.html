@@ -2676,7 +2676,8 @@ function recomputeStats() {
 
     // MP消耗（技能實際消耗 = ceil(原始 x (1 - MP消耗減少)) ）
     d.getMpCost = function(baseMp, tier) {
-        let c = Math.max(1, Math.ceil(baseMp * (1 - d.mpReduce / 100)));
+        const _mpGlobal = 0.8;   // 全域耗魔倍率：1=原始，0.8=全技能耗魔 -20%（要更省改小、如0.7；要回原始設1）
+        let c = Math.max(1, Math.ceil(baseMp * _mpGlobal * (1 - d.mpReduce / 100)));
         if (p._setApprentice5 && p.mp < p.mmp * 0.3) c = Math.max(1, Math.ceil(c / 2));   // 🔮 學徒 5/5：MP 低於最大值 30% 時，所有技能耗魔減半
         return c;
     };
