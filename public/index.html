@@ -552,11 +552,11 @@ const DB = {
         "bk_ef_kingarrow": { type: "skillbk", n: "精靈水晶(精靈王之箭)", p: 50000, sk: "sk_ef_kingarrow", gachaWeight: 10 },
         "bk_ef_naturewrath": { type: "skillbk", n: "精靈水晶(自然之怒)", p: 50000, sk: "sk_ef_naturewrath", gachaWeight: 10 },
         // ===== 黑妖裝備 + 法師魔杖（自動合併） =====
-        "de_claw_demon": { darkOnly: true, n: "魔族鋼爪", type: "wpn", dmgS: 16, dmgL: 22, hit: 2, spd: 0.9, req: "elf", safe: 0, p: 800, gachaWeight: 100, procs: [{ name: "暗刃", rate: 0.05, min: 2, max: 6, ele: null, color: "#9ca3af" }], img: "assets/icons/weapons/匕首.png" },
-        "de_claw_steel": { darkOnly: true, n: "暗鋼爪", type: "wpn", dmgS: 24, dmgL: 36, hit: 3, spd: 0.9, req: "elf", safe: 6, p: 45000, gachaWeight: 10, procs: [{ name: "暗影爪", rate: 0.07, min: 6, max: 14, ele: null, color: "#6b7280" }], img: "assets/icons/weapons/匕首.png" },
-        "de_claw_spirit": { darkOnly: true, n: "靈幽暗鋼爪", type: "wpn", dmgS: 32, dmgL: 46, hit: 4, spd: 0.9, req: "elf", safe: 6, p: 150000, gachaWeight: 1, procs: [{ name: "靈魂撕裂", rate: 0.10, min: 14, max: 30, ele: null, color: "#a855f7" }], img: "assets/icons/weapons/精靈匕首.png" },
-        "de_blade_silver": { darkOnly: true, n: "銀光雙刀", type: "wpn", dmgS: 22, dmgL: 48, hit: 2, spd: 1.0, req: "elf", safe: 6, p: 110000, gachaWeight: 1, procs: [{ name: "銀光連斬", rate: 0.10, min: 12, max: 26, ele: "wind", color: "#e5e7eb" }], img: "assets/icons/weapons/長劍.png" },
-        "de_gauntlet": { darkOnly: true, n: "暗影手甲", type: "wpn", isBow: true, ranged: true, dmgS: 18, dmgL: 22, hit: 3, spd: 1.0, req: "elf", safe: 6, p: 50000, gachaWeight: 10, procs: [{ name: "貫穿暗箭", rate: 0.08, min: 8, max: 18, ele: "wind", color: "#94a3b8" }], img: "assets/icons/weapons/弓.png" },
+        "de_claw_demon": { darkOnly: true, n: "魔族鋼爪", type: "wpn", dmgS: 16, dmgL: 22, hit: 2, spd: 0.9, req: "elf", safe: 0, p: 800, gachaWeight: 100, procs: [{ name: "暗刃", rate: 0.05, min: 2, max: 6, ele: null, color: "#9ca3af" }], img: "assets/icons/weapons/de_claw_demon.png" },
+        "de_claw_steel": { darkOnly: true, n: "暗鋼爪", type: "wpn", dmgS: 24, dmgL: 36, hit: 3, spd: 0.9, req: "elf", safe: 6, p: 45000, gachaWeight: 10, procs: [{ name: "暗影爪", rate: 0.07, min: 6, max: 14, ele: null, color: "#6b7280" }], img: "assets/icons/weapons/de_claw_steel.png" },
+        "de_claw_spirit": { darkOnly: true, n: "靈幽暗鋼爪", type: "wpn", dmgS: 32, dmgL: 46, hit: 4, spd: 0.9, req: "elf", safe: 6, p: 150000, gachaWeight: 1, procs: [{ name: "靈魂撕裂", rate: 0.10, min: 14, max: 30, ele: null, color: "#a855f7" }], img: "assets/icons/weapons/de_claw_spirit.png" },
+        "de_blade_silver": { darkOnly: true, n: "銀光雙刀", type: "wpn", dmgS: 22, dmgL: 48, hit: 2, spd: 1.0, req: "elf", safe: 6, p: 110000, gachaWeight: 1, procs: [{ name: "銀光連斬", rate: 0.10, min: 12, max: 26, ele: "wind", color: "#e5e7eb" }], img: "assets/icons/weapons/de_blade_silver.png" },
+        "de_gauntlet": { darkOnly: true, n: "暗影手甲", type: "wpn", isBow: true, ranged: true, dmgS: 18, dmgL: 22, hit: 3, spd: 1.0, req: "elf", safe: 6, p: 50000, gachaWeight: 10, procs: [{ name: "貫穿暗箭", rate: 0.08, min: 8, max: 18, ele: "wind", color: "#94a3b8" }], img: "assets/icons/weapons/de_gauntlet.png" },
         "de_blade_gloom": { darkOnly: true, n: "幽暗雙刀", type: "wpn", dmgS: 34, dmgL: 24, hit: 4, dmgBonus: 2, spd: 1.0, req: "elf", safe: 6, p: 80000, gachaWeight: 10, procs: [{ name: "暗影爆裂", rate: 0.08, min: 10, max: 22, ele: null, color: "#7c3aed" }], img: "assets/icons/weapons/de_blade_gloom.jpg" },
         "de_blade_lindr": { darkOnly: true, n: "倫得雙刀", type: "wpn", dmgS: 40, dmgL: 22, hit: 8, dmgBonus: 6, str: 2, spd: 1.0, req: "elf", safe: 6, p: 260000, gachaWeight: 1, ignoreEva: 2, procs: [{ name: "地裂術", rate: 0.08, min: 8, max: 20, ele: "earth", color: "#d97706" }], img: "assets/icons/weapons/de_blade_lindr.jpg" },
         "de_blade_demonlord": { darkOnly: true, n: "惡魔王雙刀", type: "wpn", dmgS: 40, dmgL: 38, hit: 6, dmgBonus: 5, spd: 1.0, req: "elf", safe: 6, p: 320000, gachaWeight: 1, ignoreEva: 1, procs: [{ name: "疾病術", rate: 0.10, min: 6, max: 14, ele: null, color: "#65a30d" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/de_blade_demonlord.jpg" },
@@ -564,13 +564,13 @@ const DB = {
         "mw_aris": { n: "艾莉絲魔杖", type: "wpn", dmgS: 58, dmgL: 52, hit: 27, dmgBonus: 23, mdmg: 13, mpR: 15, spd: 1.0, req: "mage", safe: 6, p: 360000, gachaWeight: 1, procs: [{ name: "流星雨", rate: 0.05, min: 30, max: 60, ele: "fire", color: "#fb923c" }], img: "assets/icons/weapons/mw_aris.jpg" },
         "mw_giran": { n: "吉倫的魔杖", type: "wpn", dmgS: 54, dmgL: 48, hit: 20, dmgBonus: 13, mdmg: 8, mpR: 15, spd: 1.0, req: "mage", safe: 6, p: 300000, gachaWeight: 1, ignoreEva: 2, procs: [{ name: "格蘭肯的詛咒", rate: 0.10, min: 12, max: 28, ele: null, color: "#a78bfa" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/mw_giran.jpg" },
         // 🗡️ 騎士專屬高階武器（天堂經典雙手劍/匕首）
-        "kn_blade_giltas": { n: "吉爾塔斯之劍", type: "wpn", dmgS: 42, dmgL: 42, hit: 8, dmgBonus: 21, str: 2, con: 1, spd: 1.0, req: "knight", safe: 6, p: 360000, gachaWeight: 1, procs: [{ name: "破壞之力", rate: 0.08, min: 12, max: 28, ele: null, color: "#f97316" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/長劍.png" },
-        "kn_blade_emperor": { n: "真‧冥皇執行劍", type: "wpn", dmgS: 38, dmgL: 44, hit: 8, dmgBonus: 26, str: 2, spd: 1.0, req: "knight", safe: 6, p: 340000, gachaWeight: 1, procs: [{ name: "混沌狂襲", rate: 0.05, min: 20, max: 40, ele: null, color: "#7c3aed" }], img: "assets/icons/weapons/長劍.png" },
-        "kn_dagger_oricalcum": { n: "奧里哈魯根短劍", type: "wpn", dmgS: 30, dmgL: 30, hit: 6, dmgBonus: 10, str: 1, spd: 0.8, req: "knight", safe: 6, p: 200000, gachaWeight: 10, procs: [{ name: "連環斬", rate: 0.10, min: 8, max: 18, ele: null, color: "#a3a3a3" }], img: "assets/icons/weapons/匕首.png" },
+        "kn_blade_giltas": { n: "吉爾塔斯之劍", type: "wpn", dmgS: 42, dmgL: 42, hit: 8, dmgBonus: 21, str: 2, con: 1, spd: 1.0, req: "knight", safe: 6, p: 360000, gachaWeight: 1, procs: [{ name: "破壞之力", rate: 0.08, min: 12, max: 28, ele: null, color: "#f97316" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/kn_blade_giltas.png" },
+        "kn_blade_emperor": { n: "真‧冥皇執行劍", type: "wpn", dmgS: 38, dmgL: 44, hit: 8, dmgBonus: 26, str: 2, spd: 1.0, req: "knight", safe: 6, p: 340000, gachaWeight: 1, procs: [{ name: "混沌狂襲", rate: 0.05, min: 20, max: 40, ele: null, color: "#7c3aed" }], img: "assets/icons/weapons/kn_blade_emperor.png" },
+        "kn_dagger_oricalcum": { n: "奧里哈魯根短劍", type: "wpn", dmgS: 30, dmgL: 30, hit: 6, dmgBonus: 10, str: 1, spd: 0.8, req: "knight", safe: 6, p: 200000, gachaWeight: 10, procs: [{ name: "連環斬", rate: 0.10, min: 8, max: 18, ele: null, color: "#a3a3a3" }], img: "assets/icons/weapons/kn_dagger_oricalcum.png" },
         // 🏹 妖精專屬高階武器（天堂經典名弓，弓手可用）
-        "ef_bow_earthgoddess": { n: "大地女神的激怒", type: "wpn", isBow: true, ranged: true, dmgS: 40, dmgL: 42, hit: 10, dmgBonus: 27, dex: 3, ignoreEva: 5, spd: 1.0, req: "elf", safe: 6, p: 360000, gachaWeight: 1, procs: [{ name: "藍惡靈奪魔", rate: 0.10, min: 20, max: 40, ele: "wind", color: "#60a5fa" }], img: "assets/icons/weapons/弓.png" },
-        "ef_bow_deicide": { n: "弒神弓", type: "wpn", isBow: true, ranged: true, dmgS: 44, dmgL: 40, hit: 8, dmgBonus: 24, dex: 3, ignoreEva: 3, spd: 1.0, req: "elf", safe: 6, p: 380000, gachaWeight: 1, procs: [{ name: "神之審判", rate: 0.08, min: 24, max: 48, ele: null, color: "#fbbf24" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/弓.png" },
-        "ef_bow_siren": { n: "賽倫之弓", type: "wpn", isBow: true, ranged: true, dmgS: 30, dmgL: 32, hit: 6, dmgBonus: 14, dex: 2, spd: 1.0, req: "elf", safe: 6, p: 180000, gachaWeight: 10, procs: [{ name: "海妖之歌", rate: 0.08, min: 10, max: 22, ele: "water", color: "#22d3ee" }], img: "assets/icons/weapons/弓.png" },
+        "ef_bow_earthgoddess": { n: "大地女神的激怒", type: "wpn", isBow: true, ranged: true, dmgS: 40, dmgL: 42, hit: 10, dmgBonus: 27, dex: 3, ignoreEva: 5, spd: 1.0, req: "elf", safe: 6, p: 360000, gachaWeight: 1, procs: [{ name: "藍惡靈奪魔", rate: 0.10, min: 20, max: 40, ele: "wind", color: "#60a5fa" }], img: "assets/icons/weapons/ef_bow_earthgoddess.png" },
+        "ef_bow_deicide": { n: "弒神弓", type: "wpn", isBow: true, ranged: true, dmgS: 44, dmgL: 40, hit: 8, dmgBonus: 24, dex: 3, ignoreEva: 3, spd: 1.0, req: "elf", safe: 6, p: 380000, gachaWeight: 1, procs: [{ name: "神之審判", rate: 0.08, min: 24, max: 48, ele: null, color: "#fbbf24" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/ef_bow_deicide.png" },
+        "ef_bow_siren": { n: "賽倫之弓", type: "wpn", isBow: true, ranged: true, dmgS: 30, dmgL: 32, hit: 6, dmgBonus: 14, dex: 2, spd: 1.0, req: "elf", safe: 6, p: 180000, gachaWeight: 10, procs: [{ name: "海妖之歌", rate: 0.08, min: 10, max: 22, ele: "water", color: "#22d3ee" }], img: "assets/icons/weapons/ef_bow_siren.png" },
         "mw_leah": { n: "蕾雅法杖", type: "wpn", dmgS: 32, dmgL: 16, hit: 13, dmgBonus: 4, str: 3, mdmg: 5, mpR: 10, spd: 1.0, req: "mage", safe: 6, p: 120000, gachaWeight: 1, procs: [{ name: "寒冰尖刺", rate: 0.07, min: 10, max: 22, ele: "water", color: "#67e8f9" }], img: "assets/icons/weapons/mw_leah.jpg" },
         "mw_demonking": { n: "惡魔王魔杖", type: "wpn", dmgS: 24, dmgL: 24, hit: 8, dmgBonus: 2, mdmg: 2, mpR: 10, spd: 1.0, req: "mage", safe: 6, p: 90000, gachaWeight: 10, procs: [{ name: "疾病術", rate: 0.10, min: 6, max: 14, ele: null, color: "#65a30d" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/mw_demonking.jpg" },
         "mw_icequeen": { n: "冰之女王魔杖", type: "wpn", dmgS: 6, dmgL: 8, hit: 7, dmgBonus: 1, spd: 1.0, req: "mage", safe: 6, p: 60000, gachaWeight: 10, procs: [{ name: "冰錐", rate: 0.07, min: 8, max: 18, ele: "water", color: "#38bdf8" }], img: "assets/icons/weapons/mw_icequeen.jpg" },
@@ -5878,6 +5878,7 @@ function autoActions() {
     ];
     buffs.forEach(cfg => {
         if (cfg.b === 'haste' && player._equipHaste) return;   // 裝備常駐加速（伊娃之盾）：不重複喝加速藥水
+        if (cfg.b === 'poly' && player.polyLock) return;   // 🔒 變身卡鎖定中：不自動使用變形卷軸（避免把卡片變身洗成隨機）
         if (document.getElementById(cfg.id).checked && (player.buffs[cfg.b] || 0) <= 0) {
             if(cfg.req && player.cls !== cfg.req) return;
             let item = player.inv.find(i => i.id === cfg.pot);
@@ -6217,6 +6218,12 @@ function useItem(u, silent = false) {
             logSys(`食用 ${d.n}，恢復 ${h} HP。`);
         } else if (d.eff === 'poly') {
             let ringOn = hasPolyRing();
+            // 🔒 變身卡鎖定：已用變身殿堂卡片鎖定外觀(polyLock)時，變形卷軸不重抽、不覆蓋（自動略過、手動提示，皆不消耗卷軸）
+            if (player.polyLock && player.poly) {
+                if (silent) return;
+                logSys('目前由變身卡鎖定外觀，變形卷軸不會生效。如要改用卷軸隨機變身，請先到變身殿堂「解除變身」。');
+                return;
+            }
             if (!silent && ringOn) {
                 // 手動從道具欄使用 + 持有變形控制戒指（裝備或背包攜帶皆可）：開啟選擇選單（變身與消耗在選定後才執行）
                 openPolySelect(item.uid);

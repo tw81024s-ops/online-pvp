@@ -63,24 +63,39 @@
             const w = _DB.items[p.eq.wpn.id];
             weapon = { dice: w.dmgS || 2, spd: w.spd || 1.5, ranged: !!w.ranged };
         }
-        // 最強攻擊魔法（取階級最高者）
+        // 攻擊魔法：優先採用玩家自己設定的攻擊技能（sel-atk-skill / config.selAtkSkill）；
+        // 若無有效設定，才自動挑「階級最高的攻擊魔法」當後備。
+        const _mkSpell = (s, id) => ({ name: s.n || id, dmgDice: s.dmgDice || null, multiDmg: s.multiDmg || null, dmgBase: s.dmgBase || 0, tier: s.tier || 1, mp: s.mp || 10, ele: s.ele || null });
+        const _validAtk = (s) => !!(s && s.type === 'atk' && s.dmgType !== 'physical' && (s.dmgDice || s.multiDmg));
+        let _selAtk = '';
+        try { const _e = document.getElementById('sel-atk-skill'); _selAtk = (_e && _e.value) || ''; } catch (e) { }
+        if (!_selAtk && p.config && p.config.selAtkSkill) _selAtk = p.config.selAtkSkill;
         let spell = null;
-        (p.skills || []).forEach(id => {
-            const s = _DB && _DB.skills[id];
-            if (!s || s.dmgType === 'physical') return;
-            if (!(s.dmgDice || s.multiDmg)) return;
-            if (!spell || (s.tier || 1) > (spell.tier || 1)) {
-                spell = { name: s.n || id, dmgDice: s.dmgDice || null, multiDmg: s.multiDmg || null, dmgBase: s.dmgBase || 0, tier: s.tier || 1, mp: s.mp || 10, ele: s.ele || null };
-            }
-        });
-        // 治癒魔法
+        if (_selAtk && _DB && _validAtk(_DB.skills[_selAtk])) {
+            spell = _mkSpell(_DB.skills[_selAtk], _selAtk);     // ✅ 用玩家設定的攻擊魔法
+        } else {
+            (p.skills || []).forEach(id => {                    // 後備：自動挑最高階攻擊魔法
+                const s = _DB && _DB.skills[id];
+                if (!_validAtk(s)) return;
+                if (!spell || (s.tier || 1) > (spell.tier || 1)) spell = _mkSpell(s, id);
+            });
+        }
+        // 治癒魔法：同樣優先用玩家設定（sel-heal-skill / config.selHealSkill），否則挑最高階治癒術
+        const _healDice = (s) => s ? (s.healDice || (s.type === 'heal' && s.valDice) || null) : null;
+        let _selHeal = '';
+        try { const _e = document.getElementById('sel-heal-skill'); _selHeal = (_e && _e.value) || ''; } catch (e) { }
+        if (!_selHeal && p.config && p.config.selHealSkill) _selHeal = p.config.selHealSkill;
         let heal = null;
-        (p.skills || []).forEach(id => {
-            const s = _DB && _DB.skills[id];
-            if (!s) return;
-            const dice = s.healDice || (s.type === 'heal' && s.valDice) || null;
-            if (dice && (!heal || (s.tier || 1) > (heal.tier || 1))) heal = { name: s.n || id, dice: dice, mp: s.mp || 5, tier: s.tier || 1 };
-        });
+        if (_selHeal && _DB && _DB.skills[_selHeal] && _healDice(_DB.skills[_selHeal])) {
+            const s = _DB.skills[_selHeal];
+            heal = { name: s.n || _selHeal, dice: _healDice(s), mp: s.mp || 5, tier: s.tier || 1 };   // ✅ 用玩家設定的治癒術
+        } else {
+            (p.skills || []).forEach(id => {
+                const s = _DB && _DB.skills[id];
+                const dice = _healDice(s);
+                if (dice && (!heal || (s.tier || 1) > (heal.tier || 1))) heal = { name: s.n || id, dice: dice, mp: s.mp || 5, tier: s.tier || 1 };
+            });
+        }
         return {
             name: p.name || myName, cls: p.cls, lv: p.lv, avatar: p.avatar || null, darkelf: !!p.darkelf,
             mhp: p.mhp, mmp: p.mmp,
