@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>放置天堂-冰之女王</title>
+    <title>放置天堂-席琳的世界</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { 
@@ -42,6 +42,27 @@
         .mob-target { padding: 0.75rem; border: 2px solid #334155; border-radius: 0.5rem; background: #0f172a; cursor: pointer; flex: 1; text-align: center; display: flex; flex-direction: column; justify-content: center; transition: all 0.2s; height: 224px; overflow: hidden;}
         .mob-target.active { border-color: #ef4444; background: #450a0a; }
         .mob-target:hover:not(.active) { background: #1e293b; }
+        /* 🔮 席琳的世界：暗紅底色＋黑紅怪物框（透明度結構與原樣式一致） */
+        body.sherine-world, body.game-bg-dim.sherine-world { background-image: linear-gradient(rgba(64,8,12,0.8), rgba(38,4,8,0.8)), url('assets/background/background.png'); }
+        body.sherine-world .mob-target { background: #1a0508; border-color: #7f1d1d; }
+        body.sherine-world .mob-target.active { background: #450a0a; border-color: #ef4444; }
+        body.sherine-world .mob-target:hover:not(.active) { background: #2c0a10; }
+        body.sherine-world #battle-view.has-bg .mob-target { background: rgba(26,5,8,0.66); border-color: rgba(127,29,29,0.8); }
+        body.sherine-world #battle-view.has-bg .mob-target.active { background: rgba(69,10,10,0.72); border-color: #ef4444; }
+        body.sherine-world #battle-view.has-bg .mob-target:hover:not(.active) { background: rgba(44,10,16,0.72); }
+        /* 🔮 席琳套裝效果：鮮綠名稱＋呼吸式綠光（凌駕其他詞綴顏色；動態光暈為非詞綴類專屬特效） */
+        .c-sherine { color: #4ade80 !important; animation: sherineName 2.2s ease-in-out infinite; }
+        @keyframes sherineName {
+            0%, 100% { text-shadow: 0 0 4px rgba(74,222,128,0.45), 0 0 10px rgba(74,222,128,0.25); }
+            50%      { text-shadow: 0 0 7px rgba(74,222,128,0.95), 0 0 16px rgba(74,222,128,0.7), 0 0 28px rgba(34,197,94,0.45); }
+        }
+        /* 🔮 席琳的恩賜：紅綠交替光特效＋頭上標註 */
+        .grace-glow { animation: graceGlow 1.6s ease-in-out infinite; }
+        @keyframes graceGlow {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(239,68,68,0.95)) drop-shadow(0 0 14px rgba(239,68,68,0.5)); }
+            50%      { filter: drop-shadow(0 0 6px rgba(74,222,128,0.95)) drop-shadow(0 0 14px rgba(74,222,128,0.5)); }
+        }
+        .grace-badge { color: #4ade80; text-shadow: 0 0 4px #ef4444, 0 0 8px rgba(74,222,128,0.8); }
         /* 區域背景：背景圖由 JS 依地圖/分類設為 inline 樣式（特殊地圖逐張不同）；卡片較不透明，使背景不過於顯眼 */
         #battle-view.has-bg { background-size: cover; background-position: center; border-radius: 0.5rem; }
         #battle-view.has-bg .mob-target { background: rgba(15,23,42,0.66); border-color: rgba(148,163,184,0.5); }
@@ -737,8 +758,8 @@ const DB = {
         "arm_113": { n: "鋼鐵盾牌", type: "arm", slot: "shield", ac: 3, req: "knight", safe: 4, p: 16500, gachaWeight: 20, block: 60 },
         "arm_114": { n: "受詛咒的魔法書", type: "arm", slot: "shield", ac: 1, req: "mage", p: 1, gachaWeight: 0, block: 10 },
         "arm_115": { n: "魔法能量之書", type: "arm", slot: "shield", ac: 2, req: "mage", safe: 4, p: 9800, int: 1, gachaWeight: 20, block: 10 },
-        "acc_116": { n: "傳送控制戒指", type: "acc", slot: "ring", ac: 0, req: "all", safe: 0, p: 50000, gachaWeight: 1 },
-        "acc_117": { n: "變形控制戒指", type: "acc", slot: "ring", ac: 0, req: "all", safe: 0, p: 50000, gachaWeight: 1 },
+        "acc_116": { n: "傳送控制戒指", type: "acc", slot: "ring", ac: 0, req: "all", safe: 0, p: 50000, gachaWeight: 1, d: "攜帶在背包即可生效（無需裝備）：手動施放傳送術/使用瞬移卷軸時必定遭遇 BOSS。" },
+        "acc_117": { n: "變形控制戒指", type: "acc", slot: "ring", ac: 0, req: "all", safe: 0, p: 50000, gachaWeight: 1, d: "攜帶在背包即可生效（無需裝備）：使用變形卷軸時可指定變身型態。" },
         "rng_mr": { n: "抗魔戒指", type: "acc", slot: "ring", ac: 0, mr: 5, req: "all", safe: 0, p: 10000, gachaWeight: 1 },
         "acc_118": { n: "守護戒指", type: "acc", slot: "ring", ac: 1, req: "all", safe: 0, p: 10000, gachaWeight: 1 },
         "acc_119": { n: "長者戒指", type: "acc", slot: "ring", ac: 0, req: "all", safe: 0, p: 10000, mmp: 10, mpR: 1, gachaWeight: 1 },
@@ -1087,8 +1108,8 @@ const DB = {
         "senis_enemy": { n: "賽尼斯", img: "assets/icons/monsters/賽尼斯.png", lv: 1, s: "S", beh: "主動", race: "血盟", wild: true, e: "none", pledgeEnemy: true, excludeAvatar: "女法師", hp: 8, ac: -11, mr: 18, exp: 100, goldMin: 1136, goldMax: 1136, atkSpd: 0.67, dmg: [1, 4], db: 0, hit: 0, regenHp: 15, scale: { hpC: 8, acBase: -11, acDiv: 6, mrBase: 18, mrDiv: 3, dmgSides: 4, dbDiv: 6, hitBase: 0, hitDiv: 5, atkSpd: 0.67, dbHalf: true }, mag: { skn: "冰箭", cd: 20, dmg: [2, 6], dbLv: 1, ele: "water", alwaysHit: true }, mag2: { skn: "冰矛圍籬", cd: 50, chance: 0.2, dmg: [5, 12], dbLv: 1, dbLvMult: 2, ele: "water", alwaysHit: true, sec: { type: "freeze", pbase: 150 } } },
         // ===== 攻城戰（攻城）怪物：等級隨玩家(由 applySiegeEnemyScaling 縮放)，由攻城系統生成 =====
         // 攻城塔/城門：固定HP、不會攻擊；HP 跨地圖保留(siegePersistHp)需攻城系統支援
-        "siege_tower": { n: "肯特守護塔", img: "assets/icons/monsters/肯特守護塔.png", lv: 1, s: "L", beh: "被動", race: "建築", siegeEnemy: true, siegePersistHp: true, noAttack: true, e: "none", boss: true, hp: 15000, ac: 10, mr: 0, exp: 0, goldMin: 0, goldMax: 0, atkSpd: 2, dmg: [0, 0], db: 0, hit: 0, siege: { fixed: true, hp: 15000, ac: 10, mr: 0 } },
-        "siege_gate": { n: "肯特城門", img: "assets/icons/monsters/肯特城門.png", lv: 1, s: "L", beh: "被動", race: "建築", siegeEnemy: true, siegePersistHp: true, noAttack: true, e: "none", boss: true, hp: 10000, ac: 10, mr: 0, dr: 20, exp: 0, goldMin: 0, goldMax: 0, atkSpd: 2, dmg: [0, 0], db: 0, hit: 0, siege: { fixed: true, hp: 10000, ac: 10, mr: 0, dr: 20 } },
+        "siege_tower": { n: "肯特守護塔", img: "assets/icons/monsters/肯特守護塔.png", lv: 1, s: "L", beh: "被動", race: "建築", siegeEnemy: true, siegePersistHp: true, noAttack: true, e: "none", boss: true, hp: 15000, ac: 10, mr: 0, dr: 10, exp: 0, goldMin: 0, goldMax: 0, atkSpd: 2, dmg: [0, 0], db: 0, hit: 0, siege: { fixed: true, hpPerLv: 500, ac: 10, mr: 0, dr: 10 } },   // 🔧 HP=500×玩家等級；新增被動：傷害減免10
+        "siege_gate": { n: "肯特城門", img: "assets/icons/monsters/肯特城門.png", lv: 1, s: "L", beh: "被動", race: "建築", siegeEnemy: true, siegePersistHp: true, noAttack: true, e: "none", boss: true, hp: 10000, ac: 10, mr: 0, dr: 20, exp: 0, goldMin: 0, goldMax: 0, atkSpd: 2, dmg: [0, 0], db: 0, hit: 0, siege: { fixed: true, hpPerLv: 300, ac: 10, mr: 0, dr: 20 } },   // 🔧 HP=300×玩家等級
         // 特羅斯王子 / 依詩蒂公主：技能「呼喚盟友」(場上敵人<3 立即追加一次普攻，10%暈眩) — 已實作(call_ally)
         "siege_tros": { n: "特羅斯王子", img: "assets/icons/monsters/特羅斯王子.png", lv: 1, s: "S", beh: "主動", race: "血盟", siegeEnemy: true, e: "none", hp: 14, ac: -10, mr: 0, exp: 0, goldMin: 0, goldMax: 0, atkSpd: 0.67, dmg: [1, 16], db: 0, hit: 2, siege: { hpC: 14, acBase: -10, acDiv: 4, mrBase: 0, mrDiv: 5, dmgSides: 16, hitBase: 2, atkSpd: 0.67 }, mag: { skn: "呼喚盟友", type: "call_ally", cd: 10, stunChance: 10 } },
         "siege_esti": { n: "依詩蒂公主", img: "assets/icons/monsters/依詩蒂公主.png", lv: 1, s: "S", beh: "主動", race: "血盟", siegeEnemy: true, e: "none", hp: 15, ac: -10, mr: 0, exp: 0, goldMin: 0, goldMax: 0, atkSpd: 0.67, dmg: [1, 12], db: 0, hit: 2, siege: { hpC: 15, acBase: -10, acDiv: 4, mrBase: 0, mrDiv: 5, dmgSides: 12, hitBase: 2, atkSpd: 0.67 }, mag: { skn: "呼喚盟友", type: "call_ally", cd: 10, stunChance: 10 } },
@@ -1361,8 +1382,14 @@ const DB = {
             npcs: [
                 { id: "npc_masha", n: "馬沙", title: "試煉", type: "quest", d: "妖精與騎士的試煉" }
             ]
+        },
+        "town_sherine": {   // 🔮 新安全區：席琳神殿
+            n: "席琳神殿",
+            npcs: [
+                { id: "npc_sherine", n: "席琳", title: "祈禱", type: "pray", d: "等級 40 以上可向席琳祈禱，開啟或關閉「席琳的世界」。" }
+            ]
         }
-		
+
     },
 	
 	skills: {
@@ -1431,7 +1458,7 @@ const DB = {
         "sk_heal2": { n: "高級治癒術", type: "heal", tier: 5, reqM: 20, reqE: 40, mp: 20, valDice: [2, 30], healDice: [1, 100], healBase: 100, msg: "你感覺舒服了一點。" },
         "sk_holy_light": { n: "聖潔之光", type: "heal", tier: 5, reqM: 20, reqE: 40, mp: 10, msg: "神聖光芒驅散了詛咒。" },
         "sk_ice_spike": { n: "冰錐", type: "atk", tier: 5, reqM: 20, reqE: 40, mp: 21, dmgType: "magic", ele: "earth", dmgDice: [6, 6] },
-        "sk_mana_drain": { n: "魔力奪取", type: "manual", tier: 5, reqM: 20, reqE: 40, hpCost: 50, mEff: "manadrain" },
+        "sk_mana_drain": { n: "魔力奪取", type: "convert", tier: 5, reqM: 20, reqE: 40, hpCost: 50, drain: true },   // 🔧 改為轉換技能（法師/妖精）：消耗HP、需對怪物施展且以異常魔法命中判定，命中吸取 MP=1D(怪物等級/2)；其餘機制比照魂體轉換
         "sk_dark_shadow": { n: "黑闇之影", type: "atk", tier: 5, reqM: 20, reqE: 40, mp: 25, dmgType: "magic", status: { kind: "blind", pbase: 150, hit: 5, dur: 20 } },
 
         // 六階魔法 (Lv 24)
@@ -1844,7 +1871,7 @@ const BUFF_NAMES = {   // buff 鍵 → 顯示名稱（DB.skills 查不到時使�
 // 遠古變體 true→'A'（其餘 'eternal'/'immortal'/'primordial' 原值）、屬性詞綴 attr。
 // 使用處：gainItem 堆疊、卸裝/換裝退回背包合併、倉庫一鍵存入(whSig)/堆疊(_whStackFind)、
 // 載入合併(consolidateInventory)、分頁重繪記憶簽章(renderTabs)。勿再各自手寫比對條件。
-function itemSig(it) { return it.id + '|' + (it.en || 0) + '|' + (it.bless === true ? 'B' : (it.bless ? 'C' : 0)) + '|' + (it.anc === true ? 'A' : (it.anc || 0)) + '|' + (it.attr || ''); }
+function itemSig(it) { return it.id + '|' + (it.en || 0) + '|' + (it.bless === true ? 'B' : (it.bless ? 'C' : 0)) + '|' + (it.anc === true ? 'A' : (it.anc || 0)) + '|' + (it.attr || '') + '|' + (it.seteff || ''); }   // 🔮 含席琳套裝效果：帶效果的裝備不可與普通品合併
 function sameItemSig(a, b) { return itemSig(a) === itemSig(b); }
 
 // ===== 🔧 架構#6：存檔版本與集中式預設值 =====
@@ -1854,7 +1881,7 @@ function sameItemSig(a, b) { return itemSig(a) === itemSig(b); }
 const SAVE_VERSION = 2;   // v1 = 未標版本的舊存檔
 const SAVE_DEFAULTS = {
     name: null, bonus: 0, panaceaUsed: 0, bloodPledge: null,
-    magicShieldCd: 0, reviveScrollCd: 0, lastMapByCat: {}, tracking: null, ismaelAccUsed: false,
+    magicShieldCd: 0, reviveScrollCd: 0, lastMapByCat: {}, tracking: null, ismaelAccUsed: false, sherineWorld: false,
     elfEle: null, poly: null, summon: null, charmed: null, hot: null,
     manualCd: {}, blessings: {},
     alloc:   { str:0, dex:0, con:0, int:0, wis:0, cha:0 },
@@ -1877,6 +1904,45 @@ function applySaveDefaults(p) {
         }
     }
 }
+
+// ============================================================================
+// 🔮 席琳的世界（席琳神殿「祈禱」開關，Lv40+；存於 player.sherineWorld）
+//  - 視覺：body 加 sherine-world class（暗紅底色、黑紅怪物框）
+//  - 怪物（攻城區與血盟敵人除外）：HP×2、AC×1.5、MR×1.5、經驗×2、金錢×2、
+//    一般攻擊傷害×1.5、額外命中×1.5、技能最終傷害×2（含持續傷害）；生怪等待 −1 秒（可與日光術疊加）
+//  - 掉落：物品掉落機率×3、單/雙/三詞綴機率×3；指定部位裝備可附「席琳套裝效果」
+// ============================================================================
+function sherineWorldActive() { return !!(player && player.sherineWorld); }
+function applySherineTheme() { document.body.classList.toggle('sherine-world', sherineWorldActive()); }
+let _sherineLootCtx = null;   // 擊殺掉落上下文：killMob 期間設定（{boss}），供 gainItem 判定詞綴×3 與套裝效果
+
+// ===== 🔮 席琳套裝效果（40 種，8 組 × 5 件；組名＝前兩字）=====
+// 掉落判定：席琳的世界中，武器/頭盔/盔甲/手套/長靴/斗篷/項鍊 掉落時，
+// 一般怪 0.1%、頭目 5% 獨立機率獲得一個效果（再從 40 種均勻抽一 → 單一效果 0.1%/40）。
+// 效果寫在裝備資訊欄（不冠在名稱前）；名稱以鮮綠色＋淡綠光暈顯示（凌駕詞綴顏色）。
+const SHERINE_EFFECTS = [
+    '紅獅的誓言','紅獅的壯志','紅獅的復仇','紅獅的熱情','紅獅的單思',
+    '白鳥的誓言','白鳥的依戀','白鳥的夢想','白鳥的情愫','白鳥的犧牲',
+    '鐵衛的誓言','鐵衛的象徵','鐵衛的盟約','鐵衛的奮戰','鐵衛的守護',
+    '麗人的誓言','麗人的加護','麗人的期盼','麗人的依靠','麗人的單戀',
+    '疾風的誓言','疾風的灑脫','疾風的傳說','疾風的襲擊','疾風的迅捷',
+    '月光的誓言','月光的隱情','月光的幽蔽','月光的純潔','月光的消逝',
+    '學徒的誓言','學徒的好奇','學徒的研究','學徒的夢想','學徒的智慧',
+    '魔女的誓言','魔女的哀戚','魔女的束縛','魔女的瘋狂','魔女的冷冽'
+];
+// 套裝加成說明（資訊欄顯示用；計數=身上「不重複效果」數，同效果兩件只算 1）
+const SHERINE_SET_TEXT = {
+    '紅獅': ['2件：額外傷害+5、額外魔法點數+3', '3件：傷害減免+10', '5件：攻擊技能最終傷害+20%'],
+    '白鳥': ['2件：額外命中+5', '3件：魅力+10', '5件：一般攻擊命中時使目標「脆弱」3秒（受所有傷害+20%，重複觸發刷新）'],
+    '鐵衛': ['2件：AC-3、傷害減免+5', '3件：受到傷害減少20%', '5件：觸發反擊或居合時，額外對全體敵人橫掃一次一般攻擊'],
+    '麗人': ['2件：近距離傷害+3、近距離命中+3', '3件：近距離爆擊率+2%', '5件：觸發重擊後，下一次一般攻擊100%命中'],
+    '疾風': ['2件：遠距離傷害+3、遠距離命中+3', '3件：遠距離爆擊率+2%', '5件：連射傷害由30%提升為80%'],
+    '月光': ['2件：額外傷害+2、額外命中+2', '3件：ER+5、MR+10', '5件：ER 也能迴避魔法攻擊（必中技能改為先判定 ER）'],
+    '學徒': ['2件：MP自然恢復+5、額外魔法點數+6', '3件：魔法爆擊率+2%', '5件：MP 低於最大值30%時，所有技能 MP 消耗減半'],
+    '魔女': ['2件：魔法傷害+2', '3件：水屬性抗性+10、額外魔法點數+5', '5件：每觸發 5 次共鳴，免費施放一次冰矛圍籬（無需學會）']
+};
+// 脆弱（白鳥5）：受所有主要傷害來源 +20%
+function fragileMult(t) { return (t && t.st && t.st.fragile > 0) ? 1.2 : 1; }
 
 let state = { running: false, ticks: 0, pDmgTick: 0, ff: false, inTick: false };
 // 主迴圈計時（依真實經過時間補跑 tick）
@@ -1923,7 +1989,7 @@ function flushAwaySummary() {
 
 let player = {
     cls: null, name: null, lv: 1, exp: 0, gold: 1000, hp: 0, mhp: 0, mp: 0, mmp: 0, blessings: {},
-    base: { str:0, dex:0, con:0, int:0, wis:0, cha:8 }, bonus: 0, alloc: { str:0, dex:0, con:0, int:0, wis:0, cha:0 }, panacea: { str:0, dex:0, con:0, int:0, wis:0, cha:0 }, panaceaUsed: 0, junkPrefs: {}, bloodPledge: null, magicShieldCd: 0, lastMapByCat: {}, tracking: null, ismaelAccUsed: false, siege: { active:false, gateKilled:false, towerKilled:false, endTime:0, kills:0, result:null, cooldownUntil:0, rewardPending:false, victoryUntil:0, accCdUntil:0 },
+    base: { str:0, dex:0, con:0, int:0, wis:0, cha:8 }, bonus: 0, alloc: { str:0, dex:0, con:0, int:0, wis:0, cha:0 }, panacea: { str:0, dex:0, con:0, int:0, wis:0, cha:0 }, panaceaUsed: 0, junkPrefs: {}, bloodPledge: null, magicShieldCd: 0, lastMapByCat: {}, tracking: null, ismaelAccUsed: false, sherineWorld: false, siege: { active:false, gateKilled:false, towerKilled:false, endTime:0, kills:0, result:null, cooldownUntil:0, rewardPending:false, victoryUntil:0, accCdUntil:0 },
     inv: [], eq: { wpn: null, arrow: null, helm: null, armor: null, shield: null, cloak: null, tshirt: null, gloves: null, boots: null, ring1: null, ring2: null, amulet: null, belt: null },
     skills: [], buffs: { haste: 0, brave: 0, blue: 0, cautious: 0, elfcookie: 0, poly: 0, shield: 0, sk_magic_shield: 0 }, poly: null, allies: [],
     summon: null, charmed: null, manualCd: {}, elfEle: null, hot: null,
@@ -2274,7 +2340,9 @@ function recomputeStats() {
 
     // MP消耗（技能實際消耗 = ceil(原始 x (1 - MP消耗減少)) ）
     d.getMpCost = function(baseMp, tier) {
-        return Math.max(1, Math.ceil(baseMp * (1 - d.mpReduce / 100)));
+        let c = Math.max(1, Math.ceil(baseMp * (1 - d.mpReduce / 100)));
+        if (p._setApprentice5 && p.mp < p.mmp * 0.3) c = Math.max(1, Math.ceil(c / 2));   // 🔮 學徒 5/5：MP 低於最大值 30% 時，所有技能耗魔減半
+        return c;
     };
 
     // HP / MP（職業等級1基礎 + (等級-1) x (職業加成 + 屬性加成)，依最終 CON / WIS）
@@ -2398,8 +2466,42 @@ d.mr += (baseMr + bonusMr);
     if(setCheck['mage'] >= 2) { p.mmp += 50; }
     if(setCheck['kurt'] >= 4) { d.ac -= 4; p._setPoly = getPolyState(false, true); }
     if(setCheck['steel'] >= 5) { d.ac -= 2; d.dr += 2; }
-    if(setCheck['mr'] >= 3) { d.mr += 5; } 
+    if(setCheck['mr'] >= 3) { d.mr += 5; }
     if(setCheck['guard'] >= 3) { d.ac -= 1; }
+
+    // ===== 🔮 席琳套裝效果：以「不重複效果」計件（同效果多件僅計 1；5/5 同時擁有 2/5、3/5 加成）=====
+    // 同步寫入傭兵快照：buildAlly 換身重算時 p=ally，旗標自然存於傭兵物件上
+    let _shSets = {};
+    for (let k in p.eq) {
+        let e = p.eq[k];
+        if (e && e.seteff) { let g = e.seteff.slice(0, 2); (_shSets[g] = _shSets[g] || new Set()).add(e.seteff); }
+    }
+    let _shN = (g) => (_shSets[g] ? _shSets[g].size : 0);
+    if (_shN('紅獅') >= 2) { d.extraDmg += 5; d.extraMp += 3; }
+    if (_shN('紅獅') >= 3) { d.dr += 10; }
+    p._setRedLion5 = _shN('紅獅') >= 5;          // 攻擊技能最終傷害 +20%（castSkill 套用）
+    if (_shN('白鳥') >= 2) { d.extraHit += 5; }
+    if (_shN('白鳥') >= 3) { d.cha = Math.min(60, d.cha + 10); }
+    p._setWhiteBird5 = _shN('白鳥') >= 5;        // 一般攻擊命中附加「脆弱」3 秒
+    if (_shN('鐵衛') >= 2) { d.ac -= 3; d.dr += 5; }
+    p._setIron3 = _shN('鐵衛') >= 3;             // 受到傷害 −20%（受擊時套用）
+    p._setIron5 = _shN('鐵衛') >= 5;             // 反擊/居合時橫掃全體敵人
+    if (_shN('麗人') >= 2) { d.meleeDmg += 3; d.meleeHit += 3; }
+    if (_shN('麗人') >= 3) { d.meleeCrit += 2; }
+    p._setBeauty5 = _shN('麗人') >= 5;           // 重擊後下一次一般攻擊 100% 命中
+    if (_shN('疾風') >= 2) { d.rangedDmg += 3; d.rangedHit += 3; }
+    if (_shN('疾風') >= 3) { d.rangedCrit += 2; }
+    p._setGale5 = _shN('疾風') >= 5;             // 連射傷害 30%→80%
+    if (_shN('月光') >= 2) { d.extraDmg += 2; d.extraHit += 2; }
+    if (_shN('月光') >= 3) { d.er += 5; d.mr += 10; }
+    p._setMoon5 = _shN('月光') >= 5;             // ER 可迴避魔法（applyMobMagic 套用）
+    if (_shN('學徒') >= 2) { d.mpR += 5; d.extraMp += 6; }
+    if (_shN('學徒') >= 3) { d.magicCrit += 2; }
+    p._setApprentice5 = _shN('學徒') >= 5;       // MP<30% 時技能耗魔減半（getMpCost 套用）
+    if (_shN('魔女') >= 2) { d.magicDmg += 2; }
+    if (_shN('魔女') >= 3) { d.resWater += 10; d.extraMp += 5; }
+    p._setWitch5 = _shN('魔女') >= 5;            // 每 5 次共鳴 → 免費冰矛圍籬
+    if (!p._setWitch5) p._witchResCnt = 0;       // 卸下套裝即重置共鳴計數
     
     let spdMult = 1.0;
     if(p.buffs.haste > 0 || p._equipHaste) spdMult *= 0.67;   // 自我加速 / 加速 / 裝備常駐加速 +33%
@@ -2597,13 +2699,17 @@ function findPolyForm(name) {
 }
 function makePolyState(form, color) { return Object.assign({ c: color }, form); }
 
-// 是否裝備「變形控制戒指」(acc_117)
+// 是否持有「變形控制戒指」(acc_117)
+// 🔧 改為「背包攜帶即可觸發」：裝備中或背包內任一處有戒指都算持有，不需佔用戒指欄位
 function hasPolyRing() {
-    return [player.eq.ring1, player.eq.ring2].some(e => e && e.id === 'acc_117');
+    return [player.eq.ring1, player.eq.ring2].some(e => e && e.id === 'acc_117')
+        || (player.inv && player.inv.some(i => i && i.id === 'acc_117' && (i.cnt || 0) > 0));
 }
-// 是否裝備傳送控制戒指 (acc_116)
+// 是否持有傳送控制戒指 (acc_116)
+// 🔧 改為「背包攜帶即可觸發」：裝備中或背包內任一處有戒指都算持有，不需佔用戒指欄位
 function hasTeleportRing() {
-    return [player.eq.ring1, player.eq.ring2].some(e => e && e.id === 'acc_116');
+    return [player.eq.ring1, player.eq.ring2].some(e => e && e.id === 'acc_116')
+        || (player.inv && player.inv.some(i => i && i.id === 'acc_116' && (i.cnt || 0) > 0));
 }
 // 傳送：清空當前怪物並重置生怪排程；forceBoss=true 時讓下一次生怪必定為 BOSS
 function doTeleport(forceBoss) {
@@ -3039,6 +3145,7 @@ function tick() {
             if(mapState.mobs[i]) { mapState.spawnAt[i] = null; continue; } // 有怪：清除排程
             if(isPureBossMap && i !== 1) continue;                          // 純 BOSS 房只生中央
             let delay = (player.buffs.sk_sunlight > 0) ? 10 : 50;           // 50 tick = 5 秒（日光術約 1 秒）
+            if (sherineWorldActive() && !isSiegeArea(mapState.current)) delay = Math.max(1, delay - 10);   // 🔮 席琳的世界：搜索時間 −1 秒（與日光術疊加）
             if(mapState.spawnAt[i] == null) mapState.spawnAt[i] = nowT + delay; // 空格剛出現：排程 5 秒後
             if(nowT >= mapState.spawnAt[i]) { spawnMob(i); mapState.spawnAt[i] = null; }
         }
@@ -3248,9 +3355,9 @@ const PURE_BOSS_MAPS = ['antaras_lair', 'fafurion_lair', 'valakas_lair'];
 function applySiegeEnemyScaling(mob) {
     let L = Math.max(1, player.lv);
     let s = mob.siege || {};
-    if (s.fixed) {                                  // 攻城塔/城門：固定HP、不隨等級成長
+    if (s.fixed) {                                  // 攻城塔/城門：HP 固定值或依玩家等級（hpPerLv），其餘屬性不成長
         mob.lv = 1;
-        mob.hp = s.hp; mob.curHp = mob.hp;
+        mob.hp = s.hpPerLv ? s.hpPerLv * L : s.hp; mob.curHp = mob.hp;   // 🔧 守護塔 500×等級、城門 300×等級
         mob.ac = s.ac; mob.mr = s.mr;
         mob.exp = 0; mob.goldMin = 0; mob.goldMax = 0;
         if (s.dr) mob.dr = s.dr;
@@ -3368,8 +3475,48 @@ function spawnMob(idx) {
     }
     if(base.pledgeEnemy) applyPledgeEnemyScaling(mapState.mobs[idx]);   // 血盟敵人：依玩家等級縮放
     if(base.siegeEnemy) applySiegeEnemyScaling(mapState.mobs[idx]);   // 攻城敵人：依玩家等級縮放
+    // 🔮 席琳的世界：攻城區與血盟敵人除外，其餘怪物強化＋報酬翻倍
+    {
+        let _m = mapState.mobs[idx];
+        if (sherineWorldActive() && !isSiegeArea(mapState.current) && _m.race !== '血盟') {
+            _m.hp = Math.floor(_m.hp * 3); _m.curHp = _m.hp;   // HP×3
+            _m.ac = Math.floor((_m.ac || 0) * 1.5);
+            _m.mr = Math.floor((_m.mr || 0) * 1.5);
+            _m.exp = Math.floor((_m.exp || 0) * 5);            // 經驗×5
+            _m.goldMin = Math.floor((_m.goldMin || 0) * 5);    // 金錢×5
+            _m.goldMax = Math.floor((_m.goldMax || 0) * 5);
+            _m.hit = Math.floor((_m.hit || 0) * 1.5);
+            _m.dr = (_m.dr || 0) + Math.floor((_m.lv || 1) / 3);   // 額外減傷：等級/3
+            _m._sherine = true;   // 一般攻擊傷害×2、技能最終傷害×2、掉落×3 於對應計算點套用
+        }
+    }
     if(base.n === '肯特城門' && player.siege && player.siege.gateHp > 0) mapState.mobs[idx].curHp = Math.min(mapState.mobs[idx].hp, player.siege.gateHp);   // 城門HP保留
     if(base.n === '肯特守護塔' && player.siege && player.siege.towerHp > 0) mapState.mobs[idx].curHp = Math.min(mapState.mobs[idx].hp, player.siege.towerHp);   // 守護塔HP保留
+
+    // 🔮 席琳的恩賜：席琳的世界中每次刷新怪物 1% 機率觸發——場上隨機一隻「一般怪物」獲得恩賜
+    //（頭目與血盟敵人不會被選中；每 3 分鐘最多一次；場上已有恩賜怪則不觸發）
+    // 加成疊在席琳的世界之上：HP×10(完全恢復)、AC×1.5、MR×1.5、經驗×10、金錢×10、
+    // 一般攻擊傷害×1.5、額外命中×1.5、技能最終傷害×2(含持續傷害)、掉落×10、套裝機率×5(=0.5%)
+    if (sherineWorldActive() && !isSiegeArea(mapState.current)
+        && mapState.mobs[idx] && mapState.mobs[idx].race !== '血盟'   // 🔮 血盟敵人的刷新不觸發恩賜判定
+        && state.ticks >= (mapState.graceCdAt || 0)
+        && !mapState.mobs.some(m => m && m._grace)
+        && Math.random() < 0.01) {
+        let _gc = mapState.mobs.filter(m => m && !m._dead && m.curHp > 0 && !m.boss && m.race !== '血盟');
+        if (_gc.length) {
+            let g = _gc[Math.floor(Math.random() * _gc.length)];
+            g._grace = true;
+            g.hp = Math.floor(g.hp * 10); g.curHp = g.hp;        // HP×10 並完全恢復
+            g.ac = Math.floor((g.ac || 0) * 1.5);
+            g.mr = Math.floor((g.mr || 0) * 1.5);
+            g.exp = Math.floor((g.exp || 0) * 10);
+            g.goldMin = Math.floor((g.goldMin || 0) * 10);
+            g.goldMax = Math.floor((g.goldMax || 0) * 10);
+            g.hit = Math.floor((g.hit || 0) * 1.5);
+            mapState.graceCdAt = state.ticks + 1800;             // 3 分鐘最多一次
+            logSys(`<span class="grace-badge font-bold">✦ 席琳的恩賜降臨！</span><span class="c-sherine font-bold">${g.n}</span><span class="text-red-300"> 獲得了席琳的力量……擊敗它以奪取豐厚的報酬！</span>`);
+        }
+    }
     renderMobs();
 }
 
@@ -3497,6 +3644,7 @@ function getPhysicalDmg(diceStr, target, wpn, arrowData, forceHeavy, forceHit, f
 
     let _outDmg = inner + fixed;
     if (graze) _outDmg = Math.max(1, Math.floor(_outDmg * 0.5));   // 擦傷：最終傷害剩 50%
+    _outDmg = Math.max(1, Math.floor(_outDmg * fragileMult(target)));   // 🔮 脆弱（白鳥5）：受所有來源傷害 +20%
     return { dmg: _outDmg, hit: true, heavy: heavy, crit: isCrit, graze: graze, crush: crush, ranged: isRanged };
 }
 
@@ -3572,6 +3720,7 @@ function procLightArrow(t) {
     let d = Math.floor((core + extraMagicDmg) * mrFactor) - (t.dr || 0);
     d = Math.max(1, d);   // 光箭無屬性，無剋制固定加值
     d = Math.floor(d * mageDmgMult);
+    d = Math.max(1, Math.floor(d * fragileMult(t)));   // 🔮 脆弱（白鳥5）
     t.curHp -= d;
     t.justHit = 'magic';
     if (t.st && t.st.mrhalf > 0) t.st.mrhalf = 0;
@@ -3585,6 +3734,11 @@ function procLightArrow(t) {
     } else {
         renderMobs();
     }
+    // 🔮 魔女 5/5：累計共鳴次數，每 5 次免費施放一次冰矛圍籬
+    if (player._setWitch5) {
+        player._witchResCnt = (player._witchResCnt || 0) + 1;
+        if (player._witchResCnt >= 5) { player._witchResCnt = 0; witchIceLance(); }
+    }
 }
 // ===== 月光爆裂：對指定目標造成 1D30 + 2×強化等級 的風屬性固定傷害（不受魔法公式影響）=====
 function procMoonburst(t) {
@@ -3593,6 +3747,7 @@ function procMoonburst(t) {
     let mbDmg = roll(1, 30) + 2 * en;
     let counterTxt = '';
     if (isElementCounter('wind', t.e)) { mbDmg += 6; counterTxt = ' <span class="text-emerald-300 font-bold">(剋屬性!)</span>'; }   // 風剋水：額外 +6 固定傷害
+    mbDmg = Math.max(1, Math.floor(mbDmg * fragileMult(t)));   // 🔮 脆弱（白鳥5）
     t.curHp -= mbDmg;
     t.justHit = 'wind';
     logCombat(`<span class="font-bold" style="color:#67e8f9;text-shadow:0 0 6px #06b6d4;">【月光爆裂】</span>對 <span class="${getMobColor(t.lv)}">${t.n}</span> 造成 ${mbDmg} 點風屬性傷害！${counterTxt}`, 'player-crit');
@@ -3667,7 +3822,7 @@ function rapidfireProc(arrowData) {
             logCombat(`【連射】箭矢射向 <span class="${getMobColor(_t.lv)}">${_t.n}</span> 但未命中。`, 'miss');
             continue;
         }
-        let _rfDmg = Math.max(1, Math.floor(_res.dmg * 0.30));   // 連射箭矢：該箭結算傷害的 30%
+        let _rfDmg = Math.max(1, Math.floor(_res.dmg * (player._setGale5 ? 0.80 : 0.30)));   // 連射箭矢：該箭結算傷害的 30%（🔮 疾風 5/5：80%）
         _t.curHp -= _rfDmg;
         _t.justHit = getWpnEle(player.eq.wpn, wpn);
         mobWake(_t);
@@ -3693,6 +3848,7 @@ function procCounter(t) {
     let idx = mapState.mobs.findIndex(m => m && m.uid === t.uid);
     if (t.curHp <= 0) { if (idx !== -1) killMob(idx); }
     else renderMobs();
+    ironGuardSweep('反擊');   // 🔮 鐵衛 5/5
 }
 // ===== 居合（武士刀）：對攻擊者打一次「必定命中、可自然重擊/爆擊」的一般攻擊；只打攻擊者 =====
 function procIai(t) {
@@ -3708,14 +3864,72 @@ function procIai(t) {
     let idx = mapState.mobs.findIndex(m => m && m.uid === t.uid);
     if (t.curHp <= 0) { if (idx !== -1) killMob(idx); }
     else renderMobs();
+    ironGuardSweep('居合');   // 🔮 鐵衛 5/5
+}
+
+// 🔮 鐵衛 5/5：觸發反擊或居合時，額外對全體敵人造成一次一般攻擊（各自正常命中判定）
+function ironGuardSweep(triggerName) {
+    if (!player._setIron5) return;
+    let targets = [];
+    mapState.mobs.forEach(m => { if (m && m.curHp > 0 && !m._dead) targets.push(m); });
+    if (!targets.length) return;
+    logCombat(`<span class="font-bold" style="color:#93c5fd;text-shadow:0 0 6px #3b82f6;">【鐵衛 5/5】</span>${triggerName}引動鋼鐵之勢，橫掃全體敵人！`, 'player');
+    targets.forEach(m => {
+        if (!m || m.curHp <= 0 || m._dead) return;   // 可能已被前一刀的擊殺波及
+        let wpn = player.eq.wpn ? DB.items[player.eq.wpn.id] : null;
+        let dice = wpn ? (m.s === 'L' ? wpn.dmgL : wpn.dmgS) : 2;
+        let res = getPhysicalDmg(dice, m, wpn, null);
+        if (!res.hit) { logCombat(`橫掃 <span class="${getMobColor(m.lv)}">${m.n}</span> 未命中。`, 'miss'); return; }
+        m.curHp -= res.dmg;
+        m.justHit = getWpnEle(player.eq.wpn, wpn);
+        mobWake(m);
+        logCombat(`橫掃命中 <span class="${getMobColor(m.lv)}">${m.n}</span>，造成 ${res.dmg} 點傷害。`, 'player');
+        if (m.curHp <= 0) { let ri = mapState.mobs.findIndex(x => x && x.uid === m.uid); if (ri !== -1) killMob(ri); }
+    });
+    renderMobs();
+}
+
+// 🔮 魔女 5/5：每觸發 5 次共鳴，免費施放一次冰矛圍籬（不耗 MP、不需學會；公式同 castSkill 單體魔法）
+function witchIceLance() {
+    let sk = DB.skills['sk_ice_lance'];
+    if (!sk) return;
+    let t = getTarget();
+    if (!t || t.curHp <= 0 || t._dead) {
+        let alive = mapState.mobs.filter(m => m && m.curHp > 0 && !m._dead);
+        if (!alive.length) return;
+        t = alive[Math.floor(Math.random() * alive.length)];
+    }
+    let effMr = (t.st && t.st.mrhalf > 0) ? (t.mr / 2) : t.mr;
+    let mrFactor = effMr <= 100 ? (100 - effMr/2)/100 : (50 - (effMr-100)/10)/100; mrFactor = Math.max(0, mrFactor);
+    let isCrit = Math.random()*100 < player.d.magicCrit;
+    let tier = sk.tier || 1;
+    let spCoef = (1 + 3*player.d.magicDmg/16) * (1 + tier/3);
+    let mageMult = (player.cls === 'mage') ? (1.5 + tier/20) : 1.0;
+    let critMult = isCrit ? (1 + player.d.magicCritDmg/100) : 1;
+    let core = roll(sk.dmgDice[0], sk.dmgDice[1]) * spCoef * critMult;
+    let fixed = (t.e === 'fire') ? 6 : 0;   // 水剋火
+    let dmg = Math.max(1, Math.floor((core + player.d.extraMp) * mrFactor) - (t.dr||0)) + fixed;
+    dmg = Math.floor(dmg * mageMult);
+    if (player._setRedLion5) dmg = Math.floor(dmg * 1.2);   // 🔮 紅獅 5/5 同樣適用（攻擊技能）
+    dmg = Math.max(1, Math.floor(dmg * fragileMult(t)));
+    t.curHp -= dmg;
+    t.justHit = 'water';
+    if (t.st && t.st.mrhalf > 0) t.st.mrhalf = 0;
+    mobWake(t);
+    if (sk.freeze) applyMobStatus(t, { kind:'freeze', pbase:sk.freeze, dur:6 }, sk.n);
+    logCombat(`<span class="font-bold" style="color:#7dd3fc;text-shadow:0 0 6px #0ea5e9;">【魔女 5/5】</span>共鳴引動了 冰矛圍籬，對 <span class="${getMobColor(t.lv)}">${t.n}</span> 造成 ${dmg} 點傷害。${isCrit ? ' (爆擊!)' : ''}`, 'magic');
+    if (t.curHp <= 0) { let ri = mapState.mobs.findIndex(m => m && m.uid === t.uid); if (ri !== -1) killMob(ri); }
+    else renderMobs();
 }
 function playerAttack() {
     let target = getTarget();
     if(!target) return;
 
+    let _sureHit = !!(player._setBeauty5 && player._beautyNextSure);   // 🔮 麗人 5/5：重擊後下一次一般攻擊 100% 命中（含無視怪物迴避）
+    if (_sureHit) player._beautyNextSure = false;
     let _ew = player.eq.wpn ? DB.items[player.eq.wpn.id] : null;
-    let _ter = Math.max(0, (target.er || 0) - ((_ew && _ew.ignoreEva) || 0));
-    if (_ter && roll(1, 100) <= _ter) {
+    let _ter = Math.max(0, (target.er || 0) - ((_ew && _ew.ignoreEva) || 0));   // 武器無視迴避
+    if (!_sureHit && _ter && roll(1, 100) <= _ter) {
         logCombat(`<span class="${getMobColor(target.lv)}">${target.n}</span> 成功迴避攻擊。`, 'evade');
         wandLightArrowProc(target);
         magicStrikeProc(target);
@@ -3738,8 +3952,8 @@ function playerAttack() {
             dice = isLarge ? (wpn.dmgL + arrowData.dmgL) : (wpn.dmgS + arrowData.dmgS);
         }
     
-    let result = getPhysicalDmg(dice, target, wpn, arrowData);
-    
+    let result = getPhysicalDmg(dice, target, wpn, arrowData, false, false, _sureHit);   // 🔮 麗人 5/5：必中（可自然重擊/爆擊）
+
     if (result.hit) {
         // --- 命中滿血的被動怪物且為遠距離攻擊時，賦予 3 秒延遲 ---
         if (target.curHp === target.hp && target.beh === '被動' && result.ranged) {
@@ -3781,8 +3995,10 @@ function playerAttack() {
             }
         }
         target.curHp -= result.dmg;
-        target.justHit = getWpnEle(player.eq.wpn, wpn);				
-        
+        target.justHit = getWpnEle(player.eq.wpn, wpn);
+        if (player._setBeauty5 && result.heavy) player._beautyNextSure = true;   // 🔮 麗人 5/5：觸發重擊 → 下一次一般攻擊必中
+        if (player._setWhiteBird5 && target.curHp > 0) { if (!target.st) target.st = newMobStatus(); target.st.fragile = 30; }   // 🔮 白鳥 5/5：脆弱 3 秒（重複觸發刷新）
+
 		// 穿透（貝卡合金）：場上有兩名以上敵人時，普攻額外命中「主目標以外隨機一名敵人」，
 		// 造成與主目標相同的傷害與屬性；僅一名敵人時與一般近戰相同（不額外攻擊）。
         if (wpn && wpn.eff === 'pierce') {
@@ -3908,6 +4124,8 @@ function enemyPhysicalAttack(mob, idx, stunChance = 0) {
         let baseWeaponDmg = heavy ? (diceCount * diceSides) : roll(diceCount, diceSides);
         let dmgBonus = (mob.db || 0) - (st.weaken > 0 ? 4 : 0) - (st.broken > 0 ? 2 : 0) + ((mob._siegeDmgEnd > state.ticks) ? 4 : 0);   // 暴風神射：額外傷害+4
         let totalDmg = baseWeaponDmg + dmgBonus;
+        if (mob._sherine) totalDmg = Math.floor(totalDmg * 2);   // 🔮 席琳的世界：怪物一般攻擊傷害 ×2
+        if (mob._grace) totalDmg = Math.floor(totalDmg * 1.5);   // 🔮 席琳的恩賜：再 ×1.5
 
         let resFactor = 1.0;
         if(mob.e === 'fire' && player.d.resFire) resFactor -= player.d.resFire/100;
@@ -3929,6 +4147,7 @@ function enemyPhysicalAttack(mob, idx, stunChance = 0) {
 
         totalDmg -= player.d.dr; // 傷害減免（已含增幅防禦）
         totalDmg -= randomDr;    // 隨機減免
+        if (player._setIron3) totalDmg = Math.floor(totalDmg * 0.8);   // 🔮 鐵衛 3/5：受到傷害減少 20%
 
         if(player.buffs.sk_holy_barrier > 0) totalDmg = Math.floor(totalDmg * 0.7);
         if(player.statuses.freeze > 0) {
@@ -4118,8 +4337,9 @@ function applyMobMagic(mob, sk) {
     if(sk.type === 'scald') {
         let chance = Math.max(0, ((sk.pbase !== undefined ? sk.pbase : 200) - player.d.mr) / 2);
         if(Math.random() * 100 < chance && !player.dead) {
-            player.statuses.scald = (sk.dur||15) * 10; player.statuses.scaldDmg = sk.d||100; player.statuses.scaldTick = (sk.tick||3) * 10;
-            logCombat(`<span class="${getMobColor(mob.lv)}">${mob.n}</span> 施放${sk.skn || '魔法'}，你被燙傷了！每 ${sk.tick||3} 秒受到 ${sk.d||100} 點固定傷害。`, 'enemy');
+            let _scD = ((mob._sherine ? 2 : 1) * (mob._grace ? 2 : 1)) * (sk.d||100);   // 🔮 席琳的世界：持續傷害×2
+            player.statuses.scald = (sk.dur||15) * 10; player.statuses.scaldDmg = _scD; player.statuses.scaldTick = (sk.tick||3) * 10;
+            logCombat(`<span class="${getMobColor(mob.lv)}">${mob.n}</span> 施放${sk.skn || '魔法'}，你被燙傷了！每 ${sk.tick||3} 秒受到 ${_scD} 點固定傷害。`, 'enemy');
         }
         return;
     }
@@ -4142,19 +4362,21 @@ function applyMobMagic(mob, sk) {
         if(sk.pbase === undefined && (mob.n === "妖魔殭屍" || mob.n === "蟑螂人")) base = 60;
         let chance = Math.max(0, (base - player.d.mr) / 2);
         if(Math.random() * 100 < chance && !player.dead) { 
-            player.statuses.poison = sk.dur * 10; 
-            player.statuses.poisonDmg = sk.d; 
+            let _poD = ((mob._sherine ? 2 : 1) * (mob._grace ? 2 : 1)) * sk.d;   // 🔮 席琳的世界：持續傷害×2
+            player.statuses.poison = sk.dur * 10;
+            player.statuses.poisonDmg = _poD;
             player.statuses.poisonTick = sk.tick * 10;
-            logCombat(`<span class="${getMobColor(mob.lv)}">${mob.n}</span> 施放${sk.skn || '魔法'}，你中毒了！每 ${sk.tick} 秒受到 ${sk.d} 點固定傷害。`, 'enemy'); 
+            logCombat(`<span class="${getMobColor(mob.lv)}">${mob.n}</span> 施放${sk.skn || '魔法'}，你中毒了！每 ${sk.tick} 秒受到 ${_poD} 點固定傷害。`, 'enemy');
         }
         return;
     }
     
     if(sk.type === 'burn') {
-        player.statuses.burn = sk.dur * 10; 
-        player.statuses.burnDmg = sk.d; 
+        let _buD = ((mob._sherine ? 2 : 1) * (mob._grace ? 2 : 1)) * sk.d;   // 🔮 席琳的世界：持續傷害×2
+        player.statuses.burn = sk.dur * 10;
+        player.statuses.burnDmg = _buD;
         player.statuses.burnTick = sk.tick * 10;
-        logCombat(`<span class="${getMobColor(mob.lv)}">${mob.n}</span> 施放${sk.skn || '魔法'}，你陷入了火牢灼燒！每 ${sk.tick} 秒受到 ${sk.d} 點固定傷害。`, 'enemy'); 
+        logCombat(`<span class="${getMobColor(mob.lv)}">${mob.n}</span> 施放${sk.skn || '魔法'}，你陷入了火牢灼燒！每 ${sk.tick} 秒受到 ${_buD} 點固定傷害。`, 'enemy');
         return;
     }
 
@@ -4178,6 +4400,11 @@ function applyMobMagic(mob, sk) {
     }
 
     if(sk.dmg) {
+        // 🔮 月光 5/5：ER 也能迴避魔法攻擊（必中技能改為先判定 ER）
+        if (player._setMoon5 && roll(1, 100) <= player.d.er) {
+            logCombat(`<span class="font-bold" style="color:#c4b5fd;">【月光 5/5】</span>你迴避掉 <span class="${getMobColor(mob.lv)}">${mob.n}</span> 施放的 ${sk.skn || '魔法'}。`, 'evade');
+            return;
+        }
         // 魔法屏障：僅吸收「會造成魔法傷害」的技能。衝擊之暈/三重矢(一般攻擊)與純異常狀態技能都在更早的分支已 return，不會進入此處，故無法被吸收。
         if(player.buffs.sk_magic_shield > 0) { player.buffs.sk_magic_shield = 0; player.magicShieldCd = 3; logCombat(`魔法屏障吸收了攻擊！（3 秒內無法再次施展魔法屏障）`, 'magic'); return; }
         let baseMagicDmg = roll(sk.dmg[0], sk.dmg[1]);
@@ -4200,6 +4427,9 @@ function applyMobMagic(mob, sk) {
         if(player.d.magicDrNonEle > 0 && !['fire','water','earth','wind'].includes(sk.ele)) {
             dmg = Math.floor(dmg * (1 - player.d.magicDrNonEle / 100));
         }
+        if (mob._sherine) dmg = Math.floor(dmg * 2);            // 🔮 席琳的世界：技能最終傷害 ×2
+        if (mob._grace) dmg = Math.floor(dmg * 2);              // 🔮 席琳的恩賜：再 ×2
+        if (player._setIron3) dmg = Math.floor(dmg * 0.8);      // 🔮 鐵衛 3/5：受到傷害減少 20%
         dmg = Math.max(1, dmg);
 
         player.hp -= dmg;
@@ -4219,15 +4449,17 @@ function applyMobMagic(mob, sk) {
             if(sk.sec.type === 'burn') {
                 let chance = Math.max(0, ((sk.sec.pbase !== undefined ? sk.sec.pbase : 100) - player.d.mr) / 2);
                 if(Math.random() * 100 < chance && !player.dead) {
-                    player.statuses.burn = sk.sec.dur * 10; player.statuses.burnDmg = sk.sec.d; player.statuses.burnTick = sk.sec.tick * 10;
-                    logCombat(`你陷入了灼燒！每 ${sk.sec.tick} 秒受到 ${sk.sec.d} 點固定傷害。`, 'enemy');
+                    let _sbD = ((mob._sherine ? 2 : 1) * (mob._grace ? 2 : 1)) * sk.sec.d;   // 🔮 席琳的世界：持續傷害×2
+                    player.statuses.burn = sk.sec.dur * 10; player.statuses.burnDmg = _sbD; player.statuses.burnTick = sk.sec.tick * 10;
+                    logCombat(`你陷入了灼燒！每 ${sk.sec.tick} 秒受到 ${_sbD} 點固定傷害。`, 'enemy');
                 }
             }
             if(sk.sec.type === 'scald') {
                 let chance = Math.max(0, ((sk.sec.pbase !== undefined ? sk.sec.pbase : 200) - player.d.mr) / 2);
                 if(Math.random() * 100 < chance && !player.dead) {
-                    player.statuses.scald = sk.sec.dur * 10; player.statuses.scaldDmg = sk.sec.d; player.statuses.scaldTick = sk.sec.tick * 10;
-                    logCombat(`你被燙傷了！每 ${sk.sec.tick} 秒受到 ${sk.sec.d} 點固定傷害。`, 'enemy');
+                    let _ssD = ((mob._sherine ? 2 : 1) * (mob._grace ? 2 : 1)) * sk.sec.d;   // 🔮 席琳的世界：持續傷害×2
+                    player.statuses.scald = sk.sec.dur * 10; player.statuses.scaldDmg = _ssD; player.statuses.scaldTick = sk.sec.tick * 10;
+                    logCombat(`你被燙傷了！每 ${sk.sec.tick} 秒受到 ${_ssD} 點固定傷害。`, 'enemy');
                 }
             }
         }
@@ -4378,6 +4610,7 @@ function killMob(idx) {
     if (!mob || mob._dead) return;        // 冪等保護：同一隻怪只結算一次獎勵
     mob._dead = true;
     if (mob.curHp > 0) mob.curHp = 0;     // 待清算期間不可被當成活目標
+    _sherineLootCtx = mob._sherine ? { boss: !!mob.boss, grace: !!mob._grace } : null;   // 🔮 席琳的世界：本次擊殺掉落套用 詞綴×3／套裝效果判定（恩賜怪套裝機率×5）
     if(typeof auditTrackKill === 'function') auditTrackKill(mob);   // 統計：累計經驗/擊殺
     logCombat(`擊敗了 <span class="${getMobColor(mob.lv)}">${mob.n}</span>！`, 'player-heavy');  // 👈 新增
     player.exp += Math.floor(mob.exp * getExpGainMult(player.lv) * (isTowerMap(mapState.current)?2:1));
@@ -4418,30 +4651,32 @@ function killMob(idx) {
 
     // === 怪物專屬掉落（依「怪物掉落資料.md」）：每樣物品各自獨立判定一次 ===
     let dropList = MOB_DROPS[mob.n] || [];
+    let _dropMult = mob._grace ? 10 : (mob._sherine ? 3 : 1);   // 🔮 席琳的世界：掉落機率 ×3；席琳的恩賜怪：×10
     let _twRolls = isTowerMap(mapState.current) ? 2 : 1;   // 傲慢塔：道具掉落加倍(擲兩次)
     for (let _r = 0; _r < _twRolls; _r++) dropList.forEach(entry => {
         let itemId = entry[0];
         let ratePct = entry[1];               // 機率(%)
         if(!DB.items[itemId]) return;          // 該物品不存在於資料庫則略過
-        if(Math.random() < ratePct / 100) gainItem(itemId, 1);
+        if(Math.random() < (ratePct * _dropMult) / 100) gainItem(itemId, 1);
     });
 
     // === 40等以上 BOSS（夢幻之島 + 攻城區/siegeEnemy 除外）：賦予祝福卷軸稀有掉落，各自獨立判定 ===
     if (mob.boss && mob.lv >= 40 && mapState.current !== 'dream_island' && !isSiegeArea(mapState.current) && !mob.siegeEnemy) {
-        if (Math.random() < 0.001)  gainItem('new_item_bless_wpn', 1);   // 0.1%  賦予武器祝福卷軸
-        if (Math.random() < 0.001)  gainItem('new_item_bless_arm', 1);   // 0.1%  賦予盔甲祝福卷軸
-        if (Math.random() < 0.0001) gainItem('new_item_bless_acc', 1);   // 0.01% 賦予飾品祝福卷軸
+        if (Math.random() < 0.001 * _dropMult)  gainItem('new_item_bless_wpn', 1);   // 0.1%  賦予武器祝福卷軸（🔮席琳×3）
+        if (Math.random() < 0.001 * _dropMult)  gainItem('new_item_bless_arm', 1);   // 0.1%  賦予盔甲祝福卷軸
+        if (Math.random() < 0.0001 * _dropMult) gainItem('new_item_bless_acc', 1);   // 0.01% 賦予飾品祝福卷軸
     }
 
     // === 區域額外掉落：眠龍洞穴1~3樓(zone_15/16/17) / 妖精森林周邊(zone_01) 所有怪物 ===
     // 粗糙的米索莉塊 / 精靈玉 / 元素石，各 20%；學會「世界樹的呼喚」則各 30%
     if (AREA_BONUS_MAPS.includes(mapState.current)) {
-        let bonusRate = player.skills.includes('sk_elf_worldtree') ? 0.30 : 0.20;
+        let bonusRate = (player.skills.includes('sk_elf_worldtree') ? 0.30 : 0.20) * _dropMult;   // 🔮 席琳的世界×3
         AREA_BONUS_ITEMS.forEach(itemId => {
-            if(DB.items[itemId] && Math.random() < bonusRate) gainItem(itemId, 1);
+            if(DB.items[itemId] && Math.random() < Math.min(1, bonusRate)) gainItem(itemId, 1);
         });
     }
     
+    _sherineLootCtx = null;   // 🔮 掉落判定結束，清除上下文
     // 🔧 架構#2：不在此處位移輸送帶（呼叫點可能正在迭代怪物陣列）。
     // tick 內的擊殺延後到 gameLoop 的 settleDeadMobs()；手動操作則立即清算。
     if (!state.inTick) settleDeadMobs();
@@ -4513,7 +4748,7 @@ function revive() {
     player.dead = false;
     player.statuses = { stun: 0, freeze: 0, stone: 0, poison: 0, poisonDmg: 0, poisonTick: 0, burn: 0, burnDmg: 0, burnTick: 0, scald: 0, scaldDmg: 0, scaldTick: 0, silence: 0, paralyze: 0, magicseal: 0 };  // 復活清除所有異常(含中毒/灼燒/燙傷)，避免復活後立即被持續傷害再次擊殺
     player.summon = null; player.charmed = null; player.manualCd = {}; player.hot = null; player.buffs.sk_charm = 0;
-    if (player.allies && player.allies.length) { player.allies = []; logSys('<span class="text-red-400 font-bold">回城復活，所有招募的協力傭兵已解散，需重新花金幣招募。</span>'); }   // 回城復活：傭兵解散（原地復活則保留）
+    if (player.allies && player.allies.length) logSys('<span class="text-emerald-300">回城復活，協力傭兵仍在你身邊。</span>');   // 🔧 玩家死亡/復活不再解散傭兵，只有在傭兵公會選「解散」才會解除
     player.skills.forEach(s => { if(DB.skills[s] && DB.skills[s].summon) player.buffs[s] = 0; });   // 清除召喚 buff，避免復活後召喚消失卻長時間不自動重新召喚
     document.getElementById('btn-revive').classList.add('hidden');
     { let ip = document.getElementById('btn-revive-inplace'); if(ip) ip.classList.add('hidden'); }
@@ -4591,7 +4826,7 @@ function mobWake(m) {
     if(m.st && m.st.sleep > 0) { m.st.sleep = 0; logCombat(`<span class="${getMobColor(m.lv)}">${m.n}</span> 從沉睡中醒來。`, 'magic'); }
 }
 const STATUS_NAME = { freeze:'冰凍', stun:'暈眩', stone:'石化', sleep:'沉睡', poison:'中毒',
-    blind:'目盲', weaken:'弱化', disease:'疾病', vacuum:'真空', broken:'損壞', slow:'緩速', mrhalf:'魔抗減半', magicseal:'魔法封印' };
+    blind:'目盲', weaken:'弱化', disease:'疾病', vacuum:'真空', broken:'損壞', slow:'緩速', mrhalf:'魔抗減半', magicseal:'魔法封印', fragile:'脆弱' };   // 🔮 脆弱（白鳥5）：受所有傷害+20%
 // 特定狀態的專屬套用訊息（接於怪物名稱後）
 const STATUS_MSG = { magicseal:'的魔法遭到封印了。' };
 // 對 BOSS 無效的行動限制類狀態
@@ -4667,7 +4902,7 @@ function applyBleed(m, hitDmg) {
 function processMobStatusTick(m, i) {
     if(!m.st) { m.st = newMobStatus(); return false; }
     let s = m.st;
-    ['freeze','stun','stone','sleep','blind','weaken','disease','vacuum','broken','slow','mrhalf','magicseal'].forEach(k => {
+    ['freeze','stun','stone','sleep','blind','weaken','disease','vacuum','broken','slow','mrhalf','magicseal','fragile'].forEach(k => {   // 🔮 含脆弱
         if(s[k] > 0) s[k]--;
     });
     if(s.blind <= 0) s.blindVal = 0;
@@ -4744,7 +4979,7 @@ function summonElementDamage(dice, ele, t, flatBonus, mult) {
     else if(ele === 'earth' && t.e === 'wind') fixed = 6;
     else if(ele === 'wind' && t.e === 'water') fixed = 6;
     else if(ele === 'water' && t.e === 'fire') fixed = 6;
-    return Math.max(1, Math.floor(base * mrFactor) - (t.dr || 0)) + fixed;
+    return Math.max(1, Math.floor((Math.max(1, Math.floor(base * mrFactor) - (t.dr || 0)) + fixed) * fragileMult(t)));   // 🔮 脆弱（白鳥5）
 }
 // ===== 協力角色：讀取其他存檔位(非當前)的角色，以其真實戰力(等級/能力/裝備)一起作戰 =====
 function allySlotList() { return ['1','2','3'].filter(n => n !== String(currentSlot)); }
@@ -4792,6 +5027,7 @@ function allyAttackOnce(ally) {
         let critMult = isCrit ? (1 + (d.magicCritDmg||0)/100) : 1;
         let base = roll(1,6) * spCoef * critMult;
         let dmg = Math.max(1, Math.floor((Math.max(1, Math.floor((base + (d.extraMp||0)) * mrFactor) - (t.dr||0))) * 1.55));
+        dmg = Math.max(1, Math.floor(dmg * fragileMult(t)));   // 🔮 脆弱（白鳥5）
         t.curHp -= dmg; t.justHit = 'magic'; mobWake(t);
         logCombat(`<span class="text-emerald-300 font-bold">【協力·${ally._allyName}】</span>魔法攻擊 <span class="${getMobColor(t.lv)}">${t.n}</span>，造成 <span class="${isCrit?'text-yellow-500 font-bold':'text-emerald-200'}">${dmg}</span> 點傷害。`, 'magic');
         allyWeaponProcs(ally, t, { hit: true, dmg: dmg });   // 🔧 法師普攻（光箭）也觸發武器特效：共鳴/魔擊/瑪那回魔
@@ -4824,6 +5060,7 @@ function allyAttackOnce(ally) {
             else if (insight) { dmg *= 2; kp = '<span class="text-cyan-300 font-bold">【看破】</span>'; }
             else if (slay) { dmg *= 3; kp = '<span class="text-orange-400 font-bold">【殺戮】</span>'; }
         }
+        dmg = Math.max(1, Math.floor(dmg * fragileMult(t)));   // 🔮 脆弱（白鳥5）
         t.curHp -= dmg; t.justHit = getWpnEle(ally.eq ? ally.eq.wpn : null, wpn); mobWake(t);
         let mark = (heavy && isCrit) ? '會心一擊' : (isCrit ? '爆擊' : (heavy ? '重擊' : ''));
         logCombat(`${kp}<span class="text-sky-300 font-bold">【協力·${ally._allyName}】</span>攻擊 <span class="${getMobColor(t.lv)}">${t.n}</span>，造成 ${dmg} 點傷害${mark?'（'+mark+'!）':''}。`, 'player');
@@ -4862,6 +5099,8 @@ function allyCastMagic(ally, sk) {
             }
             let dd = Math.max(1, Math.floor((core + extra) * mrFactor) - (t.dr||0)) + fixed;
             dd = Math.floor(dd * mageMult);
+            if (ally._setRedLion5) dd = Math.floor(dd * 1.2);   // 🔮 紅獅 5/5（傭兵快照）
+            dd = Math.max(1, Math.floor(dd * fragileMult(t)));   // 🔮 脆弱（白鳥5）
             totalDmg += dd;
         });
         t.curHp -= totalDmg;
@@ -4898,7 +5137,7 @@ function allyRapidfire(ally) {
         let ti = alive[Math.floor(Math.random() * alive.length)];
         let mt = mapState.mobs[ti];
         let dice = wpn ? (mt.s === 'L' ? wpn.dmgL : wpn.dmgS) : 2;
-        let dmg = Math.max(1, Math.floor((roll(1, dice) + (d.rangedDmg||0) + (d.extraDmg||0) - (mt.dr||0)) * 0.30));
+        let dmg = Math.max(1, Math.floor((roll(1, dice) + (d.rangedDmg||0) + (d.extraDmg||0) - (mt.dr||0)) * (ally._setGale5 ? 0.80 : 0.30) * fragileMult(mt)));   // 🔮 疾風 5/5：連射 30%→80%；脆弱
         mt.curHp -= dmg; mt.justHit = getWpnEle(ally.eq ? ally.eq.wpn : null, wpn); mobWake(mt);
         logCombat(`<span class="text-amber-300 font-bold">【協力·${ally._allyName}·連射】</span>箭矢命中 <span class="${getMobColor(mt.lv)}">${mt.n}</span>，造成 ${dmg} 點傷害。`, 'player');
         if (mt.curHp <= 0) killMob(ti);
@@ -4959,6 +5198,7 @@ function allyStrikeRoll(ally, t, opts) {
     let wpnRoll = heavy ? dice : roll(1, dice);
     let dmg = Math.max(1, Math.floor((wpnRoll + dmgB) * critMult) + (d.extraDmg||0) - (t.dr||0));
     if (opts.mult) dmg = Math.max(1, Math.floor(dmg * opts.mult));
+    dmg = Math.max(1, Math.floor(dmg * fragileMult(t)));   // 🔮 脆弱（白鳥5）
     return { hit: true, dmg: dmg, heavy: heavy, crit: isCrit };
 }
 // 共鳴光箭（傭兵版）：公式同玩家 procLightArrow；回魔（傷害/10、至少1）恢復到傭兵自身 MP
@@ -5054,6 +5294,7 @@ function allyOnHitEffects(ally, t, res) {
         if (!(ally._cleaveTicks > 0)) logCombat(`<span class="text-teal-300 font-bold">【協力·${ally._allyName}】流暢的手感，攻速提升！</span>`, 'player');
         ally._cleaveTicks = 20;
     }
+    if (ally._setWhiteBird5 && t.curHp > 0 && !t._dead) { if (!t.st) t.st = newMobStatus(); t.st.fragile = 30; }   // 🔮 白鳥 5/5（傭兵快照）：命中附加脆弱
 }
 // 🔧 受擊觸發（判定「主操控玩家」受擊/迴避，傭兵代為反制攻擊者）
 // 反擊：傭兵持單手劍 → 玩家被命中 50%（玩家觸發格檔則必定）；必中、不重擊、傷害 50%
@@ -5275,13 +5516,8 @@ function manualCast(skId) {
         let eName = { fire:'火', water:'水', wind:'風', earth:'地' }[weak];
         logCombat(eName ? `<span class="${getMobColor(t.lv)}">${t.n}</span> 弱點是 ${eName}屬性。`
                         : `<span class="${getMobColor(t.lv)}">${t.n}</span> 沒有明顯的屬性弱點。`, 'magic');
-    } else if(sk.mEff === 'manadrain') {
-        if(!t) { logSys('沒有目標。'); return; }
-        player.hp -= sk.hpCost;
-        if(Math.random() < 0.7) {
-            let gain = roll(1, Math.max(1, t.lv)); player.mp = Math.min(player.mmp, player.mp + gain);
-            logCombat(`你從 <span class="${getMobColor(t.lv)}">${t.n}</span> 吸收到了 ${gain} 點魔力。`, 'heal');
-        } else logCombat('魔力奪取失敗了。', 'miss');
+    // 🔧 魔力奪取已改為轉換技能（type:'convert', drain:true），改由 castSkill 的 convert 分支處理：
+    //    命中判定改用 abnormalMagicHit（與迷魅術一致，吃魔法命中/怪MR/等級差），吸取量＝怪物等級/2
     } else if(sk.mEff === 'charm') {
         if(!t) { logSys('沒有目標。'); return; }
         if(t.boss) { logSys('無法魅惑 BOSS。'); return; }
@@ -5329,6 +5565,22 @@ function castSkill(skId) {
     if(sk.hpCost && player.hp <= sk.hpCost + 5) return false;  // HP 不足，拒絕施放
     
     if(sk.type === 'convert') {
+        // 🔧 魔力奪取（drain）：消耗 HP，必須對怪物施展；以異常魔法命中（abnormalMagicHit，與迷魅術一致，
+        //    吃魔法命中/怪物MR/等級差）判定，命中才吸取 MP＝怪物等級/2。其餘機制（自動施放條件、不佔冷卻）比照魂體轉換。
+        if(sk.drain) {
+            let _t = getTarget();
+            if(!_t || _t.curHp <= 0) return false;   // 沒有目標：不施放、不耗 HP
+            player.mp -= cost;
+            player.hp = Math.max(1, player.hp - (sk.hpCost || 0));
+            if(abnormalMagicHit(_t)) {
+                let gain = roll(1, Math.max(1, Math.floor((_t.lv || 1) / 2)));   // 🔧 吸取量＝1D(怪物等級/2)
+                player.mp = Math.min(player.mmp, player.mp + gain);
+                logCombat(`施放 ${sk.n}，從 <span class="${getMobColor(_t.lv)}">${_t.n}</span> 吸取了 ${gain} 點魔力。`, 'heal');
+            } else {
+                logCombat(`${sk.n} 未能命中 <span class="${getMobColor(_t.lv)}">${_t.n}</span>。`, 'miss');
+            }
+            calcStats(); updateUI(); return true;
+        }
         // 心靈轉換 / 魂體轉換（輔助類）：消耗 HP 換取 MP，不佔用攻擊/治癒冷卻
         player.mp -= cost;
         player.hp = Math.max(1, player.hp - (sk.hpCost || 0));
@@ -5416,6 +5668,7 @@ function castSkill(skId) {
                 let res = getPhysicalDmg(dice, t, wpn, arrowData);
                 if(!res.hit) { hitsLog.push('Miss'); continue; }
                 landed++;
+                if (player._setRedLion5) res.dmg = Math.max(1, Math.floor(res.dmg * 1.2));   // 🔮 紅獅 5/5：攻擊技能最終傷害 +20%
                 // 遠距離物理技能命中滿血被動怪物，賦予 3 秒延遲（整段只觸發一次）
                 if(!delayDone && t.curHp === t.hp && t.beh === '被動' && res.ranged) { t._delayTicks = 30; delayDone = true; }
                 t.curHp -= res.dmg;
@@ -5512,6 +5765,8 @@ function castSkill(skId) {
                     let d = Math.floor((core + extraMagicDmg) * mrFactor) - (t.dr || 0);
                     d = Math.max(1, d) + fixed;
                     d = Math.floor(d * mageDmgMult);   // 法師一般攻擊魔法：最終傷害再乘上 (1.5 + 階級/20)
+                    if (player._setRedLion5) d = Math.floor(d * 1.2);   // 🔮 紅獅 5/5：攻擊技能最終傷害 +20%
+                    d = Math.max(1, Math.floor(d * fragileMult(t)));    // 🔮 脆弱（白鳥5）
                     totalDmg += d;
                     hitsLog.push(d);
                 });
@@ -5669,8 +5924,9 @@ function autoActions() {
         }
     });
 
-    // 轉換魔法（妖精專屬下拉，單選）：每 3 秒一次；安全區(村莊)暫停；MP 達 90% 以上不轉換；
+    // 轉換魔法（妖精/法師下拉，單選）：每 3 秒一次；安全區(村莊)暫停；MP 達 90% 以上不轉換；
     // 僅在 HP 高於玩家自訂門檻時施放（避免把 HP 轉到危險值；單選天然避免兩個同時使用）
+    // 魔力奪取：另需場上有存活目標（castSkill 內判定，無目標不施放、不耗 HP）
     if(state.ticks % 30 === 0 && !mapState.current.startsWith('town_')) {
         let convSel = document.getElementById('sel-convert-skill');
         let convId = convSel ? convSel.value : '';
@@ -5715,16 +5971,18 @@ function autoCastSpells() {
 }
 
 // 詞綴抽取（新制）：單詞綴1% / 雙詞綴0.1% / 三詞綴0.01%（互斥）；屬性詞綴再依階級機率(rollAttrAffix)決定種類
+// 🔮 席琳的世界擊殺掉落（_sherineLootCtx 生效時）：單/雙/三詞綴機率一律 ×3
 function rollAffixesNew() {
+    let m = _sherineLootCtx ? 3 : 1;
     let r = Math.random();
     let attr = false, bless = false, anc = false;
-    if (r < 0.0001) { attr = rollAttrAffix(); bless = true; anc = true; }            // 0.01% 三詞綴
-    else if (r < 0.0011) {                                                            // 0.1% 雙詞綴（屬性+遠古 / 遠古+祝福 / 屬性+祝福 等機率）
+    if (r < 0.0001 * m) { attr = rollAttrAffix(); bless = true; anc = true; }            // 0.01% 三詞綴
+    else if (r < 0.0011 * m) {                                                            // 0.1% 雙詞綴（屬性+遠古 / 遠古+祝福 / 屬性+祝福 等機率）
         let c = Math.floor(Math.random() * 3);
         if (c === 0) { attr = rollAttrAffix(); anc = true; }
         else if (c === 1) { anc = true; bless = true; }
         else { attr = rollAttrAffix(); bless = true; }
-    } else if (r < 0.030503) {                                                        // 2.9403% 單詞綴（比照舊制 3×1%×0.99²；屬性 / 遠古 / 祝福 等機率）
+    } else if (r < 0.030503 * m) {                                                        // 2.9403% 單詞綴（比照舊制 3×1%×0.99²；屬性 / 遠古 / 祝福 等機率）
         let p = Math.floor(Math.random() * 3);
         if (p === 0) attr = rollAttrAffix();
         else if (p === 1) anc = true;
@@ -5732,9 +5990,10 @@ function rollAffixesNew() {
     }
     return { attr, bless, anc };
 }
-// 詞綴抽取（舊制）：屬性 / 祝福 / 遠古 各自獨立 1%（潘朵拉、血盟掉落沿用）
+// 詞綴抽取（舊制）：屬性 / 祝福 / 遠古 各自獨立 1%（潘朵拉、血盟掉落沿用）；🔮 席琳擊殺掉落 ×3
 function rollAffixesOld() {
-    return { attr: (Math.random() < 0.01) ? rollAttrAffix() : false, bless: (Math.random() < 0.01), anc: (Math.random() < 0.01) };
+    let m = _sherineLootCtx ? 3 : 1;
+    return { attr: (Math.random() < 0.01 * m) ? rollAttrAffix() : false, bless: (Math.random() < 0.01 * m), anc: (Math.random() < 0.01 * m) };
 }
 function gainItem(id, cnt=1, silent=false, forceNormal=false, affixOld=false) {
     // 卷軸變祝福機率
@@ -5761,14 +6020,26 @@ function gainItem(id, cnt=1, silent=false, forceNormal=false, affixOld=false) {
         let _af = affixOld ? rollAffixesOld() : rollAffixesNew();
         attr = _af.attr; bless = _af.bless; anc = _af.anc;
     }
-    
-    let _probe = { id: id, en: 0, bless: bless, anc: anc, attr: attr };
+
+    // 🔮 席琳的世界擊殺掉落：武器/頭盔/盔甲/手套/長靴/斗篷/項鍊 → 一般怪0.1%、頭目5% 附加套裝效果（40 種均勻抽一）
+    let seteff = false;
+    if (_sherineLootCtx && d) {
+        let _slotOk = (d.type === 'wpn' && !d.isArrow)
+            || (d.type === 'arm' && ['helm','armor','gloves','boots','cloak'].includes(d.slot))
+            || ((d.type === 'acc' || d.type === 'arm') && d.slot === 'amulet');
+        if (_slotOk && Math.random() < (_sherineLootCtx.boss ? 0.05 : (_sherineLootCtx.grace ? 0.005 : 0.001))) {   // 🔮 恩賜怪：套裝機率 ×5 = 0.5%
+            seteff = SHERINE_EFFECTS[Math.floor(Math.random() * SHERINE_EFFECTS.length)];
+            logSys(`<span class="c-sherine font-bold">✦ 掉落的裝備蘊含著席琳的祝福：【${seteff}】！</span>`);
+        }
+    }
+
+    let _probe = { id: id, en: 0, bless: bless, anc: anc, attr: attr, seteff: seteff };
     let ex = player.inv.find(i => (i.en || 0) === 0 && sameItemSig(i, _probe));   // 🔧 架構#3：統一簽章比對（並容忍舊存檔 en 為 undefined）
     if(ex) ex.cnt += cnt;   // 不論是否鎖定都疊加；僅加數量、不更動既有堆疊的鎖定/廢品狀態
-    else player.inv.push({ id: id, uid: uid(), cnt: cnt, en: 0, bless: bless, anc: anc, attr: attr, lock: false, junk: !attr && !bless && !anc && !!(player.junkPrefs && player.junkPrefs[id]) });
-    
+    else player.inv.push({ id: id, uid: uid(), cnt: cnt, en: 0, bless: bless, anc: anc, attr: attr, seteff: seteff, lock: false, junk: !attr && !bless && !anc && !seteff && !!(player.junkPrefs && player.junkPrefs[id]) });
+
     // 紀錄這次產生的物品屬性
-    let itemInfo = { id: id, cnt: cnt, en: 0, bless: bless, anc: anc, attr: attr };
+    let itemInfo = { id: id, cnt: cnt, en: 0, bless: bless, anc: anc, attr: attr, seteff: seteff };
     
     if (!silent && d) {
         logSys(`獲得物品: <span class="font-bold">${getItemFullName(itemInfo)}</span>`);
@@ -5824,16 +6095,14 @@ function isElementCounter(e, te) {
 
 function getItemColor(item) {
     let d = DB.items[item.id];
-    // 名字顏色 = 最靠近名字的詞綴：祝福(金) > 遠古(紫) > 屬性(各自色) > 基底白
+    // 🔮 席琳套裝效果：鮮綠＋呼吸綠光，優先於所有詞綴顏色
+    if (item.seteff) return 'c-sherine';
+    // 名字顏色 = 套裝 > 祝福(金) > 遠古(紫) > 基底色
+    // 🔧 屬性詞綴不再影響裝備名稱顏色（詞綴字本身「火之/爆炎…」仍保留專屬色，見 getItemFullName）
     if (item.bless) return blessColorClass(item.bless);
     if (d && d.isB) return 'c-blessed';
     if (item.anc) return ancColorClass(item.anc);
     if (d && d.isAnc) return 'c-ancient';
-    if (getAttrAffix(item.attr)) {
-        let cls = 'c-attr-' + item.attr;
-        if (item.attr.charAt(item.attr.length - 1) === '5') cls += ' c-attr-glow';
-        return cls;
-    }
     return d.c || 'text-white';
 }
 
@@ -5941,12 +6210,12 @@ function useItem(u, silent = false) {
         } else if (d.eff === 'poly') {
             let ringOn = hasPolyRing();
             if (!silent && ringOn) {
-                // 手動從道具欄使用 + 已裝備變形控制戒指：開啟選擇選單（變身與消耗在選定後才執行）
+                // 手動從道具欄使用 + 持有變形控制戒指（裝備或背包攜帶皆可）：開啟選擇選單（變身與消耗在選定後才執行）
                 openPolySelect(item.uid);
                 return;
             }
             if (silent && ringOn && player.poly) {
-                // 自動使用 + 已裝備變形控制戒指：維持上次的變身狀態（不重抽、不跳選單）
+                // 自動使用 + 持有變形控制戒指：維持上次的變身狀態（不重抽、不跳選單）
                 // 保留 player.poly 不變，僅於下方重置持續時間。
             } else {
                 // 其餘情況（手動且無戒指 / 自動但尚無變身紀錄）：依等級隨機抽取一種
@@ -6548,10 +6817,12 @@ function renderMobs() {
 
             let _badgeTags = '';
             if(m.st) {
-                let order = ['freeze','stun','stone','sleep','poison','blind','weaken','disease','vacuum','broken','slow','mrhalf','magicseal'];
+                let order = ['freeze','stun','stone','sleep','poison','blind','weaken','disease','vacuum','broken','slow','mrhalf','magicseal','fragile'];   // 🔮 含脆弱
                 _badgeTags = order.filter(k => m.st[k] > 0).map(k =>
                     `<span class="px-1 rounded bg-purple-900/70 text-purple-200 text-[10px]">${STATUS_NAME[k]}</span>`).join(' ');
             }
+            // 🔮 席琳恩賜：名字下方常駐標誌（置於異常狀態列最前，不會被狀態列覆蓋）
+            if(m._grace) _badgeTags = `<span class="px-1 rounded bg-red-950/80 grace-badge text-[10px] font-bold">席琳恩賜</span>` + (_badgeTags ? ' ' + _badgeTags : '');
             // 徽章列固定常駐（單行、固定高度），避免有/無狀態時背景框忽大忽小
             let badges = `<div class="flex justify-center gap-0.5 mb-1 overflow-hidden" style="height:18px;">${_badgeTags}</div>`;
 
@@ -6561,7 +6832,7 @@ function renderMobs() {
                         </div>
                         ${badges}
                         <div class="flex justify-center mb-3">
-                            <img src="${imgUrl}" alt="${m.n}" onerror="this.onerror=null; this.src='https://placehold.co/100x100/1e293b/ffffff?text=?';" class="w-24 h-24 p-1 object-contain pointer-events-none ${hitClass}">
+                            <img src="${imgUrl}" alt="${m.n}" onerror="this.onerror=null; this.src='https://placehold.co/100x100/1e293b/ffffff?text=?';" class="w-24 h-24 p-1 object-contain pointer-events-none ${hitClass}${m._grace ? ' grace-glow' : ''}">
                         </div>
                         <div class="flex justify-center items-center gap-2 mb-1" style="height:16px;">${(m.bleeds && m.bleeds.length) ? `<span class="text-[11px] font-bold text-red-400" title="出血層數">🩸×${m.bleeds.length}</span>` : ''}${(m._bluntShow && state.ticks < m._bluntShow) ? `<span class="text-[11px] font-bold text-amber-300" title="鈍擊：攻擊延遲中">🔨鈍</span>` : ''}</div>
                         <div class="w-full bg-slate-700 h-2.5 rounded-full overflow-hidden">
@@ -6820,7 +7091,7 @@ function renderSkillSelects() {
             buffHtml += `<label class="cursor-pointer flex items-center gap-2 ${(isAvail && !__locked)?'':'opacity-50'}"${__locked?' title="魔法相消術已涵蓋此效果"':''}><input type="checkbox" id="auto-sk-${sid}" ${checked} ${__dis}${sumAttr}${__purAttr}> <span class="${__span}">${sk.n}</span></label>`;
         }
         if(sk.type === 'convert') {
-            cHtml += `<option value="${sid}" ${dis}>${sk.n}</option>`;
+            if (needLv !== undefined) cHtml += `<option value="${sid}" ${dis}>${sk.n}</option>`;   // 🔧 該職業無法學習的轉換技直接不顯示（如法師的心靈轉換/魂體轉換）；等級未達者仍顯示為灰字
         }
     });
     
@@ -6837,7 +7108,7 @@ function renderSkillSelects() {
         if(prevConvert && _convEl.querySelector(`option[value="${prevConvert}"]`)) _convEl.value = prevConvert;
     }
     let _convRow = document.getElementById('ui-convert-row');
-    if(_convRow) _convRow.classList.toggle('hidden', player.cls !== 'elf');
+    if(_convRow) _convRow.classList.toggle('hidden', player.cls !== 'elf' && player.cls !== 'mage');   // 🔧 轉換技能設置開放給法師（魔力奪取）
     document.getElementById('auto-buff-skills').innerHTML = buffHtml;
     updateSummonLock();
 }
@@ -6864,6 +7135,14 @@ function buildItemDescHTML(item) {
     let d = DB.items[item.id];
     if(!d) return '';
     let desc = d.d || "";
+    // 🔮 席琳套裝效果：寫在資訊欄（綠色標題＋淺綠加成說明），不冠在名稱前
+    if (item.seteff) {
+        let _g = item.seteff.slice(0, 2);
+        let _lines = (SHERINE_SET_TEXT[_g] || []).map(t => `<span class="text-green-200">・${t}</span>`).join('<br>');
+        desc = `<span class="c-sherine font-bold">✦ 席琳套裝效果：${item.seteff}</span><br>`
+             + `<span class="text-green-300 text-xs">【${_g}套裝】</span><br>${_lines}`
+             + (desc ? `<br>${desc}` : '');
+    }
     if(d.type === 'wpn') {
         desc += `<br><span class="text-orange-300">小型傷害: ${d.dmgS} / 大型傷害: ${d.dmgL}</span>`;
         
@@ -7421,7 +7700,8 @@ const MAP_CATEGORIES = {
     village: [
         {v:'town_silver_knight',t:'銀騎士村'}, {v:'town_elf',t:'妖精森林'}, {v:'town_talking',t:'說話之島'},
         {v:'town_gludio',t:'燃柳村'}, {v:'town_giran',t:'奇岩'}, {v:'town_heine',t:'海音'},
-        {v:'town_oren',t:'歐瑞村莊'}, {v:'town_ivory_tower',t:'象牙塔'}, {v:'town_witon',t:'威頓村'}
+        {v:'town_oren',t:'歐瑞村莊'}, {v:'town_ivory_tower',t:'象牙塔'}, {v:'town_witon',t:'威頓村'},
+        {v:'town_sherine',t:'席琳神殿',c:'#4ade80'}
     ],
     wild: [
         {v:'silver_knight',t:'銀騎士地區'}, {v:'talking_island',t:'說話之島周邊'}, {v:'zone_01',t:'妖精森林周邊'},
@@ -7947,6 +8227,33 @@ function changeMap(force) {
     syncMapSelectors();   // 切換完成後，同步分類選單與地圖選單為目前所在地圖
 }
 
+// ===== 🔮 席琳神殿：祈禱（席琳的世界 開關介面）=====
+function toggleSherineWorld() {
+    if ((player.lv || 1) < 40) { logSys('<span class="text-red-400">等級未達 40，席琳對你的祈禱沒有回應。</span>'); return; }
+    player.sherineWorld = !player.sherineWorld;
+    applySherineTheme();
+    logSys(player.sherineWorld
+        ? '<span class="c-sherine font-bold">【席琳的世界】已開啟。</span><span class="text-red-300">暗紅的薄霧滲入大地……怪物變得更加兇猛，但報酬也更加豐厚。</span>'
+        : '<span class="text-slate-300">【席琳的世界】已關閉，世界恢復了平靜。</span>');
+    saveGame();
+    renderMobs();
+    let el = document.getElementById('interaction-content'); if (el) renderSherinePray(el);
+}
+function renderSherinePray(div) {
+    let on = sherineWorldActive();
+    let lvOk = (player.lv || 1) >= 40;
+    div.innerHTML = `
+        <div class="flex flex-col gap-3 p-1">
+            <div class="text-slate-300 text-sm leading-relaxed">席琳：旅人啊……是否願意凝視這個世界的另一面？（需等級 40 以上，可自由開啟/關閉）</div>
+            <div class="bg-slate-800/60 border ${on ? 'border-red-700' : 'border-slate-600'} rounded p-3 text-sm leading-relaxed">
+                <div class="font-bold mb-1 ${on ? 'c-sherine' : 'text-slate-200'}">席琳的世界：目前 ${on ? '<span class="text-red-300">開啟</span>' : '<span class="text-slate-400">關閉</span>'}</div>
+                <div class="text-slate-200">怪物獲得大幅的強化，戰鬥將更為艱難，但也能獲得更多報酬，還可能出現<span class="c-sherine font-bold">珍稀的套裝裝備</span>。</div>
+            </div>
+            <button class="btn py-3 text-lg font-bold ${!lvOk ? 'bg-slate-600 border-slate-500 opacity-60 cursor-not-allowed' : (on ? 'bg-slate-700 hover:bg-slate-600 border-slate-500' : 'bg-red-800 hover:bg-red-700 border-red-600')}"
+                ${!lvOk ? 'disabled' : ''} onclick="toggleSherineWorld()">${!lvOk ? '等級不足（需 Lv40）' : (on ? '🙏 祈禱：關閉席琳的世界' : '🙏 祈禱：開啟席琳的世界')}</button>
+        </div>`;
+}
+
 function renderTownNPCs(townId) {
     let container = document.getElementById('town-npc-container');
     container.innerHTML = '';
@@ -7972,6 +8279,7 @@ function renderTownNPCs(townId) {
         else if(npc.type === 'pledge') typeIcon = "⚔️";
         else if(npc.type === 'ally') typeIcon = "🤝";
         else if(npc.type === 'bless') typeIcon = "✨";
+        else if(npc.type === 'pray') typeIcon = "🙏";
 
         el.innerHTML = `
             <div class="flex items-start justify-between mb-2">
@@ -8047,6 +8355,8 @@ function interactNPC(npcId, townId) {
         renderBianBless(contentDiv);
     } else if (npc.id === 'npc_ismael') {
         renderIsmaelExchange(contentDiv);
+    } else if (npc.id === 'npc_sherine') {
+        renderSherinePray(contentDiv);
     } else if (npc.type === 'ally') {
         renderAllyNPC(contentDiv);
     } else if (npc.type === 'warehouse') {
@@ -9182,6 +9492,7 @@ function startGame() {
     
     state.running = true;
     state.ticks = 0;   // 🔧 新角色從 0 tick 開始（避免承接前一場的計時）
+    applySherineTheme();   // 🔮 新角色預設關閉席琳的世界，重置視覺主題
     startGameTimers();
     logSys(`===== 歡迎來到天堂放置冒險 =====`);
     saveGame();   // 🔧 創角完成立即存檔：先前要等 5 分鐘自動存檔，期間關閉頁面角色會直接消失
@@ -9334,8 +9645,9 @@ function loadGame() {
         // 👇 正確的新版起點邏輯
         // 🔧 讀檔回「家」改走 getHomeTown()：血盟成員回盟主村莊（海音/歐瑞），否則回職業起始村，與回村按鈕邏輯一致
         setMapSelectors(getHomeTown());
-        
+
         calcStats();
+        applySherineTheme();   // 🔮 還原席琳的世界視覺主題
         changeMap(true);
         renderTabs();
         renderSkillSelects();
