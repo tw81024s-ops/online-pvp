@@ -2784,6 +2784,31 @@ function polySynth(targetRarity){
     if(ok){ let f=t.forms[Math.floor(Math.random()*t.forms.length)]; dex[f.n]=(dex[f.n]||0)+1; updateUI(); if(typeof saveGame==='function') saveGame(); return {success:true,form:f,rarity:targetRarity}; }
     updateUI(); if(typeof saveGame==='function') saveGame(); return {success:false};
 }
+// 一次把該階材料「全部合成」（盡量多次）；目前變身中的那隻保留1張不消耗
+function polySynthAll(targetRarity){
+    let t=RARITY_POLY[targetRarity]; if(!t||!t.synthFrom) return null;
+    let src=t.synthFrom, dex=polyDexObj();
+    let lockName=(player.polyLock && player.poly && player.poly.n)?player.poly.n:null;
+    let li=lockName?polyFindForm(lockName):null;
+    let lockInSrc=!!(li && li.rarity===src);              // 變身中的那隻是否屬於材料階
+    let avail=polyCountByRarity(src)-(lockInSrc?1:0);     // 可用材料數（保留變身中1張）
+    let times=Math.floor(avail/4);
+    if(times<=0){ logSys('「'+src+'」可用張數不足4張（變身中的那隻會保留），無法合成'+targetRarity+'。'); return null; }
+    let success=0, results=[];
+    for(let k=0;k<times;k++){
+        let need=4;
+        for(let n in dex){
+            if(need<=0) break;
+            let i=polyFindForm(n); if(!i||i.rarity!==src) continue;
+            let reserve=(n===lockName)?1:0;               // 變身中的那隻永遠保留1張
+            let usable=dex[n]-reserve; if(usable<=0) continue;
+            let take=Math.min(need,usable); dex[n]-=take; need-=take; if(dex[n]<=0) delete dex[n];
+        }
+        if(Math.random()*100<t.synthRate){ let f=t.forms[Math.floor(Math.random()*t.forms.length)]; dex[f.n]=(dex[f.n]||0)+1; success++; results.push(f.n); }
+    }
+    updateUI(); if(typeof saveGame==='function') saveGame();
+    return {times, success, results, consumed:times*4, src};
+}
 function polyActivate(name){
     let i=polyFindForm(name); if(!i) return;
     if(!(polyDexObj()[name]>0)){ logSys('尚未擁有此變身。'); return; }
@@ -2795,7 +2820,7 @@ function _polyGachaRender(msg){
     let m=document.getElementById('poly-gacha-modal'); if(!m) return;
     let dex=polyDexObj();
     let rateRows=['一般','高級','英雄','稀有'].map(r=>'<span class="'+RARITY_POLY[r].color+'">'+r+' '+RARITY_POLY[r].rate+'%</span>').join('　');
-    let synthBtns=POLY_RARITY_ORDER.filter(r=>RARITY_POLY[r].synthFrom).map(r=>'<button class="btn !py-1 !px-2" style="font-size:12px" onclick="_polyDoSynth(\''+r+'\')" title="4張'+RARITY_POLY[r].synthFrom+' → '+RARITY_POLY[r].synthRate+'% '+r+'"><span class="'+RARITY_POLY[r].color+'">合成'+r+'</span></button>').join('');
+    let synthBtns=POLY_RARITY_ORDER.filter(r=>RARITY_POLY[r].synthFrom).map(r=>'<button class="btn !py-1 !px-2" style="font-size:12px" onclick="_polyDoSynth(\''+r+'\')" title="一次全部合成：每4張'+RARITY_POLY[r].synthFrom+' → '+RARITY_POLY[r].synthRate+'%機率得1隻'+r+'（變身中的那隻會保留）"><span class="'+RARITY_POLY[r].color+'">合成'+r+'</span></button>').join('');
     let countRows=POLY_RARITY_ORDER.map(r=>'<span class="'+RARITY_POLY[r].color+'">'+r+':'+polyCountByRarity(r)+'</span>').join('　');
     let coll=POLY_RARITY_ORDER.map(r=>{
         let fs=RARITY_POLY[r].forms.filter(f=>dex[f.n]>0); if(!fs.length) return '';
@@ -2811,7 +2836,7 @@ function _polyGachaRender(msg){
         '<button class="btn flex-1 !py-2" onclick="_polyDoPull()">🎲 抽卡 ('+POLY_GACHA_COST+'金)</button>'+
         '<button class="btn flex-1 !py-2" onclick="_polyDo10Pull()">🎲 10連抽 ('+(POLY_GACHA_COST*10).toLocaleString()+'金)</button>'+
       '</div>'+
-      '<div class="text-slate-400 mb-1" style="font-size:11px">🔨 合成（消耗4張下一階，依機率成功才得1張）：</div>'+
+      '<div class="text-slate-400 mb-1" style="font-size:11px">🔨 合成（按一下把該階材料全部合成，每4張機率得1隻；變身中的那隻會保留）：</div>'+
       '<div class="flex flex-wrap gap-1 mb-2">'+synthBtns+'</div>'+
       '<div style="font-size:11px" class="text-slate-400 mb-2">抽卡機率：'+rateRows+'</div>'+
       '<div style="font-size:11px" class="text-slate-400 mb-2">擁有張數：'+countRows+'</div>'+
@@ -2828,7 +2853,17 @@ function openPolyGacha(){
 function closePolyGacha(){ let m=document.getElementById('poly-gacha-modal'); if(m) m.classList.add('hidden'); }
 function _polyDoPull(){ let r=polyGachaPull(); _polyGachaRender(r?'抽中 <span class="'+r.color+' font-bold">【'+r.rarity+'】'+r.form.n+'</span>！':''); }
 function _polyDo10Pull(){ if((player.gold||0)<POLY_GACHA_COST*10){ _polyGachaRender('<span class="text-rose-300">金幣不足（10連抽需 '+(POLY_GACHA_COST*10).toLocaleString()+'）</span>'); return; } let res=[]; for(let i=0;i<10;i++){ let r=polyGachaPull(); if(r) res.push(r); else break; } let html=res.map(r=>'<span class="'+r.color+' font-bold">'+r.form.n+'</span>').join('、'); _polyGachaRender('<div class="text-left" style="font-size:12px;line-height:1.8">🎲 本次10連：'+html+'</div>'); }
-function _polyDoSynth(t){ let r=polySynth(t); if(!r){ _polyGachaRender(''); return; } _polyGachaRender(r.success?'<span class="text-emerald-300 font-bold">✨ 合成成功！獲得 【'+t+'】'+r.form.n+'</span>':'<span class="text-rose-300">合成失敗，材料已消耗…</span>'); }
+function _polyDoSynth(t){
+    let r=polySynthAll(t); if(!r){ _polyGachaRender(''); return; }
+    let col=RARITY_POLY[t].color, msg;
+    if(r.success>0){
+        let names=r.results.map(n=>'<span class="'+col+' font-bold">'+n+'</span>').join('、');
+        msg='<span class="text-emerald-300 font-bold">✨ 合成'+r.times+'次、成功'+r.success+'隻：</span>'+names+'<span class="text-slate-400 block" style="font-size:11px">（共消耗 '+r.consumed+' 張'+r.src+'）</span>';
+    } else {
+        msg='<span class="text-rose-300">合成'+r.times+'次全部失敗…</span><span class="text-slate-400 block" style="font-size:11px">（共消耗 '+r.consumed+' 張'+r.src+'）</span>';
+    }
+    _polyGachaRender(msg);
+}
 
 // 主迴圈：依「真實經過的時間」補跑對應數量的邏輯 tick。
 // 這樣即使分頁切到背景被瀏覽器降速、或機器卡頓導致 setInterval 延遲，
