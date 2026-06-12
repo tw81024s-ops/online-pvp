@@ -67,5 +67,8 @@ module.exports = {
     },
     battlesFor(username) {
         return data.battles.filter(x => x.a_name === username || x.b_name === username).slice(-20).reverse();
-    }
+    },
+    // 全域遊戲設定（所有玩家生效）：經驗倍率 / 攻速倍率
+    getConfig() { return data.config || {}; },
+    setConfig(cfg) { data.config = Object.assign({}, data.config, cfg); flush(); return data.config; }
 };

@@ -114,6 +114,21 @@ function adminOnly(req, res, next) {
     if (!isAdminUser(req.user)) return res.status(403).json({ error: '需要管理員權限' });
     next();
 }
+
+// 全域遊戲設定：所有玩家讀取套用（經驗倍率 / 攻速倍率）
+app.get('/api/config', (req, res) => {
+    const c = store.getConfig();
+    res.json({ expMult: c.expMult || 1, spdMult: c.spdMult || 1 });
+});
+app.post('/api/admin/config', auth, adminOnly, (req, res) => {
+    const b = req.body || {};
+    const cfg = {};
+    if (b.expMult !== undefined) cfg.expMult = Math.max(0, Math.min(1000, parseFloat(b.expMult) || 1));
+    if (b.spdMult !== undefined) cfg.spdMult = Math.max(1, Math.min(20, parseFloat(b.spdMult) || 1));
+    const out = store.setConfig(cfg);
+    res.json({ ok: true, config: { expMult: out.expMult || 1, spdMult: out.spdMult || 1 } });
+});
+
 app.get('/api/admin/users', auth, adminOnly, (req, res) => {
     res.json({ users: store.allUsers() });
 });

@@ -33,6 +33,19 @@
         if (!res.ok) throw new Error(j.error || ('HTTP ' + res.status));
         return j;
     }
+    // ============ 全服設定（經驗倍率 / 攻速倍率）：所有玩家定期同步並套用 ============
+    window.__GAME_CONFIG = window.__GAME_CONFIG || { expMult: 1, spdMult: 1 };
+    async function syncGameConfig() {
+        try {
+            const r = await fetch('/api/config');
+            if (!r.ok) return;
+            const j = await r.json();
+            window.__GAME_CONFIG = { expMult: j.expMult || 1, spdMult: j.spdMult || 1 };
+            try { if (typeof calcStats === 'function') calcStats(); if (typeof updateUI === 'function') updateUI(); } catch (e) { }
+        } catch (e) { }
+    }
+    syncGameConfig();
+    setInterval(syncGameConfig, 60000);
     function toast(msg, color) {
         const t = el('div', { style: `position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:99999;background:${color || '#1e293b'};color:#fff;padding:8px 18px;border-radius:8px;border:1px solid #475569;box-shadow:0 4px 16px rgba(0,0,0,.5);font-size:14px;` }, msg);
         document.body.appendChild(t);
@@ -578,6 +591,20 @@
         row(null, '＋屬性點', v => { const n = parseInt(v) || 10; player.bonus = (player.bonus || 0) + n; refreshGame(); toast(`可分配屬性點 +${n}`); }, true, '點數（預設 10）');
         row('補滿 HP / MP', '執行', () => { player.hp = player.mhp; player.mp = player.mmp; refreshGame(); toast('已補滿'); });
         row(null, '攻速加快', v => { const n = Math.max(1, parseFloat(v) || 5); player.adminSpdMult = n; refreshGame(); toast(n > 1 ? `攻速 ×${n}（加速中）` : '攻速已恢復正常', n > 1 ? '#14532d' : '#1e3a5f'); }, true, '倍數（預設 5，輸入 1 取消）');
+        section('🌍 全服設定（所有玩家生效，立即同步）');
+        const cfgStatus = el('div', { style: 'font-size:12px;color:#94a3b8;margin:-2px 0 8px;' }, '目前全服設定：讀取中…');
+        wrap.append(cfgStatus);
+        fetch('/api/config').then(r => r.json()).then(j => { cfgStatus.textContent = `目前全服：經驗 ×${j.expMult || 1}　攻速 ×${j.spdMult || 1}`; }).catch(() => { cfgStatus.textContent = '（需登入線上模式才能讀取/設定）'; });
+        row(null, '設定經驗倍率', async v => {
+            const n = Math.max(0, parseFloat(v) || 1);
+            try { const j = await api('/api/admin/config', 'POST', { expMult: n }); await syncGameConfig(); cfgStatus.textContent = `目前全服：經驗 ×${j.config.expMult}　攻速 ×${j.config.spdMult}`; toast('全服經驗倍率 = ×' + n, '#14532d'); }
+            catch (e) { toast(e.message, '#7f1d1d'); }
+        }, true, '經驗倍率（例 2＝雙倍、1＝正常）');
+        row(null, '設定攻速倍率', async v => {
+            const n = Math.max(1, parseFloat(v) || 1);
+            try { const j = await api('/api/admin/config', 'POST', { spdMult: n }); await syncGameConfig(); cfgStatus.textContent = `目前全服：經驗 ×${j.config.expMult}　攻速 ×${j.config.spdMult}`; toast('全服攻速倍率 = ×' + n, '#14532d'); }
+            catch (e) { toast(e.message, '#7f1d1d'); }
+        }, true, '攻速倍率（例 3＝3倍、1＝正常）');
         section('🎁 取得物品（點分類展開瀏覽，或搜尋）');
         wrap.append(buildItemBrowser((id, it, qty) => {
             try { gainItem(id, qty || 1, true, true); refreshGame(); toast('已取得 ' + it.n + ' ×' + (qty || 1)); } catch (e) { toast('失敗：' + e.message, '#7f1d1d'); }
