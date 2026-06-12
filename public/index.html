@@ -512,6 +512,11 @@ function getExpGainMult(lv) {
     return m * g;
 }
 
+// 精靈專屬技能（精靈水晶）：reqE 有、reqM/reqK 皆無、且非黑妖專屬(darkOnly)。黑妖(cls='elf'+darkelf)不可學這類。
+function isElfOnlySkill(sk) {
+    return !!(sk && !sk.darkOnly && sk.reqE !== undefined && sk.reqM === undefined && sk.reqK === undefined);
+}
+
 const DB = {
         items: {
         // ===== 三職業技能書 =====
@@ -6033,6 +6038,7 @@ function useItem(u, silent = false) {
         let reqLv = (player.cls === 'mage' ? sd.reqM : player.cls === 'knight' ? sd.reqK : sd.reqE);
         if(sd.darkOnly && !player.darkelf) { logSys(`「${sd.n}」是黑妖專屬技能，只有黑妖能學習。`); return; }
         if(player.darkelf && sd.reqM !== undefined) { logSys(`黑妖是近戰刺客，無法學習法師魔法「${sd.n}」。`); return; }
+        if(player.darkelf && isElfOnlySkill(sd)) { logSys(`「${sd.n}」是精靈專屬技能（精靈水晶），黑妖無法學習。`); return; }
         if(reqLv === undefined) { logSys(`你的職業無法學習「${sd.n}」。`); return; }
         if(player.lv < reqLv) { logSys(`等級不足，需要等級 ${reqLv} 才能學習「${sd.n}」。`); return; }
         
@@ -6651,7 +6657,7 @@ player.inv.forEach(i => {
     if (d.type === 'skillbk') {
         let sk = DB.skills[d.sk];
         // 檢查該技能是否屬於該職業可學習範圍
-        let isClsPossible = ((player.cls === 'mage' ? sk.reqM : (player.cls === 'knight' ? sk.reqK : sk.reqE)) !== undefined) && !(sk.darkOnly && !player.darkelf) && !(player.darkelf && sk.reqM !== undefined);
+        let isClsPossible = ((player.cls === 'mage' ? sk.reqM : (player.cls === 'knight' ? sk.reqK : sk.reqE)) !== undefined) && !(sk.darkOnly && !player.darkelf) && !(player.darkelf && sk.reqM !== undefined) && !(player.darkelf && isElfOnlySkill(sk));
         
         if (player.skills.includes(d.sk)) {
             statusTag = '<span class="text-slate-500 text-[10px] font-bold">[已學習]</span>';
@@ -7280,7 +7286,10 @@ function sortInventory() {
         if (d.type === 'skillbk') {
             let sk = DB.skills[d.sk]; if (!sk) return false;
             let cls = (player.cls === 'mage' ? sk.reqM : (player.cls === 'knight' ? sk.reqK : sk.reqE));
-            return cls !== undefined && !player.skills.includes(d.sk);   // 可學且未學 → 可點選
+            if (cls === undefined) return false;
+            if (sk.darkOnly && !player.darkelf) return false;                              // 黑妖專屬：僅黑妖
+            if (player.darkelf && (sk.reqM !== undefined || isElfOnlySkill(sk))) return false; // 黑妖不可學法師/精靈專屬
+            return !player.skills.includes(d.sk);   // 可學且未學 → 可點選
         }
         return false;
     };
