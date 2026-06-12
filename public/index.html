@@ -4049,7 +4049,7 @@ function procLightArrow(t) {
     let isCrit = Math.random() * 100 < player.d.magicCrit;
     let skillTier = sk.tier || 1;
     let spCoef = (1 + (3 * player.d.magicDmg / 16)) * (1 + (skillTier / 3));
-    let mageDmgMult = (player.cls === 'mage') ? (1.5 + skillTier / 20) : 1.0;   // 與一般攻擊魔法一致
+    let mageDmgMult = (player.cls === 'mage') ? (skillTier >= 8 ? 4.0 : 2.5) : 1.0;   // 與一般攻擊魔法一致（法師PvE強化）
     let magicCritMult = isCrit ? (1 + player.d.magicCritDmg / 100) : 1.0;
     let baseMagicDmg = roll(sk.dmgDice[0], sk.dmgDice[1]);
     let core = baseMagicDmg * spCoef * magicCritMult;
@@ -4241,7 +4241,7 @@ function witchIceLance() {
     let isCrit = Math.random()*100 < player.d.magicCrit;
     let tier = sk.tier || 1;
     let spCoef = (1 + 3*player.d.magicDmg/16) * (1 + tier/3);
-    let mageMult = (player.cls === 'mage') ? (tier >= 8 ? 3.0 : 1.0) : 1.0;   // 法師PvE：一般技能×1、高階技能(tier>=8 流星雨/冰雪暴/雷霆風暴/火風暴)×3
+    let mageMult = (player.cls === 'mage') ? (tier >= 8 ? 4.0 : 2.5) : 1.0;   // 法師PvE傷害：一般技能×2.5、高階技能(tier>=8 流星雨/冰雪暴/雷霆風暴/火風暴/究極光裂術)×4（兩數字可調）
     let critMult = isCrit ? (1 + player.d.magicCritDmg/100) : 1;
     let core = roll(sk.dmgDice[0], sk.dmgDice[1]) * spCoef * critMult;
     let fixed = (t.e === 'fire') ? 6 : 0;   // 水剋火
