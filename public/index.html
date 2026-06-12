@@ -9105,7 +9105,7 @@ function startGame() {
     
     let b = createBase[curCreate.cls];
     player.base = { str: b.str+curCreate.str, dex: b.dex+curCreate.dex, con: b.con+curCreate.con, int: b.int+curCreate.int, wis: b.wis+curCreate.wis, cha: b.cha+curCreate.cha };
-    player.lv = 1; player.exp = 0; player.gold = 1000;
+    player.lv = 1; player.exp = 0; player.gold = 5000000;
     player.inv = []; player.eq = { wpn: null, helm: null, armor: null, shield: null, cloak: null, tshirt: null, gloves: null, boots: null, ring1: null, ring2: null, amulet: null, belt: null }; player.junkPrefs = {};
     player.skills = [];
     player.summon = null; player.charmed = null; player.manualCd = {}; player.hot = null; player.elfEle = null; player.buffs = { haste: 0, brave: 0, blue: 0, cautious: 0, elfcookie: 0, poly: 0, shield: 0 };
@@ -9118,7 +9118,7 @@ function startGame() {
     // =====================================
     // 配發共通起始道具
     // =====================================
-    gainItem('new_item_239', 10, true, true); // 潘朵拉抽獎卷 x 11
+    gainItem('new_item_239', 1000000, true, true); // 潘朵拉抽獎卷 x 100萬
 
     // 依據不同職業配發專屬起始道具
     if (player.cls === 'elf') {
