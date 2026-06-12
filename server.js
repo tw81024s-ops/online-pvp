@@ -115,18 +115,28 @@ function adminOnly(req, res, next) {
     next();
 }
 
-// 全域遊戲設定：所有玩家讀取套用（經驗倍率 / 攻速倍率）
+// 全域遊戲設定：所有玩家讀取套用（經驗倍率 / 攻速倍率 / 競技場傷害倍率）
 app.get('/api/config', (req, res) => {
     const c = store.getConfig();
-    res.json({ expMult: c.expMult || 1, spdMult: c.spdMult || 1 });
+    res.json({
+        expMult: c.expMult || 1, spdMult: c.spdMult || 1,
+        pvpDmgMult: c.pvpDmgMult != null ? c.pvpDmgMult : 1,
+        pvpMagicMult: c.pvpMagicMult != null ? c.pvpMagicMult : 1
+    });
 });
 app.post('/api/admin/config', auth, adminOnly, (req, res) => {
     const b = req.body || {};
     const cfg = {};
     if (b.expMult !== undefined) cfg.expMult = Math.max(0, Math.min(1000, parseFloat(b.expMult) || 1));
     if (b.spdMult !== undefined) cfg.spdMult = Math.max(1, Math.min(20, parseFloat(b.spdMult) || 1));
+    if (b.pvpDmgMult !== undefined) cfg.pvpDmgMult = Math.max(0.05, Math.min(5, parseFloat(b.pvpDmgMult) || 1));
+    if (b.pvpMagicMult !== undefined) cfg.pvpMagicMult = Math.max(0.05, Math.min(5, parseFloat(b.pvpMagicMult) || 1));
     const out = store.setConfig(cfg);
-    res.json({ ok: true, config: { expMult: out.expMult || 1, spdMult: out.spdMult || 1 } });
+    res.json({ ok: true, config: {
+        expMult: out.expMult || 1, spdMult: out.spdMult || 1,
+        pvpDmgMult: out.pvpDmgMult != null ? out.pvpDmgMult : 1,
+        pvpMagicMult: out.pvpMagicMult != null ? out.pvpMagicMult : 1
+    } });
 });
 
 app.get('/api/admin/users', auth, adminOnly, (req, res) => {
@@ -246,7 +256,11 @@ wss.on('connection', (ws) => {
 
             const pA = c.fromProfile;
             const pB = clampProfile(msg.profile || {});
-            const result = simulate(pA, pB);
+            const _cfg = store.getConfig();
+            const result = simulate(pA, pB, {
+                pvpDmgMult: _cfg.pvpDmgMult != null ? _cfg.pvpDmgMult : 1,
+                pvpMagicMult: _cfg.pvpMagicMult != null ? _cfg.pvpMagicMult : 1
+            });
             store.addBattle(c.from, ws.username, result.winner === 'draw' ? '平手' : (result.winner === 'A' ? c.from : ws.username));
 
             const payload = {

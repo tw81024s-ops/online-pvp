@@ -217,7 +217,7 @@
         .tri-glow { animation: triGlow 2.4s infinite linear; }
     </style>
 </head>
-<body class="h-screen w-screen flex items-center justify-center p-4">
+<body class="min-h-screen lg:h-screen w-screen flex items-start lg:items-center justify-center p-2 lg:p-4 overflow-y-auto">
 
     <!-- 創角畫面 -->
     <!-- 👇 修改 1：將寬度放大為 max-w-5xl 以容納三欄排版 -->
@@ -287,10 +287,10 @@
     </div>
 
     <!-- 遊戲主畫面 -->
-    <div id="game-screen" class="hidden w-full h-full max-w-[1600px] flex gap-4">
+    <div id="game-screen" class="hidden w-full h-auto lg:h-full max-w-[1600px] flex flex-col lg:flex-row gap-4">
         
 <!-- 左側：狀態與自動化 -->
-        <div class="w-[340px] flex flex-col gap-4">
+        <div class="w-full lg:w-[340px] lg:shrink-0 flex flex-col gap-4">
             <!-- 新增了 id="status-panel"，並加入去底色與加深背景的樣式確保文字可讀 -->
             <div id="status-panel" class="panel bg-cover bg-top bg-no-repeat" style="background-blend-mode: multiply; background-color: rgba(30, 41, 59, 0.85);">
                 <div class="panel-header text-center flex justify-between bg-transparent border-b border-slate-700"><span id="st-classname">職業</span><button onclick="openPolyGacha()" title="變身殿堂（抽卡/合成/指定變身）" style="margin-left:6px;background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:0 8px;font-size:13px;cursor:pointer;font-weight:bold;">🧬變身</button><span id="victory-badge" class="hidden font-bold" style="color:#fde68a;text-shadow:0 0 6px rgba(253,230,138,0.85);font-size:1.4rem;line-height:1;align-items:center;gap:0.15rem;" title="攻城獲勝期間：全商店8折、開放肯特城"><span style="font-size:1.05em;line-height:1;position:relative;top:-0.08em;">👑</span><span style="line-height:1;">攻城獲勝</span></span><span id="st-class" class="text-white text-lg font-bold cursor-pointer hover:bg-slate-700/50 rounded px-2 inline-block min-w-[2.5rem] text-right" title="點擊此處修改名稱" onclick="startEditName()"></span></div>
@@ -356,13 +356,13 @@
         </div>
 
         <!-- 中間：地圖與日誌 -->
-        <div class="flex-1 flex flex-col gap-4">
+        <div class="w-full lg:flex-1 lg:w-auto min-w-0 flex flex-col gap-4">
             <div class="panel">
-                <div class="panel-header flex justify-between items-center">
+                <div class="panel-header flex justify-between items-center flex-wrap gap-2">
     <span class="text-xl flex items-center gap-4">冒險地圖 <span id="status-alerts" class="text-sm font-normal"></span> <span id="siege-timer" class="hidden text-base font-bold text-red-300 anim-flash"></span></span>
     
     <!-- 👇 新增一個 flex 容器把按鈕跟地圖選單包起來 -->
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-3 flex-wrap justify-end">
         <button onclick="revive()" id="btn-revive" class="hidden bg-red-800 hover:bg-red-700 px-6 py-1.5 text-white font-bold border border-red-500 rounded anim-flash text-base shadow-md">祈求復活</button>
         <button onclick="reviveInPlace()" id="btn-revive-inplace" class="hidden bg-yellow-700 hover:bg-yellow-600 px-6 py-1.5 text-white font-bold border border-yellow-500 rounded anim-flash text-base shadow-md">原地復活</button>
         <button onclick="returnToTown()" id="btn-return-town" class="bg-emerald-800 hover:bg-emerald-700 px-4 py-1.5 text-white font-bold border border-emerald-500 rounded text-base shadow-md whitespace-nowrap">回村</button>
@@ -378,7 +378,7 @@
             
             <div id="battle-view" class="p-4"><div id="mob-list" class="flex gap-4 w-full"></div></div>
                 
-                <div id="town-view" class="hidden p-6 flex-col items-center gap-4 flex-1 h-full min-h-0">
+                <div id="town-view" class="hidden p-4 lg:p-6 flex-col items-center gap-4 flex-1 min-h-[55vh] lg:min-h-0 lg:h-full">
                     <h2 class="text-3xl font-bold text-emerald-400 drop-shadow-md shrink-0" id="town-name">銀騎士村</h2>
                     <p class="text-lg text-slate-300 shrink-0">這裡是安全區域，您的體力與魔力已完全恢復。</p>
                     
@@ -399,19 +399,19 @@
                 </div>
             </div>
 
-            <div id="combat-log-panel" class="panel flex-1 flex flex-col overflow-hidden">
+            <div id="combat-log-panel" class="panel flex-1 min-h-[180px] lg:min-h-0 flex flex-col overflow-hidden">
                 <div class="panel-header text-slate-100 text-lg border-b border-red-900/40">戰鬥日誌</div>
                 <div id="combat-log" class="flex-1 p-4 overflow-y-auto log-bg rounded-b-xl shadow-inner text-base tracking-wide"></div>
             </div>
 
-            <div class="panel h-1/3 flex flex-col overflow-hidden">
+            <div class="panel h-1/3 min-h-[140px] lg:h-1/3 flex flex-col overflow-hidden">
                 <div class="panel-header text-slate-100 text-lg border-b border-blue-900/40">系統與物品日誌</div>
                 <div id="sys-log" class="flex-1 p-4 overflow-y-auto log-bg rounded-b-xl shadow-inner text-base"></div>
             </div>
         </div>
 
         <!-- 右側：清單面板 -->
-        <div class="w-[380px] flex flex-col gap-3">
+        <div class="w-full lg:w-[380px] lg:shrink-0 flex flex-col gap-3">
             <div class="panel p-2 grid grid-cols-3 gap-2 bg-slate-800 tab-bar">
                 <button class="btn active text-base py-2 font-bold px-0" onclick="switchTab('stats', this)">能力</button>
                 <button class="btn text-base py-2 font-bold px-0" onclick="switchTab('equip', this)">裝備</button>

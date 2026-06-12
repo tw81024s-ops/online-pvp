@@ -592,19 +592,18 @@
         row('補滿 HP / MP', '執行', () => { player.hp = player.mhp; player.mp = player.mmp; refreshGame(); toast('已補滿'); });
         row(null, '攻速加快', v => { const n = Math.max(1, parseFloat(v) || 5); player.adminSpdMult = n; refreshGame(); toast(n > 1 ? `攻速 ×${n}（加速中）` : '攻速已恢復正常', n > 1 ? '#14532d' : '#1e3a5f'); }, true, '倍數（預設 5，輸入 1 取消）');
         section('🌍 全服設定（所有玩家生效，立即同步）');
-        const cfgStatus = el('div', { style: 'font-size:12px;color:#94a3b8;margin:-2px 0 8px;' }, '目前全服設定：讀取中…');
+        const cfgStatus = el('div', { style: 'font-size:12px;color:#94a3b8;margin:-2px 0 8px;line-height:1.7;' }, '目前全服設定：讀取中…');
         wrap.append(cfgStatus);
-        fetch('/api/config').then(r => r.json()).then(j => { cfgStatus.textContent = `目前全服：經驗 ×${j.expMult || 1}　攻速 ×${j.spdMult || 1}`; }).catch(() => { cfgStatus.textContent = '（需登入線上模式才能讀取/設定）'; });
-        row(null, '設定經驗倍率', async v => {
-            const n = Math.max(0, parseFloat(v) || 1);
-            try { const j = await api('/api/admin/config', 'POST', { expMult: n }); await syncGameConfig(); cfgStatus.textContent = `目前全服：經驗 ×${j.config.expMult}　攻速 ×${j.config.spdMult}`; toast('全服經驗倍率 = ×' + n, '#14532d'); }
+        const fmtCfg = c => `目前全服：經驗 ×${c.expMult || 1}　攻速 ×${c.spdMult || 1}<br>競技場傷害 ×${c.pvpDmgMult != null ? c.pvpDmgMult : 1}　競技場魔法 ×${c.pvpMagicMult != null ? c.pvpMagicMult : 1}`;
+        fetch('/api/config').then(r => r.json()).then(j => { cfgStatus.innerHTML = fmtCfg(j); }).catch(() => { cfgStatus.textContent = '（需登入線上模式才能讀取/設定）'; });
+        const setCfg = async (key, n, label) => {
+            try { const j = await api('/api/admin/config', 'POST', { [key]: n }); await syncGameConfig(); cfgStatus.innerHTML = fmtCfg(j.config); toast(label + ' = ×' + n, '#14532d'); }
             catch (e) { toast(e.message, '#7f1d1d'); }
-        }, true, '經驗倍率（例 2＝雙倍、1＝正常）');
-        row(null, '設定攻速倍率', async v => {
-            const n = Math.max(1, parseFloat(v) || 1);
-            try { const j = await api('/api/admin/config', 'POST', { spdMult: n }); await syncGameConfig(); cfgStatus.textContent = `目前全服：經驗 ×${j.config.expMult}　攻速 ×${j.config.spdMult}`; toast('全服攻速倍率 = ×' + n, '#14532d'); }
-            catch (e) { toast(e.message, '#7f1d1d'); }
-        }, true, '攻速倍率（例 3＝3倍、1＝正常）');
+        };
+        row(null, '設定經驗倍率', v => setCfg('expMult', Math.max(0, parseFloat(v) || 1), '全服經驗倍率'), true, '經驗倍率（例 2＝雙倍、1＝正常）');
+        row(null, '設定攻速倍率', v => setCfg('spdMult', Math.max(1, parseFloat(v) || 1), '全服攻速倍率'), true, '攻速倍率（例 3＝3倍、1＝正常）');
+        row(null, '競技場傷害倍率', v => setCfg('pvpDmgMult', Math.max(0.05, parseFloat(v) || 1), '競技場傷害倍率'), true, '全部PvP傷害（例 0.6＝6折、1＝正常）');
+        row(null, '競技場魔法倍率', v => setCfg('pvpMagicMult', Math.max(0.05, parseFloat(v) || 1), '競技場魔法倍率'), true, '法師魔法再乘（例 0.4＝壓低法師、1＝不變）');
         section('🎁 取得物品（點分類展開瀏覽，或搜尋）');
         wrap.append(buildItemBrowser((id, it, qty) => {
             try { gainItem(id, qty || 1, true, true); refreshGame(); toast('已取得 ' + it.n + ' ×' + (qty || 1)); } catch (e) { toast('失敗：' + e.message, '#7f1d1d'); }

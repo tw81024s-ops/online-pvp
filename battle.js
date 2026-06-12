@@ -99,7 +99,10 @@ function castHeal(p, heal) {
 // ============ 模擬主程式 ============
 // profileA/B 由前端產出（calcStats 後的衍生數值）
 // 回傳 { winner: 'A'|'B'|'draw', events: [{t, side, kind, text, dmg, hpA, hpB, mpA, mpB}], duration }
-function simulate(profileA, profileB) {
+function simulate(profileA, profileB, opts) {
+    opts = opts || {};
+    const PVP_DMG = Math.max(0, isFinite(opts.pvpDmgMult) ? opts.pvpDmgMult : 1);     // 競技場整體傷害倍率
+    const PVP_MAGIC = Math.max(0, isFinite(opts.pvpMagicMult) ? opts.pvpMagicMult : 1); // 競技場魔法額外倍率（壓法師爆炸傷害）
     const MAXTICKS = 1800; // 180 秒上限
     let A = initSide(profileA), B = initSide(profileB);
     let events = [];
@@ -134,9 +137,10 @@ function simulate(profileA, profileB) {
                 me.mp -= me.p.spell.mp;
                 me.atkSkCd = me.castInterval;
                 let r = magicAttack(me.p, foe.p, me.p.spell);
-                foe.hp -= r.dmg;
+                let mdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * PVP_MAGIC));
+                foe.hp -= mdmg;
                 push(t, side, r.crit ? 'crit' : 'magic',
-                    `${me.name} 施放 ${r.spell}，對 ${foe.name} 造成 ${r.dmg} 點傷害${r.crit ? '（爆擊！）' : ''}。`, r.dmg);
+                    `${me.name} 施放 ${r.spell}，對 ${foe.name} 造成 ${mdmg} 點傷害${r.crit ? '（爆擊！）' : ''}。`, mdmg);
                 if (foe.hp <= 0) break;
             }
 
@@ -147,10 +151,11 @@ function simulate(profileA, profileB) {
                 if (r.type === 'evade') push(t, side, 'evade', `${foe.name} 成功迴避了 ${me.name} 的攻擊。`);
                 else if (r.type === 'miss') push(t, side, 'miss', `${me.name} 對 ${foe.name} 的攻擊未命中。`);
                 else {
-                    foe.hp -= r.dmg;
+                    let pdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG));
+                    foe.hp -= pdmg;
                     let ext = r.heavy && r.crit ? '（會心一擊！）' : r.crit ? '（爆擊！）' : r.heavy ? '（重擊！）' : r.graze ? '（擦傷）' : '';
                     push(t, side, r.crit || r.heavy ? 'crit' : 'attack',
-                        `${me.name} 命中 ${foe.name}，造成 ${r.dmg} 點傷害${ext}。`, r.dmg);
+                        `${me.name} 命中 ${foe.name}，造成 ${pdmg} 點傷害${ext}。`, pdmg);
                 }
                 if (foe.hp <= 0) break;
             }
