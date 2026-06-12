@@ -491,7 +491,7 @@
         catch (e) { return toast('存檔解析失敗', '#7f1d1d'); }
         const p = save.p || (save.p = {});
         const wrap = el('div');
-        const clsName = { knight: '騎士', mage: '法師', elf: '妖精' }[p.cls] || p.cls || '?';
+        const clsName = (p.darkelf ? '黑妖' : { knight: '騎士', mage: '法師', elf: '妖精' }[p.cls]) || p.cls || '?';
         wrap.append(el('div', { style: 'color:#cbd5e1;font-size:13px;margin-bottom:10px;line-height:1.7;' },
             `帳號：<b style="color:#fbbf24">${username}</b>　職業：${clsName}　等級：${p.lv || 1}<br>金幣：${(p.gold || 0).toLocaleString()}　HP：${p.mhp || 0}　MP：${p.mmp || 0}`));
         // 角色欄位(格)選擇：玩家可能有多個角色，必須改到他「正在玩」的那一格才看得到
@@ -577,6 +577,7 @@
         row(null, '＋金幣', v => { const n = parseInt(v) || 100000; player.gold += n; refreshGame(); toast(`金幣 +${n}`); }, true, '金額（預設 100000）');
         row(null, '＋屬性點', v => { const n = parseInt(v) || 10; player.bonus = (player.bonus || 0) + n; refreshGame(); toast(`可分配屬性點 +${n}`); }, true, '點數（預設 10）');
         row('補滿 HP / MP', '執行', () => { player.hp = player.mhp; player.mp = player.mmp; refreshGame(); toast('已補滿'); });
+        row(null, '攻速加快', v => { const n = Math.max(1, parseFloat(v) || 5); player.adminSpdMult = n; refreshGame(); toast(n > 1 ? `攻速 ×${n}（加速中）` : '攻速已恢復正常', n > 1 ? '#14532d' : '#1e3a5f'); }, true, '倍數（預設 5，輸入 1 取消）');
         section('🎁 取得物品（點分類展開瀏覽，或搜尋）');
         wrap.append(buildItemBrowser((id, it, qty) => {
             try { gainItem(id, qty || 1, true, true); refreshGame(); toast('已取得 ' + it.n + ' ×' + (qty || 1)); } catch (e) { toast('失敗：' + e.message, '#7f1d1d'); }

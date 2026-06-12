@@ -2467,6 +2467,7 @@ d.mr += (baseMr + bonusMr);
         d.meleeCritDmg += 20; d.rangedCritDmg += 20;
         d.er = (d.er || 0) + 3; d.ac += 2;
     }
+    if (p.adminSpdMult && p.adminSpdMult > 1) d.aspd = d.aspd / p.adminSpdMult;   // 管理員：攻速加快(倍數，越大越快)
 
     p.hp = Math.min(p.hp, p.mhp);
     p.mp = Math.min(p.mp, p.mmp);
@@ -4561,7 +4562,7 @@ function isAllyActive(slotN) { return !!(player.allies && player.allies.some(a =
 function allyName(a) {
     if (!a) return '';
     if (a.name) return a.name;
-    return ({ knight: '騎士', mage: '法師', elf: '妖精' })[a.cls] || a.cls || ('存檔' + (a._slot || ''));
+    return (a.darkelf ? '黑妖' : ({ knight: '騎士', mage: '法師', elf: '妖精' })[a.cls]) || a.cls || ('存檔' + (a._slot || ''));
 }
 function buildAlly(slotN) {
     slotN = String(slotN);
@@ -8791,7 +8792,7 @@ function slotSummary(n){
     let s = localStorage.getItem('lineage_idle_save_' + n);
     if(!s) return null;
     try { let d = JSON.parse(s); let p = d.p;
-        let clsName = { knight:'騎士', mage:'法師', elf:'妖精' }[p.cls] || p.cls;
+        let clsName = (p.darkelf ? '黑妖' : { knight:'騎士', mage:'法師', elf:'妖精' }[p.cls]) || p.cls;
         return { name: p.name || '未命名', cls: clsName, lv: p.lv || 1, gold: p.gold || 0 };
     } catch(e){ return null; }
 }
