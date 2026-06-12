@@ -293,7 +293,7 @@
         <div class="w-[340px] flex flex-col gap-4">
             <!-- 新增了 id="status-panel"，並加入去底色與加深背景的樣式確保文字可讀 -->
             <div id="status-panel" class="panel bg-cover bg-top bg-no-repeat" style="background-blend-mode: multiply; background-color: rgba(30, 41, 59, 0.85);">
-                <div class="panel-header text-center flex justify-between bg-transparent border-b border-slate-700"><span id="st-classname">職業</span><span id="victory-badge" class="hidden font-bold" style="color:#fde68a;text-shadow:0 0 6px rgba(253,230,138,0.85);font-size:1.4rem;line-height:1;align-items:center;gap:0.15rem;" title="攻城獲勝期間：全商店8折、開放肯特城"><span style="font-size:1.05em;line-height:1;position:relative;top:-0.08em;">👑</span><span style="line-height:1;">攻城獲勝</span></span><span id="st-class" class="text-white text-lg font-bold cursor-pointer hover:bg-slate-700/50 rounded px-2 inline-block min-w-[2.5rem] text-right" title="點擊此處修改名稱" onclick="startEditName()"></span></div>
+                <div class="panel-header text-center flex justify-between bg-transparent border-b border-slate-700"><span id="st-classname">職業</span><button onclick="openPolyGacha()" title="變身殿堂（抽卡/合成/指定變身）" style="margin-left:6px;background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:0 8px;font-size:13px;cursor:pointer;font-weight:bold;">🧬變身</button><span id="victory-badge" class="hidden font-bold" style="color:#fde68a;text-shadow:0 0 6px rgba(253,230,138,0.85);font-size:1.4rem;line-height:1;align-items:center;gap:0.15rem;" title="攻城獲勝期間：全商店8折、開放肯特城"><span style="font-size:1.05em;line-height:1;position:relative;top:-0.08em;">👑</span><span style="line-height:1;">攻城獲勝</span></span><span id="st-class" class="text-white text-lg font-bold cursor-pointer hover:bg-slate-700/50 rounded px-2 inline-block min-w-[2.5rem] text-right" title="點擊此處修改名稱" onclick="startEditName()"></span></div>
                 <div class="p-4 space-y-3 text-base">
                     <div class="flex justify-between text-slate-400 border-b border-slate-700 pb-2"><span>等級</span> <span class="text-white font-bold text-xl" id="st-lv">1</span></div>
                     <div class="flex justify-between text-slate-400"><span>防禦 (AC)</span> <span class="text-white font-bold" id="st-ac">10</span></div>
@@ -2435,7 +2435,7 @@ d.mr += (baseMr + bonusMr);
     }
 
     // 變身：套裝變身（_setPoly，僅穿著套裝時生效、卸下立即消失）優先於藥水變身（buffs.poly 計時）
-    let _polyForm = p._setPoly || ((p.buffs.poly > 0 && p.poly) ? p.poly : null);
+    let _polyForm = p._setPoly || (((p.polyLock || p.buffs.poly > 0) && p.poly) ? p.poly : null);
     if(_polyForm) {
         let pf = _polyForm;
         d.meleeDmg  += (pf.md  || 0); d.meleeHit  += (pf.mh || 0);   // 近距離傷害 / 命中
@@ -2689,6 +2689,107 @@ function confirmPolySelect(uid, name) {
     if (document.getElementById('item-modal').classList.contains('hidden') === false) closeModal();
     updateUI();
 }
+
+// ====== 變身殿堂：抽卡 / 合成 / 收藏 / 指定變身（rarity-based polymorph gacha）======
+const RARITY_POLY = {
+    '一般': { color:'text-slate-200', rate:51, forms:[
+        {n:'妖魔',md:1,mh:1,spd:3},{n:'骷髏',md:1,mh:1,spd:3},{n:'哥布林',md:1,spd:3},{n:'浣熊',eh:1,sp:1,spd:3},
+        {n:'強盜弓箭手',rd:1,rh:1,spd:3},{n:'獵人戴爾',rd:1,spd:3},{n:'骷髏槍兵',md:1,mh:1,spd:3},
+        {n:'骷髏弓箭手',rd:1,rh:1,spd:3},{n:'長者',sp:2,mpr:1,spd:3},{n:'小妖魔',ac:-1,spd:4},
+    ]},
+    '高級': { color:'text-emerald-300', rate:29, forms:[
+        {n:'死亡騎士',md:1,spd:7},{n:'狂暴將軍',md:1,spd:7},{n:'刺客首領',mh:1,spd:7},{n:'黑暗妖精',rd:1,spd:7},
+        {n:'黑騎士',ac:-1,spd:7},{n:'歐林',mpr:2,spd:7},{n:'布雷哲',md:1,spd:7},{n:'黑長者',mgd:1,mpr:2,spd:7},
+        {n:'德雷克',md:1,spd:7},{n:'達伊諾斯打者',mh:2,spd:7},{n:'達伊諾斯投手',rh:2,spd:7},{n:'海洋哈維',er:1,spd:6},
+        {n:'墮落的賽尼斯',sp:8,mpr:2,mgd:1,spd:7},{n:'火焰弓箭手',rd:1,spd:7},{n:'賞金獵人',rd:1,spd:7},
+        {n:'優卡',rh:1,spd:7},{n:'巨蟻女皇士兵',md:1,spd:7},{n:'沙蟲士兵',md:1,spd:7},{n:'侏儒',ac:-1,spd:6},
+    ]},
+    '英雄': { color:'text-sky-300', rate:13, forms:[
+        {n:'女武神埃爾',md:1,mh:2,spd:12},{n:'巴佛梅特',mgd:2,sp:2,spd:12},{n:'安庫',md:2,spd:12},
+        {n:'林德拜爾',rd:2,rh:2,spd:12},{n:'飛龍',md:2,mh:2,spd:12},{n:'哈普',rd:2,spd:12},
+        {n:'凱許',md:2,mh:1,spd:12},{n:'提卡爾',mgd:2,mpr:2,spd:12},
+    ]},
+    '稀有': { color:'text-violet-300', rate:7, forms:[
+        {n:'力卡溫',md:3,mh:2,spd:16},{n:'安塔瑞斯',md:3,mh:2,spd:16},{n:'法利昂',rd:3,rh:2,spd:16},
+        {n:'黑暗精靈王',mgd:3,sp:5,spd:16},{n:'紅騎士',md:3,ac:-1,spd:16},{n:'闇黑死神',md:2,rd:2,spd:16},
+    ]},
+    '傳說': { color:'text-amber-300', rate:0, synthRate:2.5, synthFrom:'稀有', forms:[
+        {n:'公爵馬庫斯',md:5,spd:24},{n:'巴拉卡斯',md:4,mh:4,spd:24},{n:'法蘭奧爾',mgd:4,sp:6,spd:24},
+        {n:'哈汀',rd:5,spd:24},{n:'凱坦',md:4,rd:4,spd:24},{n:'拉斯塔巴德',md:5,mh:4,spd:24},
+    ]},
+    '神話': { color:'text-rose-300', rate:0, synthRate:0.5, synthFrom:'傳說', forms:[
+        {n:'神話騎士',md:5,mh:5,spd:33},{n:'神話妖精',rd:5,rh:5,spd:33},{n:'神話法師',mgd:5,sp:6,mpr:5,spd:33},
+        {n:'神話黑妖',md:5,rd:5,spd:33},{n:'神話龍騎士',md:5,mh:5,spd:33},{n:'神話槍手',rd:5,rh:5,spd:33},
+        {n:'神話王族',md:4,rd:4,mgd:3,spd:33},{n:'鐮刀死神',md:6,mh:5,spd:33},{n:'神聖劍士',md:5,mh:6,spd:33},
+        {n:'白金死亡騎士',md:6,mh:5,spd:33},{n:'白金巴風特',mgd:6,sp:6,spd:33},
+    ]},
+};
+const POLY_RARITY_ORDER = ['一般','高級','英雄','稀有','傳說','神話'];
+const POLY_GACHA_COST = 2000;
+function polyFindForm(name){ for(const r of POLY_RARITY_ORDER){ let f=RARITY_POLY[r].forms.find(x=>x.n===name); if(f) return {form:f,rarity:r,color:RARITY_POLY[r].color}; } return null; }
+function polyDexObj(){ if(!player.polyDex) player.polyDex={}; return player.polyDex; }
+function polyCountByRarity(rarity){ let dex=polyDexObj(),c=0; for(let n in dex){ let i=polyFindForm(n); if(i&&i.rarity===rarity) c+=dex[n]; } return c; }
+function polyGachaPull(){
+    if((player.gold||0)<POLY_GACHA_COST){ logSys('金幣不足，無法抽卡（需 '+POLY_GACHA_COST+'）。'); return null; }
+    player.gold-=POLY_GACHA_COST;
+    let pool=POLY_RARITY_ORDER.filter(r=>RARITY_POLY[r].rate>0);
+    let total=pool.reduce((s,r)=>s+RARITY_POLY[r].rate,0), roll=Math.random()*total, acc=0, rarity=pool[0];
+    for(const r of pool){ acc+=RARITY_POLY[r].rate; if(roll<acc){ rarity=r; break; } }
+    let forms=RARITY_POLY[rarity].forms, form=forms[Math.floor(Math.random()*forms.length)];
+    let dex=polyDexObj(); dex[form.n]=(dex[form.n]||0)+1;
+    updateUI(); if(typeof saveGame==='function') saveGame();
+    return {form,rarity,color:RARITY_POLY[rarity].color};
+}
+function polySynth(targetRarity){
+    let t=RARITY_POLY[targetRarity]; if(!t||!t.synthFrom) return null;
+    let src=t.synthFrom;
+    if(polyCountByRarity(src)<4){ logSys('「'+src+'」變身張數不足4張，無法合成'+targetRarity+'。'); return null; }
+    let need=4, dex=polyDexObj();
+    for(let n in dex){ if(need<=0) break; let i=polyFindForm(n); if(i&&i.rarity===src){ let take=Math.min(need,dex[n]); dex[n]-=take; need-=take; if(dex[n]<=0) delete dex[n]; } }
+    let ok=Math.random()*100<t.synthRate;
+    if(ok){ let f=t.forms[Math.floor(Math.random()*t.forms.length)]; dex[f.n]=(dex[f.n]||0)+1; updateUI(); if(typeof saveGame==='function') saveGame(); return {success:true,form:f,rarity:targetRarity}; }
+    updateUI(); if(typeof saveGame==='function') saveGame(); return {success:false};
+}
+function polyActivate(name){
+    let i=polyFindForm(name); if(!i) return;
+    if(!(polyDexObj()[name]>0)){ logSys('尚未擁有此變身。'); return; }
+    player.poly=Object.assign({c:i.color},i.form); player.polyLock=true;
+    logSys('變身為 <span class="'+i.color+'">'+name+'</span>。'); calcStats(); updateUI();
+}
+function polyDeactivate(){ player.polyLock=false; player.poly=null; if(player.buffs) player.buffs.poly=0; calcStats(); updateUI(); logSys('已解除變身。'); }
+function _polyGachaRender(msg){
+    let m=document.getElementById('poly-gacha-modal'); if(!m) return;
+    let dex=polyDexObj();
+    let rateRows=['一般','高級','英雄','稀有'].map(r=>'<span class="'+RARITY_POLY[r].color+'">'+r+' '+RARITY_POLY[r].rate+'%</span>').join('　');
+    let coll=POLY_RARITY_ORDER.map(r=>{
+        let fs=RARITY_POLY[r].forms.filter(f=>dex[f.n]>0); if(!fs.length) return '';
+        let cards=fs.map(f=>'<button class="btn !py-1 !px-2 text-left" style="font-size:11px" onclick="polyActivate(\''+f.n+'\');_polyGachaRender(\'已變身：'+f.n+'\')" title="'+polyFormDesc(f)+'"><span class="'+RARITY_POLY[r].color+' font-bold">'+f.n+'</span> ×'+dex[f.n]+'<span class="block text-slate-400" style="font-size:10px">'+polyFormDesc(f)+'</span></button>').join('');
+        return '<div class="mb-1"><div class="'+RARITY_POLY[r].color+' font-bold text-sm mb-1">'+r+'</div><div class="grid grid-cols-2 gap-1">'+cards+'</div></div>';
+    }).join('') || '<div class="text-slate-400 text-sm">尚無收藏，先抽卡吧！</div>';
+    let cur=(player.polyLock&&player.poly)?player.poly.n:'無';
+    m.innerHTML='<div class="absolute inset-0 bg-black/60" onclick="closePolyGacha()"></div>'+
+    '<div class="panel border-slate-500 p-4 relative w-[480px] max-h-[85vh] flex flex-col">'+
+      '<div class="panel-header rounded-md mb-2 flex justify-between"><span>🧬 變身殿堂</span><span class="text-sm text-yellow-400">金幣 '+(player.gold||0).toLocaleString()+'</span></div>'+
+      '<div class="text-xs text-slate-300 mb-2">目前變身：<b class="'+((player.poly&&player.poly.c)||'')+'">'+cur+'</b>'+(cur!=='無'?'　<button class="underline text-rose-300" onclick="polyDeactivate();_polyGachaRender(\'已解除變身\')">解除</button>':'')+'</div>'+
+      '<div class="flex gap-2 mb-2">'+
+        '<button class="btn flex-1 !py-2" onclick="_polyDoPull()">🎲 抽卡 ('+POLY_GACHA_COST+'金)</button>'+
+        '<button class="btn !py-2" onclick="_polyDoSynth(\'傳說\')" title="4張稀有→2.5%傳說">合成傳說</button>'+
+        '<button class="btn !py-2" onclick="_polyDoSynth(\'神話\')" title="4張傳說→0.5%神話">合成神話</button>'+
+      '</div>'+
+      '<div style="font-size:11px" class="text-slate-400 mb-2">抽卡機率：'+rateRows+'　|　稀有:'+polyCountByRarity('稀有')+'張 傳說:'+polyCountByRarity('傳說')+'張</div>'+
+      '<div id="poly-gacha-result" class="text-center text-sm mb-2" style="min-height:20px">'+(msg||'')+'</div>'+
+      '<div class="overflow-y-auto pr-1 flex-1">'+coll+'</div>'+
+      '<button class="btn mt-3" onclick="closePolyGacha()">關閉</button>'+
+    '</div>';
+}
+function openPolyGacha(){
+    let m=document.getElementById('poly-gacha-modal');
+    if(!m){ m=document.createElement('div'); m.id='poly-gacha-modal'; m.className='hidden fixed inset-0 z-[60] flex items-center justify-center'; document.body.appendChild(m); }
+    _polyGachaRender(''); m.classList.remove('hidden');
+}
+function closePolyGacha(){ let m=document.getElementById('poly-gacha-modal'); if(m) m.classList.add('hidden'); }
+function _polyDoPull(){ let r=polyGachaPull(); _polyGachaRender(r?'抽中 <span class="'+r.color+' font-bold">【'+r.rarity+'】'+r.form.n+'</span>！':''); }
+function _polyDoSynth(t){ let r=polySynth(t); if(!r){ _polyGachaRender(''); return; } _polyGachaRender(r.success?'<span class="text-emerald-300 font-bold">✨ 合成成功！獲得 【'+t+'】'+r.form.n+'</span>':'<span class="text-rose-300">合成失敗，材料已消耗…</span>'); }
 
 // 主迴圈：依「真實經過的時間」補跑對應數量的邏輯 tick。
 // 這樣即使分頁切到背景被瀏覽器降速、或機器卡頓導致 setInterval 延遲，
@@ -6250,7 +6351,14 @@ function updateUI() {
     
     // 處理背景圖片：抓取 player.avatar 決定背景圖 (加上 bg-top 防止頭部裁切)
     let bgImageName = player.avatar || clsDisplayName; 
-    document.getElementById('status-panel').style.backgroundImage = `url('assets/character/${bgImageName}.jpg')`;
+    {
+        let _sp = document.getElementById('status-panel');
+        if (player.polyLock && player.poly && player.poly.n) {
+            _sp.style.backgroundImage = `url('assets/icons/monsters/${player.poly.n}.png'), url('assets/character/${bgImageName}.jpg')`;
+        } else {
+            _sp.style.backgroundImage = `url('assets/character/${bgImageName}.jpg')`;
+        }
+    }
     document.getElementById('status-panel').classList.add('bg-top'); // 確保圖片從頂部對齊
 
     document.getElementById('st-ac').innerText = player.d.ac;
