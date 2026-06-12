@@ -132,15 +132,33 @@ function simulate(profileA, profileB, opts) {
                 push(t, side, 'heal', `${me.name} 施放 ${me.p.heal.name}，恢復 ${h} 點生命。`, 0);
             }
 
-            // 攻擊魔法
+            // 攻擊技能（魔法 or 物理；忠實採用玩家設定的攻擊技能）
             if (me.p.spell && me.atkSkCd <= 0 && me.mp >= me.p.spell.mp) {
                 me.mp -= me.p.spell.mp;
                 me.atkSkCd = me.castInterval;
-                let r = magicAttack(me.p, foe.p, me.p.spell);
-                let mdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * PVP_MAGIC));
-                foe.hp -= mdmg;
-                push(t, side, r.crit ? 'crit' : 'magic',
-                    `${me.name} 施放 ${r.spell}，對 ${foe.name} 造成 ${mdmg} 點傷害${r.crit ? '（爆擊！）' : ''}。`, mdmg);
+                if (me.p.spell.phys) {
+                    // 物理攻擊技能（三重矢/衝擊之暈）：依 hits 次數連續物理攻擊（用武器骰）
+                    let hits = Math.max(1, me.p.spell.hits || 1);
+                    let total = 0, anyCrit = false, parts = [];
+                    for (let h = 0; h < hits; h++) {
+                        if (foe.hp <= 0) break;
+                        let r = physicalAttack(me.p, foe.p);
+                        if (r.type === 'evade' || r.type === 'miss') { parts.push('Miss'); continue; }
+                        let pdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG));
+                        foe.hp -= pdmg; total += pdmg;
+                        if (r.crit || r.heavy) anyCrit = true;
+                        parts.push(pdmg + (r.heavy && r.crit ? '(會心)' : r.crit ? '(爆)' : r.heavy ? '(重)' : ''));
+                    }
+                    let detail = hits > 1 ? `[${parts.join(', ')}] 共 ${total}` : `${total}`;
+                    push(t, side, anyCrit ? 'crit' : 'attack',
+                        `${me.name} 施放 ${me.p.spell.name}，對 ${foe.name} 造成 ${detail} 點物理傷害。`, total);
+                } else {
+                    let r = magicAttack(me.p, foe.p, me.p.spell);
+                    let mdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * PVP_MAGIC));
+                    foe.hp -= mdmg;
+                    push(t, side, r.crit ? 'crit' : 'magic',
+                        `${me.name} 施放 ${r.spell}，對 ${foe.name} 造成 ${mdmg} 點傷害${r.crit ? '（爆擊！）' : ''}。`, mdmg);
+                }
                 if (foe.hp <= 0) break;
             }
 
@@ -217,9 +235,11 @@ function clampProfile(p) {
             spd: n(p.weapon.spd, 0.5, 4, 1.5),
             ranged: !!p.weapon.ranged
         } : null,
-        spell: p.spell && p.spell.dmgDice ? {
-            name: sanitize(p.spell.name || '魔法'),
-            dmgDice: [n(p.spell.dmgDice[0], 1, 50, 1), n(p.spell.dmgDice[1], 1, 100, 6)],
+        spell: (p.spell && (p.spell.phys || p.spell.dmgDice || (Array.isArray(p.spell.multiDmg) && p.spell.multiDmg.length))) ? {
+            name: sanitize(p.spell.name || '技能'),
+            phys: !!p.spell.phys,                                  // 物理攻擊技能（三重矢/衝擊之暈）：用武器骰連續攻擊
+            hits: n(p.spell.hits, 1, 10, 1),                       // 物理技能連擊次數
+            dmgDice: Array.isArray(p.spell.dmgDice) ? [n(p.spell.dmgDice[0], 1, 50, 1), n(p.spell.dmgDice[1], 1, 100, 6)] : null,
             multiDmg: Array.isArray(p.spell.multiDmg) ? p.spell.multiDmg.slice(0, 6).map(d => [n(d[0], 1, 50, 1), n(d[1], 1, 100, 6)]) : null,
             dmgBase: n(p.spell.dmgBase, 0, 500, 0),
             tier: n(p.spell.tier, 1, 10, 1),
