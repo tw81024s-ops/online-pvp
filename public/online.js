@@ -86,7 +86,7 @@
         }
         // 攻擊魔法：優先採用玩家自己設定的攻擊技能（sel-atk-skill / config.selAtkSkill）；
         // 若無有效設定，才自動挑「階級最高的攻擊魔法」當後備。
-        const _mkSpell = (s, id) => ({ name: s.n || id, phys: s.dmgType === 'physical', hits: s.hits || 1, dmgDice: s.dmgDice || null, multiDmg: s.multiDmg || null, dmgBase: s.dmgBase || 0, tier: s.tier || 1, mp: s.mp || 10, ele: s.ele || null, stun: s.stun || 0 });
+        const _mkSpell = (s, id) => ({ name: s.n || id, phys: s.dmgType === 'physical', hits: s.hits || 1, dmgDice: s.dmgDice || null, multiDmg: s.multiDmg || null, dmgBase: s.dmgBase || 0, tier: s.tier || 1, mp: s.mp || 10, ele: s.ele || null, stun: s.stun || 0, stunChance: s.stunChance || 0 });
         // 玩家選定的攻擊技能：物理技（三重矢/衝擊之暈，用武器骰連擊）或魔法技（需有傷害骰）皆可
         const _validAtk = (s) => !!(s && s.type === 'atk' && !s.healSlot && (s.dmgType === 'physical' ? true : (s.dmgDice || s.multiDmg)));
         const _isMagicAtk = (s) => !!(s && s.type === 'atk' && s.dmgType !== 'physical' && (s.dmgDice || s.multiDmg));
@@ -120,7 +120,7 @@
             });
         }
         return {
-            name: p.name || myName, cls: p.cls, lv: p.lv, avatar: p.avatar || null, darkelf: !!p.darkelf,
+            name: p.name || myName, cls: p.cls, lv: p.lv, avatar: p.avatar || null, darkelf: !!p.darkelf, magicEvade: !!(p.darkelf || p._setMoon5),
             mhp: p.mhp, mmp: p.mmp,
             ac: d.ac, mr: d.mr, er: d.er, dr: d.dr || 0,
             meleeHit: d.meleeHit, meleeDmg: d.meleeDmg, meleeCrit: d.meleeCrit, meleeCritDmg: d.meleeCritDmg,

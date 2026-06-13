@@ -1258,7 +1258,7 @@ const DB = {
         "bk_elf_mr": { type: "skillbk", n: "精靈水晶(魔法防禦)", p: 3000, sk: "sk_elf_mr", gachaWeight: 100 },
         "bk_elf_mind": { type: "skillbk", n: "精靈水晶(心靈轉換)", p: 3000, sk: "sk_elf_mind", gachaWeight: 100 },
         "bk_elf_worldtree": { type: "skillbk", n: "精靈水晶(世界樹的呼喚)", p: 3000, sk: "sk_elf_worldtree", gachaWeight: 100 },
-        "bk_elf_triple": { type: "skillbk", n: "精靈水晶(三重矢)", p: 3000, sk: "sk_elf_triple", gachaWeight: 10 },
+        "bk_elf_triple": { type: "skillbk", n: "精靈水晶(六重矢)", p: 3000, sk: "sk_elf_triple", gachaWeight: 10 },
 
         "bk_elf_purify": { type: "skillbk", n: "精靈水晶(淨化精神)", p: 7500, sk: "sk_elf_purify", gachaWeight: 80 },
         "bk_elf_eleres": { type: "skillbk", n: "精靈水晶(屬性防禦)", p: 7500, sk: "sk_elf_eleres", gachaWeight: 20 },
@@ -1980,7 +1980,7 @@ const DB = {
         // ================= 【騎士技術】 =================
         "sk_solid_shield": { n: "堅固防護", type: "buff", tier: 2, reqK: 40, hpCost: 30, mp: 5, dur: 180, reqShield: true, d: { er: 15 } },
         "sk_reduction_armor": { n: "增幅防禦", type: "buff", tier: 1, reqK: 30, mp: 10, dur: 1200 },
-        "sk_shock_stun": { n: "衝擊之暈", type: "atk", tier: 1, reqK: 30, mp: 12, dmgType: "physical", reqWpn: "nonbow", stun: 150 },
+        "sk_shock_stun": { n: "衝擊之暈", type: "atk", tier: 1, reqK: 30, mp: 12, dmgType: "physical", reqWpn: "nonbow", stun: 150, stunChance: 50 },
         "sk_spike_armor": { n: "尖刺盔甲", type: "buff", tier: 1, reqK: 30, mp: 10, dur: 1200, d: { meleeHit: 5 } },
 
         // ================= 【妖精精靈魔法】 =================
@@ -1988,7 +1988,7 @@ const DB = {
         "sk_elf_mr": { n: "魔法防禦", type: "buff", tier: 1, reqE: 10, mp: 10, dur: 1200, d: { mr: 10 } },
         "sk_elf_mind": { n: "心靈轉換", type: "convert", tier: 1, reqE: 10, hpCost: 8, mpGain: 2 },
         "sk_elf_worldtree": { n: "世界樹的呼喚", type: "passive", tier: 1, reqE: 10 },
-        "sk_elf_triple": { n: "三重矢", type: "atk", tier: 1, reqE: 10, mp: 15, dmgType: "physical", ranged: true, reqWpn: "bow", hits: 3 },
+        "sk_elf_triple": { n: "六重矢", type: "atk", tier: 1, reqE: 10, mp: 15, dmgType: "physical", ranged: true, reqWpn: "bow", hits: 6 },
 
         // 二階 (Lv 20)
         "sk_elf_purify": { n: "淨化精神", type: "buff", tier: 2, reqE: 20, mp: 10, dur: 1200, d: { wis: 3 } },
@@ -3066,10 +3066,12 @@ d.mr += (baseMr + bonusMr);
 
     d.spdMult = spdMult;   // 速度倍率（受加速/勇敢藥水/精靈餅乾/變身影響），供自動施法間隔使用
     d.aspd = d.aspd * spdMult;
-    if (p.darkelf) {   // 黑妖天生：高爆擊 + 高爆傷 + 高迴避，AC略升(防禦稍弱)
-        d.meleeCrit += 7; d.rangedCrit += 7;
-        d.meleeCritDmg += 20; d.rangedCritDmg += 20;
-        d.er = (d.er || 0) + 3; d.ac += 2;
+    if (p.darkelf) {   // 黑妖天生：高爆擊 + 高爆傷 + 高傷害 + 高迴避（含閃魔法），AC略升(防禦稍弱)
+        d.meleeCrit += 15; d.rangedCrit += 15;
+        d.meleeCritDmg += 50; d.rangedCritDmg += 50;
+        d.meleeDmg += 10; d.rangedDmg += 10;
+        d.er = (d.er || 0) + 8; d.mr = (d.mr || 0) + 10; d.ac += 2;
+        p._setMoon5 = true;   // 天生「月光」：ER 可迴避魔法（黑妖學不到月光，改為天生具備）
     }
     if (p.adminSpdMult && p.adminSpdMult > 1) d.aspd = d.aspd / p.adminSpdMult;   // 管理員：攻速加快(倍數，越大越快)
     { let _gc = (typeof window !== 'undefined' && window.__GAME_CONFIG) ? window.__GAME_CONFIG : null; if (_gc && _gc.spdMult && _gc.spdMult > 1) d.aspd = d.aspd / _gc.spdMult; }   // 全服攻速倍率（管理者面板設定，所有玩家生效）
@@ -5814,10 +5816,10 @@ function allyReactIai(mob) {
     });
 }
 
-// 妖精協力：三重矢（3 次物理攻擊）後整體判定一次連射
+// 妖精協力：六重矢（6 次物理攻擊）後整體判定一次連射
 function allyTripleShot(ally) {
-    logCombat(`<span class="text-sky-300 font-bold">【協力·${ally._allyName}】</span>施放 三重矢！`, 'player');
-    for (let h = 0; h < 3; h++) {
+    logCombat(`<span class="text-sky-300 font-bold">【協力·${ally._allyName}】</span>施放 六重矢！`, 'player');
+    for (let h = 0; h < 6; h++) {
         let t = getTarget(); if (!t || t.curHp <= 0) break;
         allyAttackOnce(ally);
     }
@@ -5902,7 +5904,7 @@ function renderAllyNPC(div) {
         </div>`;
     }).join('');
     div.innerHTML = `<div class="flex flex-col gap-3 p-1">
-        <div class="text-slate-300 text-sm leading-relaxed">招募其他存檔位的角色一起作戰，<b class="text-amber-300">費用＝該角色等級 × 10000 金幣</b>。協力傭兵戰鬥中不會陣亡，但<b class="text-red-300">你一旦死亡會全部解散，需重新花金幣招募</b>；存讀檔不會使其消失。法師以魔法、妖精以弓/三重矢、騎士以物理（含看破/殺戮）出手。<br><span class="text-slate-400">提示：切換那名角色的裝備或升級後，需「解除→重新招募」才會更新戰力快照。</span></div>
+        <div class="text-slate-300 text-sm leading-relaxed">招募其他存檔位的角色一起作戰，<b class="text-amber-300">費用＝該角色等級 × 10000 金幣</b>。協力傭兵戰鬥中不會陣亡，但<b class="text-red-300">你一旦死亡會全部解散，需重新花金幣招募</b>；存讀檔不會使其消失。法師以魔法、妖精以弓/六重矢、騎士以物理（含看破/殺戮）出手。<br><span class="text-slate-400">提示：切換那名角色的裝備或升級後，需「解除→重新招募」才會更新戰力快照。</span></div>
         <div class="text-sm">你的金幣：<span class="text-yellow-400 font-bold">${(player.gold||0).toLocaleString()}</span></div>
         ${rows}
     </div>`;

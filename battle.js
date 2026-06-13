@@ -64,6 +64,8 @@ function physicalAttack(atk, def) {
 
 // 魔法攻擊
 function magicAttack(atk, def, spell) {
+    // 黑妖／月光5：以身法迴避魔法（必中魔法先判定 ER 迴避）
+    if (def.magicEvade && def.er > 0 && roll(1, 100) <= def.er) return { type: 'evade' };
     let effMr = def.mr || 0;
     let mrFactor;
     if (effMr <= 100) mrFactor = (100 - effMr / 2) / 100;
@@ -138,8 +140,22 @@ function simulate(profileA, profileB, opts) {
             if (me.p.spell && me.atkSkCd <= 0 && me.mp >= me.p.spell.mp) {
                 me.mp -= me.p.spell.mp;
                 me.atkSkCd = me.castInterval;
-                if (me.p.spell.phys) {
-                    // 物理攻擊技能（三重矢/衝擊之暈）：依 hits 次數連續物理攻擊（用武器骰）
+                if (me.p.spell.phys && me.p.spell.stun) {
+                    // 衝擊之暈：擲暈眩判定。暈到→1.5~2 倍傷害並暈眩；沒暈到→僅 1 點傷害
+                    let r = physicalAttack(me.p, foe.p);
+                    let stunOk = (r.type === 'hit') && (Math.random() * 100 < (me.p.spell.stunChance || 50));
+                    if (stunOk) {
+                        let mult = 1.5 + Math.random() * 0.5;                 // 1.5 ~ 2.0 倍
+                        let dmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * mult));
+                        foe.hp -= dmg;
+                        foe.stunT = Math.max(foe.stunT, Math.round(me.p.spell.stun / 10));
+                        push(t, side, 'crit', `${me.name} 施放 ${me.p.spell.name} 命中要害！對 ${foe.name} 造成 ${dmg} 點傷害並暈眩 ${(Math.round(me.p.spell.stun / 10) / 10).toFixed(1)} 秒！`, dmg);
+                    } else {
+                        foe.hp -= 1;
+                        push(t, side, 'attack', `${me.name} 施放 ${me.p.spell.name}，未能暈眩 ${foe.name}，僅造成 1 點傷害。`, 1);
+                    }
+                } else if (me.p.spell.phys) {
+                    // 多段物理攻擊技能（六重矢等）：依 hits 次數連續物理攻擊（用武器骰）
                     let hits = Math.max(1, me.p.spell.hits || 1);
                     let total = 0, anyCrit = false, parts = [];
                     for (let h = 0; h < hits; h++) {
@@ -154,17 +170,16 @@ function simulate(profileA, profileB, opts) {
                     let detail = hits > 1 ? `[${parts.join(', ')}] 共 ${total}` : `${total}`;
                     push(t, side, anyCrit ? 'crit' : 'attack',
                         `${me.name} 施放 ${me.p.spell.name}，對 ${foe.name} 造成 ${detail} 點物理傷害。`, total);
-                    // 衝擊之暈等物理技能：命中後使對手暈眩（stun 單位約 10ms，/10 換算 tick；150→15tick=1.5秒）
-                    if (me.p.spell.stun && total > 0 && foe.hp > 0) {
-                        foe.stunT = Math.max(foe.stunT, Math.round(me.p.spell.stun / 10));
-                        push(t, side, 'attack', `${foe.name} 被 ${me.name} 的衝擊暈眩了！（${(Math.round(me.p.spell.stun / 10) / 10).toFixed(1)} 秒）`, 0);
-                    }
                 } else {
                     let r = magicAttack(me.p, foe.p, me.p.spell);
-                    let mdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * PVP_MAGIC));
-                    foe.hp -= mdmg;
-                    push(t, side, r.crit ? 'crit' : 'magic',
-                        `${me.name} 施放 ${r.spell}，對 ${foe.name} 造成 ${mdmg} 點傷害${r.crit ? '（爆擊！）' : ''}。`, mdmg);
+                    if (r.type === 'evade') {
+                        push(t, side, 'evade', `${foe.name} 以身法迴避了 ${me.name} 的魔法攻擊！`, 0);
+                    } else {
+                        let mdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * PVP_MAGIC));
+                        foe.hp -= mdmg;
+                        push(t, side, r.crit ? 'crit' : 'magic',
+                            `${me.name} 施放 ${r.spell}，對 ${foe.name} 造成 ${mdmg} 點傷害${r.crit ? '（爆擊！）' : ''}。`, mdmg);
+                    }
                 }
                 if (foe.hp <= 0) break;
             }
