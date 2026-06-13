@@ -849,8 +849,8 @@ const DB = {
         "arm_113": { n: "鋼鐵盾牌", type: "arm", slot: "shield", ac: 3, req: "knight", safe: 4, p: 16500, gachaWeight: 20, block: 60 },
         "arm_114": { n: "受詛咒的魔法書", type: "arm", slot: "shield", ac: 1, req: "mage", p: 1, gachaWeight: 0, block: 10 },
         "arm_115": { n: "魔法能量之書", type: "arm", slot: "shield", ac: 2, req: "mage", safe: 4, p: 9800, int: 1, gachaWeight: 20, block: 10 },
-        "acc_116": { n: "傳送控制戒指", type: "acc", slot: "ring", ac: 0, req: "all", safe: 0, p: 50000, gachaWeight: 1, d: "攜帶在背包即可生效（無需裝備）：手動施放傳送術/使用瞬移卷軸時必定遭遇 BOSS。" },
-        "acc_117": { n: "變形控制戒指", type: "acc", slot: "ring", ac: 0, req: "all", safe: 0, p: 50000, gachaWeight: 1, d: "攜帶在背包即可生效（無需裝備）：使用變形卷軸時可指定變身型態。" },
+        "acc_116": { n: "傳送控制戒指", type: "acc", slot: "ring", ac: 0, str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10, req: "all", safe: 0, p: 50000, gachaWeight: 10, d: "攜帶在背包即可生效（無需裝備）：手動施放傳送術/使用瞬移卷軸時必定遭遇 BOSS。裝備後各屬性 +10。" },
+        "acc_117": { n: "變形控制戒指", type: "acc", slot: "ring", ac: 0, str: 5, dex: 5, con: 5, int: 5, wis: 5, cha: 5, req: "all", safe: 0, p: 50000, gachaWeight: 10, d: "攜帶在背包即可生效（無需裝備）：使用變形卷軸時可指定變身型態。裝備後各屬性 +5。" },
         "rng_mr": { n: "抗魔戒指", type: "acc", slot: "ring", ac: 0, mr: 5, req: "all", safe: 0, p: 10000, gachaWeight: 1 },
         "acc_118": { n: "守護戒指", type: "acc", slot: "ring", ac: 1, req: "all", safe: 0, p: 10000, gachaWeight: 1 },
         "acc_119": { n: "長者戒指", type: "acc", slot: "ring", ac: 0, req: "all", safe: 0, p: 10000, mmp: 10, mpR: 1, gachaWeight: 1 },
@@ -2619,6 +2619,7 @@ function recomputeStats() {
         if (ed.int) d.int += ed.int;
         if (ed.con) d.con += ed.con;
         if (ed.wis) d.wis += ed.wis;
+        if (ed.cha) d.cha += ed.cha;
     }
     for (let k in p.buffs) {
         if (p.buffs[k] > 0 && DB.skills[k] && DB.skills[k].d) {
