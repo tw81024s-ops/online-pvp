@@ -9225,50 +9225,84 @@ function _sherineSets() {
 
 window.openSherineScrollPicker = function (uid) {
     try {
-        var it = player.inv.find(function (i) { return i.uid === uid; });
-        if (!it || (it.cnt || 0) < 1) { logSys('沒有可用的席琳附加捲軸。'); return; }
-        var rows = [];
-        SHERINE_SLOT_ORDER.forEach(function (slot) {
-            var e = player.eq && player.eq[slot]; if (!e) return;
-            var d = DB.items[e.id]; if (!d) return;
-            rows.push({ slot: slot, e: e, name: d.n });
-        });
         var old = document.getElementById('sherine-pick-overlay'); if (old) old.remove();
         var ov = document.createElement('div'); ov.id = 'sherine-pick-overlay';
         ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;';
-        var box = '<div style="background:#0f172a;border:1px solid #334155;border-radius:14px;max-width:440px;width:100%;max-height:84vh;overflow:auto;padding:18px;">';
-        box += '<div style="color:#6ee7b7;font-weight:bold;font-size:18px;margin-bottom:4px;">✦ 席琳附加捲軸</div>';
-        box += '<div style="color:#94a3b8;font-size:13px;margin-bottom:12px;">選一件已裝備的部位 → 隨機抽一套，附加「該部位對應」的席琳效果（已有效果會覆蓋）。剩餘捲軸：' + (it.cnt || 0) + '</div>';
-        if (!rows.length) box += '<div style="color:#fca5a5;font-size:14px;margin:10px 0;">目前沒有可附加的部位（需先裝備：頭盔／盔甲／手套／長靴／斗篷其一）。</div>';
-        box += '<div id="sherine-pick-list"></div>';
-        box += '<button id="sherine-pick-close" style="margin-top:10px;width:100%;background:#334155;color:#e2e8f0;border:none;border-radius:8px;padding:11px;font-weight:bold;cursor:pointer;">關閉</button></div>';
-        ov.innerHTML = box;
         document.body.appendChild(ov);
         ov.addEventListener('click', function (ev) { if (ev.target === ov) ov.remove(); });
-        document.getElementById('sherine-pick-close').onclick = function () { ov.remove(); };
-        var list = document.getElementById('sherine-pick-list');
-        rows.forEach(function (r) {
-            var b = document.createElement('button');
-            b.style.cssText = 'display:block;width:100%;text-align:left;margin-bottom:8px;background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px 12px;color:#e2e8f0;cursor:pointer;font-size:14px;';
-            var cur = r.e.seteff ? ('　<span style="color:#6ee7b7;">現:' + r.e.seteff + '</span>') : '';
-            b.innerHTML = '<b>' + SHERINE_SLOT_NAME[r.slot] + '</b>：' + r.name + cur;
-            b.onclick = function () {
-                var cur2 = player.inv.find(function (i) { return i.uid === uid; });
-                if (!cur2 || (cur2.cnt || 0) < 1) { ov.remove(); return; }
-                var sets = _sherineSets();
-                var pick = sets[Math.floor(Math.random() * sets.length)];
-                var eff = pick.effs[SHERINE_SLOT_IDX[r.slot]];
-                r.e.seteff = eff;
-                cur2.cnt -= 1;
-                if (cur2.cnt <= 0) { var ix = player.inv.indexOf(cur2); if (ix >= 0) player.inv.splice(ix, 1); }
-                try { calcStats(); } catch (e) { }
-                try { saveGame(); } catch (e) { }
-                logSys('<span class="c-sherine font-bold">✦ ' + SHERINE_SLOT_NAME[r.slot] + '（' + r.name + '）附加了席琳效果：【' + eff + '】！</span>');
-                ov.remove();
-                window.openSherinePanel('progress');
-            };
-            list.appendChild(b);
-        });
+
+        var BOX = 'background:#0f172a;border:1px solid #334155;border-radius:14px;max-width:440px;width:100%;max-height:84vh;overflow:auto;padding:18px;';
+        var BTN = 'border:none;border-radius:8px;padding:11px;font-weight:bold;cursor:pointer;font-size:14px;';
+
+        function scrollLeft() { var it = player.inv.find(function (i) { return i.uid === uid; }); return it ? (it.cnt || 0) : 0; }
+
+        function renderPick() {
+            var left = scrollLeft();
+            var rows = [];
+            SHERINE_SLOT_ORDER.forEach(function (slot) {
+                var e = player.eq && player.eq[slot]; if (!e) return;
+                var d = DB.items[e.id]; if (!d) return;
+                rows.push({ slot: slot, e: e, name: d.n });
+            });
+            var h = '<div style="' + BOX + '">';
+            h += '<div style="color:#6ee7b7;font-weight:bold;font-size:18px;margin-bottom:4px;">✦ 席琳附加捲軸</div>';
+            h += '<div style="color:#94a3b8;font-size:13px;margin-bottom:12px;">點選一個部位 → 隨機抽一套，附加「該部位對應」的效果。剩餘捲軸：' + left + ' 張</div>';
+            if (!left) h += '<div style="color:#fca5a5;font-size:14px;margin:10px 0;">沒有可用的席琳附加捲軸了。</div>';
+            else if (!rows.length) h += '<div style="color:#fca5a5;font-size:14px;margin:10px 0;">目前沒有可附加的部位（需先裝備：頭盔／盔甲／手套／長靴／斗篷其一）。</div>';
+            h += '<div id="sp-list"></div>';
+            h += '<button id="sp-close" style="margin-top:10px;width:100%;background:#334155;color:#e2e8f0;' + BTN + '">關閉</button></div>';
+            ov.innerHTML = h;
+            ov.querySelector('#sp-close').onclick = function () { ov.remove(); };
+            var list = ov.querySelector('#sp-list');
+            rows.forEach(function (r) {
+                var b = document.createElement('button');
+                b.style.cssText = 'display:block;width:100%;text-align:left;margin-bottom:8px;background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px 12px;color:#e2e8f0;cursor:pointer;font-size:14px;';
+                var cur = r.e.seteff ? ('　<span style="color:#6ee7b7;">現:' + r.e.seteff + '</span>') : '';
+                b.innerHTML = '<b>' + SHERINE_SLOT_NAME[r.slot] + '</b>：' + r.name + cur;
+                b.onclick = function () { applyTo(r); };
+                list.appendChild(b);
+            });
+        }
+
+        function applyTo(r) {
+            var it = player.inv.find(function (i) { return i.uid === uid; });
+            if (!it || (it.cnt || 0) < 1) { renderPick(); return; }
+            var sets = _sherineSets();
+            var pick = sets[Math.floor(Math.random() * sets.length)];
+            var eff = pick.effs[SHERINE_SLOT_IDX[r.slot]];
+            r.e.seteff = eff;
+            it.cnt -= 1;
+            if (it.cnt <= 0) { var ix = player.inv.indexOf(it); if (ix >= 0) player.inv.splice(ix, 1); }
+            try { calcStats(); } catch (e) { }
+            try { saveGame(); } catch (e) { }
+            logSys('<span class="c-sherine font-bold">✦ ' + SHERINE_SLOT_NAME[r.slot] + '（' + r.name + '）附加了：【' + eff + '】！</span>');
+            renderResult(r, pick, eff);
+        }
+
+        function renderResult(r, pick, eff) {
+            var equipped = {}; for (var k in player.eq) { var e = player.eq[k]; if (e && e.seteff) equipped[e.seteff] = 1; }
+            var cnt = 0; pick.effs.forEach(function (ef) { if (equipped[ef]) cnt++; });
+            var tiers = [2, 3, 5], lines = '';
+            pick.text.forEach(function (line, i) { var on = cnt >= (tiers[i] || 9); lines += '<div style="font-size:12.5px;color:' + (on ? '#34d399' : '#64748b') + ';margin:1px 0;">' + (on ? '✓ ' : '· ') + line + '</div>'; });
+            var left = scrollLeft();
+            var h = '<div style="' + BOX + '">';
+            h += '<div style="text-align:center;font-size:32px;line-height:1;margin-bottom:2px;">✦</div>';
+            h += '<div style="text-align:center;color:#6ee7b7;font-weight:bold;font-size:18px;margin-bottom:8px;">附加成功！</div>';
+            h += '<div style="text-align:center;color:#e2e8f0;font-size:14px;margin-bottom:10px;">' + SHERINE_SLOT_NAME[r.slot] + '（' + r.name + '）<br><span style="color:#34d399;font-weight:bold;font-size:18px;">【' + eff + '】</span></div>';
+            h += '<div style="border:1px solid #334155;border-radius:10px;padding:10px 12px;background:#111c33;margin-bottom:12px;">';
+            h += '<div style="color:#a7f3d0;font-weight:bold;font-size:14px;margin-bottom:4px;">' + pick.g + '套裝　已裝 ' + cnt + ' / 5 件</div>' + lines + '</div>';
+            h += '<div style="display:flex;gap:8px;">';
+            if (left > 0) h += '<button id="sp-again" style="flex:1;background:#059669;color:#fff;' + BTN + '">再附加（剩 ' + left + '）</button>';
+            h += '<button id="sp-view" style="flex:1;background:#1e293b;color:#a7f3d0;' + BTN + '">查看進度</button>';
+            h += '<button id="sp-close2" style="flex:1;background:#334155;color:#e2e8f0;' + BTN + '">關閉</button>';
+            h += '</div></div>';
+            ov.innerHTML = h;
+            ov.querySelector('#sp-close2').onclick = function () { ov.remove(); };
+            var ag = ov.querySelector('#sp-again'); if (ag) ag.onclick = renderPick;
+            ov.querySelector('#sp-view').onclick = function () { ov.remove(); window.openSherinePanel('progress'); };
+        }
+
+        renderPick();
     } catch (e) { logSys('捲軸使用失敗：' + e.message); }
 };
 
