@@ -3298,6 +3298,7 @@ function _polyGachaRender(msg){
       '<div class="flex gap-2 mb-2">'+
         '<button class="btn flex-1 !py-2" onclick="_polyDoPull()">🎲 抽卡 ('+POLY_GACHA_COST+'金)</button>'+
         '<button class="btn flex-1 !py-2" onclick="_polyDo10Pull()">🎲 10連抽 ('+(POLY_GACHA_COST*10).toLocaleString()+'金)</button>'+
+        '<button class="btn flex-1 !py-2" onclick="_polyDo100Pull()">🎲 100連抽 ('+(POLY_GACHA_COST*100).toLocaleString()+'金)</button>'+
       '</div>'+
       '<div class="text-slate-400 mb-1" style="font-size:11px">🔨 合成（按一下把該階材料全部合成，每4張機率得1隻；變身中的那隻會保留）：</div>'+
       '<div class="flex flex-wrap gap-1 mb-2">'+synthBtns+'</div>'+
@@ -3316,6 +3317,7 @@ function openPolyGacha(){
 function closePolyGacha(){ let m=document.getElementById('poly-gacha-modal'); if(m) m.classList.add('hidden'); }
 function _polyDoPull(){ let r=polyGachaPull(); _polyGachaRender(r?'抽中 <span class="'+r.color+' font-bold">【'+r.rarity+'】'+r.form.n+'</span>！':''); }
 function _polyDo10Pull(){ if((player.gold||0)<POLY_GACHA_COST*10){ _polyGachaRender('<span class="text-rose-300">金幣不足（10連抽需 '+(POLY_GACHA_COST*10).toLocaleString()+'）</span>'); return; } let res=[]; for(let i=0;i<10;i++){ let r=polyGachaPull(); if(r) res.push(r); else break; } let html=res.map(r=>'<span class="'+r.color+' font-bold">'+r.form.n+'</span>').join('、'); _polyGachaRender('<div class="text-left" style="font-size:12px;line-height:1.8">🎲 本次10連：'+html+'</div>'); }
+function _polyDo100Pull(){ if((player.gold||0)<POLY_GACHA_COST*100){ _polyGachaRender('<span class="text-rose-300">金幣不足（100連抽需 '+(POLY_GACHA_COST*100).toLocaleString()+'）</span>'); return; } let res=[]; for(let i=0;i<100;i++){ let r=polyGachaPull(); if(r) res.push(r); else break; } let agg={}; res.forEach(r=>{ let k=r.form.n; if(!agg[k]) agg[k]={color:r.color,n:0}; agg[k].n++; }); let html=Object.entries(agg).sort((a,b)=>b[1].n-a[1].n).map(([k,v])=>'<span class="'+v.color+' font-bold">'+k+' ×'+v.n+'</span>').join('、'); _polyGachaRender('<div class="text-left" style="font-size:12px;line-height:1.8">🎲 本次100連：'+html+'</div>'); }
 function _polyDoSynth(t){
     let r=polySynthAll(t); if(!r){ _polyGachaRender(''); return; }
     let col=RARITY_POLY[t].color, msg;
@@ -10698,6 +10700,9 @@ function renderPandoraGacha(div) {
             <button id="btn-gacha10" class="btn bg-purple-700 hover:bg-purple-600 border-purple-500 py-3 px-8 text-lg font-bold rounded-full shadow-[0_0_15px_rgba(126,34,206,0.5)] transition-all transform hover:scale-105" onclick="doPandoraGacha10()">
                 🎰 10 連抽（${ticketCount>=10?'10 張抽獎卷':(shopPrice(300000).toLocaleString()+' 金幣')}）
             </button>
+            <button id="btn-gacha100" class="btn bg-fuchsia-800 hover:bg-fuchsia-700 border-fuchsia-500 py-3 px-8 text-lg font-bold rounded-full shadow-[0_0_15px_rgba(192,38,211,0.5)] transition-all transform hover:scale-105 mt-2" onclick="doPandoraGacha100()">
+                🎰 100 連抽（${ticketCount>=100?'100 張抽獎卷':(shopPrice(3000000).toLocaleString()+' 金幣')}）
+            </button>
             <div id="gacha10-results" class="flex flex-wrap justify-center gap-x-3 gap-y-1 mt-3 text-sm"></div>
         </div>
 
@@ -10731,6 +10736,8 @@ function refreshGachaTicketCount() {
     if (b1) b1.innerHTML = `🎰 抽獎（${cnt > 0 ? '1 張抽獎卷' : (shopPrice(30000).toLocaleString()+' 金幣')}）`;
     let b10 = document.getElementById('btn-gacha10');
     if (b10) b10.innerHTML = `🎰 10 連抽（${cnt >= 10 ? '10 張抽獎卷' : (shopPrice(300000).toLocaleString()+' 金幣')}）`;
+    let b100 = document.getElementById('btn-gacha100');
+    if (b100) b100.innerHTML = `🎰 100 連抽（${cnt >= 100 ? '100 張抽獎卷' : (shopPrice(3000000).toLocaleString()+' 金幣')}）`;
 }
 
 
@@ -10934,6 +10941,46 @@ function doPandoraGacha() {
 }
 
 // 10 連抽：10 格同時旋轉，一次抽 10 樣（每樣各自 1% 機率帶屬性/遠古/祝福詞綴）
+function doPandoraGacha100() {
+    if (gachaRolling) return;
+    let ticketId = "new_item_239";
+    let cost = shopPrice(3000000);
+    let ticketIndex = player.inv.findIndex(i => i.id === ticketId);
+    let ticketCnt = (ticketIndex !== -1) ? player.inv[ticketIndex].cnt : 0;
+    let usedTicket = false;
+    if (ticketCnt >= 100) {
+        player.inv[ticketIndex].cnt -= 100;
+        if (player.inv[ticketIndex].cnt <= 0) player.inv.splice(ticketIndex, 1);
+        usedTicket = true;
+    } else if (player.gold >= cost) {
+        player.gold -= cost;
+    } else {
+        document.getElementById('gacha-msg').innerHTML = `<span class="text-red-400">100 連抽需要 100 張潘朵拉抽獎卷，或 ${cost.toLocaleString()} 金幣！</span>`;
+        return;
+    }
+    // 一次結算 100 件入包
+    let results = [];
+    for (let k = 0; k < 100; k++) {
+        let fid = getWeightedGachaResult();
+        let gi = gainItem(fid, (GACHA_BULK[fid] || 1), false, false, true);
+        if (!gi) gi = { id: fid, en: 0, bless: false, anc: false, attr: false, cnt: 1 };
+        results.push(gi);
+    }
+    updateUI(); saveGame(); refreshGachaTicketCount();
+    // 彙總顯示（依名稱＋強化＋詞綴歸併數量）
+    let agg = {};
+    results.forEach(gi => {
+        let d = DB.items[gi.id]; if (!d) return;
+        let key = (gi.en > 0 ? ('+' + gi.en + ' ') : '') + d.n + (gi.bless ? '(祝福)' : '') + (gi.anc ? '(遠古)' : '') + (gi.attr ? '(屬性)' : '');
+        if (!agg[key]) agg[key] = { c: d.c || 'text-white', n: 0 };
+        agg[key].n++;
+    });
+    let out = Object.entries(agg).sort((a, b) => b[1].n - a[1].n)
+        .map(([k, v]) => `<span class="${v.c}">${k}${v.n > 1 ? (' ×' + v.n) : ''}</span>`).join('、');
+    document.getElementById('gacha-msg').innerHTML = `<span class="text-fuchsia-300 font-bold">🎉 100 連抽完成！（消耗 ${usedTicket ? '100 張抽獎卷' : cost.toLocaleString() + ' 金幣'}）</span>`;
+    document.getElementById('gacha10-results').innerHTML = out;
+}
+
 function doPandoraGacha10() {
     if (gachaRolling) return;
     let ticketId = "new_item_239";
