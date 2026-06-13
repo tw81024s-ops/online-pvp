@@ -7651,7 +7651,7 @@ function openModal(item, isEq, slot) {
     if (isEq) {
         act += `<button class="col-span-2 w-full btn border-red-700 bg-red-900 hover:bg-red-800 text-red-200 py-3 text-lg font-bold" onclick="unequipItem('${slot}')">卸除</button>`;
     } else {
-        if(d.type === 'pot' || d.type === 'skillbk' || d.eff === 'panacea') {   // 萬能藥(misc/eff=panacea)亦顯示使用按鈕
+        if(d.type === 'pot' || d.type === 'skillbk' || d.eff === 'panacea' || d.eff === 'reborn') {   // 萬能藥(misc/eff=panacea)、轉生藥水(eff=reborn)亦顯示使用按鈕
             act += `<button class="col-span-2 w-full btn border-green-700 bg-emerald-800 hover:bg-emerald-700 text-green-100 py-3 text-lg font-bold" onclick="useItem('${item.uid}')">使用</button>`;
         }
         if(d.type === 'scroll') {
