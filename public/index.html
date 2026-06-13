@@ -267,6 +267,40 @@
   #creation-screen h1 { font-size: 1.35rem !important; }
 }
     </style>
+    <style id="mobile-ux">
+@media (max-width:1024px){
+  /* 觸控手感：移除點擊延遲與藍框 */
+  button,.btn,a,[onclick]{ touch-action:manipulation; }
+  *{ -webkit-tap-highlight-color:rgba(255,255,255,.08); }
+
+  /* 1) 分頁列：黏在頂端、隨時可切，放大好點 */
+  .tab-bar{ position:sticky !important; top:0 !important; z-index:40 !important;
+    box-shadow:0 6px 16px rgba(0,0,0,.45) !important; }
+  .tab-bar .btn{ min-height:48px !important; font-size:15px !important; padding:10px 2px !important; }
+
+  /* 2) 一般按鈕加大觸控區 */
+  .btn{ min-height:42px; }
+
+  /* 3) 分頁內容不要各自開小捲軸 → 隨整頁捲動，少一層卡頓 */
+  [id^="tab-"]{ height:auto !important; max-height:none !important; overflow:visible !important; }
+
+  /* 4) 物品視窗：原本兩欄並排會超出手機 → 改全螢幕直排、可整體捲動 */
+  #item-modal{ position:fixed !important; inset:0 !important; transform:none !important;
+    width:100% !important; height:100% !important; max-width:100% !important;
+    flex-direction:column !important; align-items:stretch !important; justify-content:flex-start !important;
+    gap:10px !important; padding:12px !important; overflow-y:auto !important;
+    background:rgba(0,0,0,.66) !important; z-index:80 !important; }
+  #item-modal > div{ width:100% !important; min-width:0 !important; max-width:100% !important; }
+  #item-modal > div:not(#modal-compare){ order:1; }
+  #modal-compare{ order:2; max-width:100% !important; max-height:none !important; }
+  #modal-actions{ grid-template-columns:1fr 1fr !important; gap:10px !important; }
+  #modal-actions .btn{ min-height:48px !important; font-size:15px !important; }
+}
+@media (max-width:480px){
+  .tab-bar .btn{ min-height:44px !important; font-size:14px !important; }
+  #modal-actions{ grid-template-columns:1fr !important; }  /* 小螢幕動作鈕單欄、更好按 */
+}
+    </style>
 </head>
 <body class="min-h-screen lg:h-screen w-screen flex items-start lg:items-center justify-center p-2 lg:p-4 overflow-y-auto">
 
