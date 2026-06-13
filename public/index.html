@@ -3320,7 +3320,7 @@ function _polyDo10Pull(){ if((player.gold||0)<POLY_GACHA_COST*10){ _polyGachaRen
 function _polyDo100Pull(){
     if((player.gold||0)<POLY_GACHA_COST*100){ _polyGachaRender('<span class="text-rose-300">金幣不足（100連抽需 '+(POLY_GACHA_COST*100).toLocaleString()+'）</span>'); return; }
     if(window._polyRolling) return; window._polyRolling = true;
-    let res=[], done=0; const BATCH=10, TICK=400;
+    let res=[], done=0; const BATCH = 25, TICK = 80;
     function step(){
         for(let k=0;k<BATCH && done<100;k++,done++){ let r=polyGachaPull(); if(r) res.push(r); else { done=100; break; } }
         if(done<100){ _polyGachaRender('<span class="text-fuchsia-300">🎲 抽卡中… '+done+'/100</span>'); setTimeout(step, TICK); return; }
@@ -10984,7 +10984,7 @@ function doPandoraGacha100() {
     updateUI(); refreshGachaTicketCount();
     // 分批處理：每批 10 抽、間隔約 400ms，全程約 4 秒，避免一次跑 100 抽卡死頁面
     let results = [], done = 0;
-    const BATCH = 10, TICK = 400;
+    const BATCH = 25, TICK = 80;
     function step() {
         for (let k = 0; k < BATCH && done < 100; k++, done++) {
             let fid = getWeightedGachaResult();
