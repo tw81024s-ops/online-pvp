@@ -925,8 +925,8 @@ const DB = {
         "wpn_berserker": { n: "狂戰士斧", type: "wpn", w2h: true, dmgS: 9, dmgL: 9, hit: 0, spd: 0.8, req: "knight", safe: 6, p: 13520, gachaWeight: 10, eff: "crush" },
 		"wpn_silveraxe": { n: "銀斧", type: "wpn", w2h: true, dmgS: 8, dmgL: 14, hit: 0, spd: 1.0, req: "knight", safe: 6, p: 11200, unBonus: true, gachaWeight: 20, eff: "crush" },
         "hlm_elf": { n: "精靈皮盔", type: "arm", slot: "helm", ac: 1, req: "elf,mage", safe: 6, p: 120, gachaWeight: 100 },
-        "hlm_oasis": { n: "歐西斯頭盔", type: "arm", slot: "helm", ac: 2, req: "all", safe: 4, p: 10, gachaWeight: 100 },
-        "hlm_gnome": { n: "侏儒鐵盔", type: "arm", slot: "helm", ac: 4, req: "all", safe: 4, p: 30, gachaWeight: 100 },
+        "hlm_oasis": { n: "歐西斯頭盔", type: "arm", slot: "helm", ac: 1, req: "all", safe: 4, p: 10, gachaWeight: 100 },
+        "hlm_gnome": { n: "侏儒鐵盔", type: "arm", slot: "helm", ac: 2, req: "all", safe: 4, p: 30, gachaWeight: 100 },
         "arm_42": { n: "頭盔", type: "arm", slot: "helm", ac: 1, req: "all", safe: 4, p: 60, gachaWeight: 100 },
         "arm_43": { n: "騎士面甲", type: "arm", slot: "helm", ac: 3, req: "knight", safe: 4, p: 5500, gachaWeight: 70 },
         "hlm_mr": { n: "抗魔法頭盔", type: "arm", slot: "helm", ac: 2, mr: 4, mrPerEn: 1, req: "all", safe: 4, p: 4200, gachaWeight: 80 },
@@ -935,12 +935,12 @@ const DB = {
         "arm_46": { n: "敏捷魔法頭盔", type: "arm", slot: "helm", ac: 1, req: "knight", safe: 4, p: 30800, grantSkills: ["sk_helm_dex1", "sk_helm_dex2"], gachaWeight: 10 },
         "arm_47": { n: "力量魔法頭盔", type: "arm", slot: "helm", ac: 1, req: "knight", safe: 4, p: 25200, grantSkills: ["sk_helm_str1", "sk_helm_str2", "sk_helm_str3"], gachaWeight: 10 },
         "arm_48": { n: "皮帽子", type: "arm", slot: "helm", ac: 0, req: "all", safe: 4, p: 20, gachaWeight: 100 },
-        "hlm_silver": { n: "銀釘皮帽", type: "arm", slot: "helm", ac: 4, req: "all", safe: 4, p: 320, gachaWeight: 100 },
+        "hlm_silver": { n: "銀釘皮帽", type: "arm", slot: "helm", ac: 2, req: "all", safe: 4, p: 320, gachaWeight: 100 },
         "arm_49": { n: "皮頭盔", type: "arm", slot: "helm", ac: 1, req: "all", safe: 4, p: 60, gachaWeight: 100 },
-        "hlm_bone": { n: "骷髏頭盔", type: "arm", slot: "helm", ac: 6, req: "all", safe: 0, p: 100, gachaWeight: 100 },
-        "hlm_steel": { n: "鋼鐵頭盔", type: "arm", slot: "helm", ac: 6, req: "knight", safe: 4, p: 18250, gachaWeight: 20 },
-        "hlm_mage": { n: "法師之帽", type: "arm", slot: "helm", ac: 4, req: "mage", safe: 4, p: 4250, gachaWeight: 50 },
-        "hlm_dk": { n: "死亡騎士頭盔", type: "arm", slot: "helm", ac: 6, req: "knight", safe: 4, p: 36000, gachaWeight: 1 },
+        "hlm_bone": { n: "骷髏頭盔", type: "arm", slot: "helm", ac: 3, req: "all", safe: 0, p: 100, gachaWeight: 100 },
+        "hlm_steel": { n: "鋼鐵頭盔", type: "arm", slot: "helm", ac: 3, req: "knight", safe: 4, p: 18250, gachaWeight: 20 },
+        "hlm_mage": { n: "法師之帽", type: "arm", slot: "helm", ac: 2, req: "mage", safe: 4, p: 4250, gachaWeight: 50 },
+        "hlm_dk": { n: "死亡騎士頭盔", type: "arm", slot: "helm", ac: 3, req: "knight", safe: 4, p: 36000, gachaWeight: 1 },
         "arm_50": { n: "精靈敏捷頭盔", type: "arm", slot: "helm", ac: 1, req: "elf", safe: 6, p: 4800, dex: 1, gachaWeight: 20 },
         "arm_51": { n: "精靈體質頭盔", type: "arm", slot: "helm", ac: 1, req: "elf", safe: 6, p: 4800, con: 1, gachaWeight: 20 },
         "arm_52": { n: "騎士頭巾", type: "arm", slot: "helm", ac: 1, req: "knight", p: 1, gachaWeight: 0 },
@@ -949,7 +949,7 @@ const DB = {
         "arm_55": { n: "卡士柏之帽", type: "arm", slot: "helm", ac: 2, req: "mage", safe: 4, p: 23500, mmp: 25, gachaWeight: 1 },
         "arm_56": { n: "馬庫爾之帽", type: "arm", slot: "helm", ac: 2, req: "mage", safe: 4, p: 23500, int: 1, gachaWeight: 1 },
         "arm_57": { n: "西瑪之帽", type: "arm", slot: "helm", ac: 2, req: "mage", safe: 4, p: 23500, mmp: 15, mpR: 2, gachaWeight: 1 },
-        "hlm_kurt": { n: "克特頭盔", type: "arm", slot: "helm", ac: 6, req: "knight", safe: 4, p: 32000, gachaWeight: 1 },
+        "hlm_kurt": { n: "克特頭盔", type: "arm", slot: "helm", ac: 3, req: "knight", safe: 4, p: 32000, gachaWeight: 1 },
         "arm_58": { n: "淨化頭飾", type: "arm", slot: "helm", ac: 0, req: "elf", p: 1, gachaWeight: 0 },
         "amr_plate": { n: "金屬盔甲", type: "arm", slot: "armor", ac: 7, req: "knight", safe: 4, p: 51800, gachaWeight: 30 },
         "arm_59": { n: "水晶盔甲", type: "arm", slot: "armor", ac: 8, req: "knight", safe: 4, p: 48000, gachaWeight: 10 },
@@ -961,7 +961,7 @@ const DB = {
         "arm_65": { n: "鱗甲", type: "arm", slot: "armor", ac: 4, req: "knight,elf", safe: 4, p: 2800, gachaWeight: 100 },
         "arm_66": { n: "銀釘皮甲", type: "arm", slot: "armor", ac: 3, req: "all", safe: 4, p: 420, gachaWeight: 100 },
         "arm_67": { n: "環甲", type: "arm", slot: "armor", ac: 3, req: "all", safe: 4, p: 700, gachaWeight: 100 },
-        "amr_oasis": { n: "歐西斯環甲", type: "arm", slot: "armor", ac: 4, req: "all", safe: 4, p: 66, gachaWeight: 100 },
+        "amr_oasis": { n: "歐西斯環甲", type: "arm", slot: "armor", ac: 2, req: "all", safe: 4, p: 66, gachaWeight: 100 },
         "arm_68": { n: "小藤甲", type: "arm", slot: "armor", ac: 2, req: "all", safe: 4, p: 140, gachaWeight: 100 },
         "amr_jacket": { n: "皮夾克", type: "arm", slot: "armor", ac: 1, req: "all", safe: 4, p: 1, gachaWeight: 100 },
         "arm_69": { n: "抗魔法鏈甲", type: "arm", slot: "armor", ac: 5, mr: 4, mrPerEn: 1, req: "knight,elf", safe: 4, p: 11200, gachaWeight: 50 },
@@ -971,20 +971,20 @@ const DB = {
         "arm_72": { n: "精靈金屬盔甲", type: "arm", slot: "armor", ac: 6, req: "knight,elf", safe: 6, p: 57200, gachaWeight: 10 },
         "arm_73": { n: "精靈鏈甲", type: "arm", slot: "armor", ac: 5, req: "knight,elf", safe: 6, p: 2880, gachaWeight: 50 },
         "arm_74": { n: "木製的夾克", type: "arm", slot: "armor", ac: 1, req: "all", safe: 4, p: 1, gachaWeight: 100 },
-        "arm_75": { n: "皮背心", type: "arm", slot: "armor", ac: 2, req: "all", safe: 4, p: 10, gachaWeight: 100 },
+        "arm_75": { n: "皮背心", type: "arm", slot: "armor", ac: 1, req: "all", safe: 4, p: 10, gachaWeight: 100 },
         "arm_76": { n: "皮盔甲", type: "arm", slot: "armor", ac: 3, req: "all", safe: 4, p: 210, gachaWeight: 100 },
-        "arm_77": { n: "銀釘皮背心", type: "arm", slot: "armor", ac: 4, req: "all", safe: 4, p: 280, gachaWeight: 100 },
+        "arm_77": { n: "銀釘皮背心", type: "arm", slot: "armor", ac: 2, req: "all", safe: 4, p: 280, gachaWeight: 100 },
         "arm_78": { n: "硬皮背心", type: "arm", slot: "armor", ac: 3, req: "all", safe: 4, p: 240, gachaWeight: 100 },
-        "amr_bone": { n: "骷髏盔甲", type: "arm", slot: "armor", ac: 10, req: "all", safe: 0, p: 100, gachaWeight: 100 },
-        "arm_79": { n: "鋼鐵金屬盔甲", type: "arm", slot: "armor", ac: 14, req: "knight", safe: 4, p: 59800, gachaWeight: 20 },
-        "amr_magerobe": { n: "法師長袍", type: "arm", slot: "armor", ac: 6, req: "mage", safe: 4, p: 2800, gachaWeight: 50 },
+        "amr_bone": { n: "骷髏盔甲", type: "arm", slot: "armor", ac: 5, req: "all", safe: 0, p: 100, gachaWeight: 100 },
+        "arm_79": { n: "鋼鐵金屬盔甲", type: "arm", slot: "armor", ac: 7, req: "knight", safe: 4, p: 59800, gachaWeight: 20 },
+        "amr_magerobe": { n: "法師長袍", type: "arm", slot: "armor", ac: 3, req: "mage", safe: 4, p: 2800, gachaWeight: 50 },
         "arm_80": { n: "水龍鱗盔甲", type: "arm", slot: "armor", ac: 9, resWater: 20, req: "all", safe: 4, p: 136000, gachaWeight: 1 },
         "arm_81": { n: "地龍鱗盔甲", type: "arm", slot: "armor", ac: 9, resEarth: 20, req: "all", safe: 4, p: 136000, gachaWeight: 1 },
         "arm_82": { n: "火龍鱗盔甲", type: "arm", slot: "armor", ac: 9, resFire: 20, req: "all", safe: 4, p: 136000, gachaWeight: 1 },
         "arm_83": { n: "風龍鱗盔甲", type: "arm", slot: "armor", ac: 9, resWind: 20, req: "all", safe: 4, p: 136000, gachaWeight: 1 },
-        "amr_dk": { n: "死亡騎士盔甲", type: "arm", slot: "armor", ac: 14, req: "knight", safe: 4, p: 128000, gachaWeight: 1 },
+        "amr_dk": { n: "死亡騎士盔甲", type: "arm", slot: "armor", ac: 7, req: "knight", safe: 4, p: 128000, gachaWeight: 1 },
         "arm_84": { n: "黑長者長袍", type: "arm", slot: "armor", ac: 5, req: "mage", safe: 4, p: 124000, mmp: 50, mpR: 5, gachaWeight: 1 },
-        "amr_kurt": { n: "克特盔甲", type: "arm", slot: "armor", ac: 14, req: "knight", safe: 4, p: 126000, gachaWeight: 1 },
+        "amr_kurt": { n: "克特盔甲", type: "arm", slot: "armor", ac: 7, req: "knight", safe: 4, p: 126000, gachaWeight: 1 },
         "tsh_tshirt": { n: "T恤", type: "arm", slot: "tshirt", ac: 0, req: "all", safe: 4, p: 8500, gachaWeight: 50 },
         "arm_85": { n: "精靈T恤", type: "arm", slot: "tshirt", ac: 0, req: "elf", safe: 6, p: 6600, gachaWeight: 20 },
         "clk_elf": { n: "精靈斗篷", type: "arm", slot: "cloak", ac: 1, req: "all", safe: 6, p: 900, gachaWeight: 100 },
@@ -997,42 +997,42 @@ const DB = {
         "bot_short": { n: "短統靴", type: "arm", slot: "boots", ac: 1, req: "all", safe: 4, p: 299, gachaWeight: 100 },
         "arm_90": { n: "長靴", type: "arm", slot: "boots", ac: 2, req: "all", safe: 4, p: 3260, gachaWeight: 100 },
         "arm_91": { n: "皮涼鞋", type: "arm", slot: "boots", ac: 0, req: "all", safe: 4, p: 20, gachaWeight: 100 },
-        "arm_92": { n: "銀釘皮涼鞋", type: "arm", slot: "boots", ac: 2, req: "all", safe: 4, p: 230, gachaWeight: 100 },
+        "arm_92": { n: "銀釘皮涼鞋", type: "arm", slot: "boots", ac: 1, req: "all", safe: 4, p: 230, gachaWeight: 100 },
         "arm_93": { n: "皮長靴", type: "arm", slot: "boots", ac: 2, req: "all", safe: 4, p: 720, gachaWeight: 100 },
-        "arm_94": { n: "鋼鐵長靴", type: "arm", slot: "boots", ac: 6, req: "all", safe: 4, p: 16500, gachaWeight: 20 },
+        "arm_94": { n: "鋼鐵長靴", type: "arm", slot: "boots", ac: 3, req: "all", safe: 4, p: 16500, gachaWeight: 20 },
         "arm_95": { n: "深水長靴", type: "arm", slot: "boots", ac: 2, req: "all", safe: 4, p: 36500, mpR: 1, gachaWeight: 10 },
-        "bot_dk": { n: "死亡騎士長靴", type: "arm", slot: "boots", ac: 6, req: "knight", safe: 4, p: 24000, gachaWeight: 1 },
+        "bot_dk": { n: "死亡騎士長靴", type: "arm", slot: "boots", ac: 3, req: "knight", safe: 4, p: 24000, gachaWeight: 1 },
         "arm_96": { n: "黑長者涼鞋", type: "arm", slot: "boots", ac: 2, req: "mage", safe: 4, p: 21000, mmp: 25, mpR: 5, gachaWeight: 1 },
-        "arm_97": { n: "克特長靴", type: "arm", slot: "boots", ac: 6, req: "knight", safe: 4, p: 22000, gachaWeight: 1 },
+        "arm_97": { n: "克特長靴", type: "arm", slot: "boots", ac: 3, req: "knight", safe: 4, p: 22000, gachaWeight: 1 },
         "glv_glove": { n: "手套", type: "arm", slot: "gloves", ac: 0, req: "all", safe: 4, p: 1720, gachaWeight: 100 },
 		"glv_crystal": { n: "水晶手套", type: "arm", slot: "gloves", ac: 3, req: "knight", safe: 4, p: 11500, gachaWeight: 10 },
         "arm_98": { n: "腕甲", type: "arm", slot: "gloves", ac: 0, req: "knight,elf", safe: 4, p: 11550, rangedHit: 2, gachaWeight: 20 },
         "arm_99": { n: "力量手套", type: "arm", slot: "gloves", ac: 0, req: "all", safe: 4, p: 19800, str: 2, gachaWeight: 5 },
-        "arm_100": { n: "鋼鐵手套", type: "arm", slot: "gloves", ac: 2, req: "all", safe: 4, p: 11550, gachaWeight: 20 },
-        "glv_dk": { n: "死亡騎士手套", type: "arm", slot: "gloves", ac: 4, req: "knight", safe: 4, p: 18500, gachaWeight: 1 },
-        "arm_101": { n: "克特手套", type: "arm", slot: "gloves", ac: 4, req: "knight", safe: 4, p: 17500, gachaWeight: 1 },
+        "arm_100": { n: "鋼鐵手套", type: "arm", slot: "gloves", ac: 1, req: "all", safe: 4, p: 11550, gachaWeight: 20 },
+        "glv_dk": { n: "死亡騎士手套", type: "arm", slot: "gloves", ac: 2, req: "knight", safe: 4, p: 18500, gachaWeight: 1 },
+        "arm_101": { n: "克特手套", type: "arm", slot: "gloves", ac: 2, req: "knight", safe: 4, p: 17500, gachaWeight: 1 },
         "arm_102": { n: "保護者手套", type: "arm", slot: "gloves", ac: 0, req: "elf", safe: 4, p: 4500, mhp: 20, mmp: 20, gachaWeight: 20 },
         "arm_103": { n: "小盾牌", type: "arm", slot: "shield", ac: 1, req: "all", safe: 4, p: 84, gachaWeight: 100, block: 20 },
         "shd_elf": { n: "精靈盾牌", type: "arm", slot: "shield", ac: 2, req: "all", safe: 6, p: 3200, gachaWeight: 100, block: 40 },
-        "arm_104": { n: "阿克海盾牌", type: "arm", slot: "shield", ac: 2, req: "all", safe: 4, p: 28, gachaWeight: 100, block: 30 },
+        "arm_104": { n: "阿克海盾牌", type: "arm", slot: "shield", ac: 1, req: "all", safe: 4, p: 28, gachaWeight: 100, block: 30 },
         "arm_105": { n: "大盾牌", type: "arm", slot: "shield", ac: 2, req: "knight,elf", safe: 4, p: 1680, gachaWeight: 100, block: 50 },
-        "shd_gnome": { n: "侏儒圓盾", type: "arm", slot: "shield", ac: 4, req: "knight,elf", safe: 4, p: 240, gachaWeight: 100, block: 30 },
+        "shd_gnome": { n: "侏儒圓盾", type: "arm", slot: "shield", ac: 2, req: "knight,elf", safe: 4, p: 240, gachaWeight: 100, block: 30 },
         "arm_106": { n: "反射之盾", type: "arm", slot: "shield", ac: 2, req: "knight,elf", safe: 4, p: 28000, immStone: true, magicDrNonEle: 50, d: "受到無屬性魔法傷害時減少50%。免疫石化。", gachaWeight: 1, block: 40 },
         "arm_107": { n: "伊娃之盾", type: "arm", slot: "shield", ac: 3, req: "all", safe: 4, p: 5200, mhp: 20, eff: "haste", gachaWeight: 1, block: 40 },
         "arm_108": { n: "塔盾", type: "arm", slot: "shield", ac: 3, req: "knight", safe: 4, p: 9800, gachaWeight: 50, block: 70 },
         "arm_109": { n: "木盾", type: "arm", slot: "shield", ac: 1, req: "all", safe: 4, p: 16, gachaWeight: 100, block: 30 },
         "arm_110": { n: "銀騎士之盾", type: "arm", slot: "shield", ac: 2, mr: 4, req: "knight", safe: 4, p: 2600, gachaWeight: 20, block: 70 },
-        "arm_111": { n: "皮盾牌", type: "arm", slot: "shield", ac: 2, req: "all", safe: 4, p: 32, gachaWeight: 100, block: 20 },
-        "arm_112": { n: "銀釘皮盾", type: "arm", slot: "shield", ac: 4, req: "all", safe: 4, p: 255, gachaWeight: 100, block: 30 },
-        "shd_bone": { n: "骷髏盾牌", type: "arm", slot: "shield", ac: 6, req: "all", safe: 0, p: 255, gachaWeight: 100, block: 30 },
+        "arm_111": { n: "皮盾牌", type: "arm", slot: "shield", ac: 1, req: "all", safe: 4, p: 32, gachaWeight: 100, block: 20 },
+        "arm_112": { n: "銀釘皮盾", type: "arm", slot: "shield", ac: 2, req: "all", safe: 4, p: 255, gachaWeight: 100, block: 30 },
+        "shd_bone": { n: "骷髏盾牌", type: "arm", slot: "shield", ac: 3, req: "all", safe: 0, p: 255, gachaWeight: 100, block: 30 },
 		"shd_redknight": { n: "紅騎士盾牌", type: "arm", slot: "shield", ac: 2, req: "knight", safe: 6, p: 9800, immStone: true, magicDrNonEle: 20, d: "受到無屬性魔法傷害時減少20%。免疫石化。", gachaWeight: 20, block: 50 },
-        "arm_113": { n: "鋼鐵盾牌", type: "arm", slot: "shield", ac: 6, req: "knight", safe: 4, p: 16500, gachaWeight: 20, block: 60 },
+        "arm_113": { n: "鋼鐵盾牌", type: "arm", slot: "shield", ac: 3, req: "knight", safe: 4, p: 16500, gachaWeight: 20, block: 60 },
         "arm_114": { n: "受詛咒的魔法書", type: "arm", slot: "shield", ac: 1, req: "mage", p: 1, gachaWeight: 0, block: 10 },
         "arm_115": { n: "魔法能量之書", type: "arm", slot: "shield", ac: 2, req: "mage", safe: 4, p: 9800, int: 1, gachaWeight: 20, block: 10 },
         "acc_116": { n: "傳送控制戒指", type: "acc", slot: "ring", ac: 0, str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10, req: "all", safe: 0, p: 50000, gachaWeight: 10, d: "攜帶在背包即可生效（無需裝備）：手動施放傳送術/使用瞬移卷軸時必定遭遇 BOSS。裝備後各屬性 +10。" },
         "acc_117": { n: "變形控制戒指", type: "acc", slot: "ring", ac: 0, str: 5, dex: 5, con: 5, int: 5, wis: 5, cha: 5, req: "all", safe: 0, p: 50000, gachaWeight: 10, d: "攜帶在背包即可生效（無需裝備）：使用變形卷軸時可指定變身型態。裝備後各屬性 +5。" },
-        "rng_mr": { n: "抗魔戒指", type: "acc", slot: "ring", ac: 0, mr: 10, req: "all", safe: 0, p: 10000, gachaWeight: 1 },
-        "acc_118": { n: "守護戒指", type: "acc", slot: "ring", ac: 2, req: "all", safe: 0, p: 10000, gachaWeight: 1 },
+        "rng_mr": { n: "抗魔戒指", type: "acc", slot: "ring", ac: 0, mr: 5, req: "all", safe: 0, p: 10000, gachaWeight: 1 },
+        "acc_118": { n: "守護戒指", type: "acc", slot: "ring", ac: 1, req: "all", safe: 0, p: 10000, gachaWeight: 1 },
         "acc_119": { n: "長者戒指", type: "acc", slot: "ring", ac: 0, req: "all", safe: 0, p: 10000, mmp: 10, mpR: 1, gachaWeight: 1 },
         "amu_str": { n: "力量項鍊", type: "acc", slot: "amulet", ac: 0, req: "all", safe: 0, p: 25000, str: 1, gachaWeight: 1 },
         "acc_120": { n: "敏捷項鍊", type: "acc", slot: "amulet", ac: 0, req: "all", safe: 0, p: 25000, dex: 1, gachaWeight: 1 },
@@ -1040,9 +1040,9 @@ const DB = {
         "amu_int": { n: "智力項鍊", type: "acc", slot: "amulet", ac: 0, req: "all", safe: 0, p: 25000, int: 1, gachaWeight: 1 },
         "acc_122": { n: "精神項鍊", type: "acc", slot: "amulet", ac: 0, req: "all", safe: 0, p: 25000, wis: 1, gachaWeight: 1 },
         "acc_123": { n: "妖魔戰士項鍊", type: "acc", slot: "amulet", ac: 0, req: "all", safe: 0, p: 5000, mhp: 20, gachaWeight: 20 },
-        "acc_124": { n: "守護項鍊", type: "acc", slot: "amulet", ac: 2, req: "all", safe: 0, p: 15000, gachaWeight: 1 },
+        "acc_124": { n: "守護項鍊", type: "acc", slot: "amulet", ac: 1, req: "all", safe: 0, p: 15000, gachaWeight: 1 },
         "acc_125": { n: "長老項鍊", type: "acc", slot: "amulet", ac: 0, req: "all", safe: 0, p: 20000, mmp: 30, mpR: 1, gachaWeight: 1 },
-        "acc_126": { n: "抗魔項鍊", type: "acc", slot: "amulet", ac: 0, mr: 10, req: "all", safe: 0, p: 15000, gachaWeight: 1 },
+        "acc_126": { n: "抗魔項鍊", type: "acc", slot: "amulet", ac: 0, mr: 5, req: "all", safe: 0, p: 15000, gachaWeight: 1 },
         "acc_127": { n: "老舊的身體腰帶", type: "acc", slot: "belt", ac: 0, req: "all", safe: 0, p: 3000, mhp: 30, gachaWeight: 20 },
         "acc_128": { n: "老舊的精神腰帶", type: "acc", slot: "belt", ac: 0, req: "all", safe: 0, p: 3000, mmp: 30, gachaWeight: 20 },
         "acc_129": { n: "老舊的靈魂腰帶", type: "acc", slot: "belt", ac: 0, req: "all", safe: 0, p: 3000, mhp: 15, mmp: 15, gachaWeight: 20 },
@@ -1055,8 +1055,8 @@ const DB = {
         "acc_135": { n: "光明身體腰帶", type: "acc", slot: "belt", ac: 0, req: "all", safe: 0, p: 11000, mhp: 50, hpR: 1, gachaWeight: 1 },
         "acc_136": { n: "光明精神腰帶", type: "acc", slot: "belt", ac: 0, req: "all", safe: 0, p: 11000, mmp: 50, mpR: 1, gachaWeight: 1 },
         "acc_137": { n: "光明靈魂腰帶", type: "acc", slot: "belt", ac: 0, req: "all", safe: 0, p: 11000, mhp: 20, mmp: 20, hpR: 1, mpR: 1, gachaWeight: 1 },
-        "acc_138": { n: "守護皮帶", type: "acc", slot: "belt", ac: 2, req: "all", safe: 0, p: 10000, gachaWeight: 1 },
-		"blt_mr": { n: "抗魔皮帶", type: "acc", slot: "belt", ac: 0, mr: 10, req: "all", safe: 0, p: 10000, gachaWeight: 1 },
+        "acc_138": { n: "守護皮帶", type: "acc", slot: "belt", ac: 1, req: "all", safe: 0, p: 10000, gachaWeight: 1 },
+		"blt_mr": { n: "抗魔皮帶", type: "acc", slot: "belt", ac: 0, mr: 5, req: "all", safe: 0, p: 10000, gachaWeight: 1 },
         "potion_heal": { n: "紅色藥水", type: "pot", p: 37, c: "text-red-300", d: "恢復 15 HP", val: 15, gachaWeight: 0 },
         "potion_strong": { n: "橙色藥水", type: "pot", req: "all", p: 200, c: "text-orange-300", d: "恢復 40 HP", val: 40, gachaWeight: 0 },
         "potion_ult": { n: "白色藥水", type: "pot", req: "all", p: 600, c: "text-white", d: "恢復 60 HP", val: 60, gachaWeight: 0 },
@@ -1317,17 +1317,17 @@ const DB = {
         "bk_elf_steelguard": { type: "skillbk", n: "精靈水晶(鋼鐵防護)", p: 60000, sk: "sk_elf_steelguard", gachaWeight: 1 },
     },
     sets: {
-        "set_0": { n: "皮套裝", items: ["arm_48", "arm_91", "arm_111", "arm_75"], ac: 6 },
-        "set_1": { n: "歐西斯套裝", items: ["hlm_oasis", "amr_oasis", "clk_oasis", "arm_104"], ac: 6 },
-        "set_2": { n: "侏儒套裝", items: ["hlm_gnome", "arm_86", "shd_gnome"], ac: 2, hp: 10 },
-        "set_3": { n: "銀釘套裝", items: ["hlm_silver", "arm_92", "arm_112", "arm_77"], ac: 6 },
-        "set_4": { n: "骷髏套裝", items: ["hlm_bone", "shd_bone", "amr_bone"], ac: 4, hp: 20 },
-        "set_5": { n: "鋼鐵套裝", items: ["arm_100", "hlm_steel", "arm_113", "arm_94", "arm_79"], ac: 6 },
-        "set_6": { n: "法師套裝", items: ["hlm_mage", "amr_magerobe"], mp: 100 },
-        "set_7": { n: "死亡騎士套裝", items: ["glv_dk", "amr_dk", "bot_dk", "hlm_dk"], ac: 8 },
-        "set_8": { n: "克特套裝", items: ["arm_101", "amr_kurt", "arm_97", "hlm_kurt"], ac: 8 },
+        "set_0": { n: "皮套裝", items: ["arm_48", "arm_91", "arm_111", "arm_75"], ac: 3 },
+        "set_1": { n: "歐西斯套裝", items: ["hlm_oasis", "amr_oasis", "clk_oasis", "arm_104"], ac: 3 },
+        "set_2": { n: "侏儒套裝", items: ["hlm_gnome", "arm_86", "shd_gnome"], ac: 1, hp: 5 },
+        "set_3": { n: "銀釘套裝", items: ["hlm_silver", "arm_92", "arm_112", "arm_77"], ac: 3 },
+        "set_4": { n: "骷髏套裝", items: ["hlm_bone", "shd_bone", "amr_bone"], ac: 2, hp: 10 },
+        "set_5": { n: "鋼鐵套裝", items: ["arm_100", "hlm_steel", "arm_113", "arm_94", "arm_79"], ac: 3 },
+        "set_6": { n: "法師套裝", items: ["hlm_mage", "amr_magerobe"], mp: 50 },
+        "set_7": { n: "死亡騎士套裝", items: ["glv_dk", "amr_dk", "bot_dk", "hlm_dk"], ac: 4 },
+        "set_8": { n: "克特套裝", items: ["arm_101", "amr_kurt", "arm_97", "hlm_kurt"], ac: 4 },
         "set_9": { n: "抗魔套裝", items: ["rng_mr", "acc_126", "blt_mr"], mr: 5 },
-        "set_10": { n: "守護套裝", items: ["acc_118", "acc_124", "acc_138"], ac: 2 }
+        "set_10": { n: "守護套裝", items: ["acc_118", "acc_124", "acc_138"], ac: 1 }
     },
             
     mobs: {
@@ -5191,14 +5191,15 @@ setInterval(() => { try { renderAuditTab(); } catch(e) {} }, 2000);   // 開著�
 // 好處：怪物迭代過程中陣列不再位移，徹底杜絕「怪物被跳過回合 / 索引指到錯的怪」這類隱性錯誤。
 function isTowerMap(m){ return typeof m==="string" && m.indexOf("tower_")===0; }
 // 新地圖獎勵倍率（拉高 CP 讓玩家不只擠傲慢塔）：經驗與金幣同乘。塔的 ×2 另計、不重疊。
-var MAP_REWARD_MULT = { jp_field:5, aden:2, rasta:3, rasta_1:3, rasta_2:3, rasta_3:3, rasta_4:3, demon_realm:4, demon_temple:4 };
+var MAP_REWARD_MULT = { jp_field:5, aden:2, rasta:3, rasta_1:3, rasta_2:3, rasta_3:3, rasta_4:3, demon_realm:4, demon_temple:4, forgotten_island:10, thebes_1:8, thebes_2:10, thebes_3:13, thebes_altar:16 };
 function mapRewardMult(m){ return MAP_REWARD_MULT[m] || 1; }
 function killMob(idx) {
     let mob = mapState.mobs[idx];
     if (!mob || mob._dead) return;        // 冪等保護：同一隻怪只結算一次獎勵
     mob._dead = true;
     if (mob.curHp > 0) mob.curHp = 0;     // 待清算期間不可被當成活目標
-    _sherineLootCtx = mob._sherine ? { boss: !!mob.boss, grace: !!mob._grace } : null;   // 🔮 席琳的世界：本次擊殺掉落套用 詞綴×3／套裝效果判定（恩賜怪套裝機率×5）
+    var _rbM = ['forgotten_island','thebes_1','thebes_2','thebes_3','thebes_altar'].indexOf(mapState.current) !== -1;
+    _sherineLootCtx = (mob._sherine || _rbM) ? { boss: !!mob.boss, grace: !!mob._grace } : null;   // 🔮 席琳的世界：本次擊殺掉落套用 詞綴×3／套裝效果判定（恩賜怪套裝機率×5）
     if(typeof auditTrackKill === 'function') auditTrackKill(mob);   // 統計：累計經驗/擊殺
     logCombat(`擊敗了 <span class="${getMobColor(mob.lv)}">${mob.n}</span>！`, 'player-heavy');  // 👈 新增
     player.exp += Math.floor(mob.exp * getExpGainMult(player.lv) * (isTowerMap(mapState.current)?2:1) * mapRewardMult(mapState.current));
@@ -5249,21 +5250,20 @@ function killMob(idx) {
         gainItem('scroll_armor', _sQty, true);
         logSys(`獲得 <span class="text-sky-200 font-bold">對武器施法的卷軸 ×${_sQty}、對盔甲施法的卷軸 ×${_sQty}</span>。`);
     }
-    // ===== 轉生秘境：地圖綁定套裝掉落（11 套分散 5 圖，2 倍數值，神壇出最強）=====
-    { var _rbSets = { forgotten_island:['set_0','set_2','set_10'], thebes_1:['set_3','set_6'], thebes_2:['set_5','set_9'], thebes_3:['set_4','set_8'], thebes_altar:['set_1','set_7'] };
-      var _pool = _rbSets[mapState.current];
-      if (_pool) {
-          var _rate = mob.boss ? 0.20 : 0.02;
-          if (Math.random() < _rate) {
-              var _sid = _pool[Math.floor(Math.random() * _pool.length)];
-              var _st = DB.sets[_sid];
-              if (_st && _st.items && _st.items.length) {
-                  var _iid = _st.items[Math.floor(Math.random() * _st.items.length)];
-                  gainItem(_iid, 1, false);
-                  logSys(`✨ <span class="text-amber-300 font-bold">${_st.n}</span> 部件掉落：<span class="text-emerald-300 font-bold">${(DB.items[_iid]||{}).n||_iid}</span>！`);
-              }
-          }
-      } }
+    // ===== 轉生秘境：席琳世界掉落 — 擊殺掉落可帶「席琳套裝效果」的裝備 =====
+    if (typeof _rbM !== 'undefined' && _rbM) {
+        if (Math.random() < (mob.boss ? 0.10 : 0.05)) {
+            var _ELIG = { helm: 1, armor: 1, gloves: 1, boots: 1, cloak: 1, amulet: 1 };
+            var _carriers = Object.values(DB.sets).reduce(function (a, s) { return a.concat(s.items || []); }, [])
+                .filter(function (id) { var d = DB.items[id]; return d && (d.type === 'wpn' ? !d.isArrow : _ELIG[d.slot]); });
+            if (_carriers.length) {
+                var _pr = _sherineLootCtx ? _sherineLootCtx.rate : undefined;
+                if (_sherineLootCtx) _sherineLootCtx.rate = 1;
+                gainItem(_carriers[Math.floor(Math.random() * _carriers.length)], 1, false);
+                if (_sherineLootCtx) _sherineLootCtx.rate = _pr;
+            }
+        }
+    }
 
     _sherineLootCtx = null;   // 🔮 掉落判定結束，清除上下文
     // 🔧 架構#2：不在此處位移輸送帶（呼叫點可能正在迭代怪物陣列）。
@@ -6617,7 +6617,7 @@ function gainItem(id, cnt=1, silent=false, forceNormal=false, affixOld=false) {
         let _slotOk = (d.type === 'wpn' && !d.isArrow)
             || (d.type === 'arm' && ['helm','armor','gloves','boots','cloak'].includes(d.slot))
             || ((d.type === 'acc' || d.type === 'arm') && d.slot === 'amulet');
-        if (_slotOk && Math.random() < (_sherineLootCtx.boss ? 0.05 : (_sherineLootCtx.grace ? 0.005 : 0.001))) {   // 🔮 恩賜怪：套裝機率 ×5 = 0.5%
+        if (_slotOk && Math.random() < (_sherineLootCtx.rate != null ? _sherineLootCtx.rate : (_sherineLootCtx.boss ? 0.05 : (_sherineLootCtx.grace ? 0.005 : 0.001)))) {   // 🔮 恩賜怪：套裝機率 ×5 = 0.5%
             seteff = SHERINE_EFFECTS[Math.floor(Math.random() * SHERINE_EFFECTS.length)];
             logSys(`<span class="c-sherine font-bold">✦ 掉落的裝備蘊含著席琳的祝福：【${seteff}】！</span>`);
         }
@@ -9149,13 +9149,20 @@ function claimSiegeReward(faction) {
 var PATCH_NOTES = [
     { v:'轉生秘境 1.0', date:'2026-06', title:'🏝️ 新地圖：遺忘之島 & 神殿底比斯',
       lines:[
-        '新增地圖分類「轉生秘境」，需轉生 1 轉以上才能進入。',
-        '遺忘之島（Lv86~90）：狼人、萊肯、卡司特、多羅、變形怪、飛龍、食人妖精、獨眼巨人 等。',
-        '神殿底比斯 4 層：①沙漠 → ②金字塔 → ③祭壇 → ·神壇。',
-        '底比斯新怪：曼陀羅草、神隼、聖甲獸、人面獅身獸、沙漠巨蠍、守墓石巨人、火焰祭司。',
-        '神壇三王：阿努比斯、賀洛斯、歐西里斯。',
-        '全 11 套裝數值 ×2（含套裝加成），分散在這 5 張地圖掉落，神壇出最強套。'
-      ] }
+        '【進場】需轉生 1 轉以上；遺忘之島 Lv86~90、底比斯 4 層 Lv76~98，經驗 ×8~16。',
+        '【神壇三王】阿努比斯、賀洛斯、歐西里斯。',
+        '【席琳套裝】在這兩張地圖擊殺怪物，掉落的裝備有機率附帶「席琳套裝效果」（頭目機率更高）；集齊同系列 2/3/5 件即啟動加成：',
+        '◆ 紅獅｜2件 傷害+5、MP+3｜3件 傷害減免+10｜5件 攻擊技能最終傷害+20%',
+        '◆ 白鳥｜2件 命中+5｜3件 魅力+10｜5件 普攻命中使目標脆弱3秒（受傷+20%）',
+        '◆ 鐵衛｜2件 AC-3、傷害減免+5｜3件 受傷-20%｜5件 反擊/居合時額外橫掃全體一次',
+        '◆ 麗人｜2件 近距傷害+3、命中+3｜3件 近距爆擊+2%｜5件 重擊後下次普攻必中',
+        '◆ 疾風｜2件 遠距傷害+3、命中+3｜3件 遠距爆擊+2%｜5件 連射傷害30%→80%',
+        '◆ 月光｜2件 傷害+2、命中+2｜3件 ER+5、MR+10｜5件 ER也能閃避魔法',
+        '◆ 學徒｜2件 MP回復+5、MP+6｜3件 魔法爆擊+2%｜5件 MP低於30%時技能耗MP減半',
+        '◆ 魔女｜2件 魔法傷害+2｜3件 水抗+10、MP+5｜5件 每5次共鳴免費施放冰矛圍籬',
+        '【公告】左側「📢更新公告」可隨時查看；有新版自動跳一次。'
+      ]
+     }
 ];
 function showAnnouncements(){
     var old=document.getElementById('announce-overlay'); if(old) old.remove();
