@@ -10,6 +10,13 @@
     let ws = null, wsReady = false;
     let onlineUsers = [];
     let saveTimer = null;
+    // ====== 交換系統狀態 ======
+    let tradeId = null, tradePartner = null;
+    let myOffer = { items: [], gold: 0 }, partnerOffer = { items: [], gold: 0 };
+    let iConfirmed = false, partnerConfirmed = false;
+    let tradeWin = null;
+    const _uid = () => (typeof uid === 'function') ? uid() : ('t' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7));
+    const _itemName = (e) => { const _DB = getDB(); const d = _DB && _DB.items[e.id]; return (e.en > 0 ? ('+' + e.en + ' ') : '') + ((d && d.n) || e.id) + (e.cnt > 1 ? (' ×' + e.cnt) : ''); };
 
     // 遊戲用 let 宣告 player/DB（不掛在 window 上），用存取器安全取得
     function getPlayer() { try { return (typeof player !== 'undefined' && player) ? player : (typeof window !== 'undefined' ? window.player : null) || null; } catch (e) { return null; } }
@@ -169,6 +176,15 @@
                     if (ok && typeof loadGame === 'function') { loadGame(); toast('✅ 角色資料已更新', '#14532d'); }
                 }).catch(() => { });
             }
+            if (m.type === 'trade_requested') toast('已向 ' + m.to + ' 發出交換邀請，等待對方接受…');
+            if (m.type === 'trade_declined') toast((m.by || '對方') + ' 拒絕了交換', '#7f1d1d');
+            if (m.type === 'trade_incoming') showTradeIncoming(m);
+            if (m.type === 'trade_opened') openTradeWindow(m.id, m.partner);
+            if (m.type === 'trade_partner_offer') { partnerOffer = { items: m.items || [], gold: m.gold || 0 }; iConfirmed = false; partnerConfirmed = false; renderTrade(); }
+            if (m.type === 'trade_reset_confirm') { iConfirmed = false; partnerConfirmed = false; renderTrade(); }
+            if (m.type === 'trade_partner_confirmed') { partnerConfirmed = true; renderTrade(); }
+            if (m.type === 'trade_execute') { execTrade(m.give, m.get, m.partner); }
+            if (m.type === 'trade_cancelled') { toast((m.by || '對方') + ' 取消了交換', '#7f1d1d'); closeTradeWindow(); }
         };
         ws.onclose = () => {
             wsReady = false;
@@ -320,7 +336,7 @@
         if (!token || !wsReady) { toast('請先登入線上模式', '#7f1d1d'); if (!token) showLogin(); return; }
         const _p = getPlayer(); if (!_p || !_p.cls) { toast('請先建立或載入角色再進入競技場', '#7f1d1d'); return; }
         const wrap = el('div');
-        wrap.append(el('div', { style: 'color:#94a3b8;font-size:13px;margin-bottom:10px;' }, '點選在線玩家發起挑戰，雙方將即時觀看同一場自動對戰。'));
+        wrap.append(el('div', { style: 'color:#94a3b8;font-size:13px;margin-bottom:10px;' }, '點選在線玩家「挑戰」即時對戰，或按「🤝 交換」與對方交換物品／金幣。'));
         arenaListEl = el('div');
         wrap.append(arenaListEl);
         modal('⚔️ 競技場（在線玩家）', wrap);
@@ -337,11 +353,157 @@
         others.forEach(u => {
             const row = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px 14px;margin-bottom:8px;' });
             row.append(el('div', {}, '🟢 ' + u));
+            const btns = el('div', { style: 'display:flex;gap:6px;flex:none;' });
             const b = el('button', { style: 'background:#b45309;color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-weight:bold;' }, '挑戰');
             b.onclick = () => ws.send(JSON.stringify({ type: 'challenge', to: u, profile: buildProfile() }));
-            row.append(b);
+            const tb = el('button', { style: 'background:#0e7490;color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-weight:bold;' }, '🤝 交換');
+            tb.onclick = () => requestTrade(u);
+            btns.append(b, tb);
+            row.append(btns);
             arenaListEl.append(row);
         });
+    }
+
+    // ====== 交換系統 ======
+    function requestTrade(target) {
+        if (!token || !wsReady) { toast('請先登入線上模式', '#7f1d1d'); return; }
+        if (tradeId) { toast('你已在交換中', '#7f1d1d'); return; }
+        ws.send(JSON.stringify({ type: 'trade_request', to: target }));
+    }
+    function showTradeIncoming(m) {
+        const wrap = el('div');
+        wrap.append(el('div', { style: 'margin-bottom:14px;font-size:15px;' }, '🤝 <b>' + m.from + '</b> 想和你交換物品。'));
+        const acc = bigBtn('接受', '#15803d'), dec = bigBtn('拒絕', '#7f1d1d');
+        wrap.append(acc, dec);
+        const ov = modal('🤝 交換邀請', wrap, { w: '340px' });
+        acc.onclick = () => { ov.remove(); ws.send(JSON.stringify({ type: 'trade_accept', id: m.id })); };
+        dec.onclick = () => { ov.remove(); ws.send(JSON.stringify({ type: 'trade_decline', id: m.id })); };
+    }
+    function openTradeWindow(id, partner) {
+        tradeId = id; tradePartner = partner;
+        myOffer = { items: [], gold: 0 }; partnerOffer = { items: [], gold: 0 };
+        iConfirmed = false; partnerConfirmed = false;
+        const body = el('div', { id: 'trade-body' });
+        tradeWin = modal('🤝 與 ' + partner + ' 交換', body, { w: '560px', noClose: true });
+        renderTrade();
+    }
+    function closeTradeWindow() {
+        tradeId = null; tradePartner = null;
+        myOffer = { items: [], gold: 0 }; partnerOffer = { items: [], gold: 0 };
+        iConfirmed = false; partnerConfirmed = false;
+        if (tradeWin) { try { tradeWin.remove(); } catch (e) { } tradeWin = null; }
+    }
+    function sendOffer() {
+        iConfirmed = false;
+        if (tradeId) ws.send(JSON.stringify({ type: 'trade_offer', id: tradeId, items: myOffer.items, gold: myOffer.gold }));
+        renderTrade();
+    }
+    function renderTrade() {
+        const body = document.getElementById('trade-body');
+        if (!body) return;
+        body.innerHTML = '';
+        const cols = el('div', { style: 'display:flex;gap:10px;' });
+        const mine = el('div', { style: 'flex:1;min-width:0;background:#0b1220;border:1px solid #334155;border-radius:8px;padding:8px;' });
+        mine.append(el('div', { style: 'color:#86efac;font-weight:bold;margin-bottom:6px;' }, '你的提供' + (iConfirmed ? ' ✅' : '')));
+        myOffer.items.forEach((it, idx) => {
+            const r = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;background:#1e293b;border-radius:5px;padding:3px 7px;margin-bottom:3px;font-size:13px;cursor:pointer;', title: '點擊移除' }, _itemName(it));
+            r.onclick = () => { if (iConfirmed) return; myOffer.items.splice(idx, 1); sendOffer(); };
+            mine.append(r);
+        });
+        mine.append(el('div', { style: 'color:#fbbf24;font-size:13px;margin-top:4px;' }, '💰 金幣：' + (myOffer.gold || 0)));
+        const theirs = el('div', { style: 'flex:1;min-width:0;background:#0b1220;border:1px solid #334155;border-radius:8px;padding:8px;' });
+        theirs.append(el('div', { style: 'color:#93c5fd;font-weight:bold;margin-bottom:6px;' }, tradePartner + ' 的提供' + (partnerConfirmed ? ' ✅' : '')));
+        (partnerOffer.items || []).forEach(it => theirs.append(el('div', { style: 'background:#1e293b;border-radius:5px;padding:3px 7px;margin-bottom:3px;font-size:13px;' }, _itemName(it))));
+        theirs.append(el('div', { style: 'color:#fbbf24;font-size:13px;margin-top:4px;' }, '💰 金幣：' + (partnerOffer.gold || 0)));
+        cols.append(mine, theirs);
+        body.append(cols);
+        if (!iConfirmed) {
+            const ctrl = el('div', { style: 'display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;' });
+            const addB = el('button', { style: 'background:#15803d;color:#fff;border:none;border-radius:6px;padding:8px 12px;cursor:pointer;font-weight:bold;white-space:nowrap;' }, '＋ 加入物品');
+            addB.onclick = pickInventoryItem;
+            const gold = el('input', { type: 'number', min: '0', value: String(myOffer.gold || 0), style: 'width:120px;background:#1e293b;border:1px solid #475569;border-radius:6px;padding:7px;color:#fff;' });
+            gold.onchange = () => { let g = Math.max(0, Math.floor(Number(gold.value) || 0)); const pp = getPlayer(); if (pp) g = Math.min(g, pp.gold || 0); myOffer.gold = g; gold.value = String(g); sendOffer(); };
+            ctrl.append(addB, el('span', { style: 'color:#94a3b8;font-size:13px;' }, '金幣:'), gold);
+            body.append(ctrl);
+        }
+        body.append(el('div', { style: 'margin-top:10px;font-size:13px;color:#cbd5e1;' },
+            '你：' + (iConfirmed ? '<span style="color:#86efac">已確認</span>' : '<span style="color:#fca5a5">未確認</span>') +
+            '　|　' + tradePartner + '：' + (partnerConfirmed ? '<span style="color:#86efac">已確認</span>' : '<span style="color:#fca5a5">未確認</span>')));
+        const btns = el('div', { style: 'display:flex;gap:8px;margin-top:8px;' });
+        const conf = el('button', { style: 'flex:1;background:' + (iConfirmed ? '#475569' : '#1d4ed8') + ';color:#fff;border:none;border-radius:8px;padding:11px;font-weight:bold;cursor:pointer;' }, iConfirmed ? '已確認，等待對方…' : '確認交換');
+        conf.onclick = () => { if (iConfirmed || !tradeId) return; iConfirmed = true; ws.send(JSON.stringify({ type: 'trade_confirm', id: tradeId })); renderTrade(); };
+        const cancel = el('button', { style: 'flex:1;background:#7f1d1d;color:#fff;border:none;border-radius:8px;padding:11px;font-weight:bold;cursor:pointer;' }, '取消交換');
+        cancel.onclick = cancelTrade;
+        btns.append(conf, cancel);
+        body.append(btns);
+        body.append(el('div', { style: 'color:#64748b;font-size:11px;margin-top:8px;line-height:1.6;' }, '雙方都按「確認交換」後才成交；任一方改動內容會重置雙方確認。鎖定中的道具不可交換。'));
+    }
+    function cancelTrade() {
+        if (tradeId) ws.send(JSON.stringify({ type: 'trade_cancel', id: tradeId }));
+        closeTradeWindow();
+        toast('已取消交換');
+    }
+    function pickInventoryItem() {
+        const p = getPlayer(); const _DB = getDB();
+        if (!p || !Array.isArray(p.inv)) { toast('讀不到背包', '#7f1d1d'); return; }
+        const wrap = el('div');
+        const search = input('搜尋背包道具名'); search.style.marginBottom = '6px';
+        const out = el('div', { style: 'max-height:340px;overflow-y:auto;font-size:13px;' });
+        wrap.append(search, out);
+        const offeredQty = (uidv) => myOffer.items.filter(x => x.uid === uidv).reduce((a, b) => a + b.cnt, 0);
+        function render(q) {
+            out.innerHTML = '';
+            const list = p.inv.filter(e => {
+                const d = _DB && _DB.items[e.id];
+                if (!d) return false;
+                if (e.lock) return false;
+                if (!q) return true;
+                return (d.n || '').includes(q);
+            });
+            let shown = 0;
+            list.forEach(e => {
+                const avail = e.cnt - offeredQty(e.uid);
+                if (avail <= 0) return;
+                shown++;
+                const r = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;background:#1e293b;border-radius:6px;padding:4px 8px;margin-bottom:3px;' });
+                r.append(el('span', { style: 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;' }, _itemName(e) + (avail < e.cnt ? (' （剩' + avail + '）') : '')));
+                const qty = el('input', { type: 'number', value: '1', min: '1', max: String(avail), style: 'width:52px;margin:0 6px;padding:3px;background:#0f172a;color:#e2e8f0;border:1px solid #334155;border-radius:4px;text-align:center;' });
+                const add = el('button', { style: 'background:#0e7490;color:#fff;border:none;border-radius:4px;padding:3px 12px;cursor:pointer;white-space:nowrap;' }, '加入');
+                add.onclick = () => {
+                    let n = Math.max(1, Math.min(avail, parseInt(qty.value) || 1));
+                    const exist = myOffer.items.find(x => x.uid === e.uid);
+                    if (exist) exist.cnt = Math.min(e.cnt, exist.cnt + n);
+                    else myOffer.items.push({ uid: e.uid, id: e.id, cnt: n, en: e.en || 0, bless: !!e.bless, anc: !!e.anc, attr: !!e.attr });
+                    sendOffer(); render(search.value.trim());
+                };
+                r.append(qty, add); out.append(r);
+            });
+            if (!shown) out.append(el('div', { style: 'color:#64748b;padding:8px;' }, '沒有可交換的道具'));
+        }
+        search.oninput = () => render(search.value.trim());
+        render('');
+        modal('🎒 從背包選擇要給的道具', wrap, { w: '440px' });
+    }
+    function execTrade(give, get, partner) {
+        const p = getPlayer();
+        if (!p) { closeTradeWindow(); return; }
+        if (!Array.isArray(p.inv)) p.inv = [];
+        (give.items || []).forEach(it => {
+            const e = p.inv.find(x => x.uid === it.uid);
+            if (e) { e.cnt -= it.cnt; if (e.cnt <= 0) p.inv = p.inv.filter(x => x.uid !== it.uid); }
+        });
+        p.gold = Math.max(0, (p.gold || 0) - (give.gold || 0));
+        (get.items || []).forEach(it => {
+            p.inv.push({ id: it.id, uid: _uid(), cnt: it.cnt || 1, en: it.en || 0, bless: !!it.bless, anc: !!it.anc, attr: !!it.attr, lock: false, junk: false });
+        });
+        p.gold = (p.gold || 0) + (get.gold || 0);
+        try { if (typeof saveGame === 'function') saveGame(); } catch (e) { }
+        try {
+            if (typeof refreshGame === 'function') refreshGame();
+            else { if (typeof calcStats === 'function') calcStats(); if (typeof renderTabs === 'function') renderTabs(); if (typeof updateUI === 'function') updateUI(); }
+        } catch (e) { }
+        closeTradeWindow();
+        toast('✅ 與 ' + (partner || '對方') + ' 交換完成！', '#14532d');
     }
     async function switchSlot(n) {
         const cur = activeSlot();

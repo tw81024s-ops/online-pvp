@@ -205,6 +205,9 @@ const wss = new WebSocketServer({ server, path: '/ws' });
 
 const online = new Map();      // username -> ws
 const pending = new Map();     // challengeId -> {from, to, fromProfile, ts}
+const pendingTrade = new Map(); // tradeReqId -> {from, to, ts}
+const trades = new Map();       // tradeId -> {a,b,offerA,offerB,confA,confB}
+const userTrade = new Map();    // username -> tradeId（同時只能進行一場交換）
 
 function send(ws, obj) { try { ws.send(JSON.stringify(obj)); } catch (e) { } }
 function broadcastOnline() {
@@ -276,6 +279,74 @@ wss.on('connection', (ws) => {
             return;
         }
 
+        // ====== 玩家交換系統 ======
+        if (msg.type === 'trade_request') {
+            const target = String(msg.to || '').trim();
+            const tw = online.get(target);
+            if (!tw) return send(ws, { type: 'error', error: `${target} 不在線上` });
+            if (target === ws.username) return send(ws, { type: 'error', error: '不能和自己交換' });
+            if (userTrade.has(ws.username)) return send(ws, { type: 'error', error: '你正在交換中，請先完成或取消' });
+            if (userTrade.has(target)) return send(ws, { type: 'error', error: `${target} 正在交換中` });
+            const id = makeToken().slice(0, 12);
+            pendingTrade.set(id, { from: ws.username, to: target, ts: Date.now() });
+            send(tw, { type: 'trade_incoming', id, from: ws.username });
+            send(ws, { type: 'trade_requested', to: target });
+            return;
+        }
+        if (msg.type === 'trade_accept') {
+            const c = pendingTrade.get(msg.id);
+            if (!c || c.to !== ws.username) return send(ws, { type: 'error', error: '交換邀請已失效' });
+            pendingTrade.delete(msg.id);
+            const fromWs = online.get(c.from);
+            if (!fromWs) return send(ws, { type: 'error', error: `${c.from} 已離線` });
+            if (userTrade.has(c.from) || userTrade.has(c.to)) return send(ws, { type: 'error', error: '有一方已在其他交換中' });
+            trades.set(msg.id, { a: c.from, b: c.to, offerA: { items: [], gold: 0 }, offerB: { items: [], gold: 0 }, confA: false, confB: false });
+            userTrade.set(c.from, msg.id); userTrade.set(c.to, msg.id);
+            send(fromWs, { type: 'trade_opened', id: msg.id, partner: c.to });
+            send(ws, { type: 'trade_opened', id: msg.id, partner: c.from });
+            return;
+        }
+        if (msg.type === 'trade_decline') {
+            const c = pendingTrade.get(msg.id);
+            if (c && c.to === ws.username) { pendingTrade.delete(msg.id); const fw = online.get(c.from); if (fw) send(fw, { type: 'trade_declined', by: ws.username }); }
+            return;
+        }
+        if (msg.type === 'trade_offer') {
+            const t = trades.get(msg.id); if (!t) return;
+            const isA = t.a === ws.username, isB = t.b === ws.username; if (!isA && !isB) return;
+            const offer = { items: Array.isArray(msg.items) ? msg.items.slice(0, 40) : [], gold: Math.max(0, Math.floor(Number(msg.gold) || 0)) };
+            if (isA) t.offerA = offer; else t.offerB = offer;
+            t.confA = false; t.confB = false;   // 任一方改動 → 重置雙方確認
+            const aw = online.get(t.a), bw = online.get(t.b);
+            const partnerWs = isA ? bw : aw;
+            if (partnerWs) send(partnerWs, { type: 'trade_partner_offer', items: offer.items, gold: offer.gold });
+            if (aw) send(aw, { type: 'trade_reset_confirm' });
+            if (bw) send(bw, { type: 'trade_reset_confirm' });
+            return;
+        }
+        if (msg.type === 'trade_confirm') {
+            const t = trades.get(msg.id); if (!t) return;
+            if (t.a === ws.username) t.confA = true; else if (t.b === ws.username) t.confB = true; else return;
+            const aw = online.get(t.a), bw = online.get(t.b);
+            if (t.a === ws.username && bw) send(bw, { type: 'trade_partner_confirmed' });
+            if (t.b === ws.username && aw) send(aw, { type: 'trade_partner_confirmed' });
+            if (t.confA && t.confB) {
+                if (aw) send(aw, { type: 'trade_execute', give: t.offerA, get: t.offerB, partner: t.b });
+                if (bw) send(bw, { type: 'trade_execute', give: t.offerB, get: t.offerA, partner: t.a });
+                trades.delete(msg.id); userTrade.delete(t.a); userTrade.delete(t.b);
+            }
+            return;
+        }
+        if (msg.type === 'trade_cancel') {
+            const id = userTrade.get(ws.username); const t = id && trades.get(id);
+            if (t) {
+                const other = t.a === ws.username ? t.b : t.a;
+                const ow = online.get(other); if (ow) send(ow, { type: 'trade_cancelled', by: ws.username });
+                trades.delete(id); userTrade.delete(t.a); userTrade.delete(t.b);
+            }
+            return;
+        }
+
         if (msg.type === 'challenge_decline') {
             const c = pending.get(msg.id);
             if (c && c.to === ws.username) {
@@ -290,6 +361,12 @@ wss.on('connection', (ws) => {
     ws.on('close', () => {
         if (ws.username && online.get(ws.username) === ws) {
             online.delete(ws.username);
+            // 交換中離線 → 通知對方取消
+            const tid = userTrade.get(ws.username);
+            if (tid) {
+                const t = trades.get(tid);
+                if (t) { const other = t.a === ws.username ? t.b : t.a; const ow = online.get(other); if (ow) send(ow, { type: 'trade_cancelled', by: ws.username }); trades.delete(tid); userTrade.delete(t.a); userTrade.delete(t.b); }
+            }
             broadcastOnline();
         }
     });
@@ -303,6 +380,7 @@ setInterval(() => {
     });
     const now = Date.now();
     for (const [id, c] of pending) if (now - c.ts > 60000) pending.delete(id);
+    for (const [id, c] of pendingTrade) if (now - c.ts > 60000) pendingTrade.delete(id);
 }, 30000);
 
 server.listen(PORT, () => console.log(`放置天堂線上版啟動： http://localhost:${PORT}`));
