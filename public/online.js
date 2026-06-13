@@ -379,9 +379,10 @@
             lbList.innerHTML = '';
             (j.top || []).forEach((x, i) => {
                 const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '.';
-                lbList.append(el('div', { style: 'display:flex;justify-content:space-between;padding:2px 0;' },
-                    el('span', {}, `${medal} ${x.name}`),
-                    el('span', { style: 'color:#94a3b8;' }, `${x.tier}　${x.score}`)));
+                const rowEl = el('div', { style: 'display:flex;justify-content:space-between;padding:2px 0;' });
+                const lEl = el('span'); lEl.textContent = `${medal} ${x.name}`;
+                const rEl = el('span', { style: 'color:#94a3b8;' }); rEl.textContent = `${x.tier}　${x.score}`;
+                rowEl.append(lEl, rEl); lbList.append(rowEl);
             });
             if (!(j.top || []).length) lbList.textContent = '尚無資料';
         }).catch(() => { lbList.textContent = '（排行榜讀取失敗）'; });
@@ -743,9 +744,10 @@
                 const it = eq[k]; if (!it || !it.id) return; any = true;
                 const nm = (_DB && _DB.items[it.id]) ? _DB.items[it.id].n : it.id;
                 const tags = []; if (it.en) tags.push('+' + it.en); if (it.bless) tags.push('祝'); if (it.anc) tags.push('遠'); if (it.attr) tags.push('屬');
-                box.append(el('div', { style: 'display:flex;justify-content:space-between;padding:1px 0;' },
-                    el('span', { style: 'color:#94a3b8;' }, SLOT_LABEL[k]),
-                    el('span', {}, nm + (tags.length ? ('　' + tags.join('')) : ''))));
+                const eRow = el('div', { style: 'display:flex;justify-content:space-between;padding:1px 0;' });
+                const eLab = el('span', { style: 'color:#94a3b8;' }); eLab.textContent = SLOT_LABEL[k];
+                const eVal = el('span'); eVal.textContent = nm + (tags.length ? ('　' + tags.join('')) : '');
+                eRow.append(eLab, eVal); box.append(eRow);
             });
             if (!any) box.append(el('div', { style: 'color:#64748b;' }, '（未穿戴任何裝備）'));
             wrap.append(box);
