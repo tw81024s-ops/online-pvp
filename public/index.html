@@ -8349,12 +8349,16 @@ function hubAct(act){
     } else if(act==='cta:fight'){
         hubOpenPanel(P.map);
     } else if(act==='cta:arena'){
-        var fab=document.getElementById('online-fab'); var bs=fab?fab.querySelectorAll('button'):[];
-        if(bs[0]) bs[0].click();
+        _hubClickFab(/競技場/);
     } else if(act==='cta:online'){
-        var fab2=document.getElementById('online-fab'); var bs2=fab2?fab2.querySelectorAll('button'):[];
-        if(bs2[1]) bs2[1].click(); else if(bs2[0]) bs2[0].click();
+        _hubClickFab(/登入|登出/);
     }
+}
+function _hubClickFab(re){
+    var fab=document.getElementById('online-fab'); if(!fab) return;
+    var bs=Array.prototype.slice.call(fab.querySelectorAll('button'));
+    var b=bs.find(function(x){ var t=(x.textContent||''); return re.test(t) && !/管理員|角色欄位/.test(t); });
+    if(b) b.click();
 }
 function openHubGacha(){
     var ov=document.getElementById('hub-gacha');
