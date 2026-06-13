@@ -533,7 +533,8 @@
 						<div id="auto-buff-skills" class="col-span-2 grid grid-cols-2 gap-1 mt-1 border-t border-slate-600 pt-2"></div>
                     </div>
                     
-                    <button onclick="showAnnouncements()" class="mt-auto btn w-full py-2 bg-amber-800 hover:bg-amber-700 text-base">📢 更新公告</button>
+                    <button onclick="openSherinePanel()" class="mt-auto btn w-full py-2 bg-emerald-800 hover:bg-emerald-700 text-base">🔮 席琳套裝</button>
+            <button onclick="showAnnouncements()" class="btn w-full py-2 bg-amber-800 hover:bg-amber-700 text-base">📢 更新公告</button>
                     <button onclick="saveGame()" class="btn w-full py-3 bg-slate-700 text-lg mt-2">儲存遊戲進度</button>
                 </div>
             </div>
@@ -704,6 +705,13 @@ function isElfOnlySkill(sk) {
 
 const DB = {
         items: {
+        "sherine_scroll": { n: "席琳附加捲軸", type: "scroll", req: "all", eff: "sherine_scroll", img: "assets/icons/items/sherine_scroll.png", c: "text-emerald-300", p: 1, gachaWeight: 0, d: "使用後選擇一件已裝備的部位，隨機附加一個席琳套裝效果（全 8 套 ×5 種＝40 種隨機抽一）。集齊同系列 2/3/5 件即啟動套裝加成。" },
+        "sherine_carrier_helm":   { n: "席琳頭飾", type: "arm", slot: "helm",   ac: 4,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
+        "sherine_carrier_armor":  { n: "席琳護甲", type: "arm", slot: "armor",  ac: 9,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
+        "sherine_carrier_gloves": { n: "席琳手套", type: "arm", slot: "gloves", ac: 3,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
+        "sherine_carrier_boots":  { n: "席琳長靴", type: "arm", slot: "boots",  ac: 3,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
+        "sherine_carrier_cloak":  { n: "席琳披風", type: "arm", slot: "cloak",  ac: 4,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
+        "sherine_carrier_amulet": { n: "席琳項鍊", type: "acc", slot: "amulet", ac: 3,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
 "wpn_dragonslayer": { n: "屠龍劍", type: "wpn", w2h: true, dmgS: 18, dmgL: 25, hit: 2, dmgBonus: 9, spd: 0.9, req: "knight", safe: 6, p: 100000, eff: "cleave", dragonStrike: 12, legend: true, gachaWeight: 0, d: "傳說中為屠龍而鍛造的雙手巨劍，劍身中沉眠著龍魂。<br>龍的一擊：發動一般攻擊時，固定機率對場上所有敵人造成無視防禦力的無屬性傷害。" },
         "wpn_baless": { n: "巴列斯魔杖", type: "wpn", dmgS: 2, dmgL: 3, hit: 0, dmgBonus: 0, mdmg: 2, spd: 1.0, req: "mage", safe: 0, p: 0, mpR: 10, mpROverSafe: 2, legend: true, gachaWeight: 0, d: "重獲魔力的傳說魔杖，蘊含共鳴之力。" },
         "wpn_powerless_baless": { n: "失去魔力的巴列斯魔杖", type: "wpn", dmgS: 1, dmgL: 1, hit: 0, dmgBonus: 0, spd: 1.0, req: "all", safe: 0, p: 0, noSell: true, gachaWeight: 0, d: "失去了魔力的古老魔杖。攜帶它並使用『靈魂之球』，或許能喚回沉睡的力量……" },
@@ -5199,7 +5207,7 @@ function killMob(idx) {
     mob._dead = true;
     if (mob.curHp > 0) mob.curHp = 0;     // 待清算期間不可被當成活目標
     var _rbM = ['forgotten_island','thebes_1','thebes_2','thebes_3','thebes_altar'].indexOf(mapState.current) !== -1;
-    _sherineLootCtx = (mob._sherine || _rbM) ? { boss: !!mob.boss, grace: !!mob._grace } : null;   // 🔮 席琳的世界：本次擊殺掉落套用 詞綴×3／套裝效果判定（恩賜怪套裝機率×5）
+    _sherineLootCtx = mob._sherine ? { boss: !!mob.boss, grace: !!mob._grace } : null;   // 🔮 席琳的世界：本次擊殺掉落套用 詞綴×3／套裝效果判定（恩賜怪套裝機率×5）
     if(typeof auditTrackKill === 'function') auditTrackKill(mob);   // 統計：累計經驗/擊殺
     logCombat(`擊敗了 <span class="${getMobColor(mob.lv)}">${mob.n}</span>！`, 'player-heavy');  // 👈 新增
     player.exp += Math.floor(mob.exp * getExpGainMult(player.lv) * (isTowerMap(mapState.current)?2:1) * mapRewardMult(mapState.current));
@@ -5250,19 +5258,9 @@ function killMob(idx) {
         gainItem('scroll_armor', _sQty, true);
         logSys(`獲得 <span class="text-sky-200 font-bold">對武器施法的卷軸 ×${_sQty}、對盔甲施法的卷軸 ×${_sQty}</span>。`);
     }
-    // ===== 轉生秘境：席琳世界掉落 — 擊殺掉落可帶「席琳套裝效果」的裝備 =====
+    // ===== 轉生秘境：擊殺掉落「席琳附加捲軸」（一般 5%／頭目 10%）=====
     if (typeof _rbM !== 'undefined' && _rbM) {
-        if (Math.random() < (mob.boss ? 0.10 : 0.05)) {
-            var _ELIG = { helm: 1, armor: 1, gloves: 1, boots: 1, cloak: 1, amulet: 1 };
-            var _carriers = Object.values(DB.sets).reduce(function (a, s) { return a.concat(s.items || []); }, [])
-                .filter(function (id) { var d = DB.items[id]; return d && (d.type === 'wpn' ? !d.isArrow : _ELIG[d.slot]); });
-            if (_carriers.length) {
-                var _pr = _sherineLootCtx ? _sherineLootCtx.rate : undefined;
-                if (_sherineLootCtx) _sherineLootCtx.rate = 1;
-                gainItem(_carriers[Math.floor(Math.random() * _carriers.length)], 1, false);
-                if (_sherineLootCtx) _sherineLootCtx.rate = _pr;
-            }
-        }
+        if (Math.random() < (mob.boss ? 0.10 : 0.05)) gainItem('sherine_scroll', 1, false);
     }
 
     _sherineLootCtx = null;   // 🔮 掉落判定結束，清除上下文
@@ -6777,6 +6775,7 @@ function useItem(u, silent = false) {
     if (item.id === 'scroll_revive') { if(!silent) logSys(`復活卷軸無法從道具欄使用，死亡時可於畫面下方點選『原地復活』。`); return; }
     let d = DB.items[item.id];
     if (d.noUse) { if(!silent) logSys(`此物品無法直接使用。`); return; }
+    if (d.eff === 'sherine_scroll') { if (!silent) openSherineScrollPicker(item.uid); return; }
     
     if (d.type === 'pot' || d.eff === 'poly' || d.eff === 'reset' || d.eff === 'magicbarrier' || d.eff === 'teleport_scroll' || d.eff === 'panacea' || d.eff === 'reborn') {   // 變形卷軸(eff:poly)、回憶蠟燭(eff:reset)、魔法卷軸(eff:magicbarrier)、瞬間移動卷軸(eff:teleport_scroll)亦走此消耗品分支
         // 職業限定檢查（如慎重藥水=法師、勇敢藥水=騎士、精靈餅乾=妖精）
@@ -8588,6 +8587,25 @@ window.__admAttrOptions = function(){
     try{ Object.keys(ATTR_AFFIX).forEach(function(k){ var a=ATTR_AFFIX[k]; out.push({v:k,n:a.n+'('+k.slice(-1)+'\u968e)'}); }); }catch(e){}
     return out;
 };
+window.__admSherineSets = function(){
+    if(typeof SHERINE_EFFECTS==='undefined') return [];
+    var seen=[], out=[];
+    SHERINE_EFFECTS.forEach(function(e){ var g=e.slice(0,2); if(seen.indexOf(g)===-1){ seen.push(g);
+        out.push({ g:g, effs: SHERINE_EFFECTS.filter(function(x){return x.slice(0,2)===g;}), text:(typeof SHERINE_SET_TEXT!=='undefined'&&SHERINE_SET_TEXT[g])||[] }); } });
+    return out;
+};
+window.__admSherineBase = function(){
+    return ['sherine_carrier_helm','sherine_carrier_armor','sherine_carrier_gloves','sherine_carrier_boots','sherine_carrier_cloak'];
+};
+window.__admGiveSherineSet = function(g){
+    try{
+        var S=null; window.__admSherineSets().forEach(function(x){ if(x.g===g) S=x; }); if(!S) return 0;
+        var bases=window.__admSherineBase(), n=0;
+        S.effs.forEach(function(eff,i){ var base=bases[i]; if(!base) return;
+            player.inv.push({ id:base, uid:uid(), cnt:1, en:0, bless:false, anc:0, attr:null, seteff:eff, lock:false, junk:false }); n++; });
+        calcStats(); saveGame(); return n;
+    }catch(e){ return 0; }
+};
 window.__admApplyWeapon = function(ref,en,attr,bless){
     if(typeof player==='undefined'||!player) return {ok:false,msg:'\u7121\u89d2\u8272'};
     var it=null;
@@ -9151,7 +9169,8 @@ var PATCH_NOTES = [
       lines:[
         '【進場】需轉生 1 轉以上；遺忘之島 Lv86~90、底比斯 4 層 Lv76~98，經驗 ×8~16。',
         '【神壇三王】阿努比斯、賀洛斯、歐西里斯。',
-        '【席琳套裝】在這兩張地圖擊殺怪物，掉落的裝備有機率附帶「席琳套裝效果」（頭目機率更高）；集齊同系列 2/3/5 件即啟動加成：',
+        '【席琳套裝】在這兩張地圖擊殺怪物，一般怪 5%、頭目 10% 掉落「席琳附加捲軸」；使用後選一件已裝備部位（頭盔/盔甲/手套/長靴/斗篷），附加「該部位對應」的席琳效果。集齊同系列 2/3/5 件即啟動加成：',
+        '【圖鑑】左側「🔮 席琳套裝」按鈕：「我的進度」看已湊件數、「套裝圖鑑」看每套要湊哪 5 件與加成。',
         '◆ 紅獅｜2件 傷害+5、MP+3｜3件 傷害減免+10｜5件 攻擊技能最終傷害+20%',
         '◆ 白鳥｜2件 命中+5｜3件 魅力+10｜5件 普攻命中使目標脆弱3秒（受傷+20%）',
         '◆ 鐵衛｜2件 AC-3、傷害減免+5｜3件 受傷-20%｜5件 反擊/居合時額外橫掃全體一次',
@@ -9187,7 +9206,141 @@ function showAnnouncements(){
 function maybeAutoAnnounce(){ try{ var sv=localStorage.getItem('de_seen_patch'); if(PATCH_NOTES[0] && sv!==PATCH_NOTES[0].v) showAnnouncements(); }catch(e){} }
 window.addEventListener('load', function(){ setTimeout(maybeAutoAnnounce, 1800); });
 
-function changeMap(force) {
+// 部位↔效果位對應：頭盔=第1效果、盔甲=第2、手套=第3、長靴=第4、斗篷=第5
+var SHERINE_SLOT_IDX = { helm: 0, armor: 1, gloves: 2, boots: 3, cloak: 4 };
+var SHERINE_SLOT_NAME = { helm: '頭盔', armor: '盔甲', gloves: '手套', boots: '長靴', cloak: '斗篷' };
+var SHERINE_SLOT_ORDER = ['helm', 'armor', 'gloves', 'boots', 'cloak'];
+
+function _sherineSets() {
+    var seen = [], out = [];
+    SHERINE_EFFECTS.forEach(function (x) {
+        var g = x.slice(0, 2);
+        if (seen.indexOf(g) === -1) {
+            seen.push(g);
+            out.push({ g: g, effs: SHERINE_EFFECTS.filter(function (y) { return y.slice(0, 2) === g; }), text: (typeof SHERINE_SET_TEXT !== 'undefined' && SHERINE_SET_TEXT[g]) || [] });
+        }
+    });
+    return out;
+}
+
+window.openSherineScrollPicker = function (uid) {
+    try {
+        var it = player.inv.find(function (i) { return i.uid === uid; });
+        if (!it || (it.cnt || 0) < 1) { logSys('沒有可用的席琳附加捲軸。'); return; }
+        var rows = [];
+        SHERINE_SLOT_ORDER.forEach(function (slot) {
+            var e = player.eq && player.eq[slot]; if (!e) return;
+            var d = DB.items[e.id]; if (!d) return;
+            rows.push({ slot: slot, e: e, name: d.n });
+        });
+        var old = document.getElementById('sherine-pick-overlay'); if (old) old.remove();
+        var ov = document.createElement('div'); ov.id = 'sherine-pick-overlay';
+        ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;';
+        var box = '<div style="background:#0f172a;border:1px solid #334155;border-radius:14px;max-width:440px;width:100%;max-height:84vh;overflow:auto;padding:18px;">';
+        box += '<div style="color:#6ee7b7;font-weight:bold;font-size:18px;margin-bottom:4px;">✦ 席琳附加捲軸</div>';
+        box += '<div style="color:#94a3b8;font-size:13px;margin-bottom:12px;">選一件已裝備的部位 → 隨機抽一套，附加「該部位對應」的席琳效果（已有效果會覆蓋）。剩餘捲軸：' + (it.cnt || 0) + '</div>';
+        if (!rows.length) box += '<div style="color:#fca5a5;font-size:14px;margin:10px 0;">目前沒有可附加的部位（需先裝備：頭盔／盔甲／手套／長靴／斗篷其一）。</div>';
+        box += '<div id="sherine-pick-list"></div>';
+        box += '<button id="sherine-pick-close" style="margin-top:10px;width:100%;background:#334155;color:#e2e8f0;border:none;border-radius:8px;padding:11px;font-weight:bold;cursor:pointer;">關閉</button></div>';
+        ov.innerHTML = box;
+        document.body.appendChild(ov);
+        ov.addEventListener('click', function (ev) { if (ev.target === ov) ov.remove(); });
+        document.getElementById('sherine-pick-close').onclick = function () { ov.remove(); };
+        var list = document.getElementById('sherine-pick-list');
+        rows.forEach(function (r) {
+            var b = document.createElement('button');
+            b.style.cssText = 'display:block;width:100%;text-align:left;margin-bottom:8px;background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px 12px;color:#e2e8f0;cursor:pointer;font-size:14px;';
+            var cur = r.e.seteff ? ('　<span style="color:#6ee7b7;">現:' + r.e.seteff + '</span>') : '';
+            b.innerHTML = '<b>' + SHERINE_SLOT_NAME[r.slot] + '</b>：' + r.name + cur;
+            b.onclick = function () {
+                var cur2 = player.inv.find(function (i) { return i.uid === uid; });
+                if (!cur2 || (cur2.cnt || 0) < 1) { ov.remove(); return; }
+                var sets = _sherineSets();
+                var pick = sets[Math.floor(Math.random() * sets.length)];
+                var eff = pick.effs[SHERINE_SLOT_IDX[r.slot]];
+                r.e.seteff = eff;
+                cur2.cnt -= 1;
+                if (cur2.cnt <= 0) { var ix = player.inv.indexOf(cur2); if (ix >= 0) player.inv.splice(ix, 1); }
+                try { calcStats(); } catch (e) { }
+                try { saveGame(); } catch (e) { }
+                logSys('<span class="c-sherine font-bold">✦ ' + SHERINE_SLOT_NAME[r.slot] + '（' + r.name + '）附加了席琳效果：【' + eff + '】！</span>');
+                ov.remove();
+                window.openSherinePanel('progress');
+            };
+            list.appendChild(b);
+        });
+    } catch (e) { logSys('捲軸使用失敗：' + e.message); }
+};
+
+window.openSherinePanel = function (tab) {
+    try {
+        tab = tab || 'progress';
+        var sets = _sherineSets();
+        // 目前已裝備效果集合
+        var equipped = {};
+        for (var k in player.eq) { var e = player.eq[k]; if (e && e.seteff) equipped[e.seteff] = 1; }
+        var old = document.getElementById('sherine-panel-overlay'); if (old) old.remove();
+        var ov = document.createElement('div'); ov.id = 'sherine-panel-overlay';
+        ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;';
+        var tabBtn = function (id, label) {
+            var on = tab === id;
+            return '<button data-tab="' + id + '" style="flex:1;background:' + (on ? '#059669' : '#1e293b') + ';color:' + (on ? '#fff' : '#94a3b8') + ';border:none;border-radius:8px;padding:9px;font-weight:bold;cursor:pointer;font-size:14px;">' + label + '</button>';
+        };
+        var html = '<div style="background:#0f172a;border:1px solid #334155;border-radius:14px;max-width:560px;width:100%;max-height:88vh;overflow:auto;padding:18px;">';
+        html += '<div style="color:#6ee7b7;font-weight:bold;font-size:18px;margin-bottom:10px;">🔮 席琳套裝</div>';
+        html += '<div style="display:flex;gap:8px;margin-bottom:12px;">' + tabBtn('progress', '我的進度') + tabBtn('guide', '套裝圖鑑') + '</div>';
+        html += '<div id="sherine-tab-body"></div>';
+        html += '<button id="sherine-panel-close" style="margin-top:8px;width:100%;background:#334155;color:#e2e8f0;border:none;border-radius:8px;padding:11px;font-weight:bold;cursor:pointer;">關閉</button></div>';
+        ov.innerHTML = html;
+        document.body.appendChild(ov);
+        ov.addEventListener('click', function (ev) { if (ev.target === ov) ov.remove(); });
+        document.getElementById('sherine-panel-close').onclick = function () { ov.remove(); };
+        ov.querySelectorAll('button[data-tab]').forEach(function (btn) {
+            btn.onclick = function () { window.openSherinePanel(btn.getAttribute('data-tab')); };
+        });
+
+        var body = document.getElementById('sherine-tab-body');
+        var tiers = [2, 3, 5];
+        var out = '';
+        if (tab === 'progress') {
+            out += '<div style="color:#94a3b8;font-size:12px;margin-bottom:10px;">依「已裝備」部位上的席琳效果計算；同系列不同效果湊滿 2／3／5 件即啟動加成。</div>';
+            sets.forEach(function (s) {
+                var cnt = 0; s.effs.forEach(function (ef) { if (equipped[ef]) cnt++; });
+                out += '<div style="border:1px solid #334155;border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#111c33;">';
+                out += '<div style="font-weight:bold;color:' + (cnt >= 2 ? '#a7f3d0' : '#94a3b8') + ';font-size:15px;margin-bottom:5px;">' + s.g + '套裝　<span style="font-size:13px;">已裝 ' + cnt + ' / 5 件</span></div>';
+                out += '<div style="font-size:12px;line-height:1.9;margin-bottom:4px;">';
+                SHERINE_SLOT_ORDER.forEach(function (slot, i) {
+                    var ef = s.effs[i]; var has = !!equipped[ef];
+                    out += '<span style="color:' + (has ? '#34d399' : '#64748b') + ';margin-right:10px;">' + (has ? '✓' : '·') + SHERINE_SLOT_NAME[slot] + ' ' + ef + '</span>';
+                });
+                out += '</div>';
+                s.text.forEach(function (line, i) {
+                    var on = cnt >= (tiers[i] || 9);
+                    out += '<div style="font-size:12.5px;color:' + (on ? '#34d399' : '#64748b') + ';margin:1px 0;">' + (on ? '✓ ' : '· ') + line + '</div>';
+                });
+                out += '</div>';
+            });
+        } else {
+            out += '<div style="color:#94a3b8;font-size:12px;margin-bottom:10px;">用「席琳附加捲軸」在對應部位附加效果。每套需湊滿同系列不同部位的效果：</div>';
+            sets.forEach(function (s) {
+                out += '<div style="border:1px solid #334155;border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#111c33;">';
+                out += '<div style="font-weight:bold;color:#a7f3d0;font-size:15px;margin-bottom:4px;">' + s.g + '套裝</div>';
+                out += '<div style="font-size:12px;line-height:1.9;color:#cbd5e1;margin-bottom:5px;">';
+                SHERINE_SLOT_ORDER.forEach(function (slot, i) {
+                    out += '<span style="margin-right:10px;"><span style="color:#fbbf24;">' + SHERINE_SLOT_NAME[slot] + '</span>→' + s.effs[i] + '</span>';
+                });
+                out += '</div>';
+                s.text.forEach(function (line) {
+                    out += '<div style="font-size:12.5px;color:#86efac;margin:1px 0;">◆ ' + line + '</div>';
+                });
+                out += '</div>';
+            });
+        }
+        body.innerHTML = out;
+    } catch (e) { logSys('面板開啟失敗：' + e.message); }
+};
+
+    function changeMap(force) {
     // 行動限制狀態（石化／麻痺／冰凍／暈眩）時無法主動切換地圖；force=true 供復活、載入等內部流程略過
     if (!force && player.statuses &&
         (player.statuses.stone > 0 || player.statuses.paralyze > 0 || player.statuses.freeze > 0 || player.statuses.stun > 0)) {

@@ -1140,6 +1140,26 @@
                     blRow, apply);
             }
         }
+        section('🔮 席琳套裝（測試給予：整套 5 件，可直接裝備驗證套裝效果）');
+        {
+            let sets = []; try { sets = (typeof window.__admSherineSets === 'function') ? window.__admSherineSets() : []; } catch (e) { }
+            if (!sets.length) {
+                _secBody.append(el('div', { style: 'color:#64748b;font-size:13px;' }, '找不到席琳套裝資料（請先進入遊戲）。'));
+            } else {
+                _secBody.append(el('div', { style: 'color:#94a3b8;font-size:12px;margin-bottom:8px;line-height:1.6;' }, '每套給 5 件（頭盔/盔甲/手套/長靴/斗篷各一，帶不同效果），全部裝上即可測 2/3/5 件加成。'));
+                sets.forEach(s => {
+                    const r = el('div', { style: 'display:flex;gap:8px;margin-bottom:6px;align-items:center;' });
+                    const lbl = el('div', { style: 'flex:1;font-size:13px;color:#a7f3d0;' }, s.g + '套裝　' + (s.text[2] || ''));
+                    const b = el('button', { style: 'background:#059669;color:#fff;border:none;border-radius:6px;padding:7px 12px;cursor:pointer;white-space:nowrap;font-weight:bold;' }, '給整套');
+                    b.onclick = () => {
+                        let n = 0; try { n = window.__admGiveSherineSet(s.g); } catch (e) { }
+                        if (n > 0) { toast(s.g + '套裝 ×' + n + ' 件已入背包 ✅', '#14532d'); if (typeof refreshGame === 'function') refreshGame(); }
+                        else toast('給予失敗', '#7f1d1d');
+                    };
+                    r.append(lbl, b); _secBody.append(r);
+                });
+            }
+        }
         section('👥 玩家管理（檢視 / 編輯其他人）');
         const userList = el('div', { style: 'font-size:13px;margin-bottom:8px;max-height:170px;overflow-y:auto;' });
         api('/api/admin/users').then(j => {
