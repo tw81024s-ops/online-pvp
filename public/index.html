@@ -378,7 +378,15 @@
     border-radius:12px; padding:10px 16px; font-weight:900; font-size:15px; box-shadow:0 3px 14px rgba(0,0,0,.5); }
   body.hub-open #hub-back{ display:block; }
   body.hub-home #online-fab, body.hub-open #online-fab{ display:none !important; }
+  #mhub .fbtn.gacha{ background:linear-gradient(180deg,#7c3aed,#532a9e);border-color:#a855f7;color:#f3e8ff }
 }
+#hub-gacha{ position:fixed; inset:0; z-index:90; display:none; flex-direction:column;
+  background:linear-gradient(180deg,#0b0f18,#070a11); padding:10px 8px calc(10px + env(safe-area-inset-bottom)); overflow-y:auto; }
+#hub-gacha-bar{ display:flex; gap:8px; justify-content:flex-end; margin-bottom:8px; }
+#hub-gacha-bar button{ background:linear-gradient(180deg,#b45309,#8a3d06); color:#fff; border:1px solid #f59e0b;
+  border-radius:12px; padding:10px 16px; font-weight:900; font-size:15px; }
+#hub-gacha-bar #hub-gacha-poly{ background:linear-gradient(180deg,#7c3aed,#532a9e); border-color:#a855f7; }
+#hub-gacha-body{ flex:1; min-height:0; }
     </style>
 </head>
 <body class="min-h-screen lg:h-screen w-screen flex items-start lg:items-center justify-center p-2 lg:p-4 overflow-y-auto">
@@ -8262,7 +8270,7 @@ function _hubBuildOnce(){
     if(document.getElementById('mhub')) return;
     var hub=document.createElement('div'); hub.id='mhub';
     hub.innerHTML =
-      '<div class="top">'+
+      '<div class="top" data-act="status" title="角色狀態 / 變身殿堂">'+
         '<div class="ava"></div>'+
         '<div class="who"><div class="nm">—</div><div class="lv">Lv —</div>'+
           '<div class="bars"><div class="bar hp"><i></i></div><div class="bar mp"><i></i></div><div class="bar xp"><i></i></div></div>'+
@@ -8283,6 +8291,7 @@ function _hubBuildOnce(){
           '<div class="fbtn" data-act="panel:combat"><span class="ic">📜</span>戰鬥</div>'+
           '<div class="fbtn" data-act="panel:system"><span class="ic">🔔</span>系統</div>'+
           '<div class="fbtn" data-act="tab:audit"><span class="ic">📈</span>統計</div>'+
+          '<div class="fbtn gacha" data-act="gacha"><span class="ic">🎰</span>抽卡</div>'+
         '</div>'+
       '</div>'+
       '<div class="bot">'+
@@ -8327,6 +8336,8 @@ function hubHome(){
 }
 function hubAct(act){
     var P=_hubPanels();
+    if(act==='status'){ hubOpenPanel(P.status); return; }
+    if(act==='gacha'){ openHubGacha(); return; }
     if(act.indexOf('tab:')===0){
         var key=act.slice(4);
         document.querySelectorAll('.tab-bar button[onclick*="switchTab"]').forEach(function(b){
@@ -8344,6 +8355,18 @@ function hubAct(act){
         var fab2=document.getElementById('online-fab'); var bs2=fab2?fab2.querySelectorAll('button'):[];
         if(bs2[1]) bs2[1].click(); else if(bs2[0]) bs2[0].click();
     }
+}
+function openHubGacha(){
+    var ov=document.getElementById('hub-gacha');
+    if(!ov){
+        ov=document.createElement('div'); ov.id='hub-gacha';
+        ov.innerHTML='<div id="hub-gacha-bar"><button id="hub-gacha-poly">🧬 變身殿堂</button><button id="hub-gacha-close">✕ 關閉</button></div><div id="hub-gacha-body"></div>';
+        document.body.appendChild(ov);
+        ov.querySelector('#hub-gacha-close').addEventListener('click', function(){ ov.style.display='none'; });
+        ov.querySelector('#hub-gacha-poly').addEventListener('click', function(){ ov.style.display='none'; try{ openPolyGacha(); }catch(e){} });
+    }
+    try{ if(typeof renderPandoraGacha==='function') renderPandoraGacha(document.getElementById('hub-gacha-body')); }catch(e){}
+    ov.style.display='flex';
 }
 function hubSync(){
     var hub=document.getElementById('mhub'); if(!hub) return;
