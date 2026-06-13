@@ -254,4 +254,37 @@ function clampProfile(p) {
     };
 }
 
-module.exports = { simulate, clampProfile };
+// ============ 世界王：固定時間 DPS 模擬（伺服器權威，防作弊）============
+// 玩家對「固定靶」全力輸出 ticks 個 tick（100ms/tick），回傳總傷害。
+// 靶設為高命中（lv低、ac高、mr0），讓傷害忠實反映玩家裝備/build；技能不耗 MP（1分鐘爆發）。
+function simulateBossDps(profile, ticks, opts) {
+    opts = opts || {};
+    const DMG = Math.max(0, isFinite(opts.pvpDmgMult) ? opts.pvpDmgMult : 1);
+    const MAG = Math.max(0, isFinite(opts.pvpMagicMult) ? opts.pvpMagicMult : 1);
+    const T = Math.max(1, Math.min(6000, ticks | 0));
+    const me = initSide(clampProfile(profile));
+    const bossDef = { lv: 1, ac: 10, mr: 0, dr: 0, er: 0, cls: null };   // 固定靶
+    let total = 0;
+    for (let t = 1; t <= T; t++) {
+        // 攻擊技能（不耗 MP，照冷卻放）
+        if (me.p.spell && me.atkSkCd <= 0) {
+            me.atkSkCd = me.castInterval;
+            if (me.p.spell.phys) {
+                let hits = Math.max(1, me.p.spell.hits || 1);
+                for (let h = 0; h < hits; h++) { let r = physicalAttack(me.p, bossDef); if (r.type === 'hit') total += Math.max(1, Math.floor(r.dmg * DMG)); }
+            } else {
+                let r = magicAttack(me.p, bossDef, me.p.spell); total += Math.max(1, Math.floor(r.dmg * DMG * MAG));
+            }
+        }
+        // 普通攻擊
+        if (me.atkCd <= 0) {
+            me.atkCd = me.atkInterval;
+            let r = physicalAttack(me.p, bossDef);
+            if (r.type === 'hit') total += Math.max(1, Math.floor(r.dmg * DMG));
+        }
+        me.atkCd--; me.atkSkCd--;
+    }
+    return Math.floor(total);
+}
+
+module.exports = { simulate, clampProfile, simulateBossDps };

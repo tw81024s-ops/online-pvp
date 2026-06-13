@@ -1163,6 +1163,8 @@ const DB = {
 		"new_item_elfwing": { n: "精靈羽翼", p: 10, gachaWeight: 100 },
 		"new_item_mermaid_scale": { n: "人魚之鱗", p: 10, gachaWeight: 10 },
 		"new_item_239": { n: "潘朵拉抽獎卷", p: 0, gachaWeight: 0 },
+		"zongzi_south": { n: "南部粽", p: 0, gachaWeight: 0 },
+		"zongzi_north": { n: "北部粽", p: 0, gachaWeight: 0 },
 		"potion_reborn": { n: "轉生藥水", type: "misc", req: "all", p: 300000, c: "text-fuchsia-300", d: "等級達99時使用可『轉生』：等級歸1、轉生數+1，永久保留轉生前30%最大HP，能力上限+20、萬能藥可再用20瓶。各大商店有售。", eff: "reborn", gachaWeight: 0 },
 		"new_item_240": { n: "變形怪的血", p: 1, gachaWeight: 0 },
 		"new_item_241": { n: "王族搜索狀", p: 1000, gachaWeight: 0, d: "擊敗血盟敵人必定取得。可向血盟盟主交出，換取盟主的祝福。" },
@@ -5129,6 +5131,7 @@ function killMob(idx) {
         let gMax = mob.goldMax || (mob.lv * 10);
         let g = gMin + Math.floor(Math.random() * (gMax - gMin + 1));
         player.gold += Math.round(g * (isTowerMap(mapState.current)?2:1) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.goldDropMult)||1));
+        if (window.__GAME_CONFIG && window.__GAME_CONFIG.eventZongzi && Math.random() < 0.5) gainItem(Math.random() < 0.5 ? 'zongzi_south' : 'zongzi_north', 1, true);   // 端午活動：每隻怪 50% 掉 1 顆粽子
         logSys(`獲得 <span class="text-yellow-400 font-bold">${g} 金幣</span>。`);
     }
 	// 誘捕判定（誘捕上限改於「使用肉」時以 floor(魅力/7) 判定）
@@ -8292,6 +8295,7 @@ function _hubBuildOnce(){
           '<div class="fbtn" data-act="panel:system"><span class="ic">🔔</span>系統</div>'+
           '<div class="fbtn" data-act="tab:audit"><span class="ic">📈</span>統計</div>'+
           '<div class="fbtn gacha" data-act="gacha"><span class="ic">🎰</span>抽卡</div>'+
+          '<div class="fbtn" data-act="events"><span class="ic">🎉</span>活動</div>'+
         '</div>'+
       '</div>'+
       '<div class="bot">'+
@@ -8338,6 +8342,7 @@ function hubAct(act){
     var P=_hubPanels();
     if(act==='status'){ hubOpenPanel(P.status); return; }
     if(act==='gacha'){ openHubGacha(); return; }
+    if(act==='events'){ if(typeof window.showEvents==='function') window.showEvents(); else _hubClickFab(/活動/); return; }
     if(act.indexOf('tab:')===0){
         var key=act.slice(4);
         document.querySelectorAll('.tab-bar button[onclick*="switchTab"]').forEach(function(b){
@@ -8435,6 +8440,31 @@ window.__flushPvpPending = function(){
 };
 setInterval(function(){ try{ window.__flushPvpPending(); }catch(e){} }, 3000);
 
+window.__countItem = function(id){ try{ if(typeof player==='undefined'||!player||!Array.isArray(player.inv)) return 0; return player.inv.filter(i=>i&&i.id===id).reduce((s,i)=>s+(i.cnt||1),0);}catch(e){return 0;} };
+window.__consumeItem = function(id, n){
+    try{
+        if(typeof player==='undefined'||!player||!Array.isArray(player.inv)) return false;
+        if(window.__countItem(id) < n) return false;
+        let need=n;
+        for(let i=player.inv.length-1;i>=0 && need>0;i--){
+            let it=player.inv[i]; if(!it||it.id!==id) continue;
+            let take=Math.min(it.cnt||1, need); it.cnt=(it.cnt||1)-take; need-=take;
+            if((it.cnt||0)<=0) player.inv.splice(i,1);
+        }
+        return need<=0;
+    }catch(e){return false;}
+};
+window.__zongziExchange = function(itemId, costId, costN){
+    if(typeof player==='undefined'||!player) return {ok:false,msg:'尚未載入角色'};
+    if(window.__countItem(costId) < costN) return {ok:false,msg:'粽子不足'};
+    if(!window.__consumeItem(costId, costN)) return {ok:false,msg:'扣除失敗'};
+    try{ gainItem(itemId, 1, true, true); }catch(e){ return {ok:false,msg:'發放失敗'}; }
+    if(typeof updateUI==='function') updateUI();
+    if(typeof saveGame==='function') saveGame();
+    var nm=(DB.items[itemId]&&DB.items[itemId].n)||itemId;
+    if(typeof logSys==='function') logSys('🎉 端午兌換：取得 '+nm);
+    return {ok:true, name:nm};
+};
 window.__polyFormList = function(){
     var out=[]; try{ var RP=RARITY_POLY; for(var t in RP){ (RP[t].forms||[]).forEach(function(f){ if(f&&f.n) out.push({tier:t, name:f.n}); }); } }catch(e){}
     return out;
@@ -11225,7 +11255,7 @@ function getWeightedGachaResult() {
     let pool = [];
 
     // 建立抽獎池並計算總權重（改版：所有裝備/道具/卷軸皆可由潘朵拉抽獎取得；原權重 0 者給預設權重 10）
-    const _gachaBlock = ['new_item_239','new_item_241','new_item_collar_husky','new_item_238','new_item_184','new_item_185'];
+    const _gachaBlock = ['new_item_239','zongzi_south','zongzi_north','new_item_241','new_item_collar_husky','new_item_238','new_item_184','new_item_185'];
     for (let id in DB.items) {
         if (_gachaBlock.includes(id)) continue;   // 抽獎卷本身/誘捕項圈/特殊任務物不列入抽獎池
         let gw = DB.items[id].gachaWeight;

@@ -50,7 +50,8 @@
             window.__GAME_CONFIG = {
                 expMult: j.expMult || 1, spdMult: j.spdMult || 1,
                 goldDropMult: j.goldDropMult || 1, synthRateMult: j.synthRateMult || 1,
-                enhanceRateMult: j.enhanceRateMult || 1, pandoraLuckMult: j.pandoraLuckMult || 1
+                enhanceRateMult: j.enhanceRateMult || 1, pandoraLuckMult: j.pandoraLuckMult || 1,
+                eventZongzi: j.eventZongzi ? 1 : 0
             };
             try { if (typeof calcStats === 'function') calcStats(); if (typeof updateUI === 'function') updateUI(); } catch (e) { }
         } catch (e) { }
@@ -215,8 +216,9 @@
     const btnLoginFab = el('button', { style: btnStyle('#1d4ed8') }, '🌐 線上登入');
     const btnSlots = el('button', { style: btnStyle('#0f766e') + 'display:none;' }, '👤 角色欄位');
     const btnAdmin = el('button', { style: btnStyle('#7c3aed') + 'display:none;' }, '🛠️ 管理員');
+    const btnEvents = el('button', { style: btnStyle('#9333ea') }, '🎉 每日活動');
     function btnStyle(bg) { return `background:${bg};color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:bold;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.45);`; }
-    fab.append(statusEl, btnAdmin, btnSlots, btnArena, btnLoginFab);
+    fab.append(statusEl, btnAdmin, btnSlots, btnEvents, btnArena, btnLoginFab);
     function setStatus(s, bad) { statusEl.style.display = 'block'; statusEl.textContent = s; statusEl.style.color = bad ? '#fca5a5' : '#86efac'; }
     function refreshAdminBtn() {
         // 雙重隱藏：必須是管理員帳號，且網址結尾加上 #admin 才顯示按鈕（朋友與一般情況都看不到）
@@ -410,6 +412,91 @@
         });
     }
 
+    // ============ 每日活動：世界王 + 端午兌換 ============
+    function showEvents() {
+        if (!token || !wsReady) { toast('請先登入線上模式', '#7f1d1d'); if (!token) showLogin(); return; }
+        const _p = getPlayer(); if (!_p || !_p.cls) { toast('請先建立或載入角色再參加活動', '#7f1d1d'); return; }
+        const _DB = getDB();
+        const wrap = el('div');
+
+        // ===== 世界王 =====
+        wrap.append(el('div', { style: 'font-weight:bold;color:#f87171;font-size:15px;margin-bottom:6px;' }, '🐉 世界王 — 火龍巴拉卡斯'));
+        wrap.append(el('div', { style: 'color:#94a3b8;font-size:12px;margin-bottom:8px;line-height:1.6;' }, '每日 1 次，對火龍巴拉卡斯全力輸出 60 秒比拚累積傷害。每日 00:00 結算，前 10 名發金幣：1名 10億／2名 5億／3名 3億／4–10名 各 1億。'));
+        const wbStat = el('div', { style: 'background:#0f172a;border:1px solid #334155;border-radius:8px;padding:10px;margin-bottom:8px;font-size:13px;color:#cbd5e1;' }, '讀取中…');
+        wrap.append(wbStat);
+        const wbBtn = el('button', { style: 'width:100%;background:#b91c1c;color:#fff;border:none;border-radius:8px;padding:11px;font-weight:bold;cursor:pointer;margin-bottom:10px;font-size:15px;' }, '⚔️ 挑戰世界王');
+        wrap.append(wbBtn);
+        wrap.append(el('div', { style: 'font-weight:bold;color:#fbbf24;margin-bottom:4px;' }, '🏆 今日傷害排行（前 10）'));
+        const wbLb = el('div', { style: 'font-size:12px;color:#cbd5e1;margin-bottom:6px;' }, '讀取中…');
+        wrap.append(wbLb);
+
+        function refreshWB() {
+            api('/api/worldboss/me').then(me => {
+                if (me.done) { wbStat.innerHTML = `今日成績：<b style="color:#fbbf24">${(me.dmg || 0).toLocaleString()}</b> 傷害　排名 <b>#${me.rank || '-'}</b>`; wbBtn.disabled = true; wbBtn.style.opacity = '.5'; wbBtn.style.cursor = 'default'; wbBtn.textContent = '今日已挑戰（每日 1 次）'; }
+                else { wbStat.textContent = '今日尚未挑戰，點下方開始！'; wbBtn.disabled = false; wbBtn.style.opacity = '1'; wbBtn.style.cursor = 'pointer'; wbBtn.textContent = '⚔️ 挑戰世界王'; }
+            }).catch(() => { wbStat.textContent = '（讀取失敗）'; });
+            api('/api/worldboss/leaderboard').then(j => {
+                wbLb.innerHTML = '';
+                (j.top || []).forEach((x, i) => {
+                    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '.';
+                    const r = el('div', { style: 'display:flex;justify-content:space-between;padding:2px 0;' });
+                    const a = el('span'); a.textContent = `${medal} ${x.name}`;
+                    const b = el('span', { style: 'color:#94a3b8;' }); b.textContent = (x.dmg || 0).toLocaleString();
+                    r.append(a, b); wbLb.append(r);
+                });
+                if (!(j.top || []).length) wbLb.textContent = '尚無紀錄';
+            }).catch(() => { wbLb.textContent = '（讀取失敗）'; });
+        }
+        wbBtn.onclick = async () => {
+            if (wbBtn.disabled) return;
+            wbBtn.disabled = true; wbBtn.textContent = '⚔️ 戰鬥模擬中…';
+            try {
+                const j = await api('/api/worldboss/challenge', 'POST', { profile: buildProfile(), name: (_p.name || myName || '') });
+                toast(`🐉 造成 ${(j.dmg || 0).toLocaleString()} 傷害！目前排名 #${j.rank || '-'}`, '#14532d');
+            } catch (e) { toast(e.message, '#7f1d1d'); }
+            refreshWB();
+        };
+
+        // ===== 端午兌換 =====
+        wrap.append(el('div', { style: 'font-weight:bold;color:#34d399;font-size:15px;margin:6px 0;border-top:1px solid #334155;padding-top:12px;' }, '🎉 端午兌換所'));
+        const zc = el('div', { style: 'font-size:13px;color:#cbd5e1;margin-bottom:8px;' }, '');
+        wrap.append(zc);
+        const COST = 5000;
+        const WEAPON_GROUPS = [
+            { cls: '🗡️ 騎士', ids: ['nwp_014', 'nwp_037', 'nwp_012'] },
+            { cls: '🪄 法師', ids: ['wpn_strwand', 'wpn_crystalwand', 'nwp_059'] },
+            { cls: '🏹 妖精', ids: ['nwp_033', 'nwp_031', 'wpn_flaming_angel'] },
+            { cls: '🦇 黑妖', ids: ['nwp_077', 'nwp_067', 'de_claw_spirit'] }
+        ];
+        const GEAR = ['arm_82', 'arm_83', 'arm_81', 'arm_80', 'arm_88', 'amr_dk', 'de_ring_dark', 'de_amulet_shadow', 'acc_117', 'acc_116', 'amu_str', 'amu_int', 'acc_133'];
+        function refreshZ() {
+            const south = window.__countItem('zongzi_south'), north = window.__countItem('zongzi_north');
+            zc.innerHTML = `你的粽子：南部粽 <b style="color:#fbbf24">${south.toLocaleString()}</b>　北部粽 <b style="color:#fbbf24">${north.toLocaleString()}</b>`;
+        }
+        function exRow(itemId, costId) {
+            const nm = (_DB && _DB.items[itemId]) ? _DB.items[itemId].n : itemId;
+            const r = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;background:#1e293b;border:1px solid #334155;border-radius:6px;padding:6px 10px;margin-bottom:6px;' });
+            r.append(el('div', { style: 'font-size:13px;' }, nm));
+            const btn = el('button', { style: 'background:#15803d;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-weight:bold;font-size:12px;white-space:nowrap;' }, '兌換 ' + COST.toLocaleString());
+            btn.onclick = () => {
+                const res = window.__zongziExchange(itemId, costId, COST);
+                if (res && res.ok) { toast('🎉 兌換成功：' + res.name, '#14532d'); refreshZ(); }
+                else toast((res && res.msg) || '兌換失敗', '#7f1d1d');
+            };
+            r.append(btn); return r;
+        }
+        wrap.append(el('div', { style: 'font-size:13px;color:#93c5fd;margin:4px 0;' }, '🗡️ 北部粽 ×5000 → 各職業高階武器（騎士/法師/妖精/黑妖 各 3 把）'));
+        WEAPON_GROUPS.forEach(grp => {
+            wrap.append(el('div', { style: 'font-size:12px;color:#fbbf24;font-weight:bold;margin:4px 0 2px;' }, grp.cls));
+            grp.ids.forEach(id => wrap.append(exRow(id, 'zongzi_north')));
+        });
+        wrap.append(el('div', { style: 'font-size:13px;color:#93c5fd;margin:8px 0 4px;' }, '🛡️ 南部粽 ×5000 → 任選高階飾品/防具'));
+        GEAR.forEach(id => wrap.append(exRow(id, 'zongzi_south')));
+
+        modal('🎉 每日活動', wrap, { w: '480px' });
+        refreshWB(); refreshZ();
+    }
+
     // ====== 交換系統 ======
     function requestTrade(target) {
         if (!token || !wsReady) { toast('請先登入線上模式', '#7f1d1d'); return; }
@@ -593,6 +680,8 @@
     }
     btnSlots.onclick = showSlots;
     btnArena.onclick = showArena;
+    btnEvents.onclick = showEvents;
+    window.showEvents = showEvents;
 
     function showIncoming(m) {
         const wrap = el('div');
@@ -839,7 +928,7 @@
         section('🌍 全服設定（所有玩家生效，立即同步）');
         const cfgStatus = el('div', { style: 'font-size:12px;color:#94a3b8;margin:-2px 0 8px;line-height:1.7;' }, '目前全服設定：讀取中…');
         wrap.append(cfgStatus);
-        const fmtCfg = c => `目前全服：經驗 ×${c.expMult || 1}　攻速 ×${c.spdMult || 1}<br>競技場傷害 ×${c.pvpDmgMult != null ? c.pvpDmgMult : 1}　競技場魔法 ×${c.pvpMagicMult != null ? c.pvpMagicMult : 1}<br>金幣掉落 ×${c.goldDropMult != null ? c.goldDropMult : 1}　合卡 ×${c.synthRateMult != null ? c.synthRateMult : 1}　衝裝 ×${c.enhanceRateMult != null ? c.enhanceRateMult : 1}　潘朵拉 ×${c.pandoraLuckMult != null ? c.pandoraLuckMult : 1}`;
+        const fmtCfg = c => `目前全服：經驗 ×${c.expMult || 1}　攻速 ×${c.spdMult || 1}<br>競技場傷害 ×${c.pvpDmgMult != null ? c.pvpDmgMult : 1}　競技場魔法 ×${c.pvpMagicMult != null ? c.pvpMagicMult : 1}<br>金幣掉落 ×${c.goldDropMult != null ? c.goldDropMult : 1}　合卡 ×${c.synthRateMult != null ? c.synthRateMult : 1}　衝裝 ×${c.enhanceRateMult != null ? c.enhanceRateMult : 1}　潘朵拉 ×${c.pandoraLuckMult != null ? c.pandoraLuckMult : 1}　端午活動 ${c.eventZongzi ? '🟢開啟' : '⚪關閉'}`;
         fetch('/api/config').then(r => r.json()).then(j => { cfgStatus.innerHTML = fmtCfg(j); }).catch(() => { cfgStatus.textContent = '（需登入線上模式才能讀取/設定）'; });
         const setCfg = async (key, n, label) => {
             try { const j = await api('/api/admin/config', 'POST', { [key]: n }); await syncGameConfig(); cfgStatus.innerHTML = fmtCfg(j.config); toast(label + ' = ×' + n, '#14532d'); }
@@ -853,6 +942,15 @@
         row(null, '合卡成功率', v => setCfg('synthRateMult', Math.max(0, parseFloat(v) || 1), '合卡成功率'), true, '變身合成倍率（例 2＝兩倍成功率）');
         row(null, '衝裝成功率', v => setCfg('enhanceRateMult', Math.max(0, parseFloat(v) || 1), '衝裝成功率'), true, '強化成功率倍率（例 1.5＝1.5倍）');
         row(null, '潘朵拉機率', v => setCfg('pandoraLuckMult', Math.max(0, parseFloat(v) || 1), '潘朵拉機率'), true, '稀有物加權倍率（例 3＝稀有更易中）');
+        {
+            const er = el('div', { style: 'display:flex;gap:8px;margin-bottom:8px;align-items:center;' });
+            er.append(el('div', { style: 'flex:1;font-size:14px;' }, '🎉 端午活動（全怪 50% 掉粽子）'));
+            const onB = el('button', { style: 'background:#15803d;color:#fff;border:none;border-radius:6px;padding:8px 14px;cursor:pointer;font-weight:bold;' }, '開啟');
+            const offB = el('button', { style: 'background:#7f1d1d;color:#fff;border:none;border-radius:6px;padding:8px 14px;cursor:pointer;font-weight:bold;' }, '關閉');
+            onB.onclick = () => setCfg('eventZongzi', 1, '端午活動');
+            offB.onclick = () => setCfg('eventZongzi', 0, '端午活動');
+            er.append(onB, offB); wrap.append(er);
+        }
         // 🎁 給予指定變身（對方需在線上，由其客戶端寫入圖鑑）
         section('🎁 給予指定變身（對方需在線上）');
         {

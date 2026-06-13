@@ -9,7 +9,7 @@ const path = require('path');
 const fs = require('fs');
 
 const PORT = process.env.PORT || 3000;
-const { simulate, clampProfile } = require('./battle');
+const { simulate, clampProfile, simulateBossDps } = require('./battle');
 const store = require('./store');
 
 // ====== App ======
@@ -125,7 +125,8 @@ app.get('/api/config', (req, res) => {
         goldDropMult: c.goldDropMult != null ? c.goldDropMult : 1,
         synthRateMult: c.synthRateMult != null ? c.synthRateMult : 1,
         enhanceRateMult: c.enhanceRateMult != null ? c.enhanceRateMult : 1,
-        pandoraLuckMult: c.pandoraLuckMult != null ? c.pandoraLuckMult : 1
+        pandoraLuckMult: c.pandoraLuckMult != null ? c.pandoraLuckMult : 1,
+        eventZongzi: c.eventZongzi ? 1 : 0
     });
 });
 app.post('/api/admin/config', auth, adminOnly, (req, res) => {
@@ -139,6 +140,7 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
     if (b.synthRateMult !== undefined) cfg.synthRateMult = Math.max(0, Math.min(100, parseFloat(b.synthRateMult) || 1));
     if (b.enhanceRateMult !== undefined) cfg.enhanceRateMult = Math.max(0, Math.min(100, parseFloat(b.enhanceRateMult) || 1));
     if (b.pandoraLuckMult !== undefined) cfg.pandoraLuckMult = Math.max(0, Math.min(100, parseFloat(b.pandoraLuckMult) || 1));
+    if (b.eventZongzi !== undefined) cfg.eventZongzi = b.eventZongzi ? 1 : 0;
     const out = store.setConfig(cfg);
     res.json({ ok: true, config: {
         expMult: out.expMult || 1, spdMult: out.spdMult || 1,
@@ -147,7 +149,8 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
         goldDropMult: out.goldDropMult != null ? out.goldDropMult : 1,
         synthRateMult: out.synthRateMult != null ? out.synthRateMult : 1,
         enhanceRateMult: out.enhanceRateMult != null ? out.enhanceRateMult : 1,
-        pandoraLuckMult: out.pandoraLuckMult != null ? out.pandoraLuckMult : 1
+        pandoraLuckMult: out.pandoraLuckMult != null ? out.pandoraLuckMult : 1,
+        eventZongzi: out.eventZongzi ? 1 : 0
     } });
 });
 
@@ -339,6 +342,68 @@ app.post('/api/admin/grant-poly', auth, adminOnly, (req, res) => {
     res.json({ ok: true });
 });
 
+// ===== 世界王（每日活動）=====
+const WB_TICKS = 600;   // 60 秒（100ms/tick）
+const WB_REWARDS = [1000000000, 500000000, 300000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000, 100000000]; // 1~10 名金幣
+function wbGet() {
+    let w = store.getWB();
+    if (!w || typeof w !== 'object') w = { dayKey: pvpDayKey(), scores: {} };
+    if (!w.scores) w.scores = {};
+    return w;
+}
+function wbRankOf(w, username) {
+    const ranked = Object.values(w.scores).sort((a, b) => (b.dmg || 0) - (a.dmg || 0));
+    const idx = ranked.findIndex(x => x.username === username);
+    return idx >= 0 ? idx + 1 : null;
+}
+function settleWorldBoss(scores) {
+    const ranked = Object.keys(scores).map(uid => ({ uid: Number(uid), name: scores[uid].name, username: scores[uid].username, dmg: scores[uid].dmg || 0 }))
+        .sort((a, b) => b.dmg - a.dmg);
+    for (let i = 0; i < ranked.length && i < WB_REWARDS.length; i++) {
+        const uid = ranked[i].uid;
+        const r = pvpGet(uid, ranked[i].username);
+        r.pendingGold = (r.pendingGold || 0) + WB_REWARDS[i];
+        store.putPvp(uid, r);
+        pvpFlushPending(r);   // 在線即時發、離線登入時補發
+        store.putPvp(uid, r);
+    }
+}
+function wbRollover() {
+    const w = wbGet();
+    const dk = pvpDayKey();
+    if (w.dayKey !== dk) {
+        if (Object.keys(w.scores).length) settleWorldBoss(w.scores);
+        w.scores = {}; w.dayKey = dk;
+        store.putWB(w);
+    }
+    return w;
+}
+app.post('/api/worldboss/challenge', auth, (req, res) => {
+    const u = req.user;
+    const w = wbRollover();
+    if (w.scores[u.id]) return res.status(400).json({ error: '今日已挑戰過世界王（每日 1 次）' });
+    const cfg = store.getConfig();
+    const dmg = simulateBossDps(req.body && req.body.profile ? req.body.profile : {}, WB_TICKS, {
+        pvpDmgMult: cfg.pvpDmgMult != null ? cfg.pvpDmgMult : 1,
+        pvpMagicMult: cfg.pvpMagicMult != null ? cfg.pvpMagicMult : 1
+    });
+    const name = (req.body && req.body.name) ? String(req.body.name).slice(0, 20) : u.username;
+    w.scores[u.id] = { username: u.username, name, dmg };
+    store.putWB(w);
+    res.json({ ok: true, dmg, rank: wbRankOf(w, u.username) });
+});
+app.get('/api/worldboss/me', auth, (req, res) => {
+    const u = req.user; const w = wbRollover();
+    const s = w.scores[u.id];
+    res.json({ done: !!s, dmg: s ? s.dmg : 0, rank: s ? wbRankOf(w, u.username) : null, dayKey: w.dayKey });
+});
+app.get('/api/worldboss/leaderboard', auth, (req, res) => {
+    const w = wbRollover();
+    const top = Object.values(w.scores).map(x => ({ name: x.name || x.username, dmg: x.dmg || 0 }))
+        .sort((a, b) => b.dmg - a.dmg).slice(0, 10);
+    res.json({ top });
+});
+
 wss.on('connection', (ws) => {
     ws.isAlive = true;
     ws.on('pong', () => ws.isAlive = true);
@@ -360,6 +425,7 @@ wss.on('connection', (ws) => {
             // PvP：登入時做跨日/跨週結算，稍後把待領獎勵推給客戶端（等角色載入）
             try {
                 const r0 = pvpGet(row.id, row.username); pvpRollover(r0); store.putPvp(row.id, r0);
+                try { wbRollover(); } catch (e) { }   // 世界王跨日結算（任何人登入都會觸發一次）
                 setTimeout(() => { try { const r = pvpGet(row.id, row.username); pvpFlushPending(r); store.putPvp(row.id, r); } catch (e) { } }, 2500);
             } catch (e) { }
             return;
