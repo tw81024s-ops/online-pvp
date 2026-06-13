@@ -252,6 +252,8 @@
   /* 三欄 → 直排堆疊 */
   #creation-panel { flex-direction: column !important; gap: 14px !important; align-items: stretch !important; }
   #creation-panel > * { width: 100% !important; max-width: 100% !important; }
+  /* 內層左右兩欄（選職業｜分配能力）也要直排，否則能力欄被擠到0寬度而點不到 */
+  #creation-panel .flex.gap-4 { flex-direction: column !important; height: auto !important; }
   /* 內部固定高度放寬，內容自然堆疊 */
   #creation-panel [class*="h-["] { height: auto !important; }
   /* 職業預覽框（原 340x480）：自適應寬、限制高度 */
