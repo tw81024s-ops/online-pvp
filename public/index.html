@@ -317,6 +317,69 @@
   #game-screen .panel.collapsed{ display:block !important; }  /* 桌機不收合 */
 }
     </style>
+    <style id="mobile-hub-css">
+@media (max-width:1024px){
+  /* 停用舊側邊收合殘留 */
+  #dock-left,#dock-right,.panel-toggle{ display:none !important; }
+  body.dockL #game-screen,body.dockR #game-screen{ padding-left:0 !important; padding-right:0 !important; }
+
+  /* ===== 手機 HUB 主畫面 ===== */
+  #mhub{ position:fixed; inset:0; z-index:55; display:none; flex-direction:column;
+    padding:10px 8px 12px; color:#e7edf8;
+    background:radial-gradient(120% 80% at 50% 0%,#1b2436 0%,#0b0f18 60%,#070a11 100%); }
+  body.hub-home #mhub{ display:flex; }
+  body.hub-home #game-screen{ display:none !important; }
+
+  #mhub .top{ display:flex;align-items:center;gap:10px;background:linear-gradient(180deg,#18202f,#121826);
+    border:1px solid #2c3850;border-radius:16px;padding:10px 12px; }
+  #mhub .ava{ width:46px;height:46px;border-radius:12px;flex:0 0 auto;border:1px solid #5b7099;
+    background:#1c2336;background-size:cover;background-position:top center; }
+  #mhub .who{ flex:1;min-width:0 }
+  #mhub .nm{ font-weight:900;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+  #mhub .lv{ font-size:11px;color:#9fb0cc }
+  #mhub .bars{ display:flex;flex-direction:column;gap:3px;margin-top:5px }
+  #mhub .bar{ height:7px;border-radius:6px;background:#0c1220;overflow:hidden }
+  #mhub .bar>i{ display:block;height:100%;width:0 }
+  #mhub .bar.hp>i{ background:linear-gradient(90deg,#ef4444,#b91c1c) }
+  #mhub .bar.mp>i{ background:linear-gradient(90deg,#3b82f6,#1d4ed8) }
+  #mhub .bar.xp>i{ background:linear-gradient(90deg,#f59e0b,#d97706) }
+
+  #mhub .main{ flex:1;display:flex;gap:8px;margin-top:10px;min-height:0 }
+  #mhub .side{ display:flex;flex-direction:column;gap:8px;width:74px;flex:0 0 auto }
+  #mhub .fbtn{ flex:1;border-radius:14px;border:1px solid #34425e;cursor:pointer;
+    background:linear-gradient(180deg,#1c2740,#141b2b);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    color:#e9eefb;font-weight:800;font-size:12.5px;box-shadow:0 2px 8px rgba(0,0,0,.35); }
+  #mhub .fbtn .ic{ font-size:19px;line-height:1 }
+  #mhub .fbtn.gold{ background:linear-gradient(180deg,#7a5d1e,#4a3a14);border-color:#b8923c;color:#ffe9b8 }
+  #mhub .fbtn:active{ transform:scale(.96) }
+
+  #mhub .stage{ flex:1;min-width:0;border-radius:18px;border:1px solid #2c3850;position:relative;overflow:hidden;
+    background:#0a0e18;background-size:cover;background-position:top center;background-repeat:no-repeat;
+    box-shadow:inset 0 0 60px rgba(0,0,0,.5); }
+  #mhub .stage .badge{ position:absolute;top:10px;left:50%;transform:translateX(-50%);
+    background:rgba(10,14,24,.72);border:1px solid #3a4a68;border-radius:999px;padding:4px 12px;
+    font-size:12px;font-weight:800;color:#cfe0ff;white-space:nowrap;max-width:88%;overflow:hidden;text-overflow:ellipsis }
+
+  #mhub .bot{ display:flex;gap:8px;margin-top:10px }
+  #mhub .cta{ flex:1;border-radius:14px;padding:14px 0;text-align:center;font-weight:900;font-size:15px;border:1px solid;cursor:pointer }
+  #mhub .cta.fight{ background:linear-gradient(180deg,#b45309,#8a3d06);border-color:#f59e0b;color:#fff }
+  #mhub .cta.arena{ background:linear-gradient(180deg,#7a3df0,#532a9e);border-color:#a78bfa;color:#fff }
+  #mhub .cta.online{ background:linear-gradient(180deg,#1d4ed8,#1e3a8a);border-color:#60a5fa;color:#fff }
+  #mhub .bot .cta{ font-size:14px; padding:13px 0; }
+  #mhub .cta:active{ transform:scale(.98) }
+
+  /* 功能開啟：只顯示目標框＋返回鈕 */
+  #game-screen.hubview{ display:flex !important; flex-direction:column !important; }
+  #game-screen.hubview > div{ width:100% !important; max-width:100% !important; }
+  #game-screen.hubview .hub-panel:not(.hub-active){ display:none !important; }
+  #hub-back{ display:none; position:fixed; right:12px; top:10px; z-index:75;
+    background:linear-gradient(180deg,#b45309,#8a3d06); color:#fff; border:1px solid #f59e0b;
+    border-radius:12px; padding:10px 16px; font-weight:900; font-size:15px; box-shadow:0 3px 14px rgba(0,0,0,.5); }
+  body.hub-open #hub-back{ display:block; }
+  body.hub-home #online-fab, body.hub-open #online-fab{ display:none !important; }
+}
+    </style>
 </head>
 <body class="min-h-screen lg:h-screen w-screen flex items-start lg:items-center justify-center p-2 lg:p-4 overflow-y-auto">
 
@@ -8130,20 +8193,23 @@ function _panelLabel(panel){
     var m=txt.match(/[\u4e00-\u9fff]{2,4}/);
     return m?m[0]:'視窗';
 }
-function _collapsePanelToSide(panel){
+function _collapsePanelToSide(panel, silent){
     var side=panel.getAttribute('data-dock')||'dock-right';
     var dock=document.getElementById(side); if(!dock){ _ensureDocks(); dock=document.getElementById(side); }
+    if(panel._chip){ try{ panel._chip.remove(); }catch(e){} }  // 避免重複
     panel.classList.add('collapsed');
     var chip=document.createElement('div');
     chip.className='dock-chip';
     chip.textContent=(side==='dock-left'?'▸':'◂')+_panelLabel(panel);
     chip.addEventListener('click', function(){
         panel.classList.remove('collapsed');
+        panel._hasChip=false; panel._chip=null;
         chip.remove();
         _updateDockGutters();
         try{ panel.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){}
     });
     dock.appendChild(chip);
+    panel._chip=chip; panel._hasChip=true;
     _updateDockGutters();
 }
 function _updateDockGutters(){
@@ -8152,17 +8218,18 @@ function _updateDockGutters(){
     document.body.classList.toggle('dockR', !!(dr && dr.children.length));
 }
 function setupPanelCollapse(){
-    if(window.innerWidth>1024) return;
+    return;   // 停用：改用手機 HUB 主畫面
     var gs=document.getElementById('game-screen'); if(!gs) return;
     _ensureDocks();
-    var idx=0;
     var heads=gs.querySelectorAll('.panel > .panel-header');
     for(var i=0;i<heads.length;i++){
         var h=heads[i];
         if(h.querySelector('.panel-toggle')) continue;
         var panel=h.parentElement;
-        if(panel.id==='status-panel') continue;   // 角色狀態（含等級＋圖）固定置中、不收合
-        panel.setAttribute('data-dock', (idx%2===0)?'dock-right':'dock-left'); idx++;
+        // 側邊：依出現順序左右交錯（穩定，重繪後不亂跳）
+        if(!panel.getAttribute('data-dock')) panel.setAttribute('data-dock', (i%2===0)?'dock-right':'dock-left');
+        // 若此框先前已被收合（重繪後 header 是新的），補回它的側邊標籤
+        if(panel.classList.contains('collapsed') && !panel._hasChip){ _collapsePanelToSide(panel, true); }
         var t=document.createElement('span');
         t.className='panel-toggle';
         t.textContent='▾';
@@ -8176,6 +8243,145 @@ function setupPanelCollapse(){
 document.addEventListener('DOMContentLoaded', setupPanelCollapse);
 window.addEventListener('resize', setupPanelCollapse);
 setTimeout(setupPanelCollapse, 500);
+setTimeout(setupPanelCollapse, 1500);
+// 監看主畫面重繪，持續補回收合鈕（地圖/戰鬥等動態框會被重繪洗掉）
+(function(){
+    var last=0;
+    function run(){ var now=Date.now(); if(now-last<700) return; last=now; setupPanelCollapse(); }
+    function attach(){
+        var gs=document.getElementById('game-screen'); if(!gs){ setTimeout(attach,800); return; }
+        try{ new MutationObserver(run).observe(gs,{childList:true,subtree:true}); }catch(e){}
+        run();
+    }
+    document.addEventListener('DOMContentLoaded', attach);
+    setTimeout(attach, 1200);
+})();
+
+/* ===================== 手機 HUB 主畫面 ===================== */
+function _hubBuildOnce(){
+    if(document.getElementById('mhub')) return;
+    var hub=document.createElement('div'); hub.id='mhub';
+    hub.innerHTML =
+      '<div class="top">'+
+        '<div class="ava"></div>'+
+        '<div class="who"><div class="nm">—</div><div class="lv">Lv —</div>'+
+          '<div class="bars"><div class="bar hp"><i></i></div><div class="bar mp"><i></i></div><div class="bar xp"><i></i></div></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="main">'+
+        '<div class="side">'+
+          '<div class="fbtn gold" data-act="tab:stats"><span class="ic">📊</span>能力</div>'+
+          '<div class="fbtn gold" data-act="tab:equip"><span class="ic">🛡️</span>裝備</div>'+
+          '<div class="fbtn gold" data-act="tab:skill"><span class="ic">✨</span>技能</div>'+
+          '<div class="fbtn" data-act="tab:weapons"><span class="ic">⚔️</span>武器</div>'+
+          '<div class="fbtn" data-act="tab:items"><span class="ic">🎒</span>道具</div>'+
+        '</div>'+
+        '<div class="stage"><div class="badge"></div></div>'+
+        '<div class="side">'+
+          '<div class="fbtn" data-act="panel:map"><span class="ic">🗺️</span>地圖</div>'+
+          '<div class="fbtn" data-act="panel:auto"><span class="ic">⚙️</span>自動</div>'+
+          '<div class="fbtn" data-act="panel:combat"><span class="ic">📜</span>戰鬥</div>'+
+          '<div class="fbtn" data-act="panel:system"><span class="ic">🔔</span>系統</div>'+
+          '<div class="fbtn" data-act="tab:audit"><span class="ic">📈</span>統計</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="bot">'+
+        '<div class="cta fight" data-act="cta:fight">⚔ 戰鬥</div>'+
+        '<div class="cta arena" data-act="cta:arena">⚔️ 競技場</div>'+
+        '<div class="cta online" data-act="cta:online">🌐 登入</div>'+
+      '</div>';
+    document.body.appendChild(hub);
+    var back=document.createElement('button'); back.id='hub-back'; back.textContent='🏠 返回主畫面';
+    back.addEventListener('click', hubHome); document.body.appendChild(back);
+    hub.querySelectorAll('[data-act]').forEach(function(b){
+        b.addEventListener('click', function(){ hubAct(b.getAttribute('data-act')); });
+    });
+}
+function _hubPanels(){
+    var gs=document.getElementById('game-screen'); var map={}; if(!gs) return map;
+    gs.querySelectorAll('.panel > .panel-header').forEach(function(h){
+        var pn=h.parentElement; var t=(h.textContent||'');
+        pn.classList.add('hub-panel');
+        if(pn.id==='status-panel') map.status=pn;
+        else if(/冒險地圖/.test(t)) map.map=pn;
+        else if(/自動/.test(t)) map.auto=pn;
+        else if(/戰鬥日誌/.test(t)) map.combat=pn;
+        else if(/系統|物品日誌/.test(t)) map.system=pn;
+    });
+    var tb=gs.querySelector('.tab-bar'); if(tb){ var tp=tb.closest('.panel'); if(tp){ tp.classList.add('hub-panel'); map.tabs=tp; } }
+    return map;
+}
+function hubOpenPanel(panel){
+    if(!panel){ return; }
+    var gs=document.getElementById('game-screen'); if(!gs) return;
+    document.body.classList.remove('hub-home'); document.body.classList.add('hub-open');
+    gs.classList.remove('hidden'); gs.classList.add('hubview');
+    gs.querySelectorAll('.hub-panel').forEach(function(pn){ pn.classList.remove('hub-active'); });
+    panel.classList.add('hub-active');
+    try{ window.scrollTo(0,0); }catch(e){}
+}
+function hubHome(){
+    var gs=document.getElementById('game-screen'); if(gs) gs.classList.remove('hubview');
+    document.body.classList.remove('hub-open'); document.body.classList.add('hub-home');
+    try{ hubSync(); }catch(e){}
+}
+function hubAct(act){
+    var P=_hubPanels();
+    if(act.indexOf('tab:')===0){
+        var key=act.slice(4);
+        document.querySelectorAll('.tab-bar button[onclick*="switchTab"]').forEach(function(b){
+            if((b.getAttribute('onclick')||'').indexOf("'"+key+"'")>=0) b.click();
+        });
+        hubOpenPanel(P.tabs);
+    } else if(act.indexOf('panel:')===0){
+        hubOpenPanel(P[act.slice(6)]);
+    } else if(act==='cta:fight'){
+        hubOpenPanel(P.map);
+    } else if(act==='cta:arena'){
+        var fab=document.getElementById('online-fab'); var bs=fab?fab.querySelectorAll('button'):[];
+        if(bs[0]) bs[0].click();
+    } else if(act==='cta:online'){
+        var fab2=document.getElementById('online-fab'); var bs2=fab2?fab2.querySelectorAll('button'):[];
+        if(bs2[1]) bs2[1].click(); else if(bs2[0]) bs2[0].click();
+    }
+}
+function hubSync(){
+    var hub=document.getElementById('mhub'); if(!hub) return;
+    var sp=document.getElementById('status-panel');
+    if(sp){
+        var bg=sp.style.backgroundImage; if(!bg||bg==='none') bg=getComputedStyle(sp).backgroundImage;
+        if(bg && bg!=='none'){
+            var st=hub.querySelector('.stage'); if(st) st.style.backgroundImage=bg;
+            var av=hub.querySelector('.ava'); if(av) av.style.backgroundImage=bg;
+        }
+    }
+    var cls=(document.getElementById('st-classname')||{}).innerText||'';
+    var nm=(document.getElementById('st-class')||{}).innerText||'';
+    var el;
+    el=hub.querySelector('.nm'); if(el) el.textContent=(nm?nm+' · ':'')+(cls||'冒險者');
+    var lvtxt=(document.getElementById('st-lv')||{}).innerText||'';
+    el=hub.querySelector('.lv'); if(el) el.textContent='Lv '+(lvtxt||'—');
+    [['hp','hp'],['mp','mp'],['exp','xp']].forEach(function(pr){
+        var src=document.getElementById('bar-'+pr[0]); var dst=hub.querySelector('.bar.'+pr[1]+'>i');
+        if(src&&dst){ var w=src.style.width||getComputedStyle(src).width; if(w) dst.style.width=w; }
+    });
+    // badge: 變身名或職業
+    var poly=(window.player&&player.polyLock&&player.poly&&player.poly.n)?player.poly.n:'';
+    var bd=hub.querySelector('.badge'); if(bd) bd.textContent = poly?('🧬 '+poly):(cls||'');
+}
+function hubMaybeShow(){
+    if(window.innerWidth>1024){ document.body.classList.remove('hub-home','hub-open'); return; }
+    var gs=document.getElementById('game-screen');
+    var vis = gs && !gs.classList.contains('hidden');
+    if(!vis){ document.body.classList.remove('hub-home','hub-open'); return; }
+    _hubBuildOnce(); _hubPanels();
+    if(!document.body.classList.contains('hub-open') && !document.body.classList.contains('hub-home')){
+        document.body.classList.add('hub-home');
+    }
+    if(document.body.classList.contains('hub-home')) hubSync();
+}
+setInterval(function(){ try{ hubMaybeShow(); }catch(e){} }, 600);
+document.addEventListener('DOMContentLoaded', function(){ setTimeout(hubMaybeShow,300); });
 
 // ===== 地圖分類選單（村莊／野外／地監／特殊） =====
 const MAP_CATEGORIES = {
