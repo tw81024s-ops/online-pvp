@@ -276,11 +276,19 @@
   /* 2) 一般按鈕加大觸控區 */
   .btn{ min-height:42px; }
 
-  /* 可收合框：點標題列箭頭收合/展開，減少一直往下捲 */
-  #game-screen .panel.collapsed > :not(.panel-header){ display:none !important; }
-  #game-screen .panel.collapsed .panel-header{ border-bottom:none !important; margin-bottom:0 !important; }
+  /* 收合框 → 最小化到左右側邊小頁籤，點開還原 */
+  #game-screen .panel.collapsed{ display:none !important; }
   .panel-toggle{ cursor:pointer; padding:4px 12px; margin-left:8px; font-size:18px; line-height:1;
-    color:#e2e8f0; user-select:none; border-radius:8px; background:rgba(148,163,184,.15); }
+    color:#e2e8f0; user-select:none; border-radius:8px; background:rgba(148,163,184,.15); float:right; }
+  #dock-left,#dock-right{ position:fixed; top:84px; z-index:60; display:flex; flex-direction:column;
+    gap:8px; max-height:72vh; overflow-y:auto; pointer-events:none; }
+  #dock-left{ left:0; } #dock-right{ right:0; }
+  .dock-chip{ pointer-events:auto; background:linear-gradient(180deg,#26324c,#1a2336);
+    border:1px solid #4a5d84; color:#eaf1ff; padding:12px 7px; font-weight:800; font-size:13px;
+    letter-spacing:2px; cursor:pointer; writing-mode:vertical-rl; text-orientation:upright;
+    box-shadow:0 3px 12px rgba(0,0,0,.45); user-select:none; }
+  #dock-left .dock-chip{ border-left:none; border-radius:0 12px 12px 0; }
+  #dock-right .dock-chip{ border-right:none; border-radius:12px 0 0 12px; }
 
   /* 3) 分頁內容不要各自開小捲軸 → 隨整頁捲動，少一層卡頓 */
   [id^="tab-"]{ height:auto !important; max-height:none !important; overflow:visible !important; }
@@ -300,6 +308,10 @@
 @media (max-width:480px){
   .tab-bar .btn{ min-height:44px !important; font-size:14px !important; }
   #modal-actions{ grid-template-columns:1fr !important; }  /* 小螢幕動作鈕單欄、更好按 */
+}
+@media (min-width:1025px){
+  #dock-left,#dock-right{ display:none !important; }
+  #game-screen .panel.collapsed{ display:block !important; }  /* 桌機不收合 */
 }
     </style>
 </head>
@@ -8098,25 +8110,49 @@ function switchTab(t, btn) {
     document.getElementById(`tab-${t}`).classList.remove('hidden');
     if(t === 'audit' && typeof renderAuditTab === 'function') renderAuditTab();
 }
-// 手機：為主畫面每個框加上「收合/展開」箭頭，減少一直往下捲
+// 手機：框收合 → 最小化成左右側邊小頁籤，點小頁籤可展開還原
+function _ensureDocks(){
+    ['dock-left','dock-right'].forEach(function(id){
+        if(!document.getElementById(id)){ var d=document.createElement('div'); d.id=id; document.body.appendChild(d); }
+    });
+}
+function _panelLabel(panel){
+    var h=panel.querySelector('.panel-header');
+    var txt=(h?h.textContent:panel.textContent)||'';
+    var m=txt.match(/[\u4e00-\u9fff]{2,5}/);
+    return m?m[0]:'視窗';
+}
+function _collapsePanelToSide(panel){
+    var side=panel.getAttribute('data-dock')||'dock-right';
+    var dock=document.getElementById(side); if(!dock){ _ensureDocks(); dock=document.getElementById(side); }
+    panel.classList.add('collapsed');
+    var chip=document.createElement('div');
+    chip.className='dock-chip';
+    chip.textContent=_panelLabel(panel);
+    chip.addEventListener('click', function(){
+        panel.classList.remove('collapsed');
+        chip.remove();
+        try{ panel.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){}
+    });
+    dock.appendChild(chip);
+}
 function setupPanelCollapse(){
     if(window.innerWidth>1024) return;
     var gs=document.getElementById('game-screen'); if(!gs) return;
+    _ensureDocks();
+    var idx=0;
     var heads=gs.querySelectorAll('.panel > .panel-header');
     for(var i=0;i<heads.length;i++){
         var h=heads[i];
         if(h.querySelector('.panel-toggle')) continue;
         var panel=h.parentElement;
+        panel.setAttribute('data-dock', (idx%2===0)?'dock-right':'dock-left'); idx++;
         var t=document.createElement('span');
         t.className='panel-toggle';
         t.textContent='▾';
-        t.setAttribute('aria-label','收合/展開');
+        t.setAttribute('aria-label','收合到側邊');
         (function(panel,t){
-            t.addEventListener('click', function(e){
-                e.stopPropagation();
-                panel.classList.toggle('collapsed');
-                t.textContent = panel.classList.contains('collapsed') ? '▸' : '▾';
-            });
+            t.addEventListener('click', function(e){ e.stopPropagation(); _collapsePanelToSide(panel); });
         })(panel,t);
         h.appendChild(t);
     }
