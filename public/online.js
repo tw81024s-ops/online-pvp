@@ -201,6 +201,11 @@
         pushPolyDexNow();
     }
     window.__pushPolyDex = function () { if (!token) return; clearTimeout(_pdTimer); _pdTimer = setTimeout(pushPolyDexNow, 3000); };
+    let _offToastDone = false;
+    function maybeOfflineToast() {
+        if (_offToastDone) return; _offToastDone = true;
+        try { const _op = (typeof window.__offlinePending === 'function') ? window.__offlinePending() : null; if (_op && _op.active && (_op.exp > 0 || _op.gold > 0)) toast('🏕️ 離線練功獎勵可領取！點「離線練功」領取', '#14532d'); } catch (e) { }
+    }
 
     // ============ WebSocket ============
     function connectWS() {
@@ -210,7 +215,7 @@
         ws.onopen = () => ws.send(JSON.stringify({ type: 'auth', token }));
         ws.onmessage = (ev) => {
             let m; try { m = JSON.parse(ev.data); } catch (e) { return; }
-            if (m.type === 'auth_ok') { wsReady = true; isAdmin = m.isAdmin; setStatus('🟢 ' + m.username); refreshAdminBtn(); pushName(); }
+            if (m.type === 'auth_ok') { wsReady = true; isAdmin = m.isAdmin; setStatus('🟢 ' + m.username); refreshAdminBtn(); pushName(); try { pullMergePolyDex(); } catch (e) { } maybeOfflineToast(); }
             if (m.type === 'auth_fail') { logout(true); }
             if (m.type === 'kicked') { toast('此帳號已在其他視窗登入', '#7f1d1d'); wsReady = false; }
             if (m.type === 'online_list') { onlineUsers = m.users; onlineNames = m.names || {}; renderOnline(); }
@@ -371,7 +376,7 @@
             }
         } catch (e) { toast('雲端存檔同步失敗：' + e.message, '#7f1d1d'); }
         try { await pullMergePolyDex(); } catch (e) { }
-        try { const _op = (typeof window.__offlinePending === 'function') ? window.__offlinePending() : null; if (_op && _op.active && (_op.exp > 0 || _op.gold > 0)) toast('🏕️ 離線練功獎勵可領取！點下方「離線練功」領取', '#14532d'); } catch (e) { }
+        maybeOfflineToast();
     }
     function logout(silent) {
         if (token) api('/api/logout', 'POST').catch(() => { });
