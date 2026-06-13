@@ -5167,6 +5167,14 @@ function killMob(idx) {
         logSys(`獲得 <span class="text-purple-300 font-bold">潘朵拉卷軸 ×${_pan}</span>。`);
     }
 
+    // === 全怪必掉：對武器施法的卷軸 + 對盔甲施法的卷軸（張數依怪物等級，每 20 等 +1）===
+    {
+        let _sQty = 1 + Math.floor((mob.lv || 1) / 20);
+        gainItem('scroll_weapon', _sQty, true);
+        gainItem('scroll_armor', _sQty, true);
+        logSys(`獲得 <span class="text-sky-200 font-bold">對武器施法的卷軸 ×${_sQty}、對盔甲施法的卷軸 ×${_sQty}</span>。`);
+    }
+
     _sherineLootCtx = null;   // 🔮 掉落判定結束，清除上下文
     // 🔧 架構#2：不在此處位移輸送帶（呼叫點可能正在迭代怪物陣列）。
     // tick 內的擊殺延後到 gameLoop 的 settleDeadMobs()；手動操作則立即清算。

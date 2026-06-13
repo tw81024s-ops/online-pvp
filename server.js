@@ -447,7 +447,7 @@ wss.on('connection', (ws) => {
             if (target === ws.username) return send(ws, { type: 'error', error: '不能挑戰自己' });
             const id = makeToken().slice(0, 12);
             pending.set(id, { from: ws.username, to: target, fromProfile: clampProfile(msg.profile || {}), ts: Date.now() });
-            send(tw, { type: 'challenge_received', id, from: ws.username });
+            send(tw, { type: 'challenge_received', id, from: ws.username, fromName: userNames.get(ws.username) || '' });
             send(ws, { type: 'challenge_sent', to: target });
             return;
         }
@@ -571,6 +571,19 @@ wss.on('connection', (ws) => {
             }
             return;
         }
+
+        // 發起方取消挑戰（逾時自動取消 / 手動取消）：通知對方關閉「收到挑戰」視窗
+        if (msg.type === 'challenge_cancel') {
+            const target = String(msg.to || '').trim();
+            for (const [id, c] of pending) {
+                if (c.from === ws.username && (!target || c.to === target)) {
+                    pending.delete(id);
+                    const tw2 = online.get(c.to);
+                    if (tw2) send(tw2, { type: 'challenge_cancelled', by: ws.username });
+                }
+            }
+            return;
+        }
     });
 
     ws.on('close', () => {
@@ -594,7 +607,7 @@ setInterval(() => {
         ws.isAlive = false; ws.ping();
     });
     const now = Date.now();
-    for (const [id, c] of pending) if (now - c.ts > 60000) pending.delete(id);
+    for (const [id, c] of pending) if (now - c.ts > 35000) pending.delete(id);   // 挑戰 35 秒未回應自動失效
     for (const [id, c] of pendingTrade) if (now - c.ts > 60000) pendingTrade.delete(id);
 }, 30000);
 

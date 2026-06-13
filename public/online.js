@@ -10,6 +10,30 @@
     let ws = null, wsReady = false;
     let onlineUsers = [];
     let saveTimer = null;
+    // ====== 挑戰等待狀態（30 秒逾時自動取消）======
+    let _waitOv = null, _waitTimer = null;   // 發起方等待視窗
+    let _incOv = null, _incTimer = null;      // 受challenge方收到視窗
+    function _closeWait() { if (_waitTimer) { clearInterval(_waitTimer); _waitTimer = null; } if (_waitOv) { try { _waitOv.remove(); } catch (e) { } _waitOv = null; } }
+    function sendChallenge(u) {
+        if (!u) return;
+        if (onlineUsers.indexOf(u) === -1) { toast(u + ' 已離線，無法挑戰', '#7f1d1d'); renderOnline(); return; }
+        if (_waitOv) { toast('已有進行中的挑戰，請稍候…'); return; }
+        ws.send(JSON.stringify({ type: 'challenge', to: u, profile: buildProfile() }));
+        const nm = onlineNames[u] ? (onlineNames[u] + '（' + u + '）') : u;
+        const w = el('div', { style: 'text-align:center;' });
+        w.append(el('div', { style: 'font-size:15px;margin-bottom:10px;' }, '已向 <b style="color:#fbbf24">' + nm + '</b> 發出挑戰'));
+        const cd = el('div', { style: 'font-size:30px;font-weight:bold;color:#fbbf24;margin-bottom:6px;' }, '30');
+        w.append(cd, el('div', { style: 'color:#94a3b8;font-size:13px;margin-bottom:14px;' }, '等待對方接受…逾時自動取消'));
+        const cancel = el('button', { style: 'background:#475569;color:#fff;border:none;border-radius:8px;padding:10px 22px;cursor:pointer;font-weight:bold;' }, '取消挑戰');
+        w.append(cancel);
+        _waitOv = modal('⏳ 等待應戰', w, { noClose: true });
+        cancel.onclick = () => { _closeWait(); try { ws.send(JSON.stringify({ type: 'challenge_cancel', to: u })); } catch (e) { } toast('已取消挑戰'); };
+        let left = 30;
+        _waitTimer = setInterval(() => {
+            left--; if (cd) cd.textContent = String(left);
+            if (left <= 0) { _closeWait(); try { ws.send(JSON.stringify({ type: 'challenge_cancel', to: u })); } catch (e) { } toast(nm + ' 未在時限內回應，挑戰已取消', '#7f1d1d'); }
+        }, 1000);
+    }
     // ====== 交換系統狀態 ======
     let tradeId = null, tradePartner = null;
     let myOffer = { items: [], gold: 0 }, partnerOffer = { items: [], gold: 0 };
@@ -180,9 +204,10 @@
             if (m.type === 'online_list') { onlineUsers = m.users; onlineNames = m.names || {}; renderOnline(); }
             if (m.type === 'error') toast(m.error, '#7f1d1d');
             if (m.type === 'challenge_sent') toast('已向 ' + m.to + ' 發出挑戰，等待對方接受…');
-            if (m.type === 'challenge_declined') toast(m.by + ' 拒絕了你的挑戰', '#7f1d1d');
+            if (m.type === 'challenge_declined') { _closeWait(); toast(m.by + ' 拒絕了你的挑戰', '#7f1d1d'); }
+            if (m.type === 'challenge_cancelled') { if (_incTimer) { clearInterval(_incTimer); _incTimer = null; } if (_incOv) { try { _incOv.remove(); } catch (e) { } _incOv = null; } toast((m.by || '對方') + ' 取消了挑戰', '#7f1d1d'); }
             if (m.type === 'challenge_received') showIncoming(m);
-            if (m.type === 'battle_start') playBattle(m);
+            if (m.type === 'battle_start') { _closeWait(); playBattle(m); }
             if (m.type === 'pvp_reward') { try { if (typeof window.__applyPvpReward === 'function') window.__applyPvpReward(m.gold || 0, m.tickets || 0, m.reason); } catch (e) { } }
             if (m.type === 'admin_grant_poly') { try { if (typeof window.__adminGrantPoly === 'function') { window.__adminGrantPoly(m.formName); toast('🎁 獲得變身卡：' + m.formName, '#14532d'); } } catch (e) { } }
             if (m.type === 'admin_updated') {
@@ -381,9 +406,17 @@
             lbList.innerHTML = '';
             (j.top || []).forEach((x, i) => {
                 const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '.';
-                const rowEl = el('div', { style: 'display:flex;justify-content:space-between;padding:2px 0;' });
-                const lEl = el('span'); lEl.textContent = `${medal} ${x.name}`;
-                const rEl = el('span', { style: 'color:#94a3b8;' }); rEl.textContent = `${x.tier}　${x.score}`;
+                const isOnline = onlineUsers.indexOf(x.username) !== -1;
+                const isSelf = x.username === myName;
+                const rowEl = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;padding:3px 0;' });
+                const lEl = el('span'); lEl.textContent = `${medal} ${isOnline ? '🟢' : '⚫'} ${x.name}`;
+                const rEl = el('span', { style: 'display:flex;gap:8px;align-items:center;color:#94a3b8;' });
+                const sEl = el('span'); sEl.textContent = `${x.tier}　${x.score}`; rEl.append(sEl);
+                if (isOnline && !isSelf) {
+                    const cb = el('button', { style: 'background:#b45309;color:#fff;border:none;border-radius:5px;padding:3px 10px;cursor:pointer;font-weight:bold;font-size:12px;white-space:nowrap;' }, '挑戰');
+                    cb.onclick = () => sendChallenge(x.username);
+                    rEl.append(cb);
+                }
                 rowEl.append(lEl, rEl); lbList.append(rowEl);
             });
             if (!(j.top || []).length) lbList.textContent = '尚無資料';
@@ -403,7 +436,7 @@
             row.append(el('div', {}, '🟢 ' + dispName(u)));
             const btns = el('div', { style: 'display:flex;gap:6px;flex:none;' });
             const b = el('button', { style: 'background:#b45309;color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-weight:bold;' }, '挑戰');
-            b.onclick = () => ws.send(JSON.stringify({ type: 'challenge', to: u, profile: buildProfile() }));
+            b.onclick = () => sendChallenge(u);
             const tb = el('button', { style: 'background:#0e7490;color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-weight:bold;' }, '🤝 交換');
             tb.onclick = () => requestTrade(u);
             btns.append(b, tb);
@@ -684,17 +717,28 @@
     window.showEvents = showEvents;
 
     function showIncoming(m) {
+        // 已有舊的收到視窗先清掉
+        if (_incTimer) { clearInterval(_incTimer); _incTimer = null; }
+        if (_incOv) { try { _incOv.remove(); } catch (e) { } _incOv = null; }
         const wrap = el('div');
-        wrap.append(el('div', { style: 'font-size:15px;margin-bottom:14px;' }, `<b style="color:#fbbf24">${m.from}</b> 向你發起對戰挑戰！`));
+        const fromNm = (m.fromName ? (m.fromName + '（' + m.from + '）') : m.from);
+        wrap.append(el('div', { style: 'font-size:15px;margin-bottom:8px;' }, `<b style="color:#fbbf24">${fromNm}</b> 向你發起對戰挑戰！`));
+        const cd = el('div', { style: 'text-align:center;font-size:13px;color:#94a3b8;margin-bottom:12px;' }, '30 秒內未回應將自動拒絕');
         const acc = bigBtn('⚔️ 接受挑戰', '#15803d'), dec = bigBtn('拒絕', '#475569');
-        wrap.append(acc, dec);
-        const ov = modal('收到挑戰', wrap, { noClose: true });
+        wrap.append(cd, acc, dec);
+        _incOv = modal('收到挑戰', wrap, { noClose: true });
+        const close = () => { if (_incTimer) { clearInterval(_incTimer); _incTimer = null; } if (_incOv) { try { _incOv.remove(); } catch (e) { } _incOv = null; } };
         acc.onclick = () => {
             const _p = getPlayer(); if (!_p || !_p.cls) { toast('你還沒有角色，無法應戰', '#7f1d1d'); return; }
             ws.send(JSON.stringify({ type: 'challenge_accept', id: m.id, profile: buildProfile() }));
-            ov.remove();
+            close();
         };
-        dec.onclick = () => { ws.send(JSON.stringify({ type: 'challenge_decline', id: m.id })); ov.remove(); };
+        dec.onclick = () => { ws.send(JSON.stringify({ type: 'challenge_decline', id: m.id })); close(); };
+        let left = 30;
+        _incTimer = setInterval(() => {
+            left--; if (cd) cd.textContent = left + ' 秒內未回應將自動拒絕';
+            if (left <= 0) { try { ws.send(JSON.stringify({ type: 'challenge_decline', id: m.id })); } catch (e) { } close(); toast('超過 30 秒未回應，已自動拒絕', '#7f1d1d'); }
+        }, 1000);
     }
 
     // ============ 對戰播放（雙方依伺服器時間軸同步）============
@@ -907,7 +951,13 @@
 
     btnAdmin.onclick = () => {
         const wrap = el('div');
-        function section(t) { wrap.append(el('div', { style: 'color:#fbbf24;font-weight:bold;margin:12px 0 6px;' }, t)); }
+        let _secBody = wrap;   // 目前展開區塊的內容容器
+        function section(t) {
+            const d = el('details', { style: 'margin:6px 0;border:1px solid #334155;border-radius:8px;background:#0f172a;overflow:hidden;' });
+            const sm = el('summary', { style: 'cursor:pointer;color:#fbbf24;font-weight:bold;padding:10px 12px;font-size:14px;user-select:none;' }, t);
+            const bd = el('div', { style: 'padding:6px 12px 10px;' });
+            d.append(sm, bd); wrap.append(d); _secBody = bd;
+        }
         function row(label, btnTxt, fn, withInput, ph) {
             const r = el('div', { style: 'display:flex;gap:8px;margin-bottom:8px;align-items:center;' });
             let inp = null;
@@ -915,7 +965,7 @@
             else r.append(el('div', { style: 'flex:1;font-size:14px;' }, label));
             const b = el('button', { style: 'background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:8px 14px;cursor:pointer;white-space:nowrap;font-weight:bold;' }, btnTxt);
             b.onclick = () => fn(inp && inp.value);
-            r.append(b); wrap.append(r);
+            r.append(b); _secBody.append(r);
         }
         function refreshGame() {
             try { calcStats(); updateUI(); saveGame(); } catch (e) { }
@@ -927,7 +977,7 @@
         row(null, '攻速加快', v => { const n = Math.max(1, parseFloat(v) || 5); player.adminSpdMult = n; refreshGame(); toast(n > 1 ? `攻速 ×${n}（加速中）` : '攻速已恢復正常', n > 1 ? '#14532d' : '#1e3a5f'); }, true, '倍數（預設 5，輸入 1 取消）');
         section('🌍 全服設定（所有玩家生效，立即同步）');
         const cfgStatus = el('div', { style: 'font-size:12px;color:#94a3b8;margin:-2px 0 8px;line-height:1.7;' }, '目前全服設定：讀取中…');
-        wrap.append(cfgStatus);
+        _secBody.append(cfgStatus);
         const fmtCfg = c => `目前全服：經驗 ×${c.expMult || 1}　攻速 ×${c.spdMult || 1}<br>競技場傷害 ×${c.pvpDmgMult != null ? c.pvpDmgMult : 1}　競技場魔法 ×${c.pvpMagicMult != null ? c.pvpMagicMult : 1}<br>金幣掉落 ×${c.goldDropMult != null ? c.goldDropMult : 1}　合卡 ×${c.synthRateMult != null ? c.synthRateMult : 1}　衝裝 ×${c.enhanceRateMult != null ? c.enhanceRateMult : 1}　潘朵拉 ×${c.pandoraLuckMult != null ? c.pandoraLuckMult : 1}　端午活動 ${c.eventZongzi ? '🟢開啟' : '⚪關閉'}`;
         fetch('/api/config').then(r => r.json()).then(j => { cfgStatus.innerHTML = fmtCfg(j); }).catch(() => { cfgStatus.textContent = '（需登入線上模式才能讀取/設定）'; });
         const setCfg = async (key, n, label) => {
@@ -949,7 +999,7 @@
             const offB = el('button', { style: 'background:#7f1d1d;color:#fff;border:none;border-radius:6px;padding:8px 14px;cursor:pointer;font-weight:bold;' }, '關閉');
             onB.onclick = () => setCfg('eventZongzi', 1, '端午活動');
             offB.onclick = () => setCfg('eventZongzi', 0, '端午活動');
-            er.append(onB, offB); wrap.append(er);
+            er.append(onB, offB); _secBody.append(er);
         }
         // 🎁 給予指定變身（對方需在線上，由其客戶端寫入圖鑑）
         section('🎁 給予指定變身（對方需在線上）');
@@ -968,10 +1018,10 @@
                 try { await api('/api/admin/grant-poly', 'POST', { username: u, formName: fn }); toast('已發放「' + fn + '」給 ' + u, '#14532d'); }
                 catch (e) { toast(e.message, '#7f1d1d'); }
             };
-            gr.append(gUser, gSel, gBtn); wrap.append(gr);
+            gr.append(gUser, gSel, gBtn); _secBody.append(gr);
         }
         section('🎁 取得物品（點分類展開瀏覽，或搜尋）');
-        wrap.append(buildItemBrowser((id, it, qty) => {
+        _secBody.append(buildItemBrowser((id, it, qty) => {
             try { gainItem(id, qty || 1, true, true); refreshGame(); toast('已取得 ' + it.n + ' ×' + (qty || 1)); } catch (e) { toast('失敗：' + e.message, '#7f1d1d'); }
         }));
         section('👥 玩家管理（檢視 / 編輯其他人）');
@@ -985,7 +1035,7 @@
                 r.append(eb); userList.append(r);
             });
         }).catch(e => userList.textContent = e.message);
-        wrap.append(userList);
+        _secBody.append(userList);
         section('🔍 雲端存檔診斷');
         row('列出所有帳號的雲端存檔狀態', '檢查', async () => {
             let j;
