@@ -10086,6 +10086,7 @@ function slotSummary(n){
     let s = localStorage.getItem('lineage_idle_save_' + n);
     if(!s) return null;
     try { let d = JSON.parse(s); let p = d.p;
+        if(!p || !p.cls) return null;   // 無職業＝未完成/壞檔，視為空格（可直接覆蓋創角）
         let clsName = (p.darkelf ? '黑妖' : { knight:'騎士', mage:'法師', elf:'妖精' }[p.cls]) || p.cls;
         return { name: p.name || '未命名', cls: clsName, lv: p.lv || 1, gold: p.gold || 0 };
     } catch(e){ return null; }
@@ -10284,6 +10285,9 @@ function updateClassPotionRows() {
 }
 
 function saveGame() {
+    // 尚未建立角色（無職業）的空白 player 不寫檔：避免在「選存檔位→創角畫面」期間，
+    // 背景自動存檔/雲端同步把預設空角色(cls=null)寫進該存檔位，造成「職業 null、Lv.1 未命名」的壞檔。
+    if (!player || !player.cls) return;
     // 死亡狀態不寫檔：避免把 player.dead=true 存進去，導致下次讀檔卡在死亡狀態而不出怪。
     // 死亡期間沒有可保存的進度，保留上一份「存活」存檔即可。
     if (player && player.dead) return;
