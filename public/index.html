@@ -237,6 +237,34 @@
         }
         .tri-glow { animation: triGlow 2.4s infinite linear; }
     </style>
+    <style id="mobile-creation-fix">
+@media (max-width: 1024px) {
+  body { align-items: flex-start !important; height: auto !important; min-height: 100vh; overflow-x: hidden !important; }
+  /* 創角畫面：固定1000px寬+絕對定位 → 改成自適應、隨頁面捲動 */
+  #creation-screen {
+    position: static !important;
+    width: 100% !important; max-width: 100% !important;
+    margin: 0 auto !important; padding: 14px !important;
+    box-sizing: border-box !important; gap: 14px !important;
+  }
+  #creation-screen * { min-width: 0 !important; }
+  #creation-screen [class*="w-["] { width: 100% !important; max-width: 100% !important; }
+  /* 三欄 → 直排堆疊 */
+  #creation-panel { flex-direction: column !important; gap: 14px !important; align-items: stretch !important; }
+  #creation-panel > * { width: 100% !important; max-width: 100% !important; }
+  /* 內部固定高度放寬，內容自然堆疊 */
+  #creation-panel [class*="h-["] { height: auto !important; }
+  /* 職業預覽框（原 340x480）：自適應寬、限制高度 */
+  #creation-panel > div:first-child { width: 100% !important; height: auto !important; max-height: 46vh !important; }
+  #class-preview-img { width: 100% !important; height: auto !important; max-height: 44vh !important; object-fit: contain !important; }
+  /* 標題稍微縮小，避免換行擠爆 */
+  #creation-screen h1 { font-size: 1.6rem !important; line-height: 1.2 !important; }
+}
+@media (max-width: 480px) {
+  #creation-screen { padding: 10px !important; }
+  #creation-screen h1 { font-size: 1.35rem !important; }
+}
+    </style>
 </head>
 <body class="min-h-screen lg:h-screen w-screen flex items-start lg:items-center justify-center p-2 lg:p-4 overflow-y-auto">
 
