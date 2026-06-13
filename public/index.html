@@ -249,17 +249,12 @@
   }
   #creation-screen * { min-width: 0 !important; }
   #creation-screen [class*="w-["] { width: 100% !important; max-width: 100% !important; }
-  /* 三欄 → 直排堆疊 */
   #creation-panel { flex-direction: column !important; gap: 14px !important; align-items: stretch !important; }
   #creation-panel > * { width: 100% !important; max-width: 100% !important; }
-  /* 內層左右兩欄（選職業｜分配能力）也要直排，否則能力欄被擠到0寬度而點不到 */
   #creation-panel .flex.gap-4 { flex-direction: column !important; height: auto !important; }
-  /* 內部固定高度放寬，內容自然堆疊 */
   #creation-panel [class*="h-["] { height: auto !important; }
-  /* 職業預覽框（原 340x480）：自適應寬、限制高度 */
   #creation-panel > div:first-child { width: 100% !important; height: auto !important; max-height: 46vh !important; }
-  #class-preview-img { width: 100% !important; height: auto !important; max-height: 44vh !important; object-fit: contain !important; }
-  /* 標題稍微縮小，避免換行擠爆 */
+  #class-preview-img { width: 100% !important; height: auto !important; object-fit: contain !important; max-height: 44vh !important; }
   #creation-screen h1 { font-size: 1.6rem !important; line-height: 1.2 !important; }
 }
 @media (max-width: 480px) {
@@ -273,14 +268,19 @@
   button,.btn,a,[onclick]{ touch-action:manipulation; }
   *{ -webkit-tap-highlight-color:rgba(255,255,255,.08); }
 
-  /* 1) 手機分頁改用左右切換器（◀ 名稱 ▶），黏在頂端、點擊區大 */
-  .tab-bar{ display:none !important; }
-  #tab-pager{ display:flex !important; position:sticky !important; top:0 !important; z-index:40 !important;
+  /* 1) 分頁列（格子）：黏在頂端、放大好點 */
+  .tab-bar{ position:sticky !important; top:0 !important; z-index:40 !important;
     box-shadow:0 6px 16px rgba(0,0,0,.45) !important; }
-  #tab-pager-label{ flex:1; text-align:center; }
+  .tab-bar .btn{ min-height:48px !important; font-size:15px !important; padding:10px 2px !important; }
 
   /* 2) 一般按鈕加大觸控區 */
   .btn{ min-height:42px; }
+
+  /* 可收合框：點標題列箭頭收合/展開，減少一直往下捲 */
+  #game-screen .panel.collapsed > :not(.panel-header){ display:none !important; }
+  #game-screen .panel.collapsed .panel-header{ border-bottom:none !important; margin-bottom:0 !important; }
+  .panel-toggle{ cursor:pointer; padding:4px 12px; margin-left:8px; font-size:18px; line-height:1;
+    color:#e2e8f0; user-select:none; border-radius:8px; background:rgba(148,163,184,.15); }
 
   /* 3) 分頁內容不要各自開小捲軸 → 隨整頁捲動，少一層卡頓 */
   [id^="tab-"]{ height:auto !important; max-height:none !important; overflow:visible !important; }
@@ -298,6 +298,7 @@
   #modal-actions .btn{ min-height:48px !important; font-size:15px !important; }
 }
 @media (max-width:480px){
+  .tab-bar .btn{ min-height:44px !important; font-size:14px !important; }
   #modal-actions{ grid-template-columns:1fr !important; }  /* 小螢幕動作鈕單欄、更好按 */
 }
     </style>
@@ -497,11 +498,6 @@
 
         <!-- 右側：清單面板 -->
         <div class="w-full lg:w-[380px] lg:shrink-0 flex flex-col gap-3">
-            <div id="tab-pager" class="hidden panel p-2 items-center justify-between gap-2 bg-slate-800">
-                <button class="btn font-bold" style="min-width:76px;min-height:54px;font-size:26px;line-height:1" onclick="tabStep(-1)" aria-label="上一個分頁">◀</button>
-                <span id="tab-pager-label" class="font-bold text-lg text-amber-200">能力 1/7</span>
-                <button class="btn font-bold" style="min-width:76px;min-height:54px;font-size:26px;line-height:1" onclick="tabStep(1)" aria-label="下一個分頁">▶</button>
-            </div>
             <div class="panel p-2 grid grid-cols-3 gap-2 bg-slate-800 tab-bar">
                 <button class="btn active text-base py-2 font-bold px-0" onclick="switchTab('stats', this)">能力</button>
                 <button class="btn text-base py-2 font-bold px-0" onclick="switchTab('equip', this)">裝備</button>
@@ -8101,23 +8097,33 @@ function switchTab(t, btn) {
     ['stats', 'equip', 'weapons', 'skill', 'armors', 'items', 'audit'].forEach(id => { let _e = document.getElementById(`tab-${id}`); if(_e) _e.classList.add('hidden'); });
     document.getElementById(`tab-${t}`).classList.remove('hidden');
     if(t === 'audit' && typeof renderAuditTab === 'function') renderAuditTab();
-    if(typeof syncTabPager === 'function') syncTabPager();
 }
-function _tabBtns(){ return Array.prototype.slice.call(document.querySelectorAll('.tab-bar button[onclick*="switchTab"]')); }
-function tabStep(dir){
-    var btns=_tabBtns(); if(!btns.length) return;
-    var idx=-1; for(var i=0;i<btns.length;i++){ if(btns[i].classList.contains('active')){idx=i;break;} }
-    if(idx<0) idx=0;
-    idx=(idx+dir+btns.length)%btns.length;
-    btns[idx].click();
+// 手機：為主畫面每個框加上「收合/展開」箭頭，減少一直往下捲
+function setupPanelCollapse(){
+    if(window.innerWidth>1024) return;
+    var gs=document.getElementById('game-screen'); if(!gs) return;
+    var heads=gs.querySelectorAll('.panel > .panel-header');
+    for(var i=0;i<heads.length;i++){
+        var h=heads[i];
+        if(h.querySelector('.panel-toggle')) continue;
+        var panel=h.parentElement;
+        var t=document.createElement('span');
+        t.className='panel-toggle';
+        t.textContent='▾';
+        t.setAttribute('aria-label','收合/展開');
+        (function(panel,t){
+            t.addEventListener('click', function(e){
+                e.stopPropagation();
+                panel.classList.toggle('collapsed');
+                t.textContent = panel.classList.contains('collapsed') ? '▸' : '▾';
+            });
+        })(panel,t);
+        h.appendChild(t);
+    }
 }
-function syncTabPager(){
-    var btns=_tabBtns(); if(!btns.length) return;
-    var act=null,i=0; for(i=0;i<btns.length;i++){ if(btns[i].classList.contains('active')){act=btns[i];break;} }
-    if(!act){act=btns[0];i=0;}
-    var lbl=document.getElementById('tab-pager-label');
-    if(lbl) lbl.textContent=act.textContent.trim()+'  '+(i+1)+'/'+btns.length;
-}
+document.addEventListener('DOMContentLoaded', setupPanelCollapse);
+window.addEventListener('resize', setupPanelCollapse);
+setTimeout(setupPanelCollapse, 500);
 
 // ===== 地圖分類選單（村莊／野外／地監／特殊） =====
 const MAP_CATEGORIES = {
