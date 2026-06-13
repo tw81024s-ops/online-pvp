@@ -189,6 +189,18 @@
         }
         return false;
     }
+    // ====== 帳號變身圖鑑同步（所有角色共用）======
+    let _pdTimer = null;
+    function pushPolyDexNow() {
+        if (!token) return;
+        try { const _p = getPlayer(); if (!_p || !_p.polyDex) return; api('/api/polydex', 'POST', { dex: _p.polyDex }).catch(() => { }); } catch (e) { }
+    }
+    async function pullMergePolyDex() {
+        if (!token) return;
+        try { const j = await api('/api/polydex'); if (j && j.dex && typeof window.__mergePolyDex === 'function') window.__mergePolyDex(j.dex); } catch (e) { }
+        pushPolyDexNow();
+    }
+    window.__pushPolyDex = function () { if (!token) return; clearTimeout(_pdTimer); _pdTimer = setTimeout(pushPolyDexNow, 3000); };
 
     // ============ WebSocket ============
     function connectWS() {
@@ -242,8 +254,9 @@
     const btnSlots = el('button', { style: btnStyle('#0f766e') + 'display:none;' }, '👤 角色欄位');
     const btnAdmin = el('button', { style: btnStyle('#7c3aed') + 'display:none;' }, '🛠️ 管理員');
     const btnEvents = el('button', { style: btnStyle('#9333ea') }, '🎉 每日活動');
+    const btnOffline = el('button', { style: btnStyle('#0891b2') }, '🏕️ 離線練功');
     function btnStyle(bg) { return `background:${bg};color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:bold;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.45);`; }
-    fab.append(statusEl, btnAdmin, btnSlots, btnEvents, btnArena, btnLoginFab);
+    fab.append(statusEl, btnAdmin, btnSlots, btnOffline, btnEvents, btnArena, btnLoginFab);
     function setStatus(s, bad) { statusEl.style.display = 'block'; statusEl.textContent = s; statusEl.style.color = bad ? '#fca5a5' : '#86efac'; }
     function refreshAdminBtn() {
         // 雙重隱藏：必須是管理員帳號，且網址結尾加上 #admin 才顯示按鈕（朋友與一般情況都看不到）
@@ -357,6 +370,8 @@
                 toast('已將本機存檔上傳到雲端 ☁️');
             }
         } catch (e) { toast('雲端存檔同步失敗：' + e.message, '#7f1d1d'); }
+        try { await pullMergePolyDex(); } catch (e) { }
+        try { const _op = (typeof window.__offlinePending === 'function') ? window.__offlinePending() : null; if (_op && _op.active && (_op.exp > 0 || _op.gold > 0)) toast('🏕️ 離線練功獎勵可領取！點下方「離線練功」領取', '#14532d'); } catch (e) { }
     }
     function logout(silent) {
         if (token) api('/api/logout', 'POST').catch(() => { });
@@ -714,6 +729,37 @@
     btnSlots.onclick = showSlots;
     btnArena.onclick = showArena;
     btnEvents.onclick = showEvents;
+    btnOffline.onclick = () => showOffline();
+    function showOffline() {
+        const _p = getPlayer(); if (!_p || !_p.cls) { toast('請先建立或載入角色再使用離線練功', '#7f1d1d'); return; }
+        if (typeof window.__offlinePending !== 'function') { toast('離線練功尚未就緒，請重新整理', '#7f1d1d'); return; }
+        const wrap = el('div');
+        const body = el('div'); wrap.append(body);
+        function syncCloud() { if (token) { clearTimeout(saveTimer); uploadSave(); } }
+        function render() {
+            body.innerHTML = '';
+            const p = window.__offlinePending();
+            if (!p || !p.ok) { body.append(el('div', { style: 'color:#94a3b8;text-align:center;padding:14px;' }, '無法使用（請先載入角色）')); return; }
+            if (!p.active) {
+                body.append(el('div', { style: 'color:#cbd5e1;font-size:14px;line-height:1.9;margin-bottom:14px;text-align:center;' },
+                    '開始後依你的等級自動累積<b style="color:#fbbf24">經驗與金幣</b>。<br>每次最多累積 <b style="color:#fbbf24">4 小時</b>，回來領取後即可再次開始。'));
+                const start = el('button', { style: 'width:100%;background:#0891b2;color:#fff;border:none;border-radius:14px;padding:18px;font-size:19px;font-weight:bold;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.4);' }, '🏕️ 開始離線練功');
+                start.onclick = () => { if (window.__offlineStart()) { syncCloud(); toast('已開始離線練功，離開遊戲也會累積！', '#14532d'); render(); } };
+                body.append(start);
+            } else {
+                const h = Math.floor(p.hours), mi = Math.floor((p.hours - h) * 60);
+                body.append(el('div', { style: 'background:#0f172a;border:1px solid #334155;border-radius:14px;padding:16px;margin-bottom:14px;text-align:center;font-size:15px;line-height:1.9;' },
+                    '已離線 <b style="color:#fbbf24">' + h + ' 小時 ' + mi + ' 分</b>' + (p.capped ? '（已達 4 小時上限）' : '') + '<br><br>可領取<br>📘 經驗 <b style="color:#86efac">+' + p.exp.toLocaleString() + '</b><br>💰 金幣 <b style="color:#fbbf24">+' + p.gold.toLocaleString() + '</b>'));
+                const claim = el('button', { style: 'width:100%;background:#15803d;color:#fff;border:none;border-radius:14px;padding:18px;font-size:19px;font-weight:bold;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.4);' }, '🎁 領取獎勵');
+                claim.onclick = () => { const r = window.__offlineClaim(); if (r) { syncCloud(); toast('領取成功！經驗 +' + r.exp.toLocaleString() + '、金幣 +' + r.gold.toLocaleString(), '#14532d'); render(); } };
+                body.append(claim);
+                body.append(el('div', { style: 'color:#94a3b8;font-size:12px;margin-top:8px;text-align:center;' }, '領取後可再次開始離線練功'));
+            }
+        }
+        render();
+        modal('🏕️ 離線練功', wrap, { w: '380px' });
+    }
+    window.showOffline = showOffline;
     window.showEvents = showEvents;
 
     function showIncoming(m) {

@@ -3389,7 +3389,7 @@ function polyGachaPull(){
     for(const r of pool){ acc+=RARITY_POLY[r].rate; if(roll<acc){ rarity=r; break; } }
     let forms=RARITY_POLY[rarity].forms, form=forms[Math.floor(Math.random()*forms.length)];
     let dex=polyDexObj(); dex[form.n]=(dex[form.n]||0)+1;
-    updateUI(); if(typeof saveGame==='function') saveGame();
+    updateUI(); if(typeof window.__pushPolyDex==='function') window.__pushPolyDex(); if(typeof saveGame==='function') saveGame();
     return {form,rarity,color:RARITY_POLY[rarity].color};
 }
 function polySynth(targetRarity){
@@ -8309,6 +8309,7 @@ function _hubBuildOnce(){
           '<div class="fbtn" data-act="tab:audit"><span class="ic">📈</span>統計</div>'+
           '<div class="fbtn gacha" data-act="gacha"><span class="ic">🎰</span>抽卡</div>'+
           '<div class="fbtn" data-act="events"><span class="ic">🎉</span>活動</div>'+
+          '<div class="fbtn" data-act="offline"><span class="ic">🏕️</span>離線</div>'+
         '</div>'+
       '</div>'+
       '<div class="bot">'+
@@ -8356,6 +8357,7 @@ function hubAct(act){
     if(act==='status'){ hubOpenPanel(P.status); return; }
     if(act==='gacha'){ openHubGacha(); return; }
     if(act==='events'){ if(typeof window.showEvents==='function') window.showEvents(); else _hubClickFab(/活動/); return; }
+    if(act==='offline'){ if(typeof window.showOffline==='function') window.showOffline(); else _hubClickFab(/離線/); return; }
     if(act.indexOf('tab:')===0){
         var key=act.slice(4);
         document.querySelectorAll('.tab-bar button[onclick*="switchTab"]').forEach(function(b){
@@ -8489,9 +8491,52 @@ window.__adminGrantPoly = function(formName){
         dex[formName] = (dex[formName]||0) + 1;
         if(typeof updateUI==='function') updateUI();
         if(typeof saveGame==='function') saveGame();
+        if(typeof window.__pushPolyDex==='function') window.__pushPolyDex();
         if(typeof logSys==='function') logSys('🎁 管理員贈予變身卡：'+formName);
         return true;
     }catch(e){ return false; }
+};
+
+// ===== 帳號變身圖鑑：合併（取聯集，張數取大）=====
+window.__mergePolyDex = function(serverDex){
+    if(typeof player==='undefined' || !player || !serverDex) return false;
+    try{
+        var dex = (typeof polyDexObj==='function') ? polyDexObj() : (player.polyDex = player.polyDex || {});
+        var changed=false;
+        for(var k in serverDex){ var v=serverDex[k]||0; if((dex[k]||0) < v){ dex[k]=v; changed=true; } }
+        if(changed){ if(typeof updateUI==='function') updateUI(); if(typeof saveGame==='function') saveGame(); }
+        return changed;
+    }catch(e){ return false; }
+};
+
+// ===== 離線練功（每次最多 4 小時，需領取後才能重新開始）=====
+function _offlineState(){ if(typeof player==='undefined'||!player||!player.cls) return null; if(!player.offline) player.offline={}; return player.offline; }
+window.__offlinePending = function(){
+    var st=_offlineState(); if(!st) return { ok:false };
+    if(!st.startAt) return { ok:true, active:false };
+    var now=Date.now(), CAP=4*3600*1000;
+    var elapsed=Math.min(Math.max(0, now - st.startAt), CAP);
+    var hrs=elapsed/3600000;
+    var gold=Math.round((player.lv||1) * 20000 * hrs);
+    var expReq=(typeof getExpReq==='function') ? getExpReq(player.lv) : 0;
+    var exp=(isFinite(expReq) ? Math.round(expReq * 0.08 * hrs) : 0);
+    return { ok:true, active:true, elapsedMs:elapsed, hours:hrs, exp:exp, gold:gold, capped:(now - st.startAt)>=CAP, startAt:st.startAt };
+};
+window.__offlineStart = function(){
+    var st=_offlineState(); if(!st) return false;
+    if(st.startAt) return false;
+    st.startAt = Date.now();
+    if(typeof saveGame==='function') saveGame();
+    return true;
+};
+window.__offlineClaim = function(){
+    var pnd=window.__offlinePending(); if(!pnd||!pnd.active) return null;
+    player.exp += pnd.exp; player.gold += pnd.gold;
+    var st=_offlineState(); if(st) st.startAt = null;
+    if(typeof checkLvUp==='function') checkLvUp();
+    if(typeof updateUI==='function') updateUI();
+    if(typeof saveGame==='function') saveGame();
+    return pnd;
 };
 document.addEventListener('DOMContentLoaded', function(){ setTimeout(hubMaybeShow,300); });
 

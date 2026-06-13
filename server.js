@@ -332,6 +332,16 @@ app.get('/api/pvp/leaderboard', auth, (req, res) => {
         .sort((a, b) => b.score - a.score).slice(0, 10);
     res.json({ top: arr });
 });
+
+// 帳號變身圖鑑（所有角色共用）：讀取 / 合併上傳
+app.get('/api/polydex', auth, (req, res) => {
+    res.json({ dex: store.getPolyDex(req.user.id) });
+});
+app.post('/api/polydex', auth, (req, res) => {
+    const dex = (req.body && req.body.dex) || {};
+    const merged = store.mergePolyDex(req.user.id, dex);
+    res.json({ dex: merged });
+});
 // 管理員：給予指定變身（推送給在線玩家，由客戶端寫入圖鑑＋存檔）
 app.post('/api/admin/grant-poly', auth, adminOnly, (req, res) => {
     const { username, formName } = req.body || {};

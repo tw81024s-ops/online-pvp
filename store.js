@@ -4,7 +4,7 @@ const path = require('path');
 
 const FILE = process.env.DB_PATH || path.join(__dirname, 'data.json');
 
-let data = { users: [], saves: {}, tokens: {}, battles: [], pvp: {}, worldBoss: null, nextUserId: 1 };
+let data = { users: [], saves: {}, tokens: {}, battles: [], pvp: {}, worldBoss: null, polyDex: {}, nextUserId: 1 };
 try {
     if (fs.existsSync(FILE)) data = Object.assign(data, JSON.parse(fs.readFileSync(FILE, 'utf8')));
 } catch (e) { console.error('讀取資料檔失敗，使用空白資料庫：', e.message); }
@@ -49,6 +49,7 @@ module.exports = {
         data.users = data.users.filter(x => x.id !== u.id);
         delete data.saves[u.id];
         for (let sl = 2; sl <= 4; sl++) delete data.saves[u.id + ':' + sl];
+        if (data.polyDex) delete data.polyDex[u.id];
         for (const t in data.tokens) if (data.tokens[t] === u.id) delete data.tokens[t];
         flush(); return true;
     },
@@ -67,6 +68,16 @@ module.exports = {
     },
     battlesFor(username) {
         return data.battles.filter(x => x.a_name === username || x.b_name === username).slice(-20).reverse();
+    },
+    // 帳號變身圖鑑（每帳號一筆：{ formName: count }，所有角色共用）
+    getPolyDex(userId) { if (!data.polyDex) data.polyDex = {}; return data.polyDex[userId] || {}; },
+    mergePolyDex(userId, dexObj) {
+        if (!data.polyDex) data.polyDex = {};
+        const cur = data.polyDex[userId] || {};
+        if (dexObj && typeof dexObj === 'object') {
+            for (const k in dexObj) { const v = Number(dexObj[k]) || 0; if ((cur[k] || 0) < v) cur[k] = v; }
+        }
+        data.polyDex[userId] = cur; flush(); return cur;
     },
     // PvP 積分資料（每帳號一筆）
     getPvp(userId) { if (!data.pvp) data.pvp = {}; return data.pvp[userId] || null; },
