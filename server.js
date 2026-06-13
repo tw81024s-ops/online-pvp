@@ -121,7 +121,11 @@ app.get('/api/config', (req, res) => {
     res.json({
         expMult: c.expMult || 1, spdMult: c.spdMult || 1,
         pvpDmgMult: c.pvpDmgMult != null ? c.pvpDmgMult : 1,
-        pvpMagicMult: c.pvpMagicMult != null ? c.pvpMagicMult : 1
+        pvpMagicMult: c.pvpMagicMult != null ? c.pvpMagicMult : 1,
+        goldDropMult: c.goldDropMult != null ? c.goldDropMult : 1,
+        synthRateMult: c.synthRateMult != null ? c.synthRateMult : 1,
+        enhanceRateMult: c.enhanceRateMult != null ? c.enhanceRateMult : 1,
+        pandoraLuckMult: c.pandoraLuckMult != null ? c.pandoraLuckMult : 1
     });
 });
 app.post('/api/admin/config', auth, adminOnly, (req, res) => {
@@ -131,11 +135,19 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
     if (b.spdMult !== undefined) cfg.spdMult = Math.max(1, Math.min(20, parseFloat(b.spdMult) || 1));
     if (b.pvpDmgMult !== undefined) cfg.pvpDmgMult = Math.max(0.05, Math.min(5, parseFloat(b.pvpDmgMult) || 1));
     if (b.pvpMagicMult !== undefined) cfg.pvpMagicMult = Math.max(0.05, Math.min(5, parseFloat(b.pvpMagicMult) || 1));
+    if (b.goldDropMult !== undefined) cfg.goldDropMult = Math.max(0, Math.min(100, parseFloat(b.goldDropMult) || 1));
+    if (b.synthRateMult !== undefined) cfg.synthRateMult = Math.max(0, Math.min(100, parseFloat(b.synthRateMult) || 1));
+    if (b.enhanceRateMult !== undefined) cfg.enhanceRateMult = Math.max(0, Math.min(100, parseFloat(b.enhanceRateMult) || 1));
+    if (b.pandoraLuckMult !== undefined) cfg.pandoraLuckMult = Math.max(0, Math.min(100, parseFloat(b.pandoraLuckMult) || 1));
     const out = store.setConfig(cfg);
     res.json({ ok: true, config: {
         expMult: out.expMult || 1, spdMult: out.spdMult || 1,
         pvpDmgMult: out.pvpDmgMult != null ? out.pvpDmgMult : 1,
-        pvpMagicMult: out.pvpMagicMult != null ? out.pvpMagicMult : 1
+        pvpMagicMult: out.pvpMagicMult != null ? out.pvpMagicMult : 1,
+        goldDropMult: out.goldDropMult != null ? out.goldDropMult : 1,
+        synthRateMult: out.synthRateMult != null ? out.synthRateMult : 1,
+        enhanceRateMult: out.enhanceRateMult != null ? out.enhanceRateMult : 1,
+        pandoraLuckMult: out.pandoraLuckMult != null ? out.pandoraLuckMult : 1
     } });
 });
 
@@ -208,12 +220,124 @@ const pending = new Map();     // challengeId -> {from, to, fromProfile, ts}
 const pendingTrade = new Map(); // tradeReqId -> {from, to, ts}
 const trades = new Map();       // tradeId -> {a,b,offerA,offerB,confA,confB}
 const userTrade = new Map();    // username -> tradeId（同時只能進行一場交換）
+const userNames = new Map();    // username -> 角色名字（競技場顯示）
 
 function send(ws, obj) { try { ws.send(JSON.stringify(obj)); } catch (e) { } }
 function broadcastOnline() {
     const list = [...online.keys()];
-    for (const ws of online.values()) send(ws, { type: 'online_list', users: list });
+    const names = {}; for (const u of list) names[u] = userNames.get(u) || '';
+    for (const ws of online.values()) send(ws, { type: 'online_list', users: list, names });
 }
+
+// ===== PvP 積分系統 =====
+const PVP_TIERS = [
+    { n: '青銅', min: 0 }, { n: '白銀', min: 1000 }, { n: '黃金', min: 1200 },
+    { n: '白金', min: 1400 }, { n: '鑽石', min: 1600 }, { n: '大師', min: 1800 }
+];
+const PVP_WEEK_TICKETS = [2, 3, 5, 8, 12, 20];
+function pvpTierIdx(score) { let i = 0; for (let k = 0; k < PVP_TIERS.length; k++) if (score >= PVP_TIERS[k].min) i = k; return i; }
+function pvpTierName(score) { return PVP_TIERS[pvpTierIdx(score)].n; }
+function _tzNow() { return new Date(Date.now() + 8 * 3600 * 1000); } // 台灣 UTC+8
+function pvpDayKey(d) { d = d || _tzNow(); return d.toISOString().slice(0, 10); }
+function pvpWeekKey(d) {
+    d = d || _tzNow();
+    const day = (d.getUTCDay() + 6) % 7;          // 0=週一
+    const mon = new Date(d); mon.setUTCDate(d.getUTCDate() - day);
+    return mon.toISOString().slice(0, 10);
+}
+function pvpDefault(username) {
+    return {
+        username, name: '', score: 1000, dayNet: 0, weekNet: 0,
+        dayKey: pvpDayKey(), weekKey: pvpWeekKey(), wins: 0, losses: 0, streak: 0,
+        oppToday: {}, rewardedToday: 0, pendingGold: 0, pendingTickets: 0
+    };
+}
+function pvpGet(userId, username) {
+    let r = store.getPvp(userId);
+    if (!r) r = pvpDefault(username);
+    if (r.score == null) r.score = 1000;
+    if (!r.oppToday) r.oppToday = {};
+    if (r.pendingGold == null) r.pendingGold = 0;
+    if (r.pendingTickets == null) r.pendingTickets = 0;
+    if (username) r.username = username;
+    return r;
+}
+// 跨日/跨週結算 → 累積到 pending，重置 net 與每日防刷計數
+function pvpRollover(r) {
+    const dk = pvpDayKey(), wk = pvpWeekKey();
+    if (r.dayKey !== dk) {
+        const g = Math.max(0, r.dayNet) * 100;
+        if (g > 0) r.pendingGold += g;
+        r.dayNet = 0; r.dayKey = dk; r.oppToday = {}; r.rewardedToday = 0;
+    }
+    if (r.weekKey !== wk) {
+        const g = Math.max(0, r.weekNet) * 1000;
+        const t = PVP_WEEK_TICKETS[pvpTierIdx(r.score)] || 0;
+        if (g > 0) r.pendingGold += g;
+        if (t > 0) r.pendingTickets += t;
+        r.weekNet = 0; r.weekKey = wk;
+    }
+    return r;
+}
+// 把待領獎勵推給在線玩家（客戶端套用到當前角色）；成功推送才清空
+function pvpFlushPending(r) {
+    if ((r.pendingGold || 0) <= 0 && (r.pendingTickets || 0) <= 0) return;
+    const ws = online.get(r.username);
+    if (ws) {
+        send(ws, { type: 'pvp_reward', gold: r.pendingGold || 0, tickets: r.pendingTickets || 0, reason: 'settle' });
+        r.pendingGold = 0; r.pendingTickets = 0;
+    }
+}
+// 一場結果記分＋發即時獎勵（勝利獎勵已 ×2）；含防刷
+function pvpScoreMatch(rA, rB, winner) {
+    if (winner === 'draw') return;
+    const winR = winner === 'A' ? rA : rB;
+    const loseR = winner === 'A' ? rB : rA;
+    const oppCnt = winR.oppToday[loseR.username] || 0;
+    const ranked = (oppCnt < 3) && (winR.rewardedToday < 20);   // 防刷：同對手每日3場、每日有獎20場
+    if (!ranked) return;                                         // 超過：不計分不發獎
+    winR.oppToday[loseR.username] = oppCnt + 1;
+    winR.rewardedToday++;
+    winR.score += 25; loseR.score = Math.max(0, loseR.score - 15);
+    winR.dayNet += 25; winR.weekNet += 25;
+    loseR.dayNet -= 15; loseR.weekNet -= 15;
+    winR.wins++; loseR.losses++;
+    winR.streak = (winR.streak || 0) + 1; loseR.streak = 0;
+    const oppTier = pvpTierIdx(loseR.score);
+    const gold = (500 + oppTier * 250) * 2;
+    const chance = Math.min(0.8, (0.15 + oppTier * 0.05) * 2);
+    const tickets = Math.random() < chance ? 1 : 0;
+    const wWs = online.get(winR.username);
+    if (wWs) send(wWs, { type: 'pvp_reward', gold, tickets, reason: 'win', score: winR.score, tier: pvpTierName(winR.score), delta: 25 });
+    const lWs = online.get(loseR.username);
+    if (lWs) send(lWs, { type: 'pvp_reward', gold: 100, tickets: 0, reason: 'lose', score: loseR.score, tier: pvpTierName(loseR.score), delta: -15 });
+}
+
+app.get('/api/pvp/me', auth, (req, res) => {
+    const u = req.user; const r = pvpGet(u.id, u.username); pvpRollover(r); store.putPvp(u.id, r);
+    const arr = Object.values(store.allPvp()).map(x => ({ username: x.username, score: x.score || 1000 })).sort((a, b) => b.score - a.score);
+    const rank = arr.findIndex(x => x.username === u.username) + 1;
+    res.json({
+        score: r.score, tier: pvpTierName(r.score), dayNet: r.dayNet, weekNet: r.weekNet,
+        wins: r.wins || 0, losses: r.losses || 0, streak: r.streak || 0, rank: rank || null,
+        pendingGold: r.pendingGold || 0, pendingTickets: r.pendingTickets || 0
+    });
+});
+app.get('/api/pvp/leaderboard', auth, (req, res) => {
+    const arr = Object.values(store.allPvp())
+        .map(x => ({ name: x.name || x.username, username: x.username, score: x.score || 1000, tier: pvpTierName(x.score || 1000) }))
+        .sort((a, b) => b.score - a.score).slice(0, 10);
+    res.json({ top: arr });
+});
+// 管理員：給予指定變身（推送給在線玩家，由客戶端寫入圖鑑＋存檔）
+app.post('/api/admin/grant-poly', auth, adminOnly, (req, res) => {
+    const { username, formName } = req.body || {};
+    if (!formName) return res.status(400).json({ error: '缺少變身名稱' });
+    const tw = online.get(username);
+    if (!tw) return res.status(400).json({ error: '該玩家需在線上才能發放' });
+    send(tw, { type: 'admin_grant_poly', formName: String(formName) });
+    res.json({ ok: true });
+});
 
 wss.on('connection', (ws) => {
     ws.isAlive = true;
@@ -229,12 +353,25 @@ wss.on('connection', (ws) => {
             const old = online.get(row.username);
             if (old && old !== ws) { send(old, { type: 'kicked' }); try { old.close(); } catch (e) { } }
             ws.username = row.username;
+            ws.userId = row.id;
             online.set(row.username, ws);
             send(ws, { type: 'auth_ok', username: row.username, isAdmin: isAdminUser(row) });
             broadcastOnline();
+            // PvP：登入時做跨日/跨週結算，稍後把待領獎勵推給客戶端（等角色載入）
+            try {
+                const r0 = pvpGet(row.id, row.username); pvpRollover(r0); store.putPvp(row.id, r0);
+                setTimeout(() => { try { const r = pvpGet(row.id, row.username); pvpFlushPending(r); store.putPvp(row.id, r); } catch (e) { } }, 2500);
+            } catch (e) { }
             return;
         }
         if (!ws.username) return;
+
+        // 回報角色名字（競技場顯示用）
+        if (msg.type === 'set_name') {
+            userNames.set(ws.username, String(msg.name || '').slice(0, 20));
+            broadcastOnline();
+            return;
+        }
 
         // 發起挑戰：帶上自己的戰鬥數值
         if (msg.type === 'challenge') {
@@ -265,6 +402,18 @@ wss.on('connection', (ws) => {
                 pvpMagicMult: _cfg.pvpMagicMult != null ? _cfg.pvpMagicMult : 1
             });
             store.addBattle(c.from, ws.username, result.winner === 'draw' ? '平手' : (result.winner === 'A' ? c.from : ws.username));
+
+            // ===== PvP 積分記分＋即時獎勵 =====
+            try {
+                const uA = store.findUser(c.from), uB = store.findUser(ws.username);
+                if (uA && uB) {
+                    const rA = pvpGet(uA.id, c.from), rB = pvpGet(uB.id, ws.username);
+                    rA.name = pA.name || rA.name; rB.name = pB.name || rB.name;
+                    pvpRollover(rA); pvpRollover(rB);
+                    pvpScoreMatch(rA, rB, result.winner);
+                    store.putPvp(uA.id, rA); store.putPvp(uB.id, rB);
+                }
+            } catch (e) { console.error('pvp score err:', e.message); }
 
             const payload = {
                 type: 'battle_start',

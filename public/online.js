@@ -47,12 +47,25 @@
             const r = await fetch('/api/config');
             if (!r.ok) return;
             const j = await r.json();
-            window.__GAME_CONFIG = { expMult: j.expMult || 1, spdMult: j.spdMult || 1 };
+            window.__GAME_CONFIG = {
+                expMult: j.expMult || 1, spdMult: j.spdMult || 1,
+                goldDropMult: j.goldDropMult || 1, synthRateMult: j.synthRateMult || 1,
+                enhanceRateMult: j.enhanceRateMult || 1, pandoraLuckMult: j.pandoraLuckMult || 1
+            };
             try { if (typeof calcStats === 'function') calcStats(); if (typeof updateUI === 'function') updateUI(); } catch (e) { }
         } catch (e) { }
     }
     syncGameConfig();
     setInterval(syncGameConfig, 60000);
+    // 回報角色名字給伺服器（競技場顯示），名字有變才送
+    let onlineNames = {};
+    let _lastSentName = null;
+    function pushName() {
+        if (!ws || !wsReady) return;
+        const p = getPlayer(); const nm = (p && p.name) || '';
+        if (nm !== _lastSentName) { _lastSentName = nm; try { ws.send(JSON.stringify({ type: 'set_name', name: nm })); } catch (e) { } }
+    }
+    setInterval(pushName, 15000);
     function toast(msg, color) {
         const t = el('div', { style: `position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:99999;background:${color || '#1e293b'};color:#fff;padding:8px 18px;border-radius:8px;border:1px solid #475569;box-shadow:0 4px 16px rgba(0,0,0,.5);font-size:14px;` }, msg);
         document.body.appendChild(t);
@@ -160,15 +173,17 @@
         ws.onopen = () => ws.send(JSON.stringify({ type: 'auth', token }));
         ws.onmessage = (ev) => {
             let m; try { m = JSON.parse(ev.data); } catch (e) { return; }
-            if (m.type === 'auth_ok') { wsReady = true; isAdmin = m.isAdmin; setStatus('🟢 ' + m.username); refreshAdminBtn(); }
+            if (m.type === 'auth_ok') { wsReady = true; isAdmin = m.isAdmin; setStatus('🟢 ' + m.username); refreshAdminBtn(); pushName(); }
             if (m.type === 'auth_fail') { logout(true); }
             if (m.type === 'kicked') { toast('此帳號已在其他視窗登入', '#7f1d1d'); wsReady = false; }
-            if (m.type === 'online_list') { onlineUsers = m.users; renderOnline(); }
+            if (m.type === 'online_list') { onlineUsers = m.users; onlineNames = m.names || {}; renderOnline(); }
             if (m.type === 'error') toast(m.error, '#7f1d1d');
             if (m.type === 'challenge_sent') toast('已向 ' + m.to + ' 發出挑戰，等待對方接受…');
             if (m.type === 'challenge_declined') toast(m.by + ' 拒絕了你的挑戰', '#7f1d1d');
             if (m.type === 'challenge_received') showIncoming(m);
             if (m.type === 'battle_start') playBattle(m);
+            if (m.type === 'pvp_reward') { try { if (typeof window.__applyPvpReward === 'function') window.__applyPvpReward(m.gold || 0, m.tickets || 0, m.reason); } catch (e) { } }
+            if (m.type === 'admin_grant_poly') { try { if (typeof window.__adminGrantPoly === 'function') { window.__adminGrantPoly(m.formName); toast('🎁 獲得變身卡：' + m.formName, '#14532d'); } } catch (e) { } }
             if (m.type === 'admin_updated') {
                 // 自動重新載入雲端最新存檔（管理員的修改），避免線上玩家的自動存檔把修改蓋回去
                 toast('管理員更新了你的角色資料，正在重新載入…', '#1e3a5f');
@@ -335,24 +350,54 @@
     function showArena() {
         if (!token || !wsReady) { toast('請先登入線上模式', '#7f1d1d'); if (!token) showLogin(); return; }
         const _p = getPlayer(); if (!_p || !_p.cls) { toast('請先建立或載入角色再進入競技場', '#7f1d1d'); return; }
+        // 沒名字先取名，讓其他玩家看得出是誰
+        if (!_p.name) {
+            const nm = (prompt('幫你的角色取個名字（其他玩家在競技場會看到）：', '') || '').trim().slice(0, 20);
+            if (nm) { _p.name = nm; try { if (typeof saveGame === 'function') saveGame(); } catch (e) { } try { if (typeof updateUI === 'function') updateUI(); } catch (e) { } pushName(); }
+        }
         const wrap = el('div');
+        const statBar = el('div', { style: 'background:#0f172a;border:1px solid #334155;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:13px;color:#cbd5e1;line-height:1.7;' }, '積分讀取中…');
+        wrap.append(statBar);
+        const lbBox = el('div', { style: 'background:#0f172a;border:1px solid #334155;border-radius:10px;padding:8px 12px;margin-bottom:10px;' });
+        lbBox.append(el('div', { style: 'font-weight:bold;color:#fbbf24;margin-bottom:4px;' }, '🏆 排行榜（前 10）'));
+        const lbList = el('div', { style: 'font-size:12px;color:#cbd5e1;' }, '讀取中…');
+        lbBox.append(lbList);
+        wrap.append(lbBox);
         wrap.append(el('div', { style: 'color:#94a3b8;font-size:13px;margin-bottom:10px;' }, '點選在線玩家「挑戰」即時對戰，或按「🤝 交換」與對方交換物品／金幣。'));
         arenaListEl = el('div');
         wrap.append(arenaListEl);
-        modal('⚔️ 競技場（在線玩家）', wrap);
+        modal('⚔️ 競技場', wrap);
         renderOnline();
+        refreshPvpStats(statBar, lbList);
+    }
+    function refreshPvpStats(statBar, lbList) {
+        api('/api/pvp/me').then(me => {
+            statBar.innerHTML = `段位 <b style="color:#fbbf24">${me.tier}</b>　積分 <b>${me.score}</b>　排名 <b>#${me.rank || '-'}</b><br>` +
+                `今日淨分 <b>${me.dayNet}</b>（每日 00:00 結算 ×100 金）　本週淨分 <b>${me.weekNet}</b>（每週一結算 ×1000 金）<br>戰績 ${me.wins} 勝 ${me.losses} 敗　連勝 ${me.streak}`;
+        }).catch(() => { statBar.textContent = '（積分讀取失敗，請重新登入）'; });
+        api('/api/pvp/leaderboard').then(j => {
+            lbList.innerHTML = '';
+            (j.top || []).forEach((x, i) => {
+                const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) + '.';
+                lbList.append(el('div', { style: 'display:flex;justify-content:space-between;padding:2px 0;' },
+                    el('span', {}, `${medal} ${x.name}`),
+                    el('span', { style: 'color:#94a3b8;' }, `${x.tier}　${x.score}`)));
+            });
+            if (!(j.top || []).length) lbList.textContent = '尚無資料';
+        }).catch(() => { lbList.textContent = '（排行榜讀取失敗）'; });
     }
     function renderOnline() {
         if (!arenaListEl || !document.body.contains(arenaListEl)) return;
         arenaListEl.innerHTML = '';
         const others = onlineUsers.filter(u => u !== myName);
+        const dispName = u => { const n = onlineNames[u]; return n ? (n + '（' + u + '）') : u; };
         if (others.length === 0) {
             arenaListEl.append(el('div', { style: 'color:#64748b;text-align:center;padding:18px 0;' }, '目前沒有其他玩家在線'));
             return;
         }
         others.forEach(u => {
             const row = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px 14px;margin-bottom:8px;' });
-            row.append(el('div', {}, '🟢 ' + u));
+            row.append(el('div', {}, '🟢 ' + dispName(u)));
             const btns = el('div', { style: 'display:flex;gap:6px;flex:none;' });
             const b = el('button', { style: 'background:#b45309;color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-weight:bold;' }, '挑戰');
             b.onclick = () => ws.send(JSON.stringify({ type: 'challenge', to: u, profile: buildProfile() }));
@@ -686,6 +731,25 @@
         const clsName = (p.darkelf ? '黑妖' : { knight: '騎士', mage: '法師', elf: '妖精' }[p.cls]) || p.cls || '?';
         wrap.append(el('div', { style: 'color:#cbd5e1;font-size:13px;margin-bottom:10px;line-height:1.7;' },
             `帳號：<b style="color:#fbbf24">${username}</b>　職業：${clsName}　等級：${p.lv || 1}<br>金幣：${(p.gold || 0).toLocaleString()}　HP：${p.mhp || 0}　MP：${p.mmp || 0}`));
+        // 🛡️ 目前裝備（管理員檢視）
+        (function () {
+            const SLOT_LABEL = { wpn: '武器', helm: '頭盔', armor: '盔甲', shield: '盾牌', cloak: '披風', tshirt: '內衣', gloves: '手套', boots: '鞋子', ring1: '戒指1', ring2: '戒指2', amulet: '項鍊', belt: '腰帶' };
+            const _DB = (typeof getDB === 'function') ? getDB() : (window.DB || null);
+            const eq = (p && p.eq) || {};
+            const box = el('div', { style: 'background:#0f172a;border:1px solid #334155;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:#cbd5e1;' });
+            box.append(el('div', { style: 'font-weight:bold;color:#7dd3fc;margin-bottom:4px;' }, '🛡️ 目前裝備'));
+            let any = false;
+            Object.keys(SLOT_LABEL).forEach(k => {
+                const it = eq[k]; if (!it || !it.id) return; any = true;
+                const nm = (_DB && _DB.items[it.id]) ? _DB.items[it.id].n : it.id;
+                const tags = []; if (it.en) tags.push('+' + it.en); if (it.bless) tags.push('祝'); if (it.anc) tags.push('遠'); if (it.attr) tags.push('屬');
+                box.append(el('div', { style: 'display:flex;justify-content:space-between;padding:1px 0;' },
+                    el('span', { style: 'color:#94a3b8;' }, SLOT_LABEL[k]),
+                    el('span', {}, nm + (tags.length ? ('　' + tags.join('')) : ''))));
+            });
+            if (!any) box.append(el('div', { style: 'color:#64748b;' }, '（未穿戴任何裝備）'));
+            wrap.append(box);
+        })();
         // 角色欄位(格)選擇：玩家可能有多個角色，必須改到他「正在玩」的那一格才看得到
         if (slotNums.length > 0) {
             const sr = el('div', { style: 'display:flex;gap:8px;align-items:center;margin-bottom:8px;padding:8px;background:#0f172a;border:1px solid #334155;border-radius:6px;' });
@@ -773,7 +837,7 @@
         section('🌍 全服設定（所有玩家生效，立即同步）');
         const cfgStatus = el('div', { style: 'font-size:12px;color:#94a3b8;margin:-2px 0 8px;line-height:1.7;' }, '目前全服設定：讀取中…');
         wrap.append(cfgStatus);
-        const fmtCfg = c => `目前全服：經驗 ×${c.expMult || 1}　攻速 ×${c.spdMult || 1}<br>競技場傷害 ×${c.pvpDmgMult != null ? c.pvpDmgMult : 1}　競技場魔法 ×${c.pvpMagicMult != null ? c.pvpMagicMult : 1}`;
+        const fmtCfg = c => `目前全服：經驗 ×${c.expMult || 1}　攻速 ×${c.spdMult || 1}<br>競技場傷害 ×${c.pvpDmgMult != null ? c.pvpDmgMult : 1}　競技場魔法 ×${c.pvpMagicMult != null ? c.pvpMagicMult : 1}<br>金幣掉落 ×${c.goldDropMult != null ? c.goldDropMult : 1}　合卡 ×${c.synthRateMult != null ? c.synthRateMult : 1}　衝裝 ×${c.enhanceRateMult != null ? c.enhanceRateMult : 1}　潘朵拉 ×${c.pandoraLuckMult != null ? c.pandoraLuckMult : 1}`;
         fetch('/api/config').then(r => r.json()).then(j => { cfgStatus.innerHTML = fmtCfg(j); }).catch(() => { cfgStatus.textContent = '（需登入線上模式才能讀取/設定）'; });
         const setCfg = async (key, n, label) => {
             try { const j = await api('/api/admin/config', 'POST', { [key]: n }); await syncGameConfig(); cfgStatus.innerHTML = fmtCfg(j.config); toast(label + ' = ×' + n, '#14532d'); }
@@ -783,6 +847,29 @@
         row(null, '設定攻速倍率', v => setCfg('spdMult', Math.max(1, parseFloat(v) || 1), '全服攻速倍率'), true, '攻速倍率（例 3＝3倍、1＝正常）');
         row(null, '競技場傷害倍率', v => setCfg('pvpDmgMult', Math.max(0.05, parseFloat(v) || 1), '競技場傷害倍率'), true, '全部PvP傷害（例 0.6＝6折、1＝正常）');
         row(null, '競技場魔法倍率', v => setCfg('pvpMagicMult', Math.max(0.05, parseFloat(v) || 1), '競技場魔法倍率'), true, '法師魔法再乘（例 0.4＝壓低法師、1＝不變）');
+        row(null, '金幣掉落率', v => setCfg('goldDropMult', Math.max(0, parseFloat(v) || 1), '金幣掉落率'), true, '打怪金幣倍率（例 2＝雙倍、1＝正常）');
+        row(null, '合卡成功率', v => setCfg('synthRateMult', Math.max(0, parseFloat(v) || 1), '合卡成功率'), true, '變身合成倍率（例 2＝兩倍成功率）');
+        row(null, '衝裝成功率', v => setCfg('enhanceRateMult', Math.max(0, parseFloat(v) || 1), '衝裝成功率'), true, '強化成功率倍率（例 1.5＝1.5倍）');
+        row(null, '潘朵拉機率', v => setCfg('pandoraLuckMult', Math.max(0, parseFloat(v) || 1), '潘朵拉機率'), true, '稀有物加權倍率（例 3＝稀有更易中）');
+        // 🎁 給予指定變身（對方需在線上，由其客戶端寫入圖鑑）
+        section('🎁 給予指定變身（對方需在線上）');
+        {
+            const gr = el('div', { style: 'display:flex;gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap;' });
+            const gUser = input('玩家帳號'); gUser.style.marginBottom = '0'; gUser.style.flex = '1'; gUser.style.minWidth = '90px';
+            const gSel = el('select', { style: 'flex:1;min-width:110px;background:#020617;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:8px;font-size:13px;' });
+            let forms = []; try { forms = (typeof window.__polyFormList === 'function') ? window.__polyFormList() : []; } catch (e) { }
+            if (!forms.length) gSel.append(el('option', { value: '' }, '（無變身清單）'));
+            forms.forEach(f => gSel.append(el('option', { value: f.name }, `[${f.tier}] ${f.name}`)));
+            const gBtn = el('button', { style: 'background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:8px 14px;cursor:pointer;white-space:nowrap;font-weight:bold;' }, '發放');
+            gBtn.onclick = async () => {
+                const u = (gUser.value || '').trim(); const fn = gSel.value;
+                if (!u) return toast('請輸入玩家帳號', '#7f1d1d');
+                if (!fn) return toast('請選擇變身', '#7f1d1d');
+                try { await api('/api/admin/grant-poly', 'POST', { username: u, formName: fn }); toast('已發放「' + fn + '」給 ' + u, '#14532d'); }
+                catch (e) { toast(e.message, '#7f1d1d'); }
+            };
+            gr.append(gUser, gSel, gBtn); wrap.append(gr);
+        }
         section('🎁 取得物品（點分類展開瀏覽，或搜尋）');
         wrap.append(buildItemBrowser((id, it, qty) => {
             try { gainItem(id, qty || 1, true, true); refreshGame(); toast('已取得 ' + it.n + ' ×' + (qty || 1)); } catch (e) { toast('失敗：' + e.message, '#7f1d1d'); }

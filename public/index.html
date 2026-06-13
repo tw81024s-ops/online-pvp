@@ -3394,7 +3394,7 @@ function polySynth(targetRarity){
     if(polyCountByRarity(src)<4){ logSys('「'+src+'」變身張數不足4張，無法合成'+targetRarity+'。'); return null; }
     let need=4, dex=polyDexObj();
     for(let n in dex){ if(need<=0) break; let i=polyFindForm(n); if(i&&i.rarity===src){ let take=Math.min(need,dex[n]); dex[n]-=take; need-=take; if(dex[n]<=0) delete dex[n]; } }
-    let ok=Math.random()*100<t.synthRate;
+    let ok=Math.random()*100<t.synthRate*((window.__GAME_CONFIG&&window.__GAME_CONFIG.synthRateMult)||1);
     if(ok){ let f=t.forms[Math.floor(Math.random()*t.forms.length)]; dex[f.n]=(dex[f.n]||0)+1; updateUI(); if(typeof saveGame==='function') saveGame(); return {success:true,form:f,rarity:targetRarity}; }
     updateUI(); if(typeof saveGame==='function') saveGame(); return {success:false};
 }
@@ -3418,7 +3418,7 @@ function polySynthAll(targetRarity){
             let usable=dex[n]-reserve; if(usable<=0) continue;
             let take=Math.min(need,usable); dex[n]-=take; need-=take; if(dex[n]<=0) delete dex[n];
         }
-        if(Math.random()*100<t.synthRate){ let f=t.forms[Math.floor(Math.random()*t.forms.length)]; dex[f.n]=(dex[f.n]||0)+1; success++; results.push(f.n); }
+        if(Math.random()*100<t.synthRate*((window.__GAME_CONFIG&&window.__GAME_CONFIG.synthRateMult)||1)){ let f=t.forms[Math.floor(Math.random()*t.forms.length)]; dex[f.n]=(dex[f.n]||0)+1; success++; results.push(f.n); }
     }
     updateUI(); if(typeof saveGame==='function') saveGame();
     return {times, success, results, consumed:times*4, src};
@@ -5128,7 +5128,7 @@ function killMob(idx) {
         let gMin = mob.goldMin || (mob.lv * 5);
         let gMax = mob.goldMax || (mob.lv * 10);
         let g = gMin + Math.floor(Math.random() * (gMax - gMin + 1));
-        player.gold += g * (isTowerMap(mapState.current)?2:1);
+        player.gold += Math.round(g * (isTowerMap(mapState.current)?2:1) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.goldDropMult)||1));
         logSys(`獲得 <span class="text-yellow-400 font-bold">${g} 金幣</span>。`);
     }
 	// 誘捕判定（誘捕上限改於「使用肉」時以 floor(魅力/7) 判定）
@@ -7063,7 +7063,7 @@ function doEnhance(targetUid, isEq = true) {
         } else {                                      // 防具：安定值6（其餘安定值防呆比照）
             rate = en === safe ? 0.30 : 0.20;
         }
-        if (Math.random() < rate) success = true;
+        if (Math.random() < rate*((window.__GAME_CONFIG&&window.__GAME_CONFIG.enhanceRateMult)||1)) success = true;
         else destroy = true;                          // 失敗即爆裝
     }
     
@@ -8408,6 +8408,48 @@ function hubMaybeShow(){
     if(document.body.classList.contains('hub-home')) hubSync();
 }
 setInterval(function(){ try{ hubMaybeShow(); }catch(e){} }, 600);
+
+/* ===================== PvP 競技場：客戶端獎勵套用 ===================== */
+window.__pvpPending = window.__pvpPending || null;
+window.__applyPvpReward = function(gold, tickets, reason){
+    gold = gold||0; tickets = tickets||0;
+    if(typeof player==='undefined' || !player || !player.cls){
+        window.__pvpPending = window.__pvpPending || {g:0,t:0};
+        window.__pvpPending.g += gold; window.__pvpPending.t += tickets; return;
+    }
+    try{
+        if(gold) player.gold = (player.gold||0) + gold;
+        if(tickets && typeof gainItem==='function') gainItem('new_item_239', tickets, true);
+        if(typeof updateUI==='function') updateUI();
+        if(typeof saveGame==='function') saveGame();
+        var head = reason==='win'?'🏆 競技場勝利':reason==='lose'?'🛡️ 競技場敗北':reason==='settle'?'📅 競技場結算':'⚔️ 競技場';
+        var parts=[]; if(gold) parts.push('+'+gold.toLocaleString()+' 金幣'); if(tickets) parts.push('+'+tickets+' 潘朵拉抽獎卷');
+        if(parts.length && typeof logSys==='function') logSys(head+'：'+parts.join('、'));
+    }catch(e){}
+};
+window.__flushPvpPending = function(){
+    if(window.__pvpPending && typeof player!=='undefined' && player && player.cls){
+        var pp=window.__pvpPending; window.__pvpPending=null;
+        window.__applyPvpReward(pp.g, pp.t, 'settle');
+    }
+};
+setInterval(function(){ try{ window.__flushPvpPending(); }catch(e){} }, 3000);
+
+window.__polyFormList = function(){
+    var out=[]; try{ var RP=RARITY_POLY; for(var t in RP){ (RP[t].forms||[]).forEach(function(f){ if(f&&f.n) out.push({tier:t, name:f.n}); }); } }catch(e){}
+    return out;
+};
+window.__adminGrantPoly = function(formName){
+    if(typeof player==='undefined' || !player) return false;
+    try{
+        var dex = (typeof polyDexObj==='function') ? polyDexObj() : (player.polyDex=player.polyDex||{});
+        dex[formName] = (dex[formName]||0) + 1;
+        if(typeof updateUI==='function') updateUI();
+        if(typeof saveGame==='function') saveGame();
+        if(typeof logSys==='function') logSys('🎁 管理員贈予變身卡：'+formName);
+        return true;
+    }catch(e){ return false; }
+};
 document.addEventListener('DOMContentLoaded', function(){ setTimeout(hubMaybeShow,300); });
 
 // ===== 地圖分類選單（村莊／野外／地監／特殊） =====
@@ -11184,6 +11226,7 @@ function getWeightedGachaResult() {
         if (_gachaBlock.includes(id)) continue;   // 抽獎卷本身/誘捕項圈/特殊任務物不列入抽獎池
         let gw = DB.items[id].gachaWeight;
         let weight = (gw === undefined) ? 100 : (gw > 0 ? gw : 10);   // 0 → 預設 10，讓卷軸/原本未開放的裝備也抽得到
+        if (weight < 100) weight *= ((window.__GAME_CONFIG&&window.__GAME_CONFIG.pandoraLuckMult)||1);   // 全服潘朵拉機率：拉高稀有(低權重)物品
         if (weight > 0) {
             totalWeight += weight;
             pool.push({ id: id, weight: weight });

@@ -4,7 +4,7 @@ const path = require('path');
 
 const FILE = process.env.DB_PATH || path.join(__dirname, 'data.json');
 
-let data = { users: [], saves: {}, tokens: {}, battles: [], nextUserId: 1 };
+let data = { users: [], saves: {}, tokens: {}, battles: [], pvp: {}, nextUserId: 1 };
 try {
     if (fs.existsSync(FILE)) data = Object.assign(data, JSON.parse(fs.readFileSync(FILE, 'utf8')));
 } catch (e) { console.error('讀取資料檔失敗，使用空白資料庫：', e.message); }
@@ -68,6 +68,10 @@ module.exports = {
     battlesFor(username) {
         return data.battles.filter(x => x.a_name === username || x.b_name === username).slice(-20).reverse();
     },
+    // PvP 積分資料（每帳號一筆）
+    getPvp(userId) { if (!data.pvp) data.pvp = {}; return data.pvp[userId] || null; },
+    putPvp(userId, rec) { if (!data.pvp) data.pvp = {}; data.pvp[userId] = rec; flush(); return rec; },
+    allPvp() { return data.pvp || {}; },
     // 全域遊戲設定（所有玩家生效）：經驗倍率 / 攻速倍率
     getConfig() { return data.config || {}; },
     setConfig(cfg) { data.config = Object.assign({}, data.config, cfg); flush(); return data.config; }
