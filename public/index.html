@@ -8543,6 +8543,34 @@ window.__polyFormList = function(){
     var out=[]; try{ var RP=RARITY_POLY; for(var t in RP){ (RP[t].forms||[]).forEach(function(f){ if(f&&f.n) out.push({tier:t, name:f.n}); }); } }catch(e){}
     return out;
 };
+window.__admWeapons = function(){
+    if(typeof player==='undefined'||!player) return [];
+    var plain=function(it){ var d=DB.items[it.id]||{}; var s=''; var a=getAttrAffix(it.attr); if(a)s+=a.n; if(it.bless)s+=(it.bless==='cursed'?'\u8a5b\u5492\u7684':'\u795d\u798f\u7684'); var en=it.en>0?('+'+it.en+' '):''; return en+s+(d.n||it.id); };
+    var out=[];
+    if(player.eq&&player.eq.wpn){ var it=player.eq.wpn; out.push({ref:'eq',label:'\u3010\u88dd\u5099\u4e2d\u3011'+plain(it),en:it.en||0,attr:it.attr||'',bless:!!(it.bless&&it.bless!=='cursed')}); }
+    (player.inv||[]).forEach(function(it,i){ var d=DB.items[it.id]; if(d&&d.type==='wpn'&&!d.isArrow) out.push({ref:'inv:'+i,label:plain(it),en:it.en||0,attr:it.attr||'',bless:!!(it.bless&&it.bless!=='cursed')}); });
+    return out;
+};
+window.__admAttrOptions = function(){
+    var out=[{v:'',n:'\uff08\u7121\u5c6c\u6027\uff09'}];
+    try{ Object.keys(ATTR_AFFIX).forEach(function(k){ var a=ATTR_AFFIX[k]; out.push({v:k,n:a.n+'('+k.slice(-1)+'\u968e)'}); }); }catch(e){}
+    return out;
+};
+window.__admApplyWeapon = function(ref,en,attr,bless){
+    if(typeof player==='undefined'||!player) return {ok:false,msg:'\u7121\u89d2\u8272'};
+    var it=null;
+    if(ref==='eq') it=player.eq&&player.eq.wpn;
+    else if(ref&&ref.indexOf('inv:')===0) it=(player.inv||[])[parseInt(ref.slice(4))];
+    if(!it) return {ok:false,msg:'\u627e\u4e0d\u5230\u6b66\u5668'};
+    var d=DB.items[it.id];
+    if(!d||d.type!=='wpn') return {ok:false,msg:'\u975e\u6b66\u5668'};
+    it.en=Math.max(0,Math.min(99,parseInt(en)||0));
+    it.attr=attr||false;
+    it.bless=bless?'blessed':false;
+    try{ calcStats(); }catch(e){}
+    try{ saveGame(); }catch(e){}
+    return {ok:true};
+};
 window.__adminGrantPoly = function(formName){
     if(typeof player==='undefined' || !player) return false;
     try{

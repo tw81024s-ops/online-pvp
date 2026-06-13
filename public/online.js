@@ -299,18 +299,28 @@
         box.append(search, out);
         if (!_DB || !_DB.items) { out.textContent = '讀取不到物品資料'; return box; }
         const all = Object.entries(_DB.items);
+        const setMap = {}; if (_DB.sets) Object.values(_DB.sets).forEach(st => (st.items || []).forEach(id => setMap[id] = st.n));
+        const isSet = id => !!setMap[id];
+        function statLine(it) {
+            if (it.type === 'wpn') { let x = '傷' + (it.dmgS||0) + '-' + (it.dmgL||0); if (it.hit) x += ' 命中' + it.hit; if (it.spd != null) x += ' 速' + it.spd; if (it.dmgBonus) x += ' 攻+' + it.dmgBonus; if (it.mdmg) x += ' 魔+' + it.mdmg; if (it.eff) x += ' [' + it.eff + ']'; return x; }
+            if (it.type === 'arm' || it.type === 'acc') { let pr = []; if (it.ac) pr.push('AC' + it.ac); ['str','dex','con','int','wis','cha','hp','mp'].forEach(k => { if (it[k]) pr.push(k.toUpperCase() + '+' + it[k]); }); return pr.join(' '); }
+            return '';
+        }
         const CATS = [['wpn', '武器'], ['arm', '防具'], ['acc', '飾品'], ['pot', '藥水'], ['scroll', '卷軸'], ['skillbk', '技能書']];
         const known = CATS.map(c => c[0]);
         function itemRow(id, it) {
             const r = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;padding:3px 8px;background:#1e293b;border-radius:6px;margin-bottom:3px;' });
-            r.append(el('span', { style: 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;' }, `${it.n} <span style="color:#475569">${id}</span>`));
+            const info = el('div', { style: 'flex:1;min-width:0;overflow:hidden;' });
+            info.append(el('div', { style: 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;' }, `${it.n} <span style="color:#475569">${id}</span>`));
+            const _sp = statLine(it); if (_sp) info.append(el('div', { style: 'color:#64748b;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;' }, _sp));
+            r.append(info);
             const qty = el('input', { type: 'number', value: '1', min: '1', style: 'width:54px;flex:none;margin:0 6px 0 0;padding:3px 6px;background:#0f172a;color:#e2e8f0;border:1px solid #334155;border-radius:4px;text-align:center;' });
             const b = el('button', { style: 'background:#15803d;color:#fff;border:none;border-radius:4px;padding:3px 12px;cursor:pointer;white-space:nowrap;flex:none;' }, '給予');
             b.onclick = () => { let n = parseInt(qty.value) || 1; if (n < 1) n = 1; onGive(id, it, n); };
             r.append(qty, b); return r;
         }
         function group(t) {
-            return t === 'misc' ? all.filter(([id, it]) => known.indexOf(it.type) === -1) : all.filter(([id, it]) => it.type === t);
+            return t === 'misc' ? all.filter(([id, it]) => known.indexOf(it.type) === -1 && !isSet(id)) : all.filter(([id, it]) => it.type === t && !isSet(id));
         }
         function renderCats() {
             out.innerHTML = '';
@@ -323,6 +333,27 @@
                 d.addEventListener('toggle', () => { if (d.open && !loaded) { loaded = true; items.forEach(([id, it]) => d.append(itemRow(id, it))); } });
                 out.append(d);
             });
+            if (_DB.sets) {
+                const setEntries = Object.values(_DB.sets);
+                const total = setEntries.reduce((a, x) => a + ((x.items || []).length), 0);
+                if (total) {
+                    const dd = el('details', { style: 'margin-bottom:5px;' });
+                    dd.append(el('summary', { style: 'cursor:pointer;color:#34d399;font-weight:bold;padding:4px 0;' }, `套裝（${setEntries.length} 套・${total} 件）`));
+                    let l2 = false;
+                    dd.addEventListener('toggle', () => {
+                        if (!dd.open || l2) return; l2 = true;
+                        setEntries.forEach(st => {
+                            const sd = el('details', { style: 'margin:3px 0 3px 8px;' });
+                            const bn = ['ac','hp','mp'].filter(k => st[k]).map(k => k.toUpperCase() + '+' + st[k]).join(' ');
+                            sd.append(el('summary', { style: 'cursor:pointer;color:#a7f3d0;padding:3px 0;' }, `${st.n}${bn ? ` <span style="color:#475569">[${bn}]</span>` : ''}`));
+                            let l3 = false;
+                            sd.addEventListener('toggle', () => { if (sd.open && !l3) { l3 = true; (st.items || []).forEach(id => { const it = _DB.items[id]; if (it) sd.append(itemRow(id, it)); }); } });
+                            dd.append(sd);
+                        });
+                    });
+                    out.append(dd);
+                }
+            }
         }
         function renderSearch(q) {
             out.innerHTML = '';
@@ -1075,6 +1106,40 @@
         _secBody.append(buildItemBrowser((id, it, qty) => {
             try { gainItem(id, qty || 1, true, true); refreshGame(); toast('已取得 ' + it.n + ' ×' + (qty || 1)); } catch (e) { toast('失敗：' + e.message, '#7f1d1d'); }
         }));
+        section('🗡️ 武器改造（本機角色：強化 / 四大元素 / 祝福）');
+        {
+            let weps = []; try { weps = (typeof window.__admWeapons === 'function') ? window.__admWeapons() : []; } catch (e) { }
+            if (!weps.length) {
+                _secBody.append(el('div', { style: 'color:#64748b;font-size:13px;' }, '目前角色沒有武器（裝備中或背包）。請先在遊戲中裝備或取得武器再開啟。'));
+            } else {
+                let attrs = []; try { attrs = (typeof window.__admAttrOptions === 'function') ? window.__admAttrOptions() : []; } catch (e) { }
+                const SS = 'width:100%;background:#020617;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:8px;font-size:13px;margin-bottom:8px;box-sizing:border-box;';
+                const wSel = el('select', { style: SS });
+                weps.forEach((w, i) => wSel.append(el('option', { value: String(i) }, w.label)));
+                const enInp = el('input', { type: 'number', value: '0', min: '0', max: '99', style: SS });
+                const aSel = el('select', { style: SS });
+                attrs.forEach(a => aSel.append(el('option', { value: a.v }, a.n)));
+                const blRow = el('label', { style: 'display:flex;align-items:center;gap:8px;color:#e2e8f0;font-size:14px;margin:2px 0 10px;cursor:pointer;' });
+                const blChk = el('input', { type: 'checkbox' });
+                blRow.append(blChk, el('span', {}, '加上祝福（祝福的）'));
+                const fill = () => { const w = weps[parseInt(wSel.value) || 0]; if (!w) return; enInp.value = String(w.en || 0); aSel.value = w.attr || ''; blChk.checked = !!w.bless; };
+                wSel.onchange = fill; fill();
+                const apply = el('button', { style: 'width:100%;background:#b45309;color:#fff;border:none;border-radius:8px;padding:11px;font-weight:bold;cursor:pointer;font-size:14px;' }, '套用改造');
+                apply.onclick = () => {
+                    const w = weps[parseInt(wSel.value) || 0]; if (!w) return;
+                    let r; try { r = window.__admApplyWeapon(w.ref, enInp.value, aSel.value, blChk.checked); } catch (e) { r = { ok: false, msg: e.message }; }
+                    if (r && r.ok) {
+                        toast('武器已改造 ✅', '#14532d');
+                        try { const nw = window.__admWeapons(); weps.length = 0; nw.forEach(x => weps.push(x)); const ci = wSel.value; wSel.innerHTML = ''; weps.forEach((x, i) => wSel.append(el('option', { value: String(i) }, x.label))); wSel.value = ci; fill(); } catch (e) { }
+                    } else { toast('失敗：' + ((r && r.msg) || '未知'), '#7f1d1d'); }
+                };
+                _secBody.append(el('div', { style: 'color:#94a3b8;font-size:12px;margin-bottom:6px;line-height:1.6;' }, '選擇本機角色的武器（裝備中或背包），調整強化等級、四大元素屬性與祝福。改完自動重算數值並雲端同步。'),
+                    wSel,
+                    el('div', { style: 'color:#94a3b8;font-size:12px;margin-bottom:2px;' }, '強化等級 (+N)'), enInp,
+                    el('div', { style: 'color:#94a3b8;font-size:12px;margin-bottom:2px;' }, '四大元素屬性'), aSel,
+                    blRow, apply);
+            }
+        }
         section('👥 玩家管理（檢視 / 編輯其他人）');
         const userList = el('div', { style: 'font-size:13px;margin-bottom:8px;max-height:170px;overflow-y:auto;' });
         api('/api/admin/users').then(j => {
