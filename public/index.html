@@ -39,6 +39,17 @@
         .list-item { padding: 0.75rem; border-bottom: 1px solid #334155; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 1rem; width: 100%;}
         .list-item:hover { background: #334155; }
         .set-active { background: #064e3b !important; border: 1px solid #047857 !important; }
+        .c-legend { color: #d98a04 !important; font-weight: bold; text-shadow: 0 0 4px rgba(217,138,4,0.65), 0 0 10px rgba(180,83,9,0.5); }
+        .legend-glow { animation: legendGlow 2s ease-in-out infinite; }
+        @keyframes legendGlow {
+            0%, 100% { filter: drop-shadow(0 0 4px rgba(217,138,4,0.7)); }
+            50%      { filter: drop-shadow(0 0 9px rgba(217,138,4,1)) drop-shadow(0 0 16px rgba(180,83,9,0.65)); }
+        }
+        .sherine-glow-icon { animation: sherineIcon 2.2s ease-in-out infinite; }
+        @keyframes sherineIcon {
+            0%, 100% { filter: drop-shadow(0 0 4px rgba(74,222,128,0.5)); }
+            50%      { filter: drop-shadow(0 0 8px rgba(74,222,128,0.95)) drop-shadow(0 0 16px rgba(34,197,94,0.5)); }
+        }
         .mob-target { padding: 0.75rem; border: 2px solid #334155; border-radius: 0.5rem; background: #0f172a; cursor: pointer; flex: 1; text-align: center; display: flex; flex-direction: column; justify-content: center; transition: all 0.2s; height: 224px; overflow: hidden;}
         .mob-target.active { border-color: #ef4444; background: #450a0a; }
         .mob-target:hover:not(.active) { background: #1e293b; }
@@ -692,6 +703,23 @@ function isElfOnlySkill(sk) {
 
 const DB = {
         items: {
+"wpn_dragonslayer": { n: "屠龍劍", type: "wpn", w2h: true, dmgS: 18, dmgL: 25, hit: 2, dmgBonus: 9, spd: 0.9, req: "knight", safe: 6, p: 100000, eff: "cleave", dragonStrike: 12, legend: true, gachaWeight: 0, d: "傳說中為屠龍而鍛造的雙手巨劍，劍身中沉眠著龍魂。<br>龍的一擊：發動一般攻擊時，固定機率對場上所有敵人造成無視防禦力的無屬性傷害。" },
+        "wpn_baless": { n: "巴列斯魔杖", type: "wpn", dmgS: 2, dmgL: 3, hit: 0, dmgBonus: 0, mdmg: 2, spd: 1.0, req: "mage", safe: 0, p: 0, mpR: 10, mpROverSafe: 2, legend: true, gachaWeight: 0, d: "重獲魔力的傳說魔杖，蘊含共鳴之力。" },
+        "wpn_powerless_baless": { n: "失去魔力的巴列斯魔杖", type: "wpn", dmgS: 1, dmgL: 1, hit: 0, dmgBonus: 0, spd: 1.0, req: "all", safe: 0, p: 0, noSell: true, gachaWeight: 0, d: "失去了魔力的古老魔杖。攜帶它並使用『靈魂之球』，或許能喚回沉睡的力量……" },
+        "bot_baless": { n: "巴列斯長靴", type: "arm", slot: "boots", ac: 2, str: 1, req: "knight,elf", safe: 6, p: 30000, gachaWeight: 0 },
+        "sherine_crystal": { n: "席琳結晶", type: "etc", p: 0, noUse: true, c: "c-sherine", gachaWeight: 0, d: "蘊含席琳力量的珍貴結晶，無法直接使用。進行「席琳製作」時加入材料，可使成品必定附帶一種席琳套裝效果。（席琳的世界掉落限定）" },
+        "item_crystal_ball": { n: "水晶球", p: 1, c: "text-blue-300", noUse: true, gachaWeight: 0, d: "巫師用以窺探命運的水晶球，似乎與龍之谷深處的傳說有關……（無法使用）" },
+        "item_mastery_proof": { n: "精通之證", p: 0, c: "text-blue-300", noUse: true, noSell: true, gachaWeight: 0, d: "證明你已超越自身極限的徽記。帶回威頓村交給「漢」，開啟職業精通之路。（唯一・無法存入倉庫・無法販售）" },
+        "item_soul_orb": { n: "靈魂之球", type: "misc", p: 0, c: "text-slate-200", eff: "soulorb", gachaWeight: 0, d: "蘊含微弱靈魂之力的水晶球。據說與某把失去魔力的魔杖共鳴時，能喚回沉睡的傳說。" },
+        "item_dragon_claw": { n: "飛龍的爪子", p: 1, c: "text-blue-300", noUse: true, gachaWeight: 0, d: "鋒利如刃的巨爪，似乎與龍之谷深處的傳說有關……（無法使用）" },
+        "item_lizard_horn": { n: "蜥蜴的角", p: 1, c: "text-blue-300", noUse: true, gachaWeight: 0, d: "邪惡蜥蜴額上的尖角，似乎與龍之谷深處的傳說有關……（無法使用）" },
+        "item_orc_amulet": { n: "妖魔戰士護身符", p: 1, c: "text-blue-300", noUse: true, gachaWeight: 0, d: "妖魔戰士隨身佩戴的護身符，似乎與龍之谷深處的傳說有關……（無法使用）" },
+        "mat_fire_breath": { n: "火之氣息", p: 1500, gachaWeight: 0, d: "凝聚自火精靈王的元素氣息。（火精靈王 1% 掉落）" },
+        "mat_water_breath": { n: "水之氣息", p: 1500, gachaWeight: 0, d: "凝聚自水精靈王的元素氣息。（水精靈王 1% 掉落）" },
+        "mat_wind_breath": { n: "風之氣息", p: 1500, gachaWeight: 0, d: "凝聚自風精靈王的元素氣息。（風精靈王 1% 掉落）" },
+        "mat_earth_breath": { n: "土之氣息", p: 1500, gachaWeight: 0, d: "凝聚自地精靈王的元素氣息。（地精靈王 1% 掉落）" },
+        "mat_griffon_feather": { n: "格利芬羽毛", p: 1000, gachaWeight: 0, d: "格利芬身上輕盈而堅韌的羽毛。（格利芬 1% 掉落）" },
+        "mat_unicorn_horn": { n: "神聖獨角獸之角", p: 5000, gachaWeight: 0, d: "獨角獸頭上的神聖之角，蘊含純淨之力。製作熾炎天使弓的核心材料。（獨角獸 0.1% 掉落）" },
         // ===== 三職業技能書 =====
         "bk_kn_berserk": { type: "skillbk", n: "騎士技能書(狂戰士)", p: 30000, sk: "sk_kn_berserk", gachaWeight: 20 },
         "bk_kn_rage": { type: "skillbk", n: "騎士技能書(怒氣)", p: 20000, sk: "sk_kn_rage", gachaWeight: 20 },
@@ -1749,6 +1777,16 @@ const DB = {
 	
 	    // 👇 完整的城鎮系統資料庫
     towns: {
+        "town_windwood_castle": {
+            n: "風木城",
+            npcs: [
+                { id: "npc_landish", n: "藍迪西", title: "雜貨商人", type: "shop", d: "攻下風木城後開放的雜貨商。" },
+                { id: "npc_wh_windwood", n: "寶金", title: "倉庫", type: "warehouse", d: "存放物品與金幣，三個存檔角色共用。" },
+                { id: "npc_esti", n: "依詩蒂", title: "血盟", type: "pledge", d: "尋找以血為盟的夥伴。" },
+                { id: "npc_tros", n: "特羅斯", title: "血盟", type: "pledge", d: "尋找以血為盟的夥伴。" },
+                { id: "npc_hert", n: "赫特", title: "魔物追蹤", type: "exchange", d: "消耗王族搜索狀，追蹤指定地區的特定魔物。" }
+            ]
+        },
         "town_silver_knight": {
             n: "銀騎士村",
             npcs: [
@@ -4300,6 +4338,26 @@ function procMagicStrike(t) {
     }
 }
 // 魔擊 proc 判定：裝備力量魔法杖時，每次攻擊(命中與否) 力量/60 機率；主目標已死則轉移到場上隨機存活怪
+function dragonStrikeProc() {
+    let wpn = player.eq.wpn ? DB.items[player.eq.wpn.id] : null;
+    if (!wpn || !wpn.dragonStrike) return;
+    if (Math.random() * 100 >= wpn.dragonStrike) return;
+    let targets = mapState.mobs.filter(m => m && m.curHp > 0 && !m._dead);
+    if (!targets.length) return;
+    logCombat(`<span class="font-bold" style="color:#fca5a5;text-shadow:0 0 6px #dc2626;">【龍的一擊】</span>劍中的龍魂哆哮，衡擊貫穿了所有敵人！`, 'player-crit');
+    targets.forEach(m => {
+        if (!m || m.curHp <= 0 || m._dead) return;
+        let dmg = roll(1, Math.max(1, Math.floor(player.d.str || 1))) + 25;
+        dmg = Math.max(1, Math.floor(dmg * fragileMult(m)));
+        m.curHp -= dmg;
+        m.justHit = true;
+        mobWake(m);
+        logCombat(`龍之衡擊命中 <span class="${getMobColor(m.lv)}">${m.n}</span>，造成 ${dmg} 點固定傷害。`, 'player');
+        if (m.curHp <= 0) { let ri = mapState.mobs.findIndex(x => x && x.uid === m.uid); if (ri !== -1) killMob(ri); }
+    });
+    renderMobs();
+}
+
 function magicStrikeProc(target) {
     let wpn = player.eq.wpn ? DB.items[player.eq.wpn.id] : null;
     if (!wpn || wpn.eff !== 'magicstrike') return;
@@ -4442,7 +4500,7 @@ function playerAttack() {
     if (!_sureHit && _ter && roll(1, 100) <= _ter) {
         logCombat(`<span class="${getMobColor(target.lv)}">${target.n}</span> 成功迴避攻擊。`, 'evade');
         wandLightArrowProc(target);
-        magicStrikeProc(target);
+        magicStrikeProc(target); dragonStrikeProc();
         return;
     }
 
@@ -4595,7 +4653,7 @@ function playerAttack() {
     wandLightArrowProc(target);
 
     // 魔擊：一般攻擊(命中或未命中皆然)依機率追加一次必定命中重擊
-    magicStrikeProc(target);
+    magicStrikeProc(target); dragonStrikeProc();
 }
 
 function enemyPhysicalAttack(mob, idx, stunChance = 0) {
@@ -6597,6 +6655,7 @@ function getItemColor(item) {
     let d = DB.items[item.id];
     // 🔮 席琳套裝效果：鮮綠＋呼吸綠光，優先於所有詞綴顏色
     if (item.seteff) return 'c-sherine';
+    if (d && d.legend) return 'c-legend';
     // 名字顏色 = 套裝 > 祝福(金) > 遠古(紫) > 基底色
     // 🔧 屬性詞綴不再影響裝備名稱顏色（詞綴字本身「火之/爆炎…」仍保留專屬色，見 getItemFullName）
     if (item.bless) return blessColorClass(item.bless);
