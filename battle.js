@@ -116,6 +116,8 @@ function simulate(profileA, profileB, opts) {
     for (let t = 1; t <= MAXTICKS; t++) {
         for (let [me, foe, side] of [[A, B, 'A'], [B, A, 'B']]) {
             if (me.hp <= 0 || foe.hp <= 0) continue;
+            // 暈眩中：本回合無法行動（冷卻照樣遞減）
+            if (me.stunT > 0) { me.stunT--; me.atkCd--; me.atkSkCd--; me.healCd--; continue; }
 
             // 回復（每 4 秒一跳，沿用遊戲自然回復節奏的簡化）
             if (t % 40 === 0) {
@@ -152,6 +154,11 @@ function simulate(profileA, profileB, opts) {
                     let detail = hits > 1 ? `[${parts.join(', ')}] 共 ${total}` : `${total}`;
                     push(t, side, anyCrit ? 'crit' : 'attack',
                         `${me.name} 施放 ${me.p.spell.name}，對 ${foe.name} 造成 ${detail} 點物理傷害。`, total);
+                    // 衝擊之暈等物理技能：命中後使對手暈眩（stun 單位約 10ms，/10 換算 tick；150→15tick=1.5秒）
+                    if (me.p.spell.stun && total > 0 && foe.hp > 0) {
+                        foe.stunT = Math.max(foe.stunT, Math.round(me.p.spell.stun / 10));
+                        push(t, side, 'attack', `${foe.name} 被 ${me.name} 的衝擊暈眩了！（${(Math.round(me.p.spell.stun / 10) / 10).toFixed(1)} 秒）`, 0);
+                    }
                 } else {
                     let r = magicAttack(me.p, foe.p, me.p.spell);
                     let mdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * PVP_MAGIC));
@@ -200,7 +207,7 @@ function initSide(p) {
     let spdMult = p.spdMult || 1;
     return {
         p, name: sanitize(p.name || '無名氏'),
-        hp: p.mhp, mhp: p.mhp, mp: p.mmp, mmp: p.mmp,
+        hp: p.mhp, mhp: p.mhp, mp: p.mmp, mmp: p.mmp, stunT: 0,
         atkInterval: Math.max(1, Math.round(wSpd * 10 * spdMult)),
         castInterval: Math.max(1, Math.round(20 * spdMult)),
         atkCd: randInt(0, 5), atkSkCd: randInt(0, 5), healCd: 0

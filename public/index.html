@@ -5113,6 +5113,9 @@ setInterval(() => { try { renderAuditTab(); } catch(e) {} }, 2000);   // 開著�
 // tick 內的擊殺由 gameLoop 在 tick 結束後統一清算；手動操作（點技能/道具）觸發的擊殺立即清算。
 // 好處：怪物迭代過程中陣列不再位移，徹底杜絕「怪物被跳過回合 / 索引指到錯的怪」這類隱性錯誤。
 function isTowerMap(m){ return typeof m==="string" && m.indexOf("tower_")===0; }
+// 新地圖獎勵倍率（拉高 CP 讓玩家不只擠傲慢塔）：經驗與金幣同乘。塔的 ×2 另計、不重疊。
+var MAP_REWARD_MULT = { jp_field:5, aden:2, rasta:3, rasta_1:3, rasta_2:3, rasta_3:3, rasta_4:3, demon_realm:4, demon_temple:4 };
+function mapRewardMult(m){ return MAP_REWARD_MULT[m] || 1; }
 function killMob(idx) {
     let mob = mapState.mobs[idx];
     if (!mob || mob._dead) return;        // 冪等保護：同一隻怪只結算一次獎勵
@@ -5121,7 +5124,7 @@ function killMob(idx) {
     _sherineLootCtx = mob._sherine ? { boss: !!mob.boss, grace: !!mob._grace } : null;   // 🔮 席琳的世界：本次擊殺掉落套用 詞綴×3／套裝效果判定（恩賜怪套裝機率×5）
     if(typeof auditTrackKill === 'function') auditTrackKill(mob);   // 統計：累計經驗/擊殺
     logCombat(`擊敗了 <span class="${getMobColor(mob.lv)}">${mob.n}</span>！`, 'player-heavy');  // 👈 新增
-    player.exp += Math.floor(mob.exp * getExpGainMult(player.lv) * (isTowerMap(mapState.current)?2:1));
+    player.exp += Math.floor(mob.exp * getExpGainMult(player.lv) * (isTowerMap(mapState.current)?2:1) * mapRewardMult(mapState.current));
     checkLvUp();
     // 精神(WIS)：擊殺敵人時立即額外恢復 MP
     { let mpKill = getWisMpOnKill(player.d.wis); if (mpKill > 0 && player.mp < player.mmp) player.mp = Math.min(player.mmp, player.mp + mpKill); }
@@ -5130,7 +5133,7 @@ function killMob(idx) {
         let gMin = mob.goldMin || (mob.lv * 5);
         let gMax = mob.goldMax || (mob.lv * 10);
         let g = gMin + Math.floor(Math.random() * (gMax - gMin + 1));
-        player.gold += Math.round(g * (isTowerMap(mapState.current)?2:1) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.goldDropMult)||1));
+        player.gold += Math.round(g * (isTowerMap(mapState.current)?2:1) * mapRewardMult(mapState.current) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.goldDropMult)||1));
         if (window.__GAME_CONFIG && window.__GAME_CONFIG.eventZongzi && Math.random() < 0.5) gainItem(Math.random() < 0.5 ? 'zongzi_south' : 'zongzi_north', 1, true);   // 端午活動：每隻怪 50% 掉 1 顆粽子
         logSys(`獲得 <span class="text-yellow-400 font-bold">${g} 金幣</span>。`);
     }
