@@ -280,17 +280,18 @@
   #game-screen .panel.collapsed{ display:none !important; }
   .panel-toggle{ cursor:pointer; padding:4px 12px; margin-left:8px; font-size:18px; line-height:1;
     color:#e2e8f0; user-select:none; border-radius:8px; background:rgba(148,163,184,.15); float:right; }
-  #dock-left,#dock-right{ position:fixed; top:120px; z-index:60; display:flex; flex-direction:column;
-    gap:10px; max-height:70vh; overflow-y:auto; pointer-events:none; }
+  #dock-left,#dock-right{ position:fixed; top:88px; z-index:60; display:flex; flex-direction:column;
+    gap:10px; max-height:78vh; overflow-y:auto; pointer-events:none; }
   #dock-left{ left:0; align-items:flex-start; } #dock-right{ right:0; align-items:flex-end; }
-  .dock-chip{ pointer-events:auto; display:flex; align-items:center; gap:6px;
-    background:linear-gradient(90deg,#b45309,#d97706); color:#fff;
-    border:2px solid #fbbf24; padding:12px 14px; font-weight:900; font-size:16px;
-    cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,.55); user-select:none;
-    animation:dockPulse 1.6s ease-in-out infinite; }
-  @keyframes dockPulse{ 0%,100%{box-shadow:0 4px 16px rgba(0,0,0,.55);} 50%{box-shadow:0 0 18px 3px rgba(251,191,36,.55);} }
-  #dock-left .dock-chip{ border-left:none; border-radius:0 16px 16px 0; }
-  #dock-right .dock-chip{ border-right:none; border-radius:16px 0 0 16px; }
+  .dock-chip{ pointer-events:auto; writing-mode:vertical-rl; text-orientation:upright;
+    background:linear-gradient(180deg,#d97706,#b45309); color:#fff; border:2px solid #fbbf24;
+    padding:12px 7px; font-weight:900; font-size:15px; letter-spacing:2px; cursor:pointer;
+    box-shadow:0 4px 16px rgba(0,0,0,.5); user-select:none; }
+  #dock-left .dock-chip{ border-left:none; border-radius:0 14px 14px 0; }
+  #dock-right .dock-chip{ border-right:none; border-radius:14px 0 0 14px; }
+  /* 有收合的框時，主畫面讓出左右溝槽，側邊標籤不蓋到按鈕 */
+  body.dockL #game-screen{ padding-left:42px !important; }
+  body.dockR #game-screen{ padding-right:42px !important; }
 
   /* 3) 分頁內容不要各自開小捲軸 → 隨整頁捲動，少一層卡頓 */
   [id^="tab-"]{ height:auto !important; max-height:none !important; overflow:visible !important; }
@@ -8135,13 +8136,20 @@ function _collapsePanelToSide(panel){
     panel.classList.add('collapsed');
     var chip=document.createElement('div');
     chip.className='dock-chip';
-    chip.textContent=(side==='dock-left'?'▸ ':'◂ ')+_panelLabel(panel);
+    chip.textContent=(side==='dock-left'?'▸':'◂')+_panelLabel(panel);
     chip.addEventListener('click', function(){
         panel.classList.remove('collapsed');
         chip.remove();
+        _updateDockGutters();
         try{ panel.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){}
     });
     dock.appendChild(chip);
+    _updateDockGutters();
+}
+function _updateDockGutters(){
+    var dl=document.getElementById('dock-left'), dr=document.getElementById('dock-right');
+    document.body.classList.toggle('dockL', !!(dl && dl.children.length));
+    document.body.classList.toggle('dockR', !!(dr && dr.children.length));
 }
 function setupPanelCollapse(){
     if(window.innerWidth>1024) return;
