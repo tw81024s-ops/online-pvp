@@ -283,10 +283,10 @@
   #dock-left,#dock-right{ position:fixed; top:84px; z-index:60; display:flex; flex-direction:column;
     gap:8px; max-height:72vh; overflow-y:auto; pointer-events:none; }
   #dock-left{ left:0; } #dock-right{ right:0; }
-  .dock-chip{ pointer-events:auto; background:linear-gradient(180deg,#26324c,#1a2336);
-    border:1px solid #4a5d84; color:#eaf1ff; padding:12px 7px; font-weight:800; font-size:13px;
-    letter-spacing:2px; cursor:pointer; writing-mode:vertical-rl; text-orientation:upright;
-    box-shadow:0 3px 12px rgba(0,0,0,.45); user-select:none; }
+  .dock-chip{ pointer-events:auto; background:linear-gradient(180deg,#2b3a59,#1c2740);
+    border:1px solid #5a6e98; color:#eef4ff; padding:14px 9px; font-weight:800; font-size:15px;
+    letter-spacing:3px; cursor:pointer; writing-mode:vertical-rl; text-orientation:upright;
+    box-shadow:0 3px 14px rgba(0,0,0,.5); user-select:none; min-height:64px; text-align:center; }
   #dock-left .dock-chip{ border-left:none; border-radius:0 12px 12px 0; }
   #dock-right .dock-chip{ border-right:none; border-radius:12px 0 0 12px; }
 
@@ -8118,8 +8118,12 @@ function _ensureDocks(){
 }
 function _panelLabel(panel){
     var h=panel.querySelector('.panel-header');
-    var txt=(h?h.textContent:panel.textContent)||'';
-    var m=txt.match(/[\u4e00-\u9fff]{2,5}/);
+    var txt=((h?h.textContent:'')||panel.textContent||'');
+    if(/冒險地圖|地圖/.test(txt)) return '地圖';
+    if(/自動/.test(txt)) return '自動';
+    if(/能力|裝備|技能|背包|道具/.test(txt)) return '背包';
+    if(/戰鬥|紀錄|日誌/.test(txt)) return '紀錄';
+    var m=txt.match(/[\u4e00-\u9fff]{2,4}/);
     return m?m[0]:'視窗';
 }
 function _collapsePanelToSide(panel){
@@ -8146,6 +8150,7 @@ function setupPanelCollapse(){
         var h=heads[i];
         if(h.querySelector('.panel-toggle')) continue;
         var panel=h.parentElement;
+        if(panel.id==='status-panel') continue;   // 角色狀態（含等級＋圖）固定置中、不收合
         panel.setAttribute('data-dock', (idx%2===0)?'dock-right':'dock-left'); idx++;
         var t=document.createElement('span');
         t.className='panel-toggle';
