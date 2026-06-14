@@ -4761,6 +4761,12 @@ function getPhysicalDmg(diceStr, target, wpn, arrowData, forceHeavy, forceHit, f
     if (graze) _outDmg = Math.max(1, Math.floor(_outDmg * 0.5));   // 擦傷：最終傷害剩 50%
     _outDmg = Math.max(1, Math.floor(_outDmg * fragileMult(target)));   // 🔮 脆弱（白鳥5）：受所有來源傷害 +20%
     _outDmg = Math.max(1, Math.floor(_outDmg * (isRanged ? ((window.__GAME_CONFIG&&window.__GAME_CONFIG.rangedDmgMult)||1) : ((window.__GAME_CONFIG&&window.__GAME_CONFIG.meleeDmgMult)||1))));   // 職業平衡：近戰/遠程上修倍率
+    // 職業平衡：物理乘法成分（鏡像法師 spCoef，用 dmgBonus 當對應魔傷；只對非法師物理職）
+    if (player.cls !== 'mage') {
+        var _physCoef = 1 + 3 * dmgBonus / 16;          // 對應法師 (1+3×魔傷/16)
+        var _physClassMult = (player.cls === 'knight') ? 2.0 : 2.0;   // 物理職類倍率（法師一般2.5/高階4，物理略低；可調）
+        _outDmg = Math.max(1, Math.floor(_outDmg * _physCoef * _physClassMult));
+    }
     return { dmg: _outDmg, hit: true, heavy: heavy, crit: isCrit, graze: graze, crush: crush, ranged: isRanged };
 }
 
@@ -10012,7 +10018,12 @@ function _twFloorMobs(f) {
     var pool = _twBuildPool();
     var prog = TOWER_CAP > 1 ? (f - 1) / (TOWER_CAP - 1) : 0;   // 0..1 進度
     var diff = (window.__GAME_CONFIG && window.__GAME_CONFIG.towerDiff) || 1.5;   // 管理員可調的全服爬塔難度
-    var mult = (1 + (f - 1) * 0.3) * diff;                      // 強度隨層成長 × 全服難度（由弱到強）
+    var mult = (1 + (f - 1) * 0.3) * diff;                      // 強度隨層成長 × 全服難度（傷害/命中/AC/MR 仍用此）
+    // 血量平滑曲線（脫鉤各怪基礎血鋸齒）：1~50 緩升、50 後指數暴衝
+    var _g = (f <= 50) ? (1 + (f - 1) * 0.3) : (1 + 49 * 0.3) * Math.pow(1.12, f - 50);
+    var _diffScale = diff / 1.5;                                // 預設1.5=×1，保留admin難度旋鈕
+    var bossHp = Math.max(1, Math.floor(6000 * _g * _diffScale));   // 單王基準6000×成長
+    var normHp = Math.max(1, Math.floor(1500 * _g * _diffScale));   // 單小怪基準1500×成長
     var isBossFloor = (f % 2 === 0);                            // 偶數層 = 小王
     var out = [];
     if (isBossFloor) {
@@ -10020,13 +10031,13 @@ function _twFloorMobs(f) {
         var bIdx = Math.min(bArr.length - 1, Math.floor(prog * (bArr.length - 1)));
         if (bIdx < 0) bIdx = 0;
         var bid = bArr[bIdx].id;
-        for (var i = 0; i < 2; i++) out.push({ id: bid, mult: mult * 2, boss: true });   // 2 隻相同小王、強度翻倍、頭目自帶機制
+        for (var i = 0; i < 2; i++) out.push({ id: bid, mult: mult * 2, boss: true, hpOverride: bossHp });   // 2 隻相同小王、強度翻倍、血量走平滑曲線
     } else {
         var nIdx = Math.min(pool.normals.length - 1, Math.floor(prog * (pool.normals.length - 1)));
         if (nIdx < 0) nIdx = 0;
         var nid = pool.normals[nIdx].id;
         var cnt = Math.max(5, Math.min(10, 5 + Math.floor(f / 25)));   // 至少 5 隻相同小怪
-        for (var k = 0; k < cnt; k++) out.push({ id: nid, mult: mult, boss: false });
+        for (var k = 0; k < cnt; k++) out.push({ id: nid, mult: mult, boss: false, hpOverride: normHp });
     }
     return out;
 }
@@ -10036,11 +10047,12 @@ function _twMakeMob(spec) {
     if (!base) return null;
     var m = Object.assign({}, base, { curHp: base.hp, uid: uid(), _magCd: {}, justHit: false, st: newMobStatus(), _towerMob: true });
     var mu = spec.mult || 1;
-    m.hp = Math.max(1, Math.floor((base.hp || 1) * mu)); m.curHp = m.hp;
+    m.hp = spec.hpOverride ? Math.max(1, Math.floor(spec.hpOverride)) : Math.max(1, Math.floor((base.hp || 1) * mu)); m.curHp = m.hp;   // 爬塔血量走平滑曲線
     m.ac = Math.floor((base.ac || 0) * (1 + (mu - 1) * 0.5));
     m.mr = Math.floor((base.mr || 0) * (1 + (mu - 1) * 0.5));
-    m.hit = Math.floor((base.hit || 0) * mu);
-    if (Array.isArray(base.dmg)) m.dmg = [Math.floor(base.dmg[0] * mu), Math.floor(base.dmg[1] * mu)];
+    var dmu = 1 + (mu - 1) * 0.5;   // 爬塔怪傷害/命中用半倍率（血量仍滿倍率；嫌太強把 0.5 調小、太弱調大）
+    m.hit = Math.floor((base.hit || 0) * dmu);
+    if (Array.isArray(base.dmg)) m.dmg = [Math.floor(base.dmg[0] * dmu), Math.floor(base.dmg[1] * dmu)];
     m.exp = 0; m.goldMin = 0; m.goldMax = 0;     // 個別擊殺不給獎勵，獎勵只走過層結算
     m.boss = !!spec.boss;
     return m;
