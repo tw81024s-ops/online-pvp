@@ -192,6 +192,26 @@
             return r;
         };
     }
+    // 切到背景 / 關閉分頁時：立刻把最新進度上傳雲端（keepalive，避免手機切 App 來不及同步）
+    function installFlushOnHide() {
+        if (window.__cloudFlushHooked) return; window.__cloudFlushHooked = true;
+        var flush = function () {
+            if (!token) return;
+            try { if (typeof window.saveGame === 'function') window.saveGame(); } catch (e) { }   // 先寫入最新 localStorage
+            try {
+                var raw = localStorage.getItem(slotKey());
+                if (!raw) return;
+                fetch('/api/save?slot=' + activeSlot(), {
+                    method: 'PUT',
+                    headers: Object.assign({ 'Content-Type': 'application/json' }, token ? { 'x-token': token } : {}),
+                    body: JSON.stringify({ data: JSON.parse(raw) }),
+                    keepalive: true
+                });
+            } catch (e) { }
+        };
+        window.addEventListener('pagehide', flush);
+        document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flush(); });
+    }
     // 對接遊戲原生欄位系統：用遊戲全域 currentSlot（1~3）與 lineage_idle_save_<slot>
     function activeSlot() { try { if (typeof window.__currentSlot === 'function') return window.__currentSlot() || 1; return (typeof currentSlot !== 'undefined' && currentSlot) ? currentSlot : 1; } catch (e) { return 1; } }
     function slotKey() { return 'lineage_idle_save_' + activeSlot(); }
@@ -420,6 +440,7 @@
         btnLoginFab.textContent = '🚪 登出';
         refreshAdminBtn();
         hookSave();
+        installFlushOnHide();
         connectWS();
         try {
             const cloud = await fetchCloud();

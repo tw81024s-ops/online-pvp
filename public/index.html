@@ -2516,7 +2516,7 @@ function startGameTimers() {
     if (_saveLoopId !== null) clearInterval(_saveLoopId);
     _loopLast = null; _tickDebt = 0;
     _gameLoopId = setInterval(gameLoop, 100);
-    _saveLoopId = setInterval(saveGame, 300000); // 每 5 分鐘自動存檔
+    _saveLoopId = setInterval(function () { try { (window.saveGame || saveGame)(); } catch (e) { } }, 300000); // 每 5 分鐘自動存檔（呼叫 window.saveGame 以觸發雲端上傳）
 }
 
 // 補跑（掛機/背景）所得累積：補跑期間 logSys 被靜音，先把所得累積起來，
