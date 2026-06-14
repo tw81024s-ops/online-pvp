@@ -447,50 +447,41 @@
                 try { const o = JSON.parse(raw); if (o && typeof o.t === 'number') return o.t; } catch (e) { }
                 return serverTs ? new Date(serverTs).getTime() : 0;
             };
-            // 抓雲端各欄位(1~4)＋更新時間；只補「本機為空」的欄位（不覆蓋本機既有進度）
-            const cloudSlots = {}, cloudTs = {};
-            for (let sN = 1; sN <= 4; sN++) {
-                try {
-                    const jj = await api('/api/save?slot=' + sN);
-                    if (jj && jj.data) {
-                        const d = typeof jj.data === 'string' ? jj.data : JSON.stringify(jj.data);
-                        cloudSlots[sN] = d; cloudTs[sN] = jj.updatedAt || null;
-                        const k = 'lineage_idle_save_' + sN;
-                        if (!localStorage.getItem(k)) localStorage.setItem(k, d);
-                    }
-                } catch (e) { }
-            }
             const cur = activeSlot();
             const curKey = 'lineage_idle_save_' + cur;
-            const localRaw = localStorage.getItem(curKey);
-            const cloudRaw = cloudSlots[cur];
-            if (cloudRaw && localRaw) {
-                // 兩邊都有 → 比時間戳，較新的自動勝出（不用手動確認）
-                const ct = _saveT(cloudRaw, cloudTs[cur]), lt = _saveT(localRaw, 0);
-                if (ct > lt) {
-                    localStorage.setItem(curKey, cloudRaw);
-                    if (typeof loadGame === 'function') loadGame();
-                    toast('雲端存檔較新，已自動載入 ☁️', '#14532d');
-                } else if (lt > ct) {
-                    await uploadSave();
-                    setStatus('☁️ 本機較新，已上傳');
+            let curChanged = false;
+            // 全欄位(1~4)雙向同步：較新的一方覆蓋另一方；只有一邊有就補到另一邊（解決「非目前欄位的角色沒上傳/沒下載」）
+            for (let sN = 1; sN <= 4; sN++) {
+                const k = 'lineage_idle_save_' + sN;
+                const localStr = localStorage.getItem(k);
+                let cloudStr = null, cTs = null;
+                try {
+                    const jj = await api('/api/save?slot=' + sN);
+                    if (jj && jj.data) { cloudStr = typeof jj.data === 'string' ? jj.data : JSON.stringify(jj.data); cTs = jj.updatedAt || null; }
+                } catch (e) { }
+                if (cloudStr && localStr) {
+                    const ct = _saveT(cloudStr, cTs), lt = _saveT(localStr, 0);
+                    if (ct > lt) { localStorage.setItem(k, cloudStr); if (sN === cur) curChanged = true; }
+                    else if (lt > ct) { try { await api('/api/save?slot=' + sN, 'PUT', { data: JSON.parse(localStr) }); } catch (e) { } }
+                } else if (cloudStr) {
+                    localStorage.setItem(k, cloudStr); if (sN === cur) curChanged = true;
+                } else if (localStr) {
+                    try { await api('/api/save?slot=' + sN, 'PUT', { data: JSON.parse(localStr) }); } catch (e) { }
                 }
-                // 相等：不動
-            } else if (cloudRaw) {
-                localStorage.setItem(curKey, cloudRaw);
-                if (typeof loadGame === 'function') loadGame();
-                toast('已載入雲端存檔 ☁️', '#14532d');
-            } else if (localRaw) {
-                await uploadSave();
+            }
+            // 目前欄位被雲端更新/補上 → 重載以反映最新；目前欄位空但別處有角色 → 自動切過去
+            if (localStorage.getItem(curKey)) {
+                if (curChanged && typeof loadGame === 'function') loadGame();
             } else {
-                // 目前欄位空 → 雲端其他欄位若有角色，自動切過去載入
-                const other = [1, 2, 3, 4].find(x => cloudSlots[x]);
+                const other = [1, 2, 3, 4].find(x => localStorage.getItem('lineage_idle_save_' + x));
                 if (other) {
                     if (typeof window.__cloudSwitchSlot === 'function') window.__cloudSwitchSlot(other, true);
                     else { try { window.currentSlot = other; } catch (e) { } if (typeof loadGame === 'function') loadGame(); }
-                    toast('已從雲端載入你的角色（角色' + other + '）☁️', '#14532d');
                 }
             }
+            // 若「選擇存檔位」畫面正開著，重新整理清單讓新同步的欄位顯示
+            try { if (typeof window.__refreshSlotScreen === 'function') window.__refreshSlotScreen(); } catch (e) { }
+            setStatus('☁️ 已同步');
         } catch (e) { toast('雲端存檔同步失敗：' + e.message, '#7f1d1d'); }
         try { await pullMergePolyDex(); } catch (e) { }
         maybeOfflineToast();

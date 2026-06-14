@@ -10893,6 +10893,12 @@ function openSlotSelect(mode){
         list.innerHTML += `<button onclick="chooseSlot(${n})" ${disabled ? 'disabled' : ''} class="btn w-full py-4 text-lg font-bold ${disabled ? 'opacity-40' : ''}">${label}</button>`;
     }
 }
+window.__refreshSlotScreen = function () {
+    try {
+        var panel = document.getElementById('slot-select-panel');
+        if (panel && !panel.classList.contains('hidden')) openSlotSelect(typeof _slotMode !== 'undefined' ? (_slotMode || 'load') : 'load');
+    } catch (e) { }
+};
 function chooseSlot(n){
     if(_slotMode === 'load'){ currentSlot = n; loadGame(); return; }
     let sum = slotSummary(n);
