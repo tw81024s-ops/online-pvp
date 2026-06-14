@@ -6480,7 +6480,7 @@ function autoActions() {
     // 瞬間移動卷軸：戰鬥中出現 BOSS 時自動使用（自動使用必定為未裝備傳送控制戒指的傳送術效果）
     {
         let tChk = document.getElementById('set-teleport');
-        if (tChk && tChk.checked && mapState.mobs.some(m => m && m.boss) && !isSiegeArea(mapState.current) && !PURE_BOSS_MAPS.includes(mapState.current)) {   // 攻城區與純BOSS房(安塔瑞斯/法利昂/巴拉卡斯)：BOSS為目標，不自動瞬移
+        if (tChk && tChk.checked && !(player.tower && player.tower.active) && mapState.mobs.some(m => m && m.boss) && !isSiegeArea(mapState.current) && !PURE_BOSS_MAPS.includes(mapState.current)) {   // 攻城區與純BOSS房(安塔瑞斯/法利昂/巴拉卡斯)：BOSS為目標，不自動瞬移
             let item = player.inv.find(i => i.id === 'scroll_teleport');
             if (!item) {
                 let buyChk = document.getElementById('set-auto-buy-teleport');
@@ -9491,8 +9491,12 @@ function _twStartFloor(f) {
 
 // 每 tick：補位 / 計時 / 過層 / 死亡結束
 function towerTick() {
+    try { _towerTickInner(); } catch (e) { try { console.error('towerTick', e); } catch (_) {} }
+}
+function _towerTickInner() {
     var t = player.tower;
     if (!t || !t.active) return;
+    if (mapState.current !== TOWER_MAP) { towerEnd('lose'); return; }   // 地圖被外力換掉（如瞬移）：結束避免卡住
     if (player.dead) { towerEnd('lose'); return; }
     for (var i = 0; i < 3; i++) {
         var m = mapState.mobs[i];
@@ -9558,7 +9562,7 @@ function _twOverlay() {
     o.id = 'tower-overlay';
     o.style.cssText = 'position:fixed;inset:0;z-index:9000;display:none;background:#0b0b12 url(assets/ui/tower_bg.jpg) center/cover no-repeat;';
     var shade = document.createElement('div');
-    shade.style.cssText = 'position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,14,.55),rgba(8,8,14,.82));';
+    shade.style.cssText = 'position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,14,.32),rgba(8,8,14,.70));';
     o.appendChild(shade);
     var box = document.createElement('div');
     box.id = 'tower-box';
@@ -9588,7 +9592,7 @@ function _twShowPanel(result, reached) {
     if (result) {
         var msg = result === 'win' ? '🏆 登頂成功！通關 100 層！' :
                   result === 'retreat' ? '已撤退，本次到達 第 ' + reached + ' 層' :
-                  '⛓️ 守護失敗，到達 第 ' + reached + ' 層';
+                  '⛓️ 守護失敗，到達 第 ' + reached + ' 層' + (player.dead ? '（角色已陣亡，關閉後請復活）' : '');
         banner = '<div style="background:rgba(16,16,24,.7);border:1px solid #4b5563;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:15px;color:#fbbf24;">' + msg + '</div>';
     }
     box.innerHTML =
@@ -9624,7 +9628,14 @@ function _twShowRun() {
         '<div style="font-size:14px;color:#fca5a5;letter-spacing:3px;">守護 TD・限時殲滅</div>' +
         '<div style="font-size:46px;font-weight:800;color:#f3f4f6;text-shadow:0 2px 10px #000;margin:2px 0;">第 <span id="tw-floor">1</span> 層</div>' +
         '<div id="tw-timer" style="font-size:30px;font-weight:800;color:#fbbf24;margin-bottom:4px;">60.0</div>' +
-        '<div id="tw-progress" style="font-size:14px;color:#cbd5e1;margin-bottom:10px;">剩餘 0 / 0</div>' +
+        '<div id="tw-progress" style="font-size:14px;color:#cbd5e1;margin-bottom:8px;">剩餘 0 / 0</div>' +
+        '<div style="width:100%;max-width:420px;background:rgba(10,10,16,.78);border:1px solid #475569;border-radius:9px;padding:8px 11px;margin-bottom:12px;">' +
+            '<div style="display:flex;justify-content:space-between;font-size:13px;color:#e5e7eb;margin-bottom:3px;"><span id="tw-pname">我</span><span id="tw-php-txt"></span></div>' +
+            '<div style="height:11px;background:#1f2937;border-radius:6px;overflow:hidden;"><div id="tw-php" style="height:100%;width:100%;background:#22c55e;"></div></div>' +
+            '<div style="display:flex;justify-content:space-between;font-size:11px;color:#93c5fd;margin:5px 0 2px;"><span>MP</span><span id="tw-pmp-txt"></span></div>' +
+            '<div style="height:7px;background:#1f2937;border-radius:4px;overflow:hidden;"><div id="tw-pmp" style="height:100%;width:100%;background:#3b82f6;"></div></div>' +
+        '</div>' +
+        '<div style="font-size:11px;color:#9ca3af;margin-bottom:6px;">敵方</div>' +
         '<div id="tw-mobs" style="width:100%;max-width:420px;display:flex;flex-direction:column;gap:7px;margin-bottom:14px;"></div>' +
         '<button onclick="towerRetreat()" style="width:170px;padding:9px;border:1px solid #ef4444;border-radius:8px;background:rgba(127,29,29,.6);color:#fecaca;cursor:pointer;">撤退（保留紀錄）</button>';
     _twUpdateRun();
@@ -9639,6 +9650,14 @@ function _twUpdateRun() {
         tEl.textContent = rem.toFixed(1);
         tEl.style.color = rem <= 10 ? '#ef4444' : '#fbbf24';
     }
+    // 角色自己的 HP / MP（讓畫面有實戰感，也能看到喝水/補盾生效）
+    var hpEl = document.getElementById('tw-php'), hpTx = document.getElementById('tw-php-txt');
+    if (hpEl) { var hpc = player.mhp ? Math.max(0, Math.min(100, Math.round(player.hp / player.mhp * 100))) : 0; hpEl.style.width = hpc + '%'; hpEl.style.background = hpc <= 25 ? '#ef4444' : (hpc <= 50 ? '#f59e0b' : '#22c55e'); }
+    if (hpTx) hpTx.textContent = 'HP ' + Math.max(0, Math.floor(player.hp)) + ' / ' + player.mhp;
+    var mpEl = document.getElementById('tw-pmp'), mpTx = document.getElementById('tw-pmp-txt');
+    if (mpEl) { var mpc = player.mmp ? Math.max(0, Math.min(100, Math.round(player.mp / player.mmp * 100))) : 0; mpEl.style.width = mpc + '%'; }
+    if (mpTx) mpTx.textContent = 'MP ' + Math.max(0, Math.floor(player.mp)) + ' / ' + player.mmp;
+    var nmEl = document.getElementById('tw-pname'); if (nmEl) nmEl.textContent = (player.name || '我') + '　Lv.' + (player.lv || 1);
     var live = mapState.mobs.filter(function (m) { return m && !m._dead && m.curHp > 0; });
     var remainCnt = live.length + ((t.queue && t.queue.length) || 0);
     var pEl = document.getElementById('tw-progress');
