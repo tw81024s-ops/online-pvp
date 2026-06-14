@@ -127,6 +127,7 @@ app.get('/api/config', (req, res) => {
         enhanceRateMult: c.enhanceRateMult != null ? c.enhanceRateMult : 1,
         pandoraLuckMult: c.pandoraLuckMult != null ? c.pandoraLuckMult : 1,
         towerDiff: c.towerDiff != null ? c.towerDiff : 1.5,
+        synthGao: c.synthGao!=null?c.synthGao:null, synthRare: c.synthRare!=null?c.synthRare:null, synthHero: c.synthHero!=null?c.synthHero:null, synthLegend: c.synthLegend!=null?c.synthLegend:null, synthMyth: c.synthMyth!=null?c.synthMyth:null, synthUniq: c.synthUniq!=null?c.synthUniq:null, dollT5: c.dollT5!=null?c.dollT5:null, dollT6: c.dollT6!=null?c.dollT6:null, dollT7: c.dollT7!=null?c.dollT7:null, dollT8: c.dollT8!=null?c.dollT8:null,
         eventZongzi: c.eventZongzi ? 1 : 0
     });
 });
@@ -142,6 +143,8 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
     if (b.enhanceRateMult !== undefined) cfg.enhanceRateMult = Math.max(0, Math.min(100, parseFloat(b.enhanceRateMult) || 1));
     if (b.pandoraLuckMult !== undefined) cfg.pandoraLuckMult = Math.max(0, Math.min(100, parseFloat(b.pandoraLuckMult) || 1));
     if (b.towerDiff !== undefined) cfg.towerDiff = Math.max(0.5, Math.min(50, parseFloat(b.towerDiff) || 1.5));
+    ['synthGao','synthRare','synthHero','synthLegend','synthMyth','synthUniq'].forEach(k => { if (b[k] !== undefined) cfg[k] = Math.max(0, Math.min(100, parseFloat(b[k]) || 0)); });
+    ['dollT5','dollT6','dollT7','dollT8'].forEach(k => { if (b[k] !== undefined) cfg[k] = Math.max(0, Math.min(100, parseFloat(b[k]) || 0)); });
     if (b.eventZongzi !== undefined) cfg.eventZongzi = b.eventZongzi ? 1 : 0;
     const out = store.setConfig(cfg);
     res.json({ ok: true, config: {
@@ -153,6 +156,7 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
         enhanceRateMult: out.enhanceRateMult != null ? out.enhanceRateMult : 1,
         pandoraLuckMult: out.pandoraLuckMult != null ? out.pandoraLuckMult : 1,
         towerDiff: out.towerDiff != null ? out.towerDiff : 1.5,
+        synthGao: out.synthGao!=null?out.synthGao:null, synthRare: out.synthRare!=null?out.synthRare:null, synthHero: out.synthHero!=null?out.synthHero:null, synthLegend: out.synthLegend!=null?out.synthLegend:null, synthMyth: out.synthMyth!=null?out.synthMyth:null, synthUniq: out.synthUniq!=null?out.synthUniq:null, dollT5: out.dollT5!=null?out.dollT5:null, dollT6: out.dollT6!=null?out.dollT6:null, dollT7: out.dollT7!=null?out.dollT7:null, dollT8: out.dollT8!=null?out.dollT8:null,
         eventZongzi: out.eventZongzi ? 1 : 0
     } });
 });

@@ -1120,6 +1120,7 @@
     }
 
     btnAdmin.onclick = () => {
+        if (!isAdmin || (location.hash || '').toLowerCase().indexOf('admin') === -1) { try{ toast('無權限','#7f1d1d'); }catch(e){} return; }   // 🔒 點擊時再次驗證：即使被強制顯示也無法開啟
         const wrap = el('div');
         let _secBody = wrap;   // 目前展開區塊的內容容器
         function section(t) {
@@ -1148,7 +1149,7 @@
         section('🌍 全服設定（所有玩家生效，立即同步）');
         const cfgStatus = el('div', { style: 'font-size:12px;color:#94a3b8;margin:-2px 0 8px;line-height:1.7;' }, '目前全服設定：讀取中…');
         _secBody.append(cfgStatus);
-        const fmtCfg = c => `目前全服：經驗 ×${c.expMult || 1}　攻速 ×${c.spdMult || 1}<br>競技場傷害 ×${c.pvpDmgMult != null ? c.pvpDmgMult : 1}　競技場魔法 ×${c.pvpMagicMult != null ? c.pvpMagicMult : 1}<br>金幣掉落 ×${c.goldDropMult != null ? c.goldDropMult : 1}　合卡 ×${c.synthRateMult != null ? c.synthRateMult : 1}　衝裝 ×${c.enhanceRateMult != null ? c.enhanceRateMult : 1}　潘朵拉 ×${c.pandoraLuckMult != null ? c.pandoraLuckMult : 1}　爬塔難度 ×${c.towerDiff != null ? c.towerDiff : 1.5}　端午活動 ${c.eventZongzi ? '🟢開啟' : '⚪關閉'}`;
+        const fmtCfg = c => `目前全服：經驗 ×${c.expMult || 1}　攻速 ×${c.spdMult || 1}<br>競技場傷害 ×${c.pvpDmgMult != null ? c.pvpDmgMult : 1}　競技場魔法 ×${c.pvpMagicMult != null ? c.pvpMagicMult : 1}<br>金幣掉落 ×${c.goldDropMult != null ? c.goldDropMult : 1}　合卡 ×${c.synthRateMult != null ? c.synthRateMult : 1}　衝裝 ×${c.enhanceRateMult != null ? c.enhanceRateMult : 1}　潘朵拉 ×${c.pandoraLuckMult != null ? c.pandoraLuckMult : 1}　爬塔難度 ×${c.towerDiff != null ? c.towerDiff : 1.5}　端午活動 ${c.eventZongzi ? '🟢開啟' : '⚪關閉'}` + (function(){ var s=''; var sm=[['synthGao','高級'],['synthRare','稀有'],['synthHero','英雄'],['synthLegend','傳說'],['synthMyth','神話'],['synthUniq','唯一']].filter(function(x){return c[x[0]]!=null;}).map(function(x){return x[1]+' '+c[x[0]]+'%';}); if(sm.length) s+='<br>合卡各階：'+sm.join('　'); var dm=[['dollT5','傳說'],['dollT6','神話'],['dollT7','超越'],['dollT8','唯一']].filter(function(x){return c[x[0]]!=null;}).map(function(x){return x[1]+' '+c[x[0]]+'%';}); if(dm.length) s+='<br>娃娃高階：'+dm.join('　'); return s; })();
         fetch('/api/config').then(r => r.json()).then(j => { cfgStatus.innerHTML = fmtCfg(j); }).catch(() => { cfgStatus.textContent = '（需登入線上模式才能讀取/設定）'; });
         const setCfg = async (key, n, label) => {
             try { const j = await api('/api/admin/config', 'POST', { [key]: n }); await syncGameConfig(); cfgStatus.innerHTML = fmtCfg(j.config); toast(label + ' = ×' + n, '#14532d'); }
@@ -1163,6 +1164,18 @@
         row(null, '衝裝成功率', v => setCfg('enhanceRateMult', Math.max(0, parseFloat(v) || 1), '衝裝成功率'), true, '強化成功率倍率（例 1.5＝1.5倍）');
         row(null, '潘朵拉機率', v => setCfg('pandoraLuckMult', Math.max(0, parseFloat(v) || 1), '潘朵拉機率'), true, '稀有物加權倍率（例 3＝稀有更易中）');
         row(null, '爬塔難度倍率', v => setCfg('towerDiff', Math.max(0.5, parseFloat(v) || 1.5), '爬塔難度倍率'), true, '守護TD 怪物強度倍率（例 2＝更硬、1＝正常、預設1.5）');
+        section('🎴 合卡各階成功率（%，留空＝用預設×倍率）');
+        row(null, '高級 合成率%', v => setCfg('synthGao', Math.max(0, Math.min(100, parseFloat(v) || 0)), '高級 合成率%'), true, '預設 50（×合卡倍率）');
+        row(null, '稀有 合成率%', v => setCfg('synthRare', Math.max(0, Math.min(100, parseFloat(v) || 0)), '稀有 合成率%'), true, '預設 35');
+        row(null, '英雄 合成率%', v => setCfg('synthHero', Math.max(0, Math.min(100, parseFloat(v) || 0)), '英雄 合成率%'), true, '預設 20');
+        row(null, '傳說 合成率%', v => setCfg('synthLegend', Math.max(0, Math.min(100, parseFloat(v) || 0)), '傳說 合成率%'), true, '預設 10');
+        row(null, '神話 合成率%', v => setCfg('synthMyth', Math.max(0, Math.min(100, parseFloat(v) || 0)), '神話 合成率%'), true, '預設 5');
+        row(null, '唯一 合成率%', v => setCfg('synthUniq', Math.max(0, Math.min(100, parseFloat(v) || 0)), '唯一 合成率%'), true, '預設 3');
+        section('🧸 娃娃高階機率（%，留空＝用預設）');
+        row(null, '傳說 娃娃%', v => setCfg('dollT5', Math.max(0, Math.min(100, parseFloat(v) || 0)), '傳說 娃娃%'), true, '預設 0.07');
+        row(null, '神話 娃娃%', v => setCfg('dollT6', Math.max(0, Math.min(100, parseFloat(v) || 0)), '神話 娃娃%'), true, '預設 0.02');
+        row(null, '超越 娃娃%', v => setCfg('dollT7', Math.max(0, Math.min(100, parseFloat(v) || 0)), '超越 娃娃%'), true, '預設 0.008');
+        row(null, '唯一 娃娃%', v => setCfg('dollT8', Math.max(0, Math.min(100, parseFloat(v) || 0)), '唯一 娃娃%'), true, '預設 0.002');
         {
             const er = el('div', { style: 'display:flex;gap:8px;margin-bottom:8px;align-items:center;' });
             er.append(el('div', { style: 'flex:1;font-size:14px;' }, '🎉 端午活動（全怪 50% 掉粽子）'));

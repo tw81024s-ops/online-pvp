@@ -398,7 +398,85 @@
   border-radius:12px; padding:10px 16px; font-weight:900; font-size:15px; }
 #hub-gacha-bar #hub-gacha-poly{ background:linear-gradient(180deg,#7c3aed,#532a9e); border-color:#a855f7; }
 #hub-gacha-body{ flex:1; min-height:0; }
-    </style>
+    
+/* ===== 娃娃蒐藏系統 ===== */
+.doll-ov{position:fixed;inset:0;z-index:9999;background:rgba(2,6,23,.80);align-items:center;justify-content:center;padding:12px;}
+.doll-panel{width:100%;max-width:560px;max-height:88vh;display:flex;flex-direction:column;background:#0f172a;border:1px solid #334155;border-radius:14px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.6);}
+.doll-head{display:flex;align-items:center;gap:8px;padding:12px 14px;background:#1e293b;border-bottom:1px solid #334155;}
+.doll-title{font-weight:bold;color:#e2e8f0;font-size:17px;}
+.doll-gold{margin-left:auto;color:#fbbf24;font-size:13px;font-weight:bold;}
+.doll-x{background:#334155;color:#e2e8f0;border:none;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px;}
+.doll-tabs{display:flex;gap:6px;padding:8px;background:#0b1220;}
+.doll-tab{flex:1;padding:8px;border:1px solid #334155;background:#1e293b;color:#94a3b8;border-radius:8px;cursor:pointer;font-size:14px;}
+.doll-tab.on{background:#4338ca;color:#fff;border-color:#6366f1;font-weight:bold;}
+.doll-body{padding:12px;overflow-y:auto;}
+.rb{display:inline-block;padding:1px 7px;border:1px solid;border-radius:6px;font-size:11px;font-weight:bold;}
+.dr-t1{border-color:#cbd5e1!important;} .dr-t1 .doll-rname,.rb.dr-t1{color:#e2e8f0;}
+.dr-t2{border-color:#22c55e!important;} .dr-t2 .doll-rname,.rb.dr-t2{color:#4ade80;}
+.dr-t3{border-color:#3b82f6!important;} .dr-t3 .doll-rname,.rb.dr-t3{color:#60a5fa;}
+.dr-t4{border-color:#ef4444!important;box-shadow:0 0 9px rgba(239,68,68,.4);} .dr-t4 .doll-rname,.rb.dr-t4{color:#f87171;}
+.dr-t5{border-color:#a855f7!important;box-shadow:0 0 8px rgba(168,85,247,.4);} .dr-t5 .doll-rname,.rb.dr-t5{color:#c084fc;}
+.dr-t6{border-color:#f59e0b!important;box-shadow:0 0 9px rgba(245,158,11,.45);} .dr-t6 .doll-rname,.rb.dr-t6{color:#fbbf24;}
+.dr-t7{border-color:#ec4899!important;box-shadow:0 0 11px rgba(236,72,153,.5);} .dr-t7 .doll-rname,.rb.dr-t7{color:#f472b6;}
+.dr-t8{border-color:#22d3ee!important;box-shadow:0 0 14px rgba(34,211,238,.6);}
+.dr-t8 .doll-rname,.rb.dr-t8{background:linear-gradient(90deg,#22d3ee,#67e8f9,#a5f3fc);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900;}
+.doll-img{width:62px;height:62px;margin:0 auto 6px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:34px;line-height:1;background:radial-gradient(circle at 50% 32%,#475569,#1e293b);border:2px solid #64748b;box-shadow:inset 0 -6px 12px rgba(0,0,0,.45),inset 0 4px 8px rgba(255,255,255,.06);position:relative;overflow:hidden;}
+.doll-img::after{content:'';position:absolute;top:0;left:0;right:0;height:42%;background:linear-gradient(rgba(255,255,255,.14),transparent);pointer-events:none;z-index:3;}
+.doll-img .di-emo{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:34px;z-index:1;}
+.doll-img .di-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2;}
+.doll-img:has(.di-art) .di-emo{display:none;}
+/* ===== 變身電光外框 ===== */
+#status-panel{position:relative;}
+.poly-elec{position:absolute;inset:0;z-index:6;background-position:center;background-repeat:no-repeat;background-size:100% 100%;mix-blend-mode:screen;pointer-events:none;display:none;border-radius:inherit;}
+.poly-elec.on{display:block;}
+.poly-elec.gold{background-image:url('assets/fx/poly_gold.webp');}
+.poly-elec.pink{background-image:url('assets/fx/poly_pink.webp');}
+.poly-elec.cyan{background-image:url('assets/fx/poly_cyan.webp');}
+/* ===== 功能 icon 列 ===== */
+#fn-iconrow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.fn-ic{display:flex;flex-direction:column;align-items:center;gap:2px;background:#0f172a;border:1px solid #2b3a52;border-radius:10px;padding:8px 2px;cursor:pointer;color:#cbd5e1;}
+.fn-ic:active{transform:scale(.95);}
+.fn-ic .ic{font-size:20px;line-height:1.1;}
+.fn-ic .tx{font-size:11px;}
+/* ===== 套裝監視 ===== */
+.smv-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:14px;z-index:9970;}
+.smv-ov.on{display:flex;}
+.smv-box{background:#0f172a;border:1px solid #475569;border-radius:14px;width:100%;max-width:400px;max-height:86vh;overflow:auto;color:#e2e8f0;}
+.smv-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #1e293b;font-weight:bold;}
+.smv-x{cursor:pointer;color:#94a3b8;}
+.smv-body{padding:10px 14px;}
+.smv-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(21,32,52,.4);}
+.smv-nm{font-size:14px;font-weight:bold;}
+.smv-cnt{font-size:12px;color:#94a3b8;width:48px;text-align:right;}
+.smv-pill{font-size:11px;padding:2px 8px;border-radius:999px;font-weight:bold;white-space:nowrap;}
+.smv-ok{background:#14532d;color:#86efac;}
+.smv-warn{background:#3f2d0a;color:#fcd34d;}
+.smv-eff{font-size:11px;color:#7dd3fc;margin-top:2px;}
+.smv-empty{color:#94a3b8;font-size:13px;padding:10px 0;line-height:1.6;}
+.dr-t1 .doll-img{background:radial-gradient(circle at 50% 32%,#475569,#1e293b);border-color:#cbd5e1;}
+.dr-t2 .doll-img{background:radial-gradient(circle at 50% 32%,#15803d,#052e16);border-color:#22c55e;box-shadow:0 0 9px rgba(34,197,94,.35),inset 0 -6px 12px rgba(0,0,0,.45);}
+.dr-t3 .doll-img{background:radial-gradient(circle at 50% 32%,#1d4ed8,#0c1e4a);border-color:#3b82f6;box-shadow:0 0 9px rgba(59,130,246,.4),inset 0 -6px 12px rgba(0,0,0,.45);}
+.dr-t4 .doll-img{background:radial-gradient(circle at 50% 32%,#b91c1c,#450a0a);border-color:#ef4444;box-shadow:0 0 12px rgba(239,68,68,.5),inset 0 -6px 12px rgba(0,0,0,.45);}
+.dr-t5 .doll-img{background:radial-gradient(circle at 50% 32%,#6b21a8,#2e1065);border-color:#a855f7;box-shadow:0 0 13px rgba(168,85,247,.5),inset 0 -6px 12px rgba(0,0,0,.45);}
+.dr-t6 .doll-img{background:radial-gradient(circle at 50% 32%,#b45309,#451a03);border-color:#f59e0b;box-shadow:0 0 14px rgba(245,158,11,.55),inset 0 -6px 12px rgba(0,0,0,.45);}
+.dr-t7 .doll-img{background:radial-gradient(circle at 50% 32%,#9d174d,#4a044e);border-color:#ec4899;box-shadow:0 0 16px rgba(236,72,153,.6),inset 0 -6px 12px rgba(0,0,0,.45);}
+.dr-t8 .doll-img{background:radial-gradient(circle at 50% 32%,#155e75,#083344);border-color:#22d3ee;animation:t8glow 2.6s ease-in-out infinite;}
+@keyframes t8glow{0%,100%{box-shadow:0 0 6px #22d3ee,0 0 14px #67e8f9,0 0 22px #a5f3fc,inset 0 -6px 12px rgba(0,0,0,.5);}50%{box-shadow:0 0 11px #22d3ee,0 0 20px #67e8f9,0 0 30px #a5f3fc,inset 0 -6px 12px rgba(0,0,0,.5);}}
+.doll-name{color:#e2e8f0;font-weight:bold;font-size:14px;margin:2px 0;}
+.doll-star{color:#fbbf24;font-size:13px;letter-spacing:1px;}
+.doll-eff{color:#86efac;font-size:11px;margin-top:3px;line-height:1.3;}
+.doll-shard{color:#94a3b8;font-size:11px;margin-top:3px;}
+.doll-tag{font-size:11px;color:#cbd5e1;margin-top:3px;} .doll-tag b{color:#fbbf24;}
+.doll-up{margin-top:5px;width:100%;padding:5px;border:none;border-radius:7px;background:#15803d;color:#fff;font-size:12px;cursor:pointer;}
+.doll-up.dis{background:#475569;color:#94a3b8;cursor:not-allowed;}
+.doll-cell.locked{opacity:.4;} .doll-cell.eq{box-shadow:0 0 0 2px #22c55e inset;}
+.doll-mile{display:flex;flex-direction:column;gap:3px;margin:8px 0;font-size:12px;}
+.doll-mile .ms-on{color:#86efac;} .doll-mile .ms-off{color:#64748b;}
+.doll-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+.doll-slot.empty{color:#64748b;display:flex;align-items:center;justify-content:center;min-height:80px;}
+.doll-cur{color:#cbd5e1;font-size:12px;background:#0b1220;border:1px solid #334155;border-radius:8px;padding:8px;margin-bottom:10px;line-height:1.5;}
+.doll-empty{color:#94a3b8;grid-column:1/-1;text-align:center;padding:16px;}
+</style>
 </head>
 <body class="min-h-screen lg:h-screen w-screen flex items-start lg:items-center justify-center p-2 lg:p-4 overflow-y-auto">
 
@@ -535,6 +613,7 @@
                     
                     <button onclick="openSherinePanel()" class="mt-auto btn w-full py-2 bg-emerald-800 hover:bg-emerald-700 text-base">🔮 席琳套裝</button>
       <button onclick="openTowerWindow()" class="btn w-full py-2 bg-rose-900 hover:bg-rose-800 text-base">🗼 守護TD</button>
+<button onclick="openDollWindow()" class="btn w-full py-2 bg-indigo-900 hover:bg-indigo-800 text-base">🧸 娃娃蒐藏</button>
             <button onclick="showAnnouncements()" class="btn w-full py-2 bg-amber-800 hover:bg-amber-700 text-base">📢 更新公告</button>
                     <button onclick="saveGame()" class="btn w-full py-3 bg-slate-700 text-lg mt-2">儲存遊戲進度</button>
                 </div>
@@ -610,6 +689,8 @@
                 <button id="btn-sell-junk" class="btn text-base py-2 font-bold px-0" style="background: linear-gradient(135deg, #6b2a10 0%, #b3490e 28%, #5a230e 52%, #9a3e0c 76%, #4a1d0c 100%); color: #fed7aa; border-color: #c2410c;" onclick="sellAllJunk()">賣出廢品</button>
                 <button id="btn-trash-gear" class="btn text-base py-2 font-bold px-0" style="grid-column:1 / -1; background: linear-gradient(135deg,#5b3a10 0%,#b45309 28%,#4a2f0c 52%,#d97706 76%,#3a2509 100%); color:#fde68a; border-color:#d97706;" onclick="sellUnlockedGear()">🗑️ 一鍵賣裝（賣掉未上鎖裝備/武器換金幣）</button>
             </div>
+
+            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
 
             <div class="panel flex-1 flex flex-col overflow-hidden relative">
                 <!-- 能力 -->
@@ -2801,6 +2882,395 @@ function logSys(msg) {
 // recomputeStats()：純數值重算（屬性/裝備/套裝/變身/buff → player.d），含「裝備授予技能」同步，無畫面副作用。
 // calcStats()：維持原有對外介面 = recomputeStats() + UI 刷新（applyElfBorder/updateUI），既有呼叫點行為不變。
 // 不需要刷畫面的場合（如 buildAlly 換身重算）請呼叫 recomputeStats()。
+/* ===================== 娃娃系統（金幣抽卡 × 混合輔助 × 圖鑑蒐藏） =====================
+   階級 1一般 2高級 3稀有 4英雄 5傳說 6神話 7超越 8唯一（仿天堂階級）
+   每隻娃娃一種主效果，數值依「階級 + 星級」由 DOLL_VAL 表算出。
+   裝備（最多3隻）才生效；擁有則計入圖鑑蒐集，達里程碑給永久帳號加成。            */
+
+const DOLL_RNAME = { 1: '一般', 2: '高級', 3: '稀有', 4: '英雄', 5: '傳說', 6: '神話', 7: '超越', 8: '唯一' };
+const DOLL_RCLS = { 1: 'dr-t1', 2: 'dr-t2', 3: 'dr-t3', 4: 'dr-t4', 5: 'dr-t5', 6: 'dr-t6', 7: 'dr-t7', 8: 'dr-t8' };
+const DOLL_RATE = { 1: 0.726, 2: 0.25, 3: 0.02, 4: 0.003, 5: 0.0007, 6: 0.0002, 7: 0.00008, 8: 0.00002 };
+const DOLL_SHARD_GAIN = { 1: 1, 2: 2, 3: 4, 4: 8, 5: 15, 6: 25, 7: 40, 8: 60 };
+const DOLL_STAR_COST = [0, 500, 1200, 2500, 5000];
+const DOLL_MAX_STAR = 5;
+const DOLL_EQUIP_SLOTS = 3;
+
+const DOLL_VAL = {
+  hpPct:     [0.02, 0.03, 0.045, 0.06, 0.08, 0.11, 0.15, 0.20],
+  mpPct:     [0.02, 0.03, 0.045, 0.06, 0.08, 0.11, 0.15, 0.20],
+  dmgPct:    [0.015, 0.025, 0.035, 0.05, 0.07, 0.10, 0.14, 0.18],
+  magicDmg:  [0.02, 0.035, 0.05, 0.07, 0.10, 0.14, 0.19, 0.25],
+  hitFlat:   [1, 2, 3, 4, 6, 8, 11, 15],
+  evaFlat:   [1, 2, 3, 4, 6, 8, 11, 15],
+  critFlat:  [1, 2, 3, 4, 5, 7, 9, 12],
+  drFlat:    [1, 2, 3, 4, 5, 6, 8, 10],
+  aspdPct:   [0.01, 0.02, 0.03, 0.04, 0.06, 0.08, 0.10, 0.13],
+  hpRegen:   [0.008, 0.012, 0.02, 0.03, 0.04, 0.055, 0.07, 0.10],
+  mpRegen:   [0.015, 0.025, 0.035, 0.05, 0.07, 0.09, 0.12, 0.15],
+  assistDmg: [0.08, 0.13, 0.20, 0.30, 0.45, 0.65, 0.90, 1.30],
+  assistHeal:[0.008, 0.012, 0.02, 0.03, 0.04, 0.055, 0.07, 0.10],
+};
+const DOLL_EFF_DESC = {
+  hpPct: '最大HP', mpPct: '最大MP', dmgPct: '全傷害', magicDmg: '魔法傷害', hitFlat: '命中', evaFlat: '迴避',
+  critFlat: '暴擊', drFlat: '減傷', aspdPct: '攻速', hpRegen: '每5秒回HP', mpRegen: '每5秒回MP',
+  assistDmg: '召喚協助攻擊', assistHeal: '召喚協助補血'
+};
+
+const DOLLS = [
+  { id: 'd_orcmage', n: '妖魔法師', r: 1, e: 'magicDmg', img: 'assets/icons/monsters/%23U5996%23U9b54%23U6cd5%23U5e2b.png', emo: '🧙' },
+  { id: 'd_snowman', n: '雪人', r: 1, e: 'hpPct', img: 'assets/icons/monsters/%23U96ea%23U4eba.png', emo: '⛄' },
+  { id: 'd_mushroom', n: '蘑菇', r: 1, e: 'mpPct', img: 'assets/icons/monsters/%23U8611%23U83c7.png', emo: '🍄' },
+  { id: 'd_dobermann', n: '杜賓狗', r: 1, e: 'drFlat', img: 'assets/icons/monsters/%23U675c%23U8cd3%23U72d7.png', emo: '🐕' },
+  { id: 'd_husky', n: '哈士奇', r: 1, e: 'hitFlat', img: 'assets/icons/monsters/%23U54c8%23U58eb%23U5947.png', emo: '🐶' },
+  { id: 'd_yeti', n: '雪怪', r: 2, e: 'evaFlat', img: 'assets/icons/monsters/%23U96ea%23U602a.png', emo: '❄️' },
+  { id: 'd_wolf', n: '狼', r: 2, e: 'dmgPct', img: 'assets/icons/monsters/%23U72fc.png', emo: '🐺' },
+  { id: 'd_bear', n: '熊', r: 2, e: 'hpPct', img: 'assets/icons/monsters/%23U718a.png', emo: '🐻' },
+  { id: 'd_unicorn', n: '獨角獸', r: 3, e: 'hpRegen', img: 'assets/icons/monsters/%23U7368%23U89d2%23U7378.png', emo: '🦄' },
+  { id: 'd_medusa', n: '蛇女', r: 3, e: 'critFlat', img: 'assets/icons/monsters/%23U86c7%23U5973.png', emo: '🐍' },
+  { id: 'd_icemaid', n: '冰之女王侍女', r: 3, e: 'hpPct', img: 'assets/icons/monsters/%23U51b0%23U4e4b%23U5973%23U738b%23U4f8d%23U5973.png', emo: '👰' },
+  { id: 'd_cannibalfae', n: '食人妖精', r: 3, e: 'mpRegen', img: 'assets/icons/monsters/%23U98df%23U4eba%23U5996%23U7cbe.png', emo: '🧚' },
+  { id: 'd_wyvern', n: '飛龍', r: 4, e: 'aspdPct', img: 'assets/icons/monsters/%23U98db%23U9f8d.png', emo: '🐲' },
+  { id: 'd_demon', n: '惡魔', r: 4, e: 'assistDmg', img: 'assets/icons/monsters/%23U60e1%23U9b54.png', emo: '😈' },
+  { id: 'd_icequeen', n: '冰之女王', r: 5, e: 'dmgPct', img: 'assets/icons/monsters/%23U51b0%23U4e4b%23U5973%23U738b.png', emo: '👑' },
+  { id: 'd_ifrit', n: '伊弗利特', r: 5, e: 'dmgPct', img: 'assets/icons/monsters/%23U4f0a%23U5f17%23U5229%23U7279.png', emo: '🔥' },
+  { id: 'd_baphomet', n: '巴風特', r: 5, e: 'dmgPct', img: 'assets/icons/monsters/%23U5df4%23U98a8%23U7279.png', emo: '🐐' },
+  { id: 'd_deathknight', n: '死亡騎士', r: 6, e: 'drFlat', img: 'assets/icons/monsters/%23U6b7b%23U4ea1%23U9a0e%23U58eb.png', emo: '⚔️' },
+  { id: 'd_phoenix', n: '不死鳥', r: 6, e: 'assistHeal', img: 'assets/icons/monsters/%23U4e0d%23U6b7b%23U9ce5.png', emo: '🔥' },
+  { id: 'd_balakas', n: '巴拉卡斯', r: 7, e: 'dmgPct', img: 'assets/icons/monsters/%23U5df4%23U62c9%23U5361%23U65af.png', emo: '🔥' },
+  { id: 'd_antharas', n: '安塔瑞斯', r: 7, e: 'drFlat', img: 'assets/icons/monsters/%23U5b89%23U5854%23U745e%23U65af.png', emo: '🐉' },
+  { id: 'd_falion', n: '法利昂', r: 7, e: 'magicDmg', img: 'assets/icons/monsters/%23U6cd5%23U5229%23U6602.png', emo: '💧' },
+  { id: 'd_lindvior', n: '林德拜爾', r: 7, e: 'aspdPct', img: 'assets/icons/monsters/林德拜爾.png', emo: '🌪️' },
+  { id: 'd_giltas', n: '吉爾塔斯', r: 8, e: 'assistDmg', img: 'assets/icons/monsters/吉爾塔斯.png', emo: '⚜️' },
+];
+const DOLL_MAP = {}; DOLLS.forEach(d => DOLL_MAP[d.id] = d);
+
+const DOLL_MILESTONES = [
+  { need: 5, b: { hpPct: 0.03 }, t: '擁有5隻：最大HP +3%' },
+  { need: 10, b: { dmgPct: 0.03 }, t: '擁有10隻：全傷害 +3%' },
+  { need: 15, b: { drFlat: 3 }, t: '擁有15隻：減傷 +3%' },
+  { need: 20, b: { hpPct: 0.05, dmgPct: 0.05 }, t: '擁有20隻：HP+5%、傷害+5%' },
+  { need: DOLLS.length, b: { drFlat: 5, critFlat: 5 }, t: '集滿圖鑑：減傷+5%、暴擊+5%' },
+];
+
+function _dollInit() {
+  if (!player) return;
+  if (!player.dolls) player.dolls = {};
+  if (!player.dollEquip) player.dollEquip = [];
+  if (typeof player.dollDraws !== 'number') player.dollDraws = 0;
+}
+function dollVal(rarity, eff, star) {
+  const base = (DOLL_VAL[eff] || [])[rarity - 1] || 0;
+  return base * (1 + 0.25 * (Math.max(1, star) - 1));
+}
+function dollOwnedCount() { _dollInit(); return Object.keys(player.dolls).length; }
+function dollDrawCost() {
+  const gc = (typeof window !== 'undefined' && window.__GAME_CONFIG) ? window.__GAME_CONFIG : {};
+  return gc.dollCost || 10000000;
+}
+function _rollRarity() {
+  var _c=(typeof window!=='undefined'&&window.__GAME_CONFIG)?window.__GAME_CONFIG:{};
+  function _dr(k){ var ov=_c['dollT'+k]; return (k>=5 && ov!=null)? (Math.max(0,ov)/100) : DOLL_RATE[k]; }
+  let r = Math.random(), acc = 0;
+  for (let k = 8; k >= 1; k--) { acc += _dr(k); if (r < acc) return k; }
+  return 1;
+}
+function _pickDoll(rarity) {
+  let pool = DOLLS.filter(d => d.r === rarity);
+  while (!pool.length && rarity > 1) { rarity--; pool = DOLLS.filter(d => d.r === rarity); }
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+function dollDraw(n) {
+  _dollInit();
+  const cost = dollDrawCost() * (n === 10 ? 9 : n);
+  if ((player.gold || 0) < cost) { if (typeof toast === 'function') toast('金幣不足（需 ' + cost.toLocaleString() + '）', '#7f1d1d'); return null; }
+  player.gold -= cost;
+  player.dollDraws += n;
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const rarity = _rollRarity();
+    const doll = _pickDoll(rarity);
+    const owned = player.dolls[doll.id];
+    if (owned) { const sh = DOLL_SHARD_GAIN[doll.r]; owned.shards = (owned.shards || 0) + sh; out.push({ doll, dup: true, shards: sh }); }
+    else { player.dolls[doll.id] = { star: 1, shards: 0 }; out.push({ doll, dup: false, shards: 0 }); }
+  }
+  try { calcStats(); } catch (e) { } try { saveGame(); } catch (e) { }
+  return out;
+}
+function dollCanUpgrade(id) { _dollInit(); const o = player.dolls[id]; if (!o || o.star >= DOLL_MAX_STAR) return false; return (o.shards || 0) >= DOLL_STAR_COST[o.star]; }
+function dollUpgrade(id) {
+  if (!dollCanUpgrade(id)) return false;
+  const o = player.dolls[id]; o.shards -= DOLL_STAR_COST[o.star]; o.star++;
+  try { calcStats(); } catch (e) { } try { saveGame(); } catch (e) { }
+  return true;
+}
+function dollEquipToggle(id) {
+  _dollInit(); if (!player.dolls[id]) return;
+  const idx = player.dollEquip.indexOf(id);
+  if (idx >= 0) player.dollEquip.splice(idx, 1);
+  else {
+    if (player.dollEquip.length >= DOLL_EQUIP_SLOTS) { if (typeof toast === 'function') toast('裝備槽已滿（最多 ' + DOLL_EQUIP_SLOTS + ' 隻）', '#7f1d1d'); return; }
+    player.dollEquip.push(id);
+  }
+  try { calcStats(); } catch (e) { } try { saveGame(); } catch (e) { }
+  if (typeof renderDollPanel === 'function') renderDollPanel();
+}
+function dollBonus() {
+  _dollInit();
+  const b = { hpPct: 0, mpPct: 0, dmgPct: 0, hitFlat: 0, evaFlat: 0, critFlat: 0, drFlat: 0, aspdPct: 0, hpRegen: 0, mpRegen: 0, assistDmg: 0, assistHeal: 0 };
+  (player.dollEquip || []).forEach(id => { const d = DOLL_MAP[id], o = player.dolls[id]; if (!d || !o) return; b[d.e] = (b[d.e] || 0) + dollVal(d.r, d.e, o.star); });
+  const owned = dollOwnedCount();
+  DOLL_MILESTONES.forEach(m => { if (owned >= m.need) { for (const k in m.b) b[k] = (b[k] || 0) + m.b[k]; } });
+  return b;
+}
+function applyDollStats() {
+  if (!player || !player.d) return;
+  const b = dollBonus(), d = player.d, p = player;
+  if (b.hpPct) p.mhp = Math.round(p.mhp * (1 + b.hpPct));
+  if (b.mpPct) p.mmp = Math.round(p.mmp * (1 + b.mpPct));
+  if (b.dmgPct) { d.meleeDmg = Math.round(d.meleeDmg * (1 + b.dmgPct)); d.rangedDmg = Math.round(d.rangedDmg * (1 + b.dmgPct)); d.magicDmg = Math.round(d.magicDmg * (1 + b.dmgPct)); }
+  if (b.magicDmg) d.magicDmg = Math.round(d.magicDmg * (1 + b.magicDmg));
+  if (b.hitFlat) { d.meleeHit += b.hitFlat; d.rangedHit += b.hitFlat; d.magicHit += b.hitFlat; }
+  if (b.evaFlat) d.er += b.evaFlat;
+  if (b.critFlat) { d.meleeCrit += b.critFlat; d.rangedCrit += b.critFlat; d.magicCrit += b.critFlat; }
+  if (b.drFlat) d.dr += b.drFlat;
+  if (b.aspdPct) d.aspd = Math.max(0.2, d.aspd * (1 - b.aspdPct));
+}
+let _dollCd = { regen: 0, assistD: 0, assistH: 0 };
+function dollTick() {
+  if (!player || player.dead || !state.running) return;
+  _dollInit();
+  const bonus = dollBonus();
+  _dollCd.regen++; _dollCd.assistD++; _dollCd.assistH++;
+  if (_dollCd.regen >= 50) {
+    _dollCd.regen = 0;
+    if (bonus.hpRegen && player.hp < player.mhp) player.hp = Math.min(player.mhp, player.hp + Math.ceil(player.mhp * bonus.hpRegen));
+    if (bonus.mpRegen && player.mp < player.mmp) player.mp = Math.min(player.mmp, player.mp + Math.ceil(player.mmp * bonus.mpRegen));
+  }
+  if (_dollCd.assistH >= 60) {
+    _dollCd.assistH = 0;
+    if (bonus.assistHeal && player.hp < player.mhp) player.hp = Math.min(player.mhp, player.hp + Math.ceil(player.mhp * bonus.assistHeal));
+  }
+  if (_dollCd.assistD >= 40) {
+    _dollCd.assistD = 0;
+    if (bonus.assistDmg && player.d) {
+      let idx = (mapState.targetIdx != null && mapState.mobs[mapState.targetIdx] && mapState.mobs[mapState.targetIdx].curHp > 0) ? mapState.targetIdx : -1;
+      if (idx < 0) idx = mapState.mobs.findIndex(m => m && m.curHp > 0);
+      if (idx >= 0) {
+        const t = mapState.mobs[idx];
+        const dmg = Math.max(1, Math.round((player.d.meleeDmg || 1) * bonus.assistDmg));
+        t.curHp -= dmg; t.justHit = 'magic';
+        try { if (typeof mobWake === 'function') mobWake(t); } catch (e) { }
+        try { if (typeof logSys === 'function') logSys(`🧸 娃娃協助攻擊，造成 ${dmg} 傷害！`); } catch (e) { }
+        if (t.curHp <= 0) { try { killMob(idx); } catch (e) { try { renderMobs(); } catch (e2) { } } }
+        else { try { renderMobs(); } catch (e) { } }
+      }
+    }
+  }
+}
+/* ===================== 娃娃系統 UI（抽卡 / 圖鑑 / 裝備） ===================== */
+let _dollTab = 'gacha';
+let _dollLastResult = null;
+
+function _dollFmt(eff, v) {
+  if (eff === 'assistDmg') return '召喚協助攻擊（傷害 ' + Math.round(v * 100) + '%）';
+  if (eff === 'assistHeal') return '召喚補血（每6秒回 ' + (v * 100).toFixed(1) + '% HP）';
+  if (eff === 'hpRegen') return '每5秒回 ' + (v * 100).toFixed(1) + '% HP';
+  if (eff === 'mpRegen') return '每5秒回 ' + (v * 100).toFixed(1) + '% MP';
+  if (eff === 'hpPct') return '最大HP +' + Math.round(v * 100) + '%';
+  if (eff === 'mpPct') return '最大MP +' + Math.round(v * 100) + '%';
+  if (eff === 'dmgPct') return '全傷害 +' + Math.round(v * 100) + '%'; if (eff === 'magicDmg') return '魔法傷害 +' + Math.round(v * 100) + '%';
+  if (eff === 'aspdPct') return '攻速 +' + Math.round(v * 100) + '%';
+  if (eff === 'critFlat') return '暴擊 +' + v + '%';
+  if (eff === 'drFlat') return '減傷 +' + v + '%';
+  if (eff === 'hitFlat') return '命中 +' + v;
+  if (eff === 'evaFlat') return '迴避 +' + v;
+  return DOLL_EFF_DESC[eff] + ' +' + v;
+}
+function _dollStars(star) { return '★'.repeat(star) + '☆'.repeat(DOLL_MAX_STAR - star); }
+function _dollImgHtml(doll) { return '<div class="doll-img"><span class="di-emo">' + (doll.emo || '🧸') + '</span>' + (doll.img ? '<img class="di-art" src="' + doll.img + '" alt="" onerror="this.remove()">' : '') + '</div>'; }
+
+function openDollWindow() {
+  if (!player || !player.cls) { if (typeof toast === 'function') toast('請先建立角色', '#7f1d1d'); return; }
+  _dollInit();
+  let ov = document.getElementById('doll-overlay');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'doll-overlay';
+    ov.className = 'doll-ov'; ov.style.display = 'none';
+    ov.innerHTML =
+      '<div class="doll-panel">' +
+      '  <div class="doll-head">' +
+      '    <span class="doll-title">🧸 娃娃蒐藏</span>' +
+      '    <span id="doll-gold" class="doll-gold"></span>' +
+      '    <button class="doll-x" onclick="closeDollWindow()">✕</button>' +
+      '  </div>' +
+      '  <div class="doll-tabs">' +
+      '    <button id="dtab-gacha" class="doll-tab" onclick="dollTab(\'gacha\')">🎲 抽卡</button>' +
+      '    <button id="dtab-codex" class="doll-tab" onclick="dollTab(\'codex\')">📖 圖鑑</button>' +
+      '    <button id="dtab-equip" class="doll-tab" onclick="dollTab(\'equip\')">🎽 裝備</button>' +
+      '  </div>' +
+      '  <div id="doll-body" class="doll-body"></div>' +
+      '</div>';
+    document.body.appendChild(ov);
+  }
+  ov.style.display = 'flex';
+  _dollTab = 'gacha';
+  renderDollPanel();
+}
+function closeDollWindow() { const ov = document.getElementById('doll-overlay'); if (ov) ov.style.display = 'none'; }
+function dollTab(name) { _dollTab = name; renderDollPanel(); }
+
+function renderDollPanel() {
+  _dollInit();
+  const g = document.getElementById('doll-gold'); if (g) g.textContent = '💰 ' + (player.gold || 0).toLocaleString();
+  ['gacha', 'codex', 'equip'].forEach(t => { const b = document.getElementById('dtab-' + t); if (b) b.classList.toggle('on', _dollTab === t); });
+  const body = document.getElementById('doll-body'); if (!body) return;
+  if (_dollTab === 'gacha') body.innerHTML = _renderGacha();
+  else if (_dollTab === 'codex') body.innerHTML = _renderCodex();
+  else body.innerHTML = _renderEquip();
+}
+
+function _renderGacha() {
+  const cost = dollDrawCost();
+  let rates = [];
+  for (let k = 8; k >= 1; k--) { const pc = DOLL_RATE[k] * 100; const ps = pc >= 1 ? pc.toFixed(0) : (pc >= 0.1 ? pc.toFixed(1) : pc.toFixed(3)); rates.push('<span class="' + DOLL_RCLS[k] + ' rb">' + DOLL_RNAME[k] + '</span> ' + ps + '%'); }
+  let h = '<div class="doll-gacha">';
+  h += '<div class="doll-rate">' + rates.join('　') + '</div>';
+  h += '<div class="doll-buy">';
+  h += '<button class="doll-draw1" onclick="dollDoDraw(1)">單抽<br><span>💰 ' + cost.toLocaleString() + '</span></button>';
+  h += '<button class="doll-draw10" onclick="dollDoDraw(10)">十連（9折）<br><span>💰 ' + (cost * 9).toLocaleString() + '</span></button>';
+  h += '</div>';
+  if (_dollLastResult && _dollLastResult.length) {
+    h += '<div class="doll-result-title">抽卡結果</div><div class="doll-result">';
+    _dollLastResult.forEach(r => {
+      h += '<div class="doll-card ' + DOLL_RCLS[r.doll.r] + '">' +
+        _dollImgHtml(r.doll) +
+        '<div class="doll-rname">' + DOLL_RNAME[r.doll.r] + '</div>' +
+        '<div class="doll-name">' + r.doll.n + '</div>' +
+        '<div class="doll-tag">' + (r.dup ? ('重複 → 碎片 +' + r.shards) : '<b>NEW!</b>') + '</div>' +
+        '</div>';
+    });
+    h += '</div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+function _renderCodex() {
+  const owned = dollOwnedCount(), total = DOLLS.length;
+  let h = '<div class="doll-codex">';
+  h += '<div class="doll-prog">蒐集進度：<b>' + owned + ' / ' + total + '</b></div>';
+  h += '<div class="doll-mile">';
+  DOLL_MILESTONES.forEach(m => { h += '<div class="' + (owned >= m.need ? 'ms-on' : 'ms-off') + '">' + (owned >= m.need ? '✅ ' : '🔒 ') + m.t + '</div>'; });
+  h += '</div>';
+  h += '<div class="doll-grid">';
+  DOLLS.forEach(d => {
+    const o = player.dolls[d.id];
+    if (o) {
+      const canUp = dollCanUpgrade(d.id);
+      const equipped = (player.dollEquip || []).indexOf(d.id) >= 0;
+      h += '<div class="doll-cell ' + DOLL_RCLS[d.r] + (equipped ? ' eq' : '') + '">' +
+        _dollImgHtml(d) +
+        '<div class="doll-rname">' + DOLL_RNAME[d.r] + (equipped ? ' ·裝備中' : '') + '</div>' +
+        '<div class="doll-name">' + d.n + '</div>' +
+        '<div class="doll-star">' + _dollStars(o.star) + '</div>' +
+        '<div class="doll-eff">' + _dollFmt(d.e, dollVal(d.r, d.e, o.star)) + '</div>' +
+        '<div class="doll-shard">碎片 ' + (o.shards || 0) + (o.star < DOLL_MAX_STAR ? ' / ' + DOLL_STAR_COST[o.star] : '（滿星）') + '</div>' +
+        (o.star < DOLL_MAX_STAR ? '<button class="doll-up' + (canUp ? '' : ' dis') + '" ' + (canUp ? 'onclick="dollDoUpgrade(\'' + d.id + '\')"' : 'disabled') + '>升星</button>' : '') +
+        '</div>';
+    } else {
+      h += '<div class="doll-cell locked"><div class="doll-img"><span class="di-emo">❔</span></div><div class="doll-rname">' + DOLL_RNAME[d.r] + '</div><div class="doll-name">？？？</div><div class="doll-eff">未取得</div></div>';
+    }
+  });
+  h += '</div></div>';
+  return h;
+}
+
+function _renderEquip() {
+  const eq = player.dollEquip || [];
+  let h = '<div class="doll-equip">';
+  h += '<div class="doll-slots">';
+  for (let i = 0; i < DOLL_EQUIP_SLOTS; i++) {
+    const id = eq[i], d = id ? DOLL_MAP[id] : null, o = id ? player.dolls[id] : null;
+    if (d) h += '<div class="doll-slot ' + DOLL_RCLS[d.r] + '">' + _dollImgHtml(d) + '<div class="doll-rname">' + DOLL_RNAME[d.r] + '</div><div class="doll-name">' + d.n + '</div><div class="doll-star">' + _dollStars(o.star) + '</div><div class="doll-eff">' + _dollFmt(d.e, dollVal(d.r, d.e, o.star)) + '</div><button class="doll-up" onclick="dollEquipToggle(\'' + id + '\')">卸下</button></div>';
+    else h += '<div class="doll-slot empty">空槽</div>';
+  }
+  h += '</div>';
+  const b = dollBonus(); const parts = [];
+  for (const k in b) { if (b[k]) parts.push(_dollFmt(k, b[k])); }
+  h += '<div class="doll-cur">目前加成（含圖鑑里程碑）：' + (parts.length ? parts.join('　') : '無') + '</div>';
+  h += '<div class="doll-own-title">已擁有（點擊裝備/卸下，最多 ' + DOLL_EQUIP_SLOTS + ' 隻）</div><div class="doll-grid">';
+  const ids = Object.keys(player.dolls).sort((a, c) => DOLL_MAP[c].r - DOLL_MAP[a].r);
+  if (!ids.length) h += '<div class="doll-empty">尚未擁有娃娃，先去抽卡吧！</div>';
+  ids.forEach(id => {
+    const d = DOLL_MAP[id], o = player.dolls[id], equipped = eq.indexOf(id) >= 0;
+    h += '<div class="doll-cell ' + DOLL_RCLS[d.r] + (equipped ? ' eq' : '') + '" onclick="dollEquipToggle(\'' + id + '\')" style="cursor:pointer;">' +
+      _dollImgHtml(d) +
+      '<div class="doll-rname">' + DOLL_RNAME[d.r] + (equipped ? ' ·裝備中' : '') + '</div>' +
+      '<div class="doll-name">' + d.n + '</div>' +
+      '<div class="doll-star">' + _dollStars(o.star) + '</div>' +
+      '<div class="doll-eff">' + _dollFmt(d.e, dollVal(d.r, d.e, o.star)) + '</div>' +
+      '<div class="doll-tag">' + (equipped ? '點擊卸下' : '點擊裝備') + '</div></div>';
+  });
+  h += '</div></div>';
+  return h;
+}
+
+function dollDoDraw(n) {
+  const res = dollDraw(n);
+  if (!res) return;
+  _dollLastResult = res;
+  _dollTab = 'gacha';
+  renderDollPanel();
+  try { updateUI(); } catch (e) { }
+}
+function dollDoUpgrade(id) {
+  if (dollUpgrade(id)) { renderDollPanel(); if (typeof toast === 'function') toast('升星成功！', '#14532d'); }
+}
+
+
+/* ===== 變身電光外框 ===== */
+function _polyTier(name){ try{ for(var r in RARITY_POLY){ var fs=RARITY_POLY[r].forms||[]; for(var i=0;i<fs.length;i++){ if(fs[i].n===name) return r; } } }catch(e){} return null; }
+function _applyPolyElec(tierName){
+  var sp=document.getElementById('status-panel'); if(!sp) return;
+  var el=sp.querySelector('.poly-elec');
+  var cls = tierName==='傳說'?'gold':tierName==='神話'?'pink':tierName==='唯一'?'cyan':null;
+  if(!cls){ if(el) el.classList.remove('on','gold','pink','cyan'); return; }
+  if(!el){ el=document.createElement('div'); el.className='poly-elec'; sp.appendChild(el); }
+  el.classList.remove('gold','pink','cyan'); el.classList.add(cls,'on');
+}
+/* ===== 套裝監視 ===== */
+var _SMV_REQ={leather:4,oasis:4,gnome:3,silver:4,bone:3,steel:5,mage:2,dk:4,kurt:4,mr:3,guard:3};
+var _SMV_EFF={leather:'AC −3',oasis:'AC −3',gnome:'AC −1、最大HP +5',silver:'AC −3',bone:'AC −2、最大HP +10',steel:'AC −2、減傷 +2',mage:'最大MP +50',dk:'AC −4、套裝變身',kurt:'AC −4、套裝變身',mr:'魔抗 +5',guard:'AC −1'};
+var _SMV_CODE={set_0:'leather',set_1:'oasis',set_2:'gnome',set_3:'silver',set_4:'bone',set_5:'steel',set_6:'mage',set_7:'dk',set_8:'kurt',set_9:'mr',set_10:'guard'};
+function _smvData(){
+  var byCode={};
+  try{ for(var sid in DB.sets){ var c=_SMV_CODE[sid]; if(!c) continue; byCode[c]={name:(DB.sets[sid].n||c), total:(DB.sets[sid].items||[]).length}; } }catch(e){}
+  var worn={}, seen={};
+  try{ for(var k in player.eq){ var e=player.eq[k]; if(!e) continue; if(seen[e.id]) continue; seen[e.id]=true; var ed=DB.items[e.id]; if(ed&&ed.set){ worn[ed.set]=(worn[ed.set]||0)+1; } } }catch(e){}
+  var rows=[];
+  for(var c2 in byCode){ var w=worn[c2]||0; if(w<=0) continue; var req=_SMV_REQ[c2]||byCode[c2].total; rows.push({code:c2,name:byCode[c2].name,worn:w,req:req,active:w>=req,eff:_SMV_EFF[c2]||''}); }
+  rows.sort(function(a,b){ return (b.active-a.active)||(b.worn-a.worn); });
+  return rows;
+}
+function openSetMonitor(){
+  if(!player||!player.cls){ if(typeof toast==='function') toast('請先建立角色','#7f1d1d'); return; }
+  var ov=document.getElementById('smv-ov');
+  if(!ov){ ov=document.createElement('div'); ov.id='smv-ov'; ov.className='smv-ov'; ov.innerHTML='<div class="smv-box"><div class="smv-head"><span>🛡️ 套裝監視</span><span class="smv-x" onclick="closeSetMonitor()">✕</span></div><div class="smv-body" id="smv-body"></div></div>'; document.body.appendChild(ov); ov.addEventListener('click',function(ev){ if(ev.target===ov) closeSetMonitor(); }); }
+  var rows=_smvData(); var html='';
+  if(!rows.length){ html='<div class="smv-empty">目前沒有穿戴任何套裝部位。湊齊同一套裝可觸發套裝加成。</div>'; }
+  else{ rows.forEach(function(r){
+    var pill = r.active?'<span class="smv-pill smv-ok">生效</span>':'<span class="smv-pill smv-warn">差 '+(r.req-r.worn)+' 件</span>';
+    html+='<div class="smv-row"><div style="flex:1;"><div class="smv-nm">'+r.name+'</div><div class="smv-eff">'+(r.active?'✨ ':'')+r.eff+'</div></div><span class="smv-cnt">'+r.worn+' / '+r.req+'</span>'+pill+'</div>';
+  });
+    try{ var sh=(typeof _sherineSets==='function')?_sherineSets():[]; if(sh&&sh.length){ html+='<div class="smv-row"><div style="flex:1;"><div class="smv-nm" style="color:#4ade80;">席琳套裝</div><div class="smv-eff">'+sh.length+' 項席琳效果生效中</div></div><span class="smv-pill smv-ok">生效</span></div>'; } }catch(e){}
+  }
+  document.getElementById('smv-body').innerHTML=html;
+  ov.classList.add('on');
+}
+function closeSetMonitor(){ var ov=document.getElementById('smv-ov'); if(ov) ov.classList.remove('on'); }
+try{ window.openSetMonitor=openSetMonitor; window.closeSetMonitor=closeSetMonitor; window._applyPolyElec=_applyPolyElec; window._polyTier=_polyTier; }catch(e){}
+
 function recomputeStats() {
     let p = player, d = p.d, b = p.base, a = p.alloc;
 
@@ -3141,6 +3611,7 @@ d.mr += (baseMr + bonusMr);
     if (p.adminSpdMult && p.adminSpdMult > 1) d.aspd = d.aspd / p.adminSpdMult;   // 管理員：攻速加快(倍數，越大越快)
     { let _gc = (typeof window !== 'undefined' && window.__GAME_CONFIG) ? window.__GAME_CONFIG : null; if (_gc && _gc.spdMult && _gc.spdMult > 1) d.aspd = d.aspd / _gc.spdMult; }   // 全服攻速倍率（管理者面板設定，所有玩家生效）
 
+    try { applyDollStats(); } catch (e) { }   // 娃娃輔助加成
     p.hp = Math.min(p.hp, p.mhp);
     p.mp = Math.min(p.mp, p.mmp);
 }
@@ -3457,13 +3928,19 @@ function polyGachaPull(){
     updateUI(); if(typeof window.__pushPolyDex==='function') window.__pushPolyDex(); if(typeof saveGame==='function') saveGame();
     return {form,rarity,color:RARITY_POLY[rarity].color};
 }
+function _synthEffRate(name,t){
+    var c=(typeof window!=='undefined'&&window.__GAME_CONFIG)?window.__GAME_CONFIG:{};
+    var K={'高級':'synthGao','稀有':'synthRare','英雄':'synthHero','傳說':'synthLegend','神話':'synthMyth','唯一':'synthUniq'};
+    var base=(K[name]&&c[K[name]]!=null)?c[K[name]]:t.synthRate;
+    return base*((c.synthRateMult)||1);
+}
 function polySynth(targetRarity){
     let t=RARITY_POLY[targetRarity]; if(!t||!t.synthFrom) return null;
     let src=t.synthFrom;
     if(polyCountByRarity(src)<4){ logSys('「'+src+'」變身張數不足4張，無法合成'+targetRarity+'。'); return null; }
     let need=4, dex=polyDexObj();
     for(let n in dex){ if(need<=0) break; let i=polyFindForm(n); if(i&&i.rarity===src){ let take=Math.min(need,dex[n]); dex[n]-=take; need-=take; if(dex[n]<=0) delete dex[n]; } }
-    let ok=Math.random()*100<t.synthRate*((window.__GAME_CONFIG&&window.__GAME_CONFIG.synthRateMult)||1);
+    let ok=Math.random()*100<_synthEffRate(targetRarity,t);
     if(ok){ let f=t.forms[Math.floor(Math.random()*t.forms.length)]; dex[f.n]=(dex[f.n]||0)+1; updateUI(); if(typeof saveGame==='function') saveGame(); return {success:true,form:f,rarity:targetRarity}; }
     updateUI(); if(typeof saveGame==='function') saveGame(); return {success:false};
 }
@@ -3487,7 +3964,7 @@ function polySynthAll(targetRarity){
             let usable=dex[n]-reserve; if(usable<=0) continue;
             let take=Math.min(need,usable); dex[n]-=take; need-=take; if(dex[n]<=0) delete dex[n];
         }
-        if(Math.random()*100<t.synthRate*((window.__GAME_CONFIG&&window.__GAME_CONFIG.synthRateMult)||1)){ let f=t.forms[Math.floor(Math.random()*t.forms.length)]; dex[f.n]=(dex[f.n]||0)+1; success++; results.push(f.n); }
+        if(Math.random()*100<_synthEffRate(targetRarity,t)){ let f=t.forms[Math.floor(Math.random()*t.forms.length)]; dex[f.n]=(dex[f.n]||0)+1; success++; results.push(f.n); }
     }
     updateUI(); if(typeof saveGame==='function') saveGame();
     return {times, success, results, consumed:times*4, src};
@@ -3646,7 +4123,7 @@ function tick() {
         regenTick();
     }
     if (state.ticks % 10 === 0) siegeTick();   // 攻城戰：每秒檢查時限
-    if (player.tower && player.tower.active) towerTick();   // 爬塔守護：補位/計時/過層
+    if (player.tower && player.tower.active) towerTick(); if (typeof dollTick === 'function') dollTick();   // 爬塔守護：補位/計時/過層
     
     if(player.statuses.poison > 0 && state.ticks % player.statuses.poisonTick === 0) {
         player.hp -= player.statuses.poisonDmg;
@@ -7336,10 +7813,12 @@ function updateUI() {
             _sp.style.backgroundImage = `url('${_pimg}'), url('assets/character/${bgImageName}.jpg')`;
             _sp.style.backgroundBlendMode = 'normal';            // 變身時不要把怪物圖和人物圖相乘
             _sp.style.backgroundColor = 'rgba(15,23,42,0.30)';   // 降低變暗，怪物圖看得清楚
+            try{ _applyPolyElec(_polyTier(player.poly.n)); }catch(e){}
         } else {
             _sp.style.backgroundImage = `url('assets/character/${bgImageName}.jpg')`;
             _sp.style.backgroundBlendMode = 'multiply';          // 一般職業維持原本風格
             _sp.style.backgroundColor = 'rgba(30,41,59,0.85)';
+            try{ _applyPolyElec(null); }catch(e){}
         }
     }
     document.getElementById('status-panel').classList.add('bg-top'); // 確保圖片從頂部對齊
@@ -9206,6 +9685,14 @@ function claimSiegeReward(faction) {
 }
 
 var PATCH_NOTES = [
+    { v:'娃娃蒐藏 1.0', date:'2026-06', title:'🧸 娃娃蒐藏系統上線！',
+      lines:[
+        '【娃娃蒐藏】用金幣抽卡取得娃娃，共 8 階（一般→唯一）。重複的娃娃會轉成碎片，碎片可升星（最高 5★）。',
+        '【裝備生效】最多同時裝備 3 隻娃娃，提供回血／回魔／減傷／命中／爆擊／攻速／全傷害…等混合輔助；圖鑑里程碑另有永久加成。',
+        '【入口】左側「🧸 娃娃蒐藏」按鈕：抽卡／圖鑑／裝備 三分頁。',
+        '【抽卡機率】唯一 0.002%、超越 0.008%、神話 0.02%、傳說 0.07%、英雄 0.3%、稀有 2%、高級 25%、一般 72.6%（高難度版，無保底）。',
+        '【本次其他更新】① 變身後頭像依階級顯示電光外框（傳說金／神話粉／唯一青）。② 新增功能 icon 列：套裝監視／爬塔／公告／每日活動／離線練功／競技場／登入。③ 套裝監視：即時查看穿戴套裝件數與生效狀態。',
+      ] },
     { v:'轉生秘境 1.0', date:'2026-06', title:'🏝️ 新地圖：遺忘之島 & 神殿底比斯',
       lines:[
         '【進場】需轉生 1 轉以上；遺忘之島 Lv86~90、底比斯 4 層 Lv76~98，經驗 ×8~16。',
