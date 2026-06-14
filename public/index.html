@@ -9337,23 +9337,29 @@ window.openSherinePanel = function (tab) {
         var tiers = [2, 3, 5];
         var out = '';
         if (tab === 'progress') {
-            out += '<div style="color:#94a3b8;font-size:12px;margin-bottom:10px;">依「已裝備」部位上的席琳效果計算；同系列不同效果湊滿 2／3／5 件即啟動加成。</div>';
+            out += '<div style="color:#94a3b8;font-size:12px;margin-bottom:10px;">只列出「已附加在你身上裝備」的席琳效果。效果只會在你選的那個部位，不會擴散到其他部位。</div>';
+            var anyOwned = false;
             sets.forEach(function (s) {
-                var cnt = 0; s.effs.forEach(function (ef) { if (equipped[ef]) cnt++; });
+                var owned = [];
+                SHERINE_SLOT_ORDER.forEach(function (slot, i) { if (equipped[s.effs[i]]) owned.push({ slot: slot, eff: s.effs[i] }); });
+                var cnt = owned.length;
+                if (cnt === 0) return;
+                anyOwned = true;
+                var missing = [];
+                SHERINE_SLOT_ORDER.forEach(function (slot, i) { if (!equipped[s.effs[i]]) missing.push(SHERINE_SLOT_NAME[slot]); });
                 out += '<div style="border:1px solid #334155;border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#111c33;">';
-                out += '<div style="font-weight:bold;color:' + (cnt >= 2 ? '#a7f3d0' : '#94a3b8') + ';font-size:15px;margin-bottom:5px;">' + s.g + '套裝　<span style="font-size:13px;">已裝 ' + cnt + ' / 5 件</span></div>';
-                out += '<div style="font-size:12px;line-height:1.9;margin-bottom:4px;">';
-                SHERINE_SLOT_ORDER.forEach(function (slot, i) {
-                    var ef = s.effs[i]; var has = !!equipped[ef];
-                    out += '<span style="color:' + (has ? '#34d399' : '#64748b') + ';margin-right:10px;">' + (has ? '✓' : '·') + SHERINE_SLOT_NAME[slot] + ' ' + ef + '</span>';
-                });
+                out += '<div style="font-weight:bold;color:' + (cnt >= 2 ? '#a7f3d0' : '#cbd5e1') + ';font-size:15px;margin-bottom:5px;">' + s.g + '套裝\u3000<span style="font-size:13px;">已裝 ' + cnt + ' / 5 件</span></div>';
+                out += '<div style="font-size:12.5px;line-height:1.9;margin-bottom:3px;">已在身上：';
+                owned.forEach(function (o) { out += '<span style="color:#34d399;margin-right:10px;">✓' + SHERINE_SLOT_NAME[o.slot] + ' ' + o.eff + '</span>'; });
                 out += '</div>';
+                if (missing.length) out += '<div style="font-size:12px;color:#64748b;margin-bottom:4px;">還缺：' + missing.join('、') + '</div>';
                 s.text.forEach(function (line, i) {
                     var on = cnt >= (tiers[i] || 9);
                     out += '<div style="font-size:12.5px;color:' + (on ? '#34d399' : '#64748b') + ';margin:1px 0;">' + (on ? '✓ ' : '· ') + line + '</div>';
                 });
                 out += '</div>';
             });
+            if (!anyOwned) out += '<div style="color:#94a3b8;font-size:14px;padding:14px;text-align:center;line-height:1.8;">目前裝備上還沒有任何席琳效果。<br>到遺忘之島／底比斯取得「席琳附加捲軸」，使用後選部位附加。</div>';
         } else {
             out += '<div style="color:#94a3b8;font-size:12px;margin-bottom:10px;">用「席琳附加捲軸」在對應部位附加效果。每套需湊滿同系列不同部位的效果：</div>';
             sets.forEach(function (s) {
