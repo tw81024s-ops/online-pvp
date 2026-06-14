@@ -5555,7 +5555,8 @@ function applyMobMagic(mob, sk) {
         
         // 屬性抗性與魔防一律生效：有屬性者受該屬性抗性折減、所有魔法傷害受抗魔(MR)折減（alwaysHit 不再無視防禦）
         // 怪物技能傷害公式: (怪物技能傷害 × 屬抗係數) × 抗魔係數 - 傷害減免
-        let dmg = Math.floor(Math.floor((baseMagicDmg + extraMagicDmg) * resFactor) * mrFactor) - player.d.dr;
+        var _twMag = mob._towerMob ? 0.5 : 1;   // 爬塔王魔法傷害折減（×0.5，避免低魔防被秒；要再調改這個數）
+        let dmg = Math.floor(Math.floor((baseMagicDmg + extraMagicDmg) * resFactor * _twMag) * mrFactor) - player.d.dr;
         if(sk.ext_freeze && player.statuses.freeze > 0) dmg += sk.ext_freeze;
 
         if(player.buffs.sk_holy_barrier > 0) dmg = Math.floor(dmg * 0.7);
