@@ -427,7 +427,7 @@
 .doll-img:has(.di-art) .di-emo{display:none;}
 /* ===== 變身電光外框 ===== */
 #status-panel{position:relative;}
-.poly-elec{position:absolute;inset:0;z-index:6;background-position:center;background-repeat:no-repeat;background-size:100% 100%;mix-blend-mode:screen;pointer-events:none;display:none;border-radius:inherit;}
+.poly-elec{position:absolute;inset:-10px;z-index:6;opacity:.9;background-position:center;background-repeat:no-repeat;background-size:100% 100%;mix-blend-mode:screen;pointer-events:none;display:none;border-radius:inherit;}
 .poly-elec.on{display:block;}
 .poly-elec.gold{background-image:url('assets/fx/poly_gold.webp');}
 .poly-elec.pink{background-image:url('assets/fx/poly_pink.webp');}
@@ -453,6 +453,16 @@
 .smv-warn{background:#3f2d0a;color:#fcd34d;}
 .smv-eff{font-size:11px;color:#7dd3fc;margin-top:2px;}
 .smv-empty{color:#94a3b8;font-size:13px;padding:10px 0;line-height:1.6;}
+/* ===== 娃娃抽卡按鈕放大 ===== */
+.doll-buy{display:flex;gap:10px;margin:12px 0;flex-wrap:wrap;}
+.doll-draw1,.doll-draw10,.doll-draw100{flex:1 1 28%;min-width:88px;border:none;border-radius:12px;padding:13px 6px;font-size:15px;font-weight:bold;color:#fff;cursor:pointer;line-height:1.35;box-shadow:0 3px 10px rgba(0,0,0,.4);text-align:center;}
+.doll-draw1{background:linear-gradient(135deg,#64748b,#334155);}
+.doll-draw10{background:linear-gradient(135deg,#7c3aed,#5b21b6);}
+.doll-draw100{background:linear-gradient(135deg,#d97706,#92400e);}
+.doll-draw1 span,.doll-draw10 span,.doll-draw100 span{display:inline-block;margin-top:3px;font-size:12px;font-weight:normal;opacity:.92;}
+.doll-draw1:active,.doll-draw10:active,.doll-draw100:active{transform:scale(.96);}
+.doll-100sum{font-size:13px;line-height:2;text-align:left;padding:4px 2px;}
+.doll-100foot{font-size:13px;font-weight:bold;color:#fcd34d;margin-top:6px;text-align:left;}
 .dr-t1 .doll-img{background:radial-gradient(circle at 50% 32%,#475569,#1e293b);border-color:#cbd5e1;}
 .dr-t2 .doll-img{background:radial-gradient(circle at 50% 32%,#15803d,#052e16);border-color:#22c55e;box-shadow:0 0 9px rgba(34,197,94,.35),inset 0 -6px 12px rgba(0,0,0,.45);}
 .dr-t3 .doll-img{background:radial-gradient(circle at 50% 32%,#1d4ed8,#0c1e4a);border-color:#3b82f6;box-shadow:0 0 9px rgba(59,130,246,.4),inset 0 -6px 12px rgba(0,0,0,.45);}
@@ -3139,8 +3149,13 @@ function _renderGacha() {
   h += '<div class="doll-buy">';
   h += '<button class="doll-draw1" onclick="dollDoDraw(1)">單抽<br><span>💰 ' + cost.toLocaleString() + '</span></button>';
   h += '<button class="doll-draw10" onclick="dollDoDraw(10)">十連（9折）<br><span>💰 ' + (cost * 9).toLocaleString() + '</span></button>';
+  h += '<button class="doll-draw100" onclick="dollDo100Pull()">100連（9折）<br><span>💰 ' + (cost * 90).toLocaleString() + '</span></button>';
   h += '</div>';
-  if (_dollLastResult && _dollLastResult.length) {
+  if (window._dollRolling) {
+    h += '<div class="doll-result-title" id="doll-prog">🎲 抽卡中… ' + (window._dollProg||0) + '/100</div>';
+  } else if (window._dollLast100Html) {
+    h += '<div class="doll-result-title">🎉 本次 100 連</div>' + window._dollLast100Html;
+  } else if (_dollLastResult && _dollLastResult.length) {
     h += '<div class="doll-result-title">抽卡結果</div><div class="doll-result">';
     _dollLastResult.forEach(r => {
       h += '<div class="doll-card ' + DOLL_RCLS[r.doll.r] + '">' +
@@ -3217,12 +3232,43 @@ function _renderEquip() {
 }
 
 function dollDoDraw(n) {
+  if (window._dollRolling) return;
+  window._dollLast100Html = null;
   const res = dollDraw(n);
   if (!res) return;
   _dollLastResult = res;
   _dollTab = 'gacha';
   renderDollPanel();
   try { updateUI(); } catch (e) { }
+}
+function dollDo100Pull() {
+  _dollInit();
+  var per = dollDrawCost(), cost = per * 90;
+  if ((player.gold || 0) < cost) { if (typeof toast === 'function') toast('金幣不足（100連需 ' + cost.toLocaleString() + '）', '#7f1d1d'); return; }
+  if (window._dollRolling) return;
+  window._dollRolling = true; window._dollProg = 0; window._dollLast100Html = null; _dollLastResult = null;
+  player.gold -= cost; player.dollDraws += 100;
+  var agg = {}, newCount = 0, shardTotal = 0, done = 0, BATCH = 25, TICK = 80;
+  _dollTab = 'gacha'; renderDollPanel();
+  function step() {
+    for (var k = 0; k < BATCH && done < 100; k++, done++) {
+      var rarity = _rollRarity(), doll = _pickDoll(rarity), owned = player.dolls[doll.id];
+      if (owned) { var sh = DOLL_SHARD_GAIN[doll.r]; owned.shards = (owned.shards || 0) + sh; shardTotal += sh; }
+      else { player.dolls[doll.id] = { star: 1, shards: 0 }; newCount++; }
+      if (!agg[doll.id]) agg[doll.id] = { n: 0, r: doll.r, name: doll.n }; agg[doll.id].n++;
+    }
+    try { saveGame(); } catch (e) { }
+    window._dollProg = done;
+    if (done < 100) { renderDollPanel(); setTimeout(step, TICK); return; }
+    try { calcStats(); } catch (e) { }
+    var arr = Object.keys(agg).map(function (id) { return agg[id]; }).sort(function (a, b) { return b.r - a.r; });
+    var html = '<div class="doll-100sum">';
+    arr.forEach(function (x) { html += '<span class="' + DOLL_RCLS[x.r] + ' rb">' + DOLL_RNAME[x.r] + '</span> ' + x.name + ' ×' + x.n + '　'; });
+    html += '</div><div class="doll-100foot">新娃娃 ' + newCount + ' 隻　碎片 +' + shardTotal + '</div>';
+    window._dollLast100Html = html; window._dollRolling = false;
+    renderDollPanel(); try { updateUI(); } catch (e) { }
+  }
+  setTimeout(step, TICK);
 }
 function dollDoUpgrade(id) {
   if (dollUpgrade(id)) { renderDollPanel(); if (typeof toast === 'function') toast('升星成功！', '#14532d'); }
