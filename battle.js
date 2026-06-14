@@ -105,6 +105,9 @@ function simulate(profileA, profileB, opts) {
     opts = opts || {};
     const PVP_DMG = Math.max(0, isFinite(opts.pvpDmgMult) ? opts.pvpDmgMult : 1);     // 競技場整體傷害倍率
     const PVP_MAGIC = Math.max(0, isFinite(opts.pvpMagicMult) ? opts.pvpMagicMult : 1); // 競技場魔法額外倍率（壓法師爆炸傷害）
+    const MAGE_X = Math.max(0.1, isFinite(opts.mageDmgMult) ? opts.mageDmgMult : 1);
+    const MELEE_X = Math.max(0.1, isFinite(opts.meleeDmgMult) ? opts.meleeDmgMult : 1);
+    const RANGED_X = Math.max(0.1, isFinite(opts.rangedDmgMult) ? opts.rangedDmgMult : 1);
     const MAXTICKS = 1800; // 180 秒上限
     let A = initSide(profileA), B = initSide(profileB);
     let events = [];
@@ -148,7 +151,7 @@ function simulate(profileA, profileB, opts) {
                     let stunOk = (r.type === 'hit') && (Math.random() * 100 < (me.p.spell.stunChance || 50));
                     if (stunOk) {
                         let mult = 1.5 + Math.random() * 0.5;                 // 1.5 ~ 2.0 倍
-                        let dmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * mult));
+                        let dmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * mult * (r.ranged ? RANGED_X : MELEE_X) * tkMult(foe.p)));
                         foe.hp -= dmg;
                         foe.stunT = Math.max(foe.stunT, Math.round(me.p.spell.stun / 10));
                         push(t, side, 'crit', `${me.name} 施放 ${me.p.spell.name} 命中要害！對 ${foe.name} 造成 ${dmg} 點傷害並暈眩 ${(Math.round(me.p.spell.stun / 10) / 10).toFixed(1)} 秒！`, dmg);
@@ -164,7 +167,7 @@ function simulate(profileA, profileB, opts) {
                         if (foe.hp <= 0) break;
                         let r = physicalAttack(me.p, foe.p);
                         if (r.type === 'evade' || r.type === 'miss') { parts.push('Miss'); continue; }
-                        let pdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG));
+                        let pdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * (r.ranged ? RANGED_X : MELEE_X) * tkMult(foe.p)));
                         foe.hp -= pdmg; total += pdmg;
                         if (r.crit || r.heavy) anyCrit = true;
                         parts.push(pdmg + (r.heavy && r.crit ? '(會心)' : r.crit ? '(爆)' : r.heavy ? '(重)' : ''));
@@ -180,7 +183,7 @@ function simulate(profileA, profileB, opts) {
                         foe.mShield = false; foe.mShieldCd = 30;   // 吸收一次，3 秒後重新就緒
                         push(t, side, 'evade', `🛡️ ${foe.name} 的魔法屏障吸收了 ${me.name} 的魔法攻擊！`, 0);
                     } else {
-                        let mdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * PVP_MAGIC));
+                        let mdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * PVP_MAGIC * MAGE_X * tkMult(foe.p)));
                         foe.hp -= mdmg;
                         push(t, side, r.crit ? 'crit' : 'magic',
                             `${me.name} 施放 ${r.spell}，對 ${foe.name} 造成 ${mdmg} 點傷害${r.crit ? '（爆擊！）' : ''}。`, mdmg);
@@ -196,7 +199,7 @@ function simulate(profileA, profileB, opts) {
                 if (r.type === 'evade') push(t, side, 'evade', `${foe.name} 成功迴避了 ${me.name} 的攻擊。`);
                 else if (r.type === 'miss') push(t, side, 'miss', `${me.name} 對 ${foe.name} 的攻擊未命中。`);
                 else {
-                    let pdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG));
+                    let pdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * (r.ranged ? RANGED_X : MELEE_X) * tkMult(foe.p)));
                     foe.hp -= pdmg;
                     let ext = r.heavy && r.crit ? '（會心一擊！）' : r.crit ? '（爆擊！）' : r.heavy ? '（重擊！）' : r.graze ? '（擦傷）' : '';
                     push(t, side, r.crit || r.heavy ? 'crit' : 'attack',
@@ -238,6 +241,13 @@ function initSide(p) {
 function sanitize(s) { return String(s).replace(/[<>&"']/g, '').slice(0, 20); }
 
 // 基本防呆：限制 profile 數值範圍，避免明顯灌爆的封包打掛伺服器
+function tkMult(p) {   // 防守方職業受傷倍率
+    if (!p || !p.cls) return 1;
+    if (p.cls === 'knight') return 0.5;
+    if (p.cls === 'mage') return 1.5;
+    if (p.darkelf) return 1.3;
+    return 1.0;
+}
 function clampProfile(p) {
     let n = (v, lo, hi, dflt) => { v = Number(v); return isFinite(v) ? Math.max(lo, Math.min(hi, v)) : dflt; };
     return {
@@ -289,6 +299,9 @@ function simulateBossDps(profile, ticks, opts) {
     opts = opts || {};
     const DMG = Math.max(0, isFinite(opts.pvpDmgMult) ? opts.pvpDmgMult : 1);
     const MAG = Math.max(0, isFinite(opts.pvpMagicMult) ? opts.pvpMagicMult : 1);
+    const MAGE_X = Math.max(0.1, isFinite(opts.mageDmgMult) ? opts.mageDmgMult : 1);
+    const MELEE_X = Math.max(0.1, isFinite(opts.meleeDmgMult) ? opts.meleeDmgMult : 1);
+    const RANGED_X = Math.max(0.1, isFinite(opts.rangedDmgMult) ? opts.rangedDmgMult : 1);
     const T = Math.max(1, Math.min(6000, ticks | 0));
     const me = initSide(clampProfile(profile));
     const bossDef = { lv: 1, ac: 10, mr: 0, dr: 0, er: 0, cls: null };   // 固定靶
@@ -299,16 +312,16 @@ function simulateBossDps(profile, ticks, opts) {
             me.atkSkCd = me.castInterval;
             if (me.p.spell.phys) {
                 let hits = Math.max(1, me.p.spell.hits || 1);
-                for (let h = 0; h < hits; h++) { let r = physicalAttack(me.p, bossDef); if (r.type === 'hit') total += Math.max(1, Math.floor(r.dmg * DMG)); }
+                for (let h = 0; h < hits; h++) { let r = physicalAttack(me.p, bossDef); if (r.type === 'hit') total += Math.max(1, Math.floor(r.dmg * DMG * (r.ranged ? RANGED_X : MELEE_X))); }
             } else {
-                let r = magicAttack(me.p, bossDef, me.p.spell); total += Math.max(1, Math.floor(r.dmg * DMG * MAG));
+                let r = magicAttack(me.p, bossDef, me.p.spell); total += Math.max(1, Math.floor(r.dmg * DMG * MAG * MAGE_X));
             }
         }
         // 普通攻擊
         if (me.atkCd <= 0) {
             me.atkCd = me.atkInterval;
             let r = physicalAttack(me.p, bossDef);
-            if (r.type === 'hit') total += Math.max(1, Math.floor(r.dmg * DMG));
+            if (r.type === 'hit') total += Math.max(1, Math.floor(r.dmg * DMG * (r.ranged ? RANGED_X : MELEE_X)));
         }
         me.atkCd--; me.atkSkCd--;
     }

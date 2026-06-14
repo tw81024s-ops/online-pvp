@@ -3375,6 +3375,14 @@ function recomputeStats() {
         d.meleeDmg += Math.floor(p.lv / 4);    // 每提升4 近距離傷害+1
         d.rangedDmg += Math.floor(p.lv / 12);  // 每提升12 遠距離傷害+1
         d.extraHit += Math.floor(p.lv / 3);    // 每提升3 額外命中+1
+    } else if (p.cls === 'elf' && p.darkelf) {   // 黑妖：近戰玻璃刺客（低魔防/高閃/高爆）
+        d.mr = 5;
+        d.ac -= Math.floor(p.lv / 7);
+        d.mr += Math.floor(p.lv / 10);         // 魔防成長很慢（拿掉高魔防）
+        d.meleeDmg += Math.floor(p.lv / 6);    // 近戰傷害成長
+        d.meleeCrit += Math.floor(p.lv / 6) + 5; // 高爆擊
+        d.er += Math.floor(p.lv / 3);          // 高閃避
+        d.extraHit += Math.floor(p.lv / 5);
     } else if (p.cls === 'elf') {
         d.mr = 25;
         d.ac -= Math.floor(p.lv / 7);          // 每提升7 AC-1
@@ -3420,8 +3428,8 @@ function recomputeStats() {
     };
 
     // HP / MP（職業等級1基礎 + (等級-1) x (職業加成 + 屬性加成)，依最終 CON / WIS）
-    let hpBase   = p.cls === 'knight' ? 16 : (p.cls === 'elf' ? 15 : 12);
-    let hpClsInc = p.cls === 'knight' ? 8.5 : (p.cls === 'elf' ? 7.3 : 4.3);
+    let hpBase   = p.cls === 'knight' ? 16 : (p.cls === 'elf' ? (p.darkelf ? 13 : 15) : 12);
+    let hpClsInc = p.cls === 'knight' ? 8.5 : (p.cls === 'elf' ? (p.darkelf ? 5.5 : 7.3) : 4.3);
     let conInc   = getConGrowth(d.con, p.cls);
     p.mhp = hpBase + (p.lv - 1) * (hpClsInc + conInc) + (p.rebornHpBonus || 0);   // 小數隱藏不捨去；+轉生保留HP
 
@@ -3662,6 +3670,13 @@ d.mr += (baseMr + bonusMr);
     p.mp = Math.min(p.mp, p.mmp);
 }
 
+function _takenMult() {   // 職業受傷倍率（套在 AC/MR/DR 抵抗之後）
+    if (!player || !player.cls) return 1;
+    if (player.cls === 'knight') return 0.5;   // 鐵壁：全傷-50%
+    if (player.cls === 'mage') return 1.5;     // 法術玻璃砲：+50%
+    if (player.darkelf) return 1.3;            // 近戰玻璃刺客：+30%
+    return 1.0;                                // 妖精：正常
+}
 function calcStats() {   // 🔧 架構#4：對外介面不變（重算 + UI 刷新）
     recomputeStats();
     applyElfBorder();
@@ -4745,6 +4760,7 @@ function getPhysicalDmg(diceStr, target, wpn, arrowData, forceHeavy, forceHit, f
     let _outDmg = inner + fixed;
     if (graze) _outDmg = Math.max(1, Math.floor(_outDmg * 0.5));   // 擦傷：最終傷害剩 50%
     _outDmg = Math.max(1, Math.floor(_outDmg * fragileMult(target)));   // 🔮 脆弱（白鳥5）：受所有來源傷害 +20%
+    _outDmg = Math.max(1, Math.floor(_outDmg * (isRanged ? ((window.__GAME_CONFIG&&window.__GAME_CONFIG.rangedDmgMult)||1) : ((window.__GAME_CONFIG&&window.__GAME_CONFIG.meleeDmgMult)||1))));   // 職業平衡：近戰/遠程上修倍率
     return { dmg: _outDmg, hit: true, heavy: heavy, crit: isCrit, graze: graze, crush: crush, ranged: isRanged };
 }
 
@@ -4812,7 +4828,7 @@ function procLightArrow(t) {
     let isCrit = Math.random() * 100 < player.d.magicCrit;
     let skillTier = sk.tier || 1;
     let spCoef = (1 + (3 * player.d.magicDmg / 16)) * (1 + (skillTier / 3));
-    let mageDmgMult = (player.cls === 'mage') ? (skillTier >= 8 ? 4.0 : 2.5) : 1.0;   // 與一般攻擊魔法一致（法師PvE強化）
+    let mageDmgMult = ((player.cls === 'mage') ? (skillTier >= 8 ? 4.0 : 2.5) : 1.0) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.mageDmgMult)||1);   // 與一般攻擊魔法一致（法師PvE強化）
     let magicCritMult = isCrit ? (1 + player.d.magicCritDmg / 100) : 1.0;
     let baseMagicDmg = roll(sk.dmgDice[0], sk.dmgDice[1]);
     let core = baseMagicDmg * spCoef * magicCritMult;
@@ -5302,7 +5318,7 @@ function enemyPhysicalAttack(mob, idx, stunChance = 0) {
             if(_sh && _sh.block && Math.random() * 100 < _sh.block) { let _before = totalDmg; totalDmg = Math.floor(totalDmg * 0.5); blockReduced = _before - totalDmg; blocked = true; }
         }
 
-        totalDmg = Math.max(1, totalDmg);
+        totalDmg = Math.max(1, Math.floor(totalDmg * _takenMult()));
         player.hp -= totalDmg;
 
         let atkMsg = `${mobInsightPrefix}<span class="${getMobColor(mob.lv)}">${mob.n}</span> 擊中你，造成 ${totalDmg} 點傷害。`;
@@ -5550,7 +5566,7 @@ function applyMobMagic(mob, sk) {
         if (mob._sherine) dmg = Math.floor(dmg * 2);            // 🔮 席琳的世界：技能最終傷害 ×2
         if (mob._grace) dmg = Math.floor(dmg * 2);              // 🔮 席琳的恩賜：再 ×2
         if (player._setIron3) dmg = Math.floor(dmg * 0.8);      // 🔮 鐵衛 3/5：受到傷害減少 20%
-        dmg = Math.max(1, dmg);
+        dmg = Math.max(1, Math.floor(dmg * _takenMult()));
 
         player.hp -= dmg;
         logCombat(`<span class="${getMobColor(mob.lv)}">${mob.n}</span> 施放${sk.skn || '魔法'}，對你造成 ${dmg} 點魔法傷害。`, 'enemy');
@@ -6856,7 +6872,7 @@ function castSkill(skId) {
     // 套用新的魔攻係數 (SP Coefficient) 公式
     let spCoef = (1 + (3 * player.d.magicDmg / 16)) * (1 + (skillTier / 3));
     // 法師專屬：一般攻擊魔法（排除精靈魔法 sk_elf_*、裝備授予技能）最終傷害 ×(1.5 + 法術階級/20)；僅影響傷害，不影響命中/治癒/回血
-    let mageDmgMult = (player.cls === 'mage' && !__granted && !skId.startsWith('sk_elf_')) ? (1.5 + skillTier / 20) : 1.0;
+    let mageDmgMult = ((player.cls === 'mage' && !__granted && !skId.startsWith('sk_elf_')) ? (1.5 + skillTier / 20) : 1.0) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.mageDmgMult)||1);
     
     let magicCritMult = isCrit ? (1 + player.d.magicCritDmg / 100) : 1.0;
 

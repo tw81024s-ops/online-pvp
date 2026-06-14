@@ -127,7 +127,7 @@ app.get('/api/config', (req, res) => {
         enhanceRateMult: c.enhanceRateMult != null ? c.enhanceRateMult : 1,
         pandoraLuckMult: c.pandoraLuckMult != null ? c.pandoraLuckMult : 1,
         towerDiff: c.towerDiff != null ? c.towerDiff : 1.5,
-        synthGao: c.synthGao!=null?c.synthGao:null, synthRare: c.synthRare!=null?c.synthRare:null, synthHero: c.synthHero!=null?c.synthHero:null, synthLegend: c.synthLegend!=null?c.synthLegend:null, synthMyth: c.synthMyth!=null?c.synthMyth:null, synthUniq: c.synthUniq!=null?c.synthUniq:null, dollT5: c.dollT5!=null?c.dollT5:null, dollT6: c.dollT6!=null?c.dollT6:null, dollT7: c.dollT7!=null?c.dollT7:null, dollT8: c.dollT8!=null?c.dollT8:null,
+        synthGao: c.synthGao!=null?c.synthGao:null, synthRare: c.synthRare!=null?c.synthRare:null, synthHero: c.synthHero!=null?c.synthHero:null, synthLegend: c.synthLegend!=null?c.synthLegend:null, synthMyth: c.synthMyth!=null?c.synthMyth:null, synthUniq: c.synthUniq!=null?c.synthUniq:null, dollT5: c.dollT5!=null?c.dollT5:null, dollT6: c.dollT6!=null?c.dollT6:null, dollT7: c.dollT7!=null?c.dollT7:null, dollT8: c.dollT8!=null?c.dollT8:null, mageDmgMult: c.mageDmgMult!=null?c.mageDmgMult:1, meleeDmgMult: c.meleeDmgMult!=null?c.meleeDmgMult:1, rangedDmgMult: c.rangedDmgMult!=null?c.rangedDmgMult:1,
         eventZongzi: c.eventZongzi ? 1 : 0
     });
 });
@@ -145,6 +145,7 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
     if (b.towerDiff !== undefined) cfg.towerDiff = Math.max(0.5, Math.min(50, parseFloat(b.towerDiff) || 1.5));
     ['synthGao','synthRare','synthHero','synthLegend','synthMyth','synthUniq'].forEach(k => { if (b[k] !== undefined) cfg[k] = Math.max(0, Math.min(100, parseFloat(b[k]) || 0)); });
     ['dollT5','dollT6','dollT7','dollT8'].forEach(k => { if (b[k] !== undefined) cfg[k] = Math.max(0, Math.min(100, parseFloat(b[k]) || 0)); });
+    ['mageDmgMult','meleeDmgMult','rangedDmgMult'].forEach(k => { if (b[k] !== undefined) cfg[k] = Math.max(0.1, Math.min(10, parseFloat(b[k]) || 1)); });
     if (b.eventZongzi !== undefined) cfg.eventZongzi = b.eventZongzi ? 1 : 0;
     const out = store.setConfig(cfg);
     res.json({ ok: true, config: {
@@ -156,7 +157,7 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
         enhanceRateMult: out.enhanceRateMult != null ? out.enhanceRateMult : 1,
         pandoraLuckMult: out.pandoraLuckMult != null ? out.pandoraLuckMult : 1,
         towerDiff: out.towerDiff != null ? out.towerDiff : 1.5,
-        synthGao: out.synthGao!=null?out.synthGao:null, synthRare: out.synthRare!=null?out.synthRare:null, synthHero: out.synthHero!=null?out.synthHero:null, synthLegend: out.synthLegend!=null?out.synthLegend:null, synthMyth: out.synthMyth!=null?out.synthMyth:null, synthUniq: out.synthUniq!=null?out.synthUniq:null, dollT5: out.dollT5!=null?out.dollT5:null, dollT6: out.dollT6!=null?out.dollT6:null, dollT7: out.dollT7!=null?out.dollT7:null, dollT8: out.dollT8!=null?out.dollT8:null,
+        synthGao: out.synthGao!=null?out.synthGao:null, synthRare: out.synthRare!=null?out.synthRare:null, synthHero: out.synthHero!=null?out.synthHero:null, synthLegend: out.synthLegend!=null?out.synthLegend:null, synthMyth: out.synthMyth!=null?out.synthMyth:null, synthUniq: out.synthUniq!=null?out.synthUniq:null, dollT5: out.dollT5!=null?out.dollT5:null, dollT6: out.dollT6!=null?out.dollT6:null, dollT7: out.dollT7!=null?out.dollT7:null, dollT8: out.dollT8!=null?out.dollT8:null, mageDmgMult: out.mageDmgMult!=null?out.mageDmgMult:1, meleeDmgMult: out.meleeDmgMult!=null?out.meleeDmgMult:1, rangedDmgMult: out.rangedDmgMult!=null?out.rangedDmgMult:1,
         eventZongzi: out.eventZongzi ? 1 : 0
     } });
 });
@@ -402,7 +403,10 @@ app.post('/api/worldboss/challenge', auth, (req, res) => {
     const cfg = store.getConfig();
     const dmg = simulateBossDps(req.body && req.body.profile ? req.body.profile : {}, WB_TICKS, {
         pvpDmgMult: cfg.pvpDmgMult != null ? cfg.pvpDmgMult : 1,
-        pvpMagicMult: cfg.pvpMagicMult != null ? cfg.pvpMagicMult : 1
+        pvpMagicMult: cfg.pvpMagicMult != null ? cfg.pvpMagicMult : 1,
+        mageDmgMult: cfg.mageDmgMult != null ? cfg.mageDmgMult : 1,
+        meleeDmgMult: cfg.meleeDmgMult != null ? cfg.meleeDmgMult : 1,
+        rangedDmgMult: cfg.rangedDmgMult != null ? cfg.rangedDmgMult : 1
     });
     const name = (req.body && req.body.name) ? String(req.body.name).slice(0, 20) : u.username;
     w.scores[u.id] = { username: u.username, name, dmg };
@@ -501,7 +505,10 @@ wss.on('connection', (ws) => {
             const _cfg = store.getConfig();
             const result = simulate(pA, pB, {
                 pvpDmgMult: _cfg.pvpDmgMult != null ? _cfg.pvpDmgMult : 1,
-                pvpMagicMult: _cfg.pvpMagicMult != null ? _cfg.pvpMagicMult : 1
+                pvpMagicMult: _cfg.pvpMagicMult != null ? _cfg.pvpMagicMult : 1,
+                mageDmgMult: _cfg.mageDmgMult != null ? _cfg.mageDmgMult : 1,
+                meleeDmgMult: _cfg.meleeDmgMult != null ? _cfg.meleeDmgMult : 1,
+                rangedDmgMult: _cfg.rangedDmgMult != null ? _cfg.rangedDmgMult : 1
             });
             store.addBattle(c.from, ws.username, result.winner === 'draw' ? '平手' : (result.winner === 'A' ? c.from : ws.username));
 
