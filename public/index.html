@@ -6623,7 +6623,11 @@ function gainItem(id, cnt=1, silent=false, forceNormal=false, affixOld=false) {
 
     let _probe = { id: id, en: 0, bless: bless, anc: anc, attr: attr, seteff: seteff };
     let ex = player.inv.find(i => (i.en || 0) === 0 && sameItemSig(i, _probe));   // 🔧 架構#3：統一簽章比對（並容忍舊存檔 en 為 undefined）
-    if(ex) ex.cnt += cnt;   // 不論是否鎖定都疊加；僅加數量、不更動既有堆疊的鎖定/廢品狀態
+    if(ex) {
+        ex.cnt += cnt;
+        // 🗑️ 廢品記憶：重新獲得同種物品時，即使疊到既有堆疊也套用廢品標記（鎖定／有特殊屬性者除外）
+        if (!ex.lock && !attr && !bless && !anc && !seteff && player.junkPrefs && player.junkPrefs[id]) ex.junk = true;
+    }
     else player.inv.push({ id: id, uid: uid(), cnt: cnt, en: 0, bless: bless, anc: anc, attr: attr, seteff: seteff, lock: false, junk: !attr && !bless && !anc && !seteff && !!(player.junkPrefs && player.junkPrefs[id]) });
 
     // 紀錄這次產生的物品屬性
@@ -9380,6 +9384,17 @@ window.openSherinePanel = function (tab) {
     } catch (e) { logSys('面板開啟失敗：' + e.message); }
 };
 
+    window.__currentSlot = function () { try { return currentSlot; } catch (e) { return 1; } };
+    window.__cloudSwitchSlot = function (n, hasData) {
+        try {
+            currentSlot = n;
+            if (hasData) { if (typeof loadGame === 'function') loadGame(); }
+            else {
+                var g = document.getElementById('game-screen'); if (g) g.classList.add('hidden');
+                if (typeof showCreation === 'function') showCreation();
+            }
+        } catch (e) { }
+    };
     function changeMap(force) {
     // 行動限制狀態（石化／麻痺／冰凍／暈眩）時無法主動切換地圖；force=true 供復活、載入等內部流程略過
     if (!force && player.statuses &&

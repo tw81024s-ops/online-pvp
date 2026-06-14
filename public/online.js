@@ -171,7 +171,7 @@
         };
     }
     // 對接遊戲原生欄位系統：用遊戲全域 currentSlot（1~3）與 lineage_idle_save_<slot>
-    function activeSlot() { try { return (typeof currentSlot !== 'undefined' && currentSlot) ? currentSlot : 1; } catch (e) { return 1; } }
+    function activeSlot() { try { if (typeof window.__currentSlot === 'function') return window.__currentSlot() || 1; return (typeof currentSlot !== 'undefined' && currentSlot) ? currentSlot : 1; } catch (e) { return 1; } }
     function slotKey() { return 'lineage_idle_save_' + activeSlot(); }
     async function uploadSave() {
         try {
@@ -188,6 +188,11 @@
             return true;
         }
         return false;
+    }
+    async function fetchCloud() {
+        const j = await api('/api/save?slot=' + activeSlot());
+        if (!j || !j.data) return null;
+        return typeof j.data === 'string' ? j.data : JSON.stringify(j.data);
     }
     // ====== 帳號變身圖鑑同步（所有角色共用）======
     let _pdTimer = null;
@@ -395,13 +400,20 @@
         hookSave();
         connectWS();
         try {
-            const hasCloud = await downloadSave();
-            const hasLocal = !!localStorage.getItem(slotKey());
-            if (hasCloud) {
-                if (confirm('雲端發現你的存檔，要立即載入嗎？\n（取消＝保留目前畫面，下次自行按「載入進度」）')) {
-                    if (typeof loadGame === 'function') loadGame();
+            const cloud = await fetchCloud();
+            const localRaw = localStorage.getItem(slotKey());
+            if (cloud) {
+                if (!localRaw || cloud !== localRaw) {
+                    const ask = localRaw
+                        ? '雲端有此角色欄位的存檔。\n要用「雲端存檔」覆蓋本機並載入嗎？\n\n確定＝用雲端覆蓋本機\n取消＝保留本機目前進度（不變動）'
+                        : '雲端有此角色欄位的存檔，要載入到本機嗎？';
+                    if (confirm(ask)) {
+                        localStorage.setItem(slotKey(), cloud);
+                        if (typeof loadGame === 'function') loadGame();
+                        toast('已用雲端存檔覆蓋本機並載入 ☁️', '#14532d');
+                    }
                 }
-            } else if (hasLocal) {
+            } else if (localRaw) {
                 await uploadSave();
                 toast('已將本機存檔上傳到雲端 ☁️');
             }
@@ -724,19 +736,30 @@
     }
     async function switchSlot(n) {
         const cur = activeSlot();
-        if (n === cur) return;
-        if (!confirm('要切換到「角色欄位 ' + n + '」嗎？\n目前的角色會先自動存檔。')) return;
+        if (n === cur) { toast('目前已在角色欄位 ' + n); return; }
+        if (!confirm('要切換到「角色欄位 ' + n + '」嗎？\n目前角色會先存檔並上傳雲端。')) return;
         try {
             toast('切換中…請稍候');
+            // 1) 存目前欄位並上傳雲端
             if (typeof window.saveGame === 'function') { try { window.saveGame(); } catch (e) { } }
-            const raw = localStorage.getItem('lineage_idle_save');
-            if (raw) { try { await api('/api/save?slot=' + cur, 'PUT', { data: JSON.parse(raw) }); } catch (e) { } }
-            localStorage.setItem('de_active_slot', String(n));
+            const curRaw = localStorage.getItem('lineage_idle_save_' + cur);
+            if (curRaw) { try { await api('/api/save?slot=' + cur, 'PUT', { data: JSON.parse(curRaw) }); } catch (e) { } }
+            // 2) 下載目標欄位雲端存檔 → 寫入該欄位 key
             let j = {};
             try { j = await api('/api/save?slot=' + n); } catch (e) { }
-            if (j && j.data) localStorage.setItem('lineage_idle_save', typeof j.data === 'string' ? j.data : JSON.stringify(j.data));
-            else localStorage.removeItem('lineage_idle_save');
-            location.reload();   // 乾淨重開，載入該欄位的角色
+            if (j && j.data) localStorage.setItem('lineage_idle_save_' + n, typeof j.data === 'string' ? j.data : JSON.stringify(j.data));
+            const hasData = !!localStorage.getItem('lineage_idle_save_' + n);
+            // 3) 切換並載入（透過遊戲端 helper 正確改 currentSlot，不重整）
+            if (typeof window.__cloudSwitchSlot === 'function') {
+                window.__cloudSwitchSlot(n, hasData);
+            } else {
+                try { window.currentSlot = n; } catch (e) { }
+                if (hasData && typeof loadGame === 'function') loadGame();
+            }
+            localStorage.setItem('de_active_slot', String(n));
+            if (hasData) toast('已切換到角色欄位 ' + n + ' ✅', '#14532d');
+            else toast('角色欄位 ' + n + ' 沒有角色，請建立新角色。', '#1e3a5f');
+            try { setStatus('☁️ 角色' + n); } catch (e) { }
         } catch (e) { toast('切換失敗：' + e.message, '#7f1d1d'); }
     }
     async function showSlots() {
