@@ -608,6 +608,7 @@
                 <button class="btn text-base py-2 font-bold px-0" style="background: linear-gradient(135deg, #565d68 0%, #6b7280 26%, #3f4651 48%, #5a6270 72%, #313740 100%); color: #f1f5f9; border-color: #6b7280;" onclick="switchTab('audit', this)">統計</button>
                 <button id="btn-sort-inv" class="btn text-base py-2 font-bold px-0" style="background: linear-gradient(135deg, #0c4a5e 0%, #0e7490 28%, #0a3d4d 52%, #11657e 76%, #093440 100%); color: #a5f3fc; border-color: #0891b2;" onclick="sortInventory()">一鍵排列</button>
                 <button id="btn-sell-junk" class="btn text-base py-2 font-bold px-0" style="background: linear-gradient(135deg, #6b2a10 0%, #b3490e 28%, #5a230e 52%, #9a3e0c 76%, #4a1d0c 100%); color: #fed7aa; border-color: #c2410c;" onclick="sellAllJunk()">賣出廢品</button>
+                <button id="btn-trash-gear" class="btn text-base py-2 font-bold px-0" style="grid-column:1 / -1; background: linear-gradient(135deg,#5b3a10 0%,#b45309 28%,#4a2f0c 52%,#d97706 76%,#3a2509 100%); color:#fde68a; border-color:#d97706;" onclick="sellUnlockedGear()">🗑️ 一鍵賣裝（賣掉未上鎖裝備/武器換金幣）</button>
             </div>
 
             <div class="panel flex-1 flex flex-col overflow-hidden relative">
@@ -8240,6 +8241,39 @@ function sortInventory() {
 }
 
 // 一鍵賣出所有已勾為廢品的武器/防具/飾品（鎖定者不會被賣，因鎖定時已自動取消勾選）
+// ===== 一鍵賣掉未上鎖的裝備/武器（換金幣，兩段確認）=====
+function sellUnlockedGear() {
+    var EQUIP = { wpn: 1, arm: 1, acc: 1 };   // 武器 / 防具 / 飾品
+    var toSell = player.inv.filter(function (i) {
+        var d = DB.items[i.id];
+        return d && EQUIP[d.type] && !i.lock;
+    });
+    if (toSell.length === 0) { alert('沒有可賣出的未上鎖裝備或武器。\n（已上鎖的不會列入，身上穿戴的也不受影響）'); return; }
+    var totalCnt = 0, totalGold = 0;
+    toSell.forEach(function (i) {
+        var c = i.cnt || 1; totalCnt += c;
+        var sp = 0; try { sp = getSellPrice(i); } catch (e) { sp = Math.floor(((DB.items[i.id] || {}).p || 0) / 4); }
+        totalGold += sp * c;
+    });
+    var names = toSell.slice(0, 25).map(function (i) {
+        var nm; try { nm = getItemFullName(i); } catch (e) { nm = (DB.items[i.id] || {}).n || i.id; }
+        return '・' + nm + ((i.cnt || 1) > 1 ? ' ×' + i.cnt : '');
+    }).join('\n');
+    var more = toSell.length > 25 ? ('\n…等，合計 ' + toSell.length + ' 種') : '';
+    var goldStr = totalGold.toLocaleString();
+    // 第一次確認：顯示賣出內容
+    if (!confirm('【一鍵賣裝】即將賣出以下「未上鎖」的裝備/武器\n（共 ' + toSell.length + ' 種、' + totalCnt + ' 件；已上鎖與身上穿戴的不受影響）：\n\n' + names + more + '\n\n預計可換 ' + goldStr + ' 金幣，要賣嗎？')) return;
+    // 第二次確認：最終確認
+    if (!confirm('再次確認\n賣出後無法復原，真的要賣掉這 ' + totalCnt + ' 件、換 ' + goldStr + ' 金幣嗎？')) return;
+    var sellSet = {};
+    toSell.forEach(function (i) { sellSet[i.uid] = 1; });
+    player.inv = player.inv.filter(function (i) { return !sellSet[i.uid]; });
+    player.gold = (player.gold || 0) + totalGold;
+    try { updateUI(); } catch (e) { }
+    try { saveGame(); } catch (e) { }
+    try { logSys('<span class="text-yellow-400 font-bold">🗑️ 一鍵賣裝：賣出 ' + toSell.length + ' 種（' + totalCnt + ' 件）未上鎖裝備/武器，獲得 ' + goldStr + ' 金幣。</span>'); } catch (e) { }
+}
+
 function sellAllJunk() {
     let toSell = player.inv.filter(i => {
         let d = DB.items[i.id];
