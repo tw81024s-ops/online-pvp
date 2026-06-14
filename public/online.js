@@ -143,8 +143,16 @@
                 if (dice && (!heal || (s.tier || 1) > (heal.tier || 1))) heal = { name: s.n || id, dice: dice, mp: s.mp || 5, tier: s.tier || 1 };
             });
         }
+        // 🛡️ 魔法屏障：玩家開啟「魔法卷軸(魔法屏障)」設定，且有技能或持有卷軸 → PvP 進場帶屏障
+        let magicBarrier = false;
+        try {
+            const _on = !!(p.config && p.config.setMagicbarrier);
+            const _hasSkill = (p.skills || []).indexOf('sk_magic_shield') !== -1;
+            const _hasScroll = (p.inv || []).some(i => i.id === 'scroll_magicbarrier' && (i.cnt || 0) > 0);
+            magicBarrier = _on && (_hasSkill || _hasScroll);
+        } catch (e) { }
         return {
-            name: p.name || myName, cls: p.cls, lv: p.lv, avatar: p.avatar || null, darkelf: !!p.darkelf, magicEvade: !!(p.darkelf || p._setMoon5),
+            name: p.name || myName, cls: p.cls, lv: p.lv, avatar: p.avatar || null, darkelf: !!p.darkelf, magicEvade: !!(p.darkelf || p._setMoon5), magicBarrier,
             mhp: p.mhp, mmp: p.mmp,
             ac: d.ac, mr: d.mr, er: d.er, dr: d.dr || 0,
             meleeHit: d.meleeHit, meleeDmg: d.meleeDmg, meleeCrit: d.meleeCrit, meleeCritDmg: d.meleeCritDmg,

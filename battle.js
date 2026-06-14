@@ -118,6 +118,8 @@ function simulate(profileA, profileB, opts) {
     for (let t = 1; t <= MAXTICKS; t++) {
         for (let [me, foe, side] of [[A, B, 'A'], [B, A, 'B']]) {
             if (me.hp <= 0 || foe.hp <= 0) continue;
+            // 🛡️ 魔法屏障：抵擋後冷卻倒數，歸零則重新就緒（對應角色開啟的魔法屏障設定）
+            if (me.magicBarrier && me.mShieldCd > 0) { me.mShieldCd--; if (me.mShieldCd <= 0) me.mShield = true; }
             // 暈眩中：本回合無法行動（冷卻照樣遞減）
             if (me.stunT > 0) { me.stunT--; me.atkCd--; me.atkSkCd--; me.healCd--; continue; }
 
@@ -174,6 +176,9 @@ function simulate(profileA, profileB, opts) {
                     let r = magicAttack(me.p, foe.p, me.p.spell);
                     if (r.type === 'evade') {
                         push(t, side, 'evade', `${foe.name} 以身法迴避了 ${me.name} 的魔法攻擊！`, 0);
+                    } else if (foe.mShield) {
+                        foe.mShield = false; foe.mShieldCd = 30;   // 吸收一次，3 秒後重新就緒
+                        push(t, side, 'evade', `🛡️ ${foe.name} 的魔法屏障吸收了 ${me.name} 的魔法攻擊！`, 0);
                     } else {
                         let mdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * PVP_MAGIC));
                         foe.hp -= mdmg;
@@ -225,7 +230,8 @@ function initSide(p) {
         hp: p.mhp, mhp: p.mhp, mp: p.mmp, mmp: p.mmp, stunT: 0,
         atkInterval: Math.max(1, Math.round(wSpd * 10 * spdMult)),
         castInterval: Math.max(1, Math.round(20 * spdMult)),
-        atkCd: randInt(0, 5), atkSkCd: randInt(0, 5), healCd: 0
+        atkCd: randInt(0, 5), atkSkCd: randInt(0, 5), healCd: 0,
+        magicBarrier: !!p.magicBarrier, mShield: !!p.magicBarrier, mShieldCd: 0
     };
 }
 
