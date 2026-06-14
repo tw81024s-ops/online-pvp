@@ -443,22 +443,53 @@
         installFlushOnHide();
         connectWS();
         try {
-            const cloud = await fetchCloud();
-            const localRaw = localStorage.getItem(slotKey());
-            if (cloud) {
-                if (!localRaw || cloud !== localRaw) {
-                    const ask = localRaw
-                        ? '雲端有此角色欄位的存檔。\n要用「雲端存檔」覆蓋本機並載入嗎？\n\n確定＝用雲端覆蓋本機\n取消＝保留本機目前進度（不變動）'
-                        : '雲端有此角色欄位的存檔，要載入到本機嗎？';
-                    if (confirm(ask)) {
-                        localStorage.setItem(slotKey(), cloud);
-                        if (typeof loadGame === 'function') loadGame();
-                        toast('已用雲端存檔覆蓋本機並載入 ☁️', '#14532d');
+            const _saveT = (raw, serverTs) => {
+                try { const o = JSON.parse(raw); if (o && typeof o.t === 'number') return o.t; } catch (e) { }
+                return serverTs ? new Date(serverTs).getTime() : 0;
+            };
+            // 抓雲端各欄位(1~4)＋更新時間；只補「本機為空」的欄位（不覆蓋本機既有進度）
+            const cloudSlots = {}, cloudTs = {};
+            for (let sN = 1; sN <= 4; sN++) {
+                try {
+                    const jj = await api('/api/save?slot=' + sN);
+                    if (jj && jj.data) {
+                        const d = typeof jj.data === 'string' ? jj.data : JSON.stringify(jj.data);
+                        cloudSlots[sN] = d; cloudTs[sN] = jj.updatedAt || null;
+                        const k = 'lineage_idle_save_' + sN;
+                        if (!localStorage.getItem(k)) localStorage.setItem(k, d);
                     }
+                } catch (e) { }
+            }
+            const cur = activeSlot();
+            const curKey = 'lineage_idle_save_' + cur;
+            const localRaw = localStorage.getItem(curKey);
+            const cloudRaw = cloudSlots[cur];
+            if (cloudRaw && localRaw) {
+                // 兩邊都有 → 比時間戳，較新的自動勝出（不用手動確認）
+                const ct = _saveT(cloudRaw, cloudTs[cur]), lt = _saveT(localRaw, 0);
+                if (ct > lt) {
+                    localStorage.setItem(curKey, cloudRaw);
+                    if (typeof loadGame === 'function') loadGame();
+                    toast('雲端存檔較新，已自動載入 ☁️', '#14532d');
+                } else if (lt > ct) {
+                    await uploadSave();
+                    setStatus('☁️ 本機較新，已上傳');
                 }
+                // 相等：不動
+            } else if (cloudRaw) {
+                localStorage.setItem(curKey, cloudRaw);
+                if (typeof loadGame === 'function') loadGame();
+                toast('已載入雲端存檔 ☁️', '#14532d');
             } else if (localRaw) {
                 await uploadSave();
-                toast('已將本機存檔上傳到雲端 ☁️');
+            } else {
+                // 目前欄位空 → 雲端其他欄位若有角色，自動切過去載入
+                const other = [1, 2, 3, 4].find(x => cloudSlots[x]);
+                if (other) {
+                    if (typeof window.__cloudSwitchSlot === 'function') window.__cloudSwitchSlot(other, true);
+                    else { try { window.currentSlot = other; } catch (e) { } if (typeof loadGame === 'function') loadGame(); }
+                    toast('已從雲端載入你的角色（角色' + other + '）☁️', '#14532d');
+                }
             }
         } catch (e) { toast('雲端存檔同步失敗：' + e.message, '#7f1d1d'); }
         try { await pullMergePolyDex(); } catch (e) { }
