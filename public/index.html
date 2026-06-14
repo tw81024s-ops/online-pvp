@@ -534,6 +534,7 @@
                     </div>
                     
                     <button onclick="openSherinePanel()" class="mt-auto btn w-full py-2 bg-emerald-800 hover:bg-emerald-700 text-base">🔮 席琳套裝</button>
+      <button onclick="openTowerWindow()" class="btn w-full py-2 bg-rose-900 hover:bg-rose-800 text-base">🗼 守護TD</button>
             <button onclick="showAnnouncements()" class="btn w-full py-2 bg-amber-800 hover:bg-amber-700 text-base">📢 更新公告</button>
                     <button onclick="saveGame()" class="btn w-full py-3 bg-slate-700 text-lg mt-2">儲存遊戲進度</button>
                 </div>
@@ -3626,6 +3627,7 @@ function gameLoop() {
 }
 
 function tick() {
+    if (player.dead && player.tower && player.tower.active) towerEnd('lose');
     if(!state.running || player.dead) return;
     state.ticks++;
     for(let k in player.manualCd) if(player.manualCd[k] > 0) player.manualCd[k]--;
@@ -3643,6 +3645,7 @@ function tick() {
         regenTick();
     }
     if (state.ticks % 10 === 0) siegeTick();   // 攻城戰：每秒檢查時限
+    if (player.tower && player.tower.active) towerTick();   // 爬塔守護：補位/計時/過層
     
     if(player.statuses.poison > 0 && state.ticks % player.statuses.poisonTick === 0) {
         player.hp -= player.statuses.poisonDmg;
@@ -9395,7 +9398,269 @@ window.openSherinePanel = function (tab) {
             }
         } catch (e) { }
     };
-    function changeMap(force) {
+    // ===================== 爬塔守護 Guard TD =====================
+var TOWER_MAP = 'climb_td';     // sentinel 地圖：DB.maps 無此鍵 → spawnMob 自動 no-op（禁止自動重生）
+var TOWER_CAP = 100;            // 封頂 100 樓
+var TOWER_TIME = 60;           // 每層限時 60 秒
+var _twPool = null;
+
+function _twBuildPool() {
+    if (_twPool) return _twPool;
+    var arr = [];
+    for (var id in DB.mobs) {
+        var m = DB.mobs[id];
+        if (!m) continue;
+        if (m.race === '建築' || m.siegeEnemy || m.pledgeEnemy || m.race === '血盟') continue;
+        if (m.n === '肯特城門' || m.n === '肯特守護塔') continue;
+        arr.push({ id: id, lv: m.lv || 1, boss: !!m.boss });
+    }
+    arr.sort(function (a, b) { return (a.lv - b.lv) || ((a.boss ? 1 : 0) - (b.boss ? 1 : 0)); });
+    _twPool = {
+        normals: arr.filter(function (x) { return !x.boss; }),
+        bosses: arr.filter(function (x) { return x.boss; })
+    };
+    if (!_twPool.normals.length) _twPool.normals = arr;
+    return _twPool;
+}
+
+// 第 f 層的怪清單：奇數層=小怪(≥5隻相同)、偶數層=小王(2隻相同、強度翻倍、用有機制的頭目)，由弱到強
+function _twFloorMobs(f) {
+    var pool = _twBuildPool();
+    var prog = TOWER_CAP > 1 ? (f - 1) / (TOWER_CAP - 1) : 0;   // 0..1 進度
+    var diff = (window.__GAME_CONFIG && window.__GAME_CONFIG.towerDiff) || 1.5;   // 管理員可調的全服爬塔難度
+    var mult = (1 + (f - 1) * 0.3) * diff;                      // 強度隨層成長 × 全服難度（由弱到強）
+    var isBossFloor = (f % 2 === 0);                            // 偶數層 = 小王
+    var out = [];
+    if (isBossFloor) {
+        var bArr = pool.bosses.length ? pool.bosses : pool.normals;
+        var bIdx = Math.min(bArr.length - 1, Math.floor(prog * (bArr.length - 1)));
+        if (bIdx < 0) bIdx = 0;
+        var bid = bArr[bIdx].id;
+        for (var i = 0; i < 2; i++) out.push({ id: bid, mult: mult * 2, boss: true });   // 2 隻相同小王、強度翻倍、頭目自帶機制
+    } else {
+        var nIdx = Math.min(pool.normals.length - 1, Math.floor(prog * (pool.normals.length - 1)));
+        if (nIdx < 0) nIdx = 0;
+        var nid = pool.normals[nIdx].id;
+        var cnt = Math.max(5, Math.min(10, 5 + Math.floor(f / 25)));   // 至少 5 隻相同小怪
+        for (var k = 0; k < cnt; k++) out.push({ id: nid, mult: mult, boss: false });
+    }
+    return out;
+}
+
+function _twMakeMob(spec) {
+    var base = DB.mobs[spec.id];
+    if (!base) return null;
+    var m = Object.assign({}, base, { curHp: base.hp, uid: uid(), _magCd: {}, justHit: false, st: newMobStatus(), _towerMob: true });
+    var mu = spec.mult || 1;
+    m.hp = Math.max(1, Math.floor((base.hp || 1) * mu)); m.curHp = m.hp;
+    m.ac = Math.floor((base.ac || 0) * (1 + (mu - 1) * 0.5));
+    m.mr = Math.floor((base.mr || 0) * (1 + (mu - 1) * 0.5));
+    m.hit = Math.floor((base.hit || 0) * mu);
+    if (Array.isArray(base.dmg)) m.dmg = [Math.floor(base.dmg[0] * mu), Math.floor(base.dmg[1] * mu)];
+    m.exp = 0; m.goldMin = 0; m.goldMax = 0;     // 個別擊殺不給獎勵，獎勵只走過層結算
+    m.boss = !!spec.boss;
+    return m;
+}
+
+function enterTower() {
+    if (typeof state === 'undefined' || !state.running) { try { logSys('請先進入遊戲再挑戰'); } catch (e) { } return; }
+    if (player.siege && player.siege.active) { alert('攻城進行中，無法進入爬塔'); return; }
+    if (player.dead) { alert('你已死亡，請先復活'); return; }
+    try { saveSiegeBossHp(); } catch (e) { }
+    player.tower = player.tower || {};
+    player.tower.best = player.tower.best || 0;
+    player.tower.active = true;
+    player.tower.returnMap = (mapState.current === TOWER_MAP) ? 'training' : mapState.current;
+    mapState.current = TOWER_MAP;
+    _twStartFloor(1);
+    _twShowRun();
+}
+
+function _twStartFloor(f) {
+    player.tower.floor = f;
+    var specs = _twFloorMobs(f);
+    player.tower.queue = specs.slice(3);
+    player.tower.total = specs.length;
+    mapState.mobs = [null, null, null];
+    mapState.spawnAt = [null, null, null];
+    mapState.targetIdx = 0;
+    for (var i = 0; i < 3 && i < specs.length; i++) mapState.mobs[i] = _twMakeMob(specs[i]);
+    player.tower.endTime = Date.now() + TOWER_TIME * 1000;
+    try { renderMobs(); } catch (e) { }
+}
+
+// 每 tick：補位 / 計時 / 過層 / 死亡結束
+function towerTick() {
+    var t = player.tower;
+    if (!t || !t.active) return;
+    if (player.dead) { towerEnd('lose'); return; }
+    for (var i = 0; i < 3; i++) {
+        var m = mapState.mobs[i];
+        var dead = !m || m._dead || m.curHp <= 0;
+        if (dead) {
+            if (t.queue && t.queue.length) { mapState.mobs[i] = _twMakeMob(t.queue.shift()); mapState.spawnAt[i] = null; }
+            else if (m) { mapState.mobs[i] = null; mapState.spawnAt[i] = null; }
+        }
+    }
+    var alive = mapState.mobs.some(function (m) { return m && !m._dead && m.curHp > 0; });
+    var cleared = (!t.queue || t.queue.length === 0) && !alive;
+    if (cleared) { _twClearFloor(); return; }
+    if (Date.now() >= (t.endTime || 0)) { towerEnd('lose'); return; }
+    _twUpdateRun();
+}
+
+function _twClearFloor() {
+    var t = player.tower, f = t.floor;
+    _twReward(f);
+    if (t.best < f) t.best = f;
+    if (f >= TOWER_CAP) { towerEnd('win'); return; }
+    _twStartFloor(f + 1);
+    _twShowRun();
+    try { toast('第 ' + f + ' 層 通過！'); } catch (e) { }
+}
+
+// 過層獎勵：金幣 + 潘朵拉卷（每6層一級距×1000）；30 層起加席琳卷（每層 +2）
+function _twReward(f) {
+    var bracket = Math.ceil(f / 6);
+    var pandora = bracket * 1000;
+    var gold = bracket * 1000000;
+    player.gold = (player.gold || 0) + gold;
+    try {
+        gainItem('new_item_239', pandora, true);
+        if (f >= 30) gainItem('sherine_scroll', (f - 29) * 2, true);
+    } catch (e) { }
+    try { updateUI(); } catch (e) { }
+    try { saveGame(); } catch (e) { }
+}
+
+function towerEnd(result) {
+    var t = player.tower; if (!t || !t.active) return;
+    var reached = Math.max(t.best || 0, t.floor || 0);
+    t.active = false;
+    mapState.current = t.returnMap || 'training';
+    mapState.mobs = [null, null, null];
+    mapState.spawnAt = [null, null, null];
+    mapState.targetIdx = 0;
+    try { syncMapSelectors(); } catch (e) { }
+    try { renderMobs(); } catch (e) { }
+    try { saveGame(); } catch (e) { }
+    if (window.__towerSubmit) { try { window.__towerSubmit(reached); } catch (e) { } }
+    _twShowPanel(result, reached);
+}
+
+function towerRetreat() { if (player.tower && player.tower.active) towerEnd('retreat'); }
+
+// ============ 介面：守護TD 視窗 ============
+function _twOverlay() {
+    var o = document.getElementById('tower-overlay');
+    if (o) return o;
+    o = document.createElement('div');
+    o.id = 'tower-overlay';
+    o.style.cssText = 'position:fixed;inset:0;z-index:9000;display:none;background:#0b0b12 url(assets/ui/tower_bg.jpg) center/cover no-repeat;';
+    var shade = document.createElement('div');
+    shade.style.cssText = 'position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,14,.55),rgba(8,8,14,.82));';
+    o.appendChild(shade);
+    var box = document.createElement('div');
+    box.id = 'tower-box';
+    box.style.cssText = 'position:relative;max-width:520px;margin:0 auto;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;color:#e5e7eb;font-family:inherit;text-align:center;';
+    o.appendChild(box);
+    document.body.appendChild(o);
+    return o;
+}
+
+function openTowerWindow() {
+    var o = _twOverlay();
+    o.style.display = 'block';
+    if (player.tower && player.tower.active) _twShowRun();
+    else _twShowPanel(null, (player.tower && player.tower.best) || 0);
+}
+
+function closeTowerWindow() {
+    var o = document.getElementById('tower-overlay');
+    if (o) o.style.display = 'none';
+}
+
+function _twShowPanel(result, reached) {
+    var o = _twOverlay(); o.style.display = 'block';
+    var box = document.getElementById('tower-box');
+    var best = (player.tower && player.tower.best) || 0;
+    var banner = '';
+    if (result) {
+        var msg = result === 'win' ? '🏆 登頂成功！通關 100 層！' :
+                  result === 'retreat' ? '已撤退，本次到達 第 ' + reached + ' 層' :
+                  '⛓️ 守護失敗，到達 第 ' + reached + ' 層';
+        banner = '<div style="background:rgba(16,16,24,.7);border:1px solid #4b5563;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:15px;color:#fbbf24;">' + msg + '</div>';
+    }
+    box.innerHTML =
+        '<div style="font-size:30px;font-weight:800;letter-spacing:4px;color:#f3f4f6;text-shadow:0 2px 8px #000;">🗼 守護 TD</div>' +
+        '<div style="color:#9ca3af;margin:4px 0 16px;">限時殲滅・爬塔守護　封頂 ' + TOWER_CAP + ' 層</div>' +
+        banner +
+        '<div style="font-size:16px;margin-bottom:10px;">我的最高層：<b style="color:#34d399;">' + best + '</b> / ' + TOWER_CAP + '</div>' +
+        '<button onclick="enterTower()" style="width:240px;padding:12px;border:none;border-radius:10px;background:#b91c1c;color:#fff;font-size:17px;font-weight:700;cursor:pointer;margin-bottom:8px;">' + (best > 0 ? '再次挑戰（從第 1 層）' : '開始挑戰') + '</button>' +
+        '<div id="tw-board" style="width:100%;max-width:380px;margin-top:14px;background:rgba(10,10,16,.66);border:1px solid #374151;border-radius:10px;padding:10px 12px;max-height:38vh;overflow:auto;text-align:left;font-size:13px;color:#cbd5e1;">排行榜載入中…</div>' +
+        '<button onclick="closeTowerWindow()" style="margin-top:14px;width:160px;padding:8px;border:1px solid #6b7280;border-radius:8px;background:transparent;color:#d1d5db;cursor:pointer;">關閉</button>';
+    _twLoadBoard();
+}
+
+function _twLoadBoard() {
+    var el = document.getElementById('tw-board'); if (!el) return;
+    if (!window.__towerBoard) { el.textContent = '（需登入線上帳號才有排行榜）'; return; }
+    window.__towerBoard().then(function (r) {
+        var top = (r && r.top) || [];
+        if (!top.length) { el.innerHTML = '<div style="color:#9ca3af;">尚無紀錄，當第一個登頂的人！</div>'; return; }
+        var html = '<div style="font-weight:700;color:#fbbf24;margin-bottom:6px;">🏆 爬塔排行榜 Top 20</div>';
+        top.forEach(function (x, i) {
+            var c = i === 0 ? '#fbbf24' : i === 1 ? '#d1d5db' : i === 2 ? '#d97706' : '#94a3b8';
+            html += '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span style="color:' + c + ';">' + (i + 1) + '. ' + (x.name || '無名氏') + '</span><span style="color:#e5e7eb;">第 ' + (x.floor || 0) + ' 層</span></div>';
+        });
+        el.innerHTML = html;
+    }).catch(function () { el.textContent = '排行榜載入失敗'; });
+}
+
+function _twShowRun() {
+    var o = _twOverlay(); o.style.display = 'block';
+    var box = document.getElementById('tower-box');
+    box.innerHTML =
+        '<div style="font-size:14px;color:#fca5a5;letter-spacing:3px;">守護 TD・限時殲滅</div>' +
+        '<div style="font-size:46px;font-weight:800;color:#f3f4f6;text-shadow:0 2px 10px #000;margin:2px 0;">第 <span id="tw-floor">1</span> 層</div>' +
+        '<div id="tw-timer" style="font-size:30px;font-weight:800;color:#fbbf24;margin-bottom:4px;">60.0</div>' +
+        '<div id="tw-progress" style="font-size:14px;color:#cbd5e1;margin-bottom:10px;">剩餘 0 / 0</div>' +
+        '<div id="tw-mobs" style="width:100%;max-width:420px;display:flex;flex-direction:column;gap:7px;margin-bottom:14px;"></div>' +
+        '<button onclick="towerRetreat()" style="width:170px;padding:9px;border:1px solid #ef4444;border-radius:8px;background:rgba(127,29,29,.6);color:#fecaca;cursor:pointer;">撤退（保留紀錄）</button>';
+    _twUpdateRun();
+}
+
+function _twUpdateRun() {
+    var t = player.tower; if (!t || !t.active) return;
+    var fEl = document.getElementById('tw-floor'); if (fEl) fEl.textContent = t.floor;
+    var tEl = document.getElementById('tw-timer');
+    if (tEl) {
+        var rem = Math.max(0, ((t.endTime || 0) - Date.now()) / 1000);
+        tEl.textContent = rem.toFixed(1);
+        tEl.style.color = rem <= 10 ? '#ef4444' : '#fbbf24';
+    }
+    var live = mapState.mobs.filter(function (m) { return m && !m._dead && m.curHp > 0; });
+    var remainCnt = live.length + ((t.queue && t.queue.length) || 0);
+    var pEl = document.getElementById('tw-progress');
+    if (pEl) pEl.textContent = '剩餘 ' + remainCnt + ' / ' + (t.total || 0) + ' 隻';
+    var mEl = document.getElementById('tw-mobs');
+    if (mEl) {
+        var html = '';
+        mapState.mobs.forEach(function (m) {
+            if (!m || m._dead || m.curHp <= 0) return;
+            var pct = Math.max(0, Math.min(100, Math.round(m.curHp / m.hp * 100)));
+            var nm = (m.n || '怪物') + (m.boss ? ' 👑' : '');
+            html += '<div style="background:rgba(10,10,16,.7);border:1px solid #374151;border-radius:8px;padding:6px 9px;text-align:left;">' +
+                '<div style="display:flex;justify-content:space-between;font-size:13px;color:#e5e7eb;"><span>' + nm + '</span><span>' + m.curHp + ' / ' + m.hp + '</span></div>' +
+                '<div style="height:7px;background:#1f2937;border-radius:4px;margin-top:3px;overflow:hidden;"><div style="height:100%;width:' + pct + '%;background:' + (m.boss ? '#a855f7' : '#ef4444') + ';"></div></div>' +
+                '</div>';
+        });
+        mEl.innerHTML = html || '<div style="color:#9ca3af;font-size:13px;">下一波即將出現…</div>';
+    }
+}
+
+
+function changeMap(force) {
     // 行動限制狀態（石化／麻痺／冰凍／暈眩）時無法主動切換地圖；force=true 供復活、載入等內部流程略過
     if (!force && player.statuses &&
         (player.statuses.stone > 0 || player.statuses.paralyze > 0 || player.statuses.freeze > 0 || player.statuses.stun > 0)) {

@@ -64,6 +64,19 @@
         if (!res.ok) throw new Error(j.error || ('HTTP ' + res.status));
         return j;
     }
+
+    // ============ 爬塔守護：排行榜上傳 / 抓取 ============
+    async function towerSubmit(floor) {
+        try {
+            const p = getPlayer();
+            return await api('/api/tower/submit', 'POST', { floor: floor | 0, name: (p && p.name) || myName || '' });
+        } catch (e) { return null; }
+    }
+    async function towerBoard() {
+        try { return await api('/api/tower/board', 'GET'); } catch (e) { return { top: [] }; }
+    }
+    window.__towerSubmit = towerSubmit;
+    window.__towerBoard = towerBoard;
     // ============ 全服設定（經驗倍率 / 攻速倍率）：所有玩家定期同步並套用 ============
     window.__GAME_CONFIG = window.__GAME_CONFIG || { expMult: 1, spdMult: 1 };
     async function syncGameConfig() {
@@ -75,6 +88,7 @@
                 expMult: j.expMult || 1, spdMult: j.spdMult || 1,
                 goldDropMult: j.goldDropMult || 1, synthRateMult: j.synthRateMult || 1,
                 enhanceRateMult: j.enhanceRateMult || 1, pandoraLuckMult: j.pandoraLuckMult || 1,
+                towerDiff: j.towerDiff || 1.5,
                 eventZongzi: j.eventZongzi ? 1 : 0
             };
             try { if (typeof calcStats === 'function') calcStats(); if (typeof updateUI === 'function') updateUI(); } catch (e) { }
@@ -1091,7 +1105,7 @@
         section('🌍 全服設定（所有玩家生效，立即同步）');
         const cfgStatus = el('div', { style: 'font-size:12px;color:#94a3b8;margin:-2px 0 8px;line-height:1.7;' }, '目前全服設定：讀取中…');
         _secBody.append(cfgStatus);
-        const fmtCfg = c => `目前全服：經驗 ×${c.expMult || 1}　攻速 ×${c.spdMult || 1}<br>競技場傷害 ×${c.pvpDmgMult != null ? c.pvpDmgMult : 1}　競技場魔法 ×${c.pvpMagicMult != null ? c.pvpMagicMult : 1}<br>金幣掉落 ×${c.goldDropMult != null ? c.goldDropMult : 1}　合卡 ×${c.synthRateMult != null ? c.synthRateMult : 1}　衝裝 ×${c.enhanceRateMult != null ? c.enhanceRateMult : 1}　潘朵拉 ×${c.pandoraLuckMult != null ? c.pandoraLuckMult : 1}　端午活動 ${c.eventZongzi ? '🟢開啟' : '⚪關閉'}`;
+        const fmtCfg = c => `目前全服：經驗 ×${c.expMult || 1}　攻速 ×${c.spdMult || 1}<br>競技場傷害 ×${c.pvpDmgMult != null ? c.pvpDmgMult : 1}　競技場魔法 ×${c.pvpMagicMult != null ? c.pvpMagicMult : 1}<br>金幣掉落 ×${c.goldDropMult != null ? c.goldDropMult : 1}　合卡 ×${c.synthRateMult != null ? c.synthRateMult : 1}　衝裝 ×${c.enhanceRateMult != null ? c.enhanceRateMult : 1}　潘朵拉 ×${c.pandoraLuckMult != null ? c.pandoraLuckMult : 1}　爬塔難度 ×${c.towerDiff != null ? c.towerDiff : 1.5}　端午活動 ${c.eventZongzi ? '🟢開啟' : '⚪關閉'}`;
         fetch('/api/config').then(r => r.json()).then(j => { cfgStatus.innerHTML = fmtCfg(j); }).catch(() => { cfgStatus.textContent = '（需登入線上模式才能讀取/設定）'; });
         const setCfg = async (key, n, label) => {
             try { const j = await api('/api/admin/config', 'POST', { [key]: n }); await syncGameConfig(); cfgStatus.innerHTML = fmtCfg(j.config); toast(label + ' = ×' + n, '#14532d'); }
@@ -1105,6 +1119,7 @@
         row(null, '合卡成功率', v => setCfg('synthRateMult', Math.max(0, parseFloat(v) || 1), '合卡成功率'), true, '變身合成倍率（例 2＝兩倍成功率）');
         row(null, '衝裝成功率', v => setCfg('enhanceRateMult', Math.max(0, parseFloat(v) || 1), '衝裝成功率'), true, '強化成功率倍率（例 1.5＝1.5倍）');
         row(null, '潘朵拉機率', v => setCfg('pandoraLuckMult', Math.max(0, parseFloat(v) || 1), '潘朵拉機率'), true, '稀有物加權倍率（例 3＝稀有更易中）');
+        row(null, '爬塔難度倍率', v => setCfg('towerDiff', Math.max(0.5, parseFloat(v) || 1.5), '爬塔難度倍率'), true, '守護TD 怪物強度倍率（例 2＝更硬、1＝正常、預設1.5）');
         {
             const er = el('div', { style: 'display:flex;gap:8px;margin-bottom:8px;align-items:center;' });
             er.append(el('div', { style: 'flex:1;font-size:14px;' }, '🎉 端午活動（全怪 50% 掉粽子）'));

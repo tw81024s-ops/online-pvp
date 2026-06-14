@@ -86,6 +86,8 @@ module.exports = {
     // 世界王（每日活動）：全服共用一筆 { dayKey, scores: { userId: {name, dmg} } }
     getWB() { return data.worldBoss || null; },
     putWB(rec) { data.worldBoss = rec; flush(); return rec; },
+    getTower() { if (!data.tower) data.tower = {}; return data.tower; },
+    putTower(t) { data.tower = t; flush(); return t; },
     // 全域遊戲設定（所有玩家生效）：經驗倍率 / 攻速倍率
     getConfig() { return data.config || {}; },
     setConfig(cfg) { data.config = Object.assign({}, data.config, cfg); flush(); return data.config; }

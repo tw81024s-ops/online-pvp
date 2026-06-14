@@ -126,6 +126,7 @@ app.get('/api/config', (req, res) => {
         synthRateMult: c.synthRateMult != null ? c.synthRateMult : 1,
         enhanceRateMult: c.enhanceRateMult != null ? c.enhanceRateMult : 1,
         pandoraLuckMult: c.pandoraLuckMult != null ? c.pandoraLuckMult : 1,
+        towerDiff: c.towerDiff != null ? c.towerDiff : 1.5,
         eventZongzi: c.eventZongzi ? 1 : 0
     });
 });
@@ -140,6 +141,7 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
     if (b.synthRateMult !== undefined) cfg.synthRateMult = Math.max(0, Math.min(100, parseFloat(b.synthRateMult) || 1));
     if (b.enhanceRateMult !== undefined) cfg.enhanceRateMult = Math.max(0, Math.min(100, parseFloat(b.enhanceRateMult) || 1));
     if (b.pandoraLuckMult !== undefined) cfg.pandoraLuckMult = Math.max(0, Math.min(100, parseFloat(b.pandoraLuckMult) || 1));
+    if (b.towerDiff !== undefined) cfg.towerDiff = Math.max(0.5, Math.min(50, parseFloat(b.towerDiff) || 1.5));
     if (b.eventZongzi !== undefined) cfg.eventZongzi = b.eventZongzi ? 1 : 0;
     const out = store.setConfig(cfg);
     res.json({ ok: true, config: {
@@ -150,6 +152,7 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
         synthRateMult: out.synthRateMult != null ? out.synthRateMult : 1,
         enhanceRateMult: out.enhanceRateMult != null ? out.enhanceRateMult : 1,
         pandoraLuckMult: out.pandoraLuckMult != null ? out.pandoraLuckMult : 1,
+        towerDiff: out.towerDiff != null ? out.towerDiff : 1.5,
         eventZongzi: out.eventZongzi ? 1 : 0
     } });
 });
@@ -411,6 +414,25 @@ app.get('/api/worldboss/leaderboard', auth, (req, res) => {
     const w = wbRollover();
     const top = Object.values(w.scores).map(x => ({ name: x.name || x.username, dmg: x.dmg || 0 }))
         .sort((a, b) => b.dmg - a.dmg).slice(0, 10);
+    res.json({ top });
+});
+
+// ===== 爬塔守護：排行榜（記錄每位玩家最高層）=====
+app.post('/api/tower/submit', auth, (req, res) => {
+    const u = req.user;
+    const floor = Math.max(0, Math.min(100, parseInt((req.body && req.body.floor), 10) || 0));
+    const name = (req.body && req.body.name) ? String(req.body.name).slice(0, 20) : u.username;
+    const t = store.getTower();
+    const cur = t[u.username];
+    if (!cur || floor > (cur.floor || 0)) { t[u.username] = { name, floor, ts: Date.now() }; store.putTower(t); }
+    const entries = Object.entries(t).map(([un, v]) => ({ un, floor: v.floor || 0 })).sort((a, b) => b.floor - a.floor);
+    const rank = entries.findIndex(e => e.un === u.username) + 1;
+    res.json({ ok: true, best: (t[u.username] || {}).floor || floor, rank: rank || null });
+});
+app.get('/api/tower/board', auth, (req, res) => {
+    const t = store.getTower();
+    const top = Object.values(t).map(x => ({ name: x.name, floor: x.floor || 0 }))
+        .sort((a, b) => b.floor - a.floor).slice(0, 20);
     res.json({ top });
 });
 
