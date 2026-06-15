@@ -43,6 +43,28 @@ function makeToken() { return crypto.randomBytes(24).toString('hex'); }
 function isAdminUser(u) {
     return !!(u && (u.is_admin || (process.env.ADMIN_USERNAME && u.username === process.env.ADMIN_USERNAME)));
 }
+// ===== 防作弊：上傳存檔時夾限可被竄改的數值（金幣/強化）=====
+const GOLD_CAP = 1e12;   // 金幣上限（超過視為作弊，可調整）
+const EN_CAP = 30;       // 裝備強化上限（+501 之類為作弊，可調整）
+function clampNum(v, lo, hi, dflt) {
+    v = Number(v);
+    if (!isFinite(v)) return dflt;
+    return Math.max(lo, Math.min(hi, v));
+}
+function sanitizeSaveObj(obj) {
+    try {
+        const p = obj && obj.p;
+        if (!p || typeof p !== 'object') return obj;
+        if ('gold' in p) p.gold = clampNum(p.gold, 0, GOLD_CAP, 0);
+        const cEn = it => { if (it && typeof it === 'object' && 'en' in it) it.en = clampNum(it.en, 0, EN_CAP, 0); };
+        if (p.eq && typeof p.eq === 'object') Object.keys(p.eq).forEach(k => cEn(p.eq[k]));
+        if (Array.isArray(p.inv)) p.inv.forEach(cEn);
+    } catch (e) { }
+    return obj;
+}
+function sanitizeSaveStr(str) {
+    try { return JSON.stringify(sanitizeSaveObj(JSON.parse(str))); } catch (e) { return str; }
+}
 function auth(req, res, next) {
     const tok = req.headers['x-token'];
     if (!tok) return res.status(401).json({ error: '未登入' });
@@ -93,10 +115,16 @@ app.get('/api/save', auth, (req, res) => {
     res.json({ data: row.data, updatedAt: row.updated_at });
 });
 app.put('/api/save', auth, (req, res) => {
-    const data = JSON.stringify(req.body && req.body.data ? req.body.data : null);
+    let body = req.body && req.body.data ? req.body.data : null;
+    if (body && !isAdminUser(req.user)) body = sanitizeSaveObj(body);   // 管理員不夾限（方便測試）
+    const data = JSON.stringify(body);
     if (!data || data === 'null') return res.status(400).json({ error: '存檔資料為空' });
     if (data.length > 4 * 1024 * 1024) return res.status(400).json({ error: '存檔過大' });
     store.putSave(req.user.id, data, reqSlot(req));
+    res.json({ ok: true });
+});
+app.delete('/api/save', auth, (req, res) => {
+    store.deleteSave(req.user.id, reqSlot(req));
     res.json({ ok: true });
 });
 // 角色欄位：回傳哪些格子有角色
@@ -122,7 +150,7 @@ app.get('/api/config', (req, res) => {
         expMult: c.expMult || 1, spdMult: c.spdMult || 1,
         pvpDmgMult: c.pvpDmgMult != null ? c.pvpDmgMult : 1,
         pvpMagicMult: c.pvpMagicMult != null ? c.pvpMagicMult : 1,
-        goldDropMult: c.goldDropMult != null ? c.goldDropMult : 1,
+        goldDropMult: c.goldDropMult != null ? c.goldDropMult : 1, dropMult: c.dropMult != null ? c.dropMult : 1,
         synthRateMult: c.synthRateMult != null ? c.synthRateMult : 1,
         enhanceRateMult: c.enhanceRateMult != null ? c.enhanceRateMult : 1,
         pandoraLuckMult: c.pandoraLuckMult != null ? c.pandoraLuckMult : 1,
@@ -139,6 +167,7 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
     if (b.pvpDmgMult !== undefined) cfg.pvpDmgMult = Math.max(0.05, Math.min(5, parseFloat(b.pvpDmgMult) || 1));
     if (b.pvpMagicMult !== undefined) cfg.pvpMagicMult = Math.max(0.05, Math.min(5, parseFloat(b.pvpMagicMult) || 1));
     if (b.goldDropMult !== undefined) cfg.goldDropMult = Math.max(0, Math.min(100, parseFloat(b.goldDropMult) || 1));
+    if (b.dropMult !== undefined) cfg.dropMult = Math.max(0, Math.min(100, parseFloat(b.dropMult) || 1));
     if (b.synthRateMult !== undefined) cfg.synthRateMult = Math.max(0, Math.min(100, parseFloat(b.synthRateMult) || 1));
     if (b.enhanceRateMult !== undefined) cfg.enhanceRateMult = Math.max(0, Math.min(100, parseFloat(b.enhanceRateMult) || 1));
     if (b.pandoraLuckMult !== undefined) cfg.pandoraLuckMult = Math.max(0, Math.min(100, parseFloat(b.pandoraLuckMult) || 1));
@@ -152,7 +181,7 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
         expMult: out.expMult || 1, spdMult: out.spdMult || 1,
         pvpDmgMult: out.pvpDmgMult != null ? out.pvpDmgMult : 1,
         pvpMagicMult: out.pvpMagicMult != null ? out.pvpMagicMult : 1,
-        goldDropMult: out.goldDropMult != null ? out.goldDropMult : 1,
+        goldDropMult: out.goldDropMult != null ? out.goldDropMult : 1, dropMult: out.dropMult != null ? out.dropMult : 1,
         synthRateMult: out.synthRateMult != null ? out.synthRateMult : 1,
         enhanceRateMult: out.enhanceRateMult != null ? out.enhanceRateMult : 1,
         pandoraLuckMult: out.pandoraLuckMult != null ? out.pandoraLuckMult : 1,
@@ -162,6 +191,10 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
     } });
 });
 
+app.post('/api/admin/sweep-saves', auth, adminOnly, (req, res) => {
+    const cleaned = store.sweepSaves(sanitizeSaveStr);
+    res.json({ ok: true, cleaned });
+});
 app.get('/api/admin/users', auth, adminOnly, (req, res) => {
     res.json({ users: store.allUsers() });
 });

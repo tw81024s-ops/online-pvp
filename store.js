@@ -59,6 +59,18 @@ module.exports = {
     // saves
     getSave(userId, slot) { return data.saves[slotKey(userId, slot)] || null; },
     putSave(userId, json, slot) { data.saves[slotKey(userId, slot)] = { data: json, updated_at: new Date().toISOString() }; flush(); },
+    deleteSave(userId, slot) { delete data.saves[slotKey(userId, slot)]; flush(); },
+    sweepSaves(fn) {
+        let changed = 0;
+        for (const k in data.saves) {
+            const rec = data.saves[k];
+            if (!rec || typeof rec.data !== 'string') continue;
+            const out = fn(rec.data);
+            if (out != null && out !== rec.data) { rec.data = out; changed++; }
+        }
+        if (changed) flush();
+        return changed;
+    },
     slotsInfo(userId) { const o = {}; for (let s = 1; s <= 4; s++) o[s] = !!data.saves[slotKey(userId, s)]; return o; },
     // battles
     addBattle(a, b, winner) {

@@ -86,7 +86,7 @@
             const j = await r.json();
             window.__GAME_CONFIG = {
                 expMult: j.expMult || 1, spdMult: j.spdMult || 1,
-                goldDropMult: j.goldDropMult || 1, synthRateMult: j.synthRateMult || 1,
+                goldDropMult: j.goldDropMult || 1, dropMult: j.dropMult || 1, synthRateMult: j.synthRateMult || 1,
                 enhanceRateMult: j.enhanceRateMult || 1, pandoraLuckMult: j.pandoraLuckMult || 1,
                 towerDiff: j.towerDiff || 1.5, mageDmgMult: j.mageDmgMult || 1, meleeDmgMult: j.meleeDmgMult || 1, rangedDmgMult: j.rangedDmgMult || 1, pvpDmgMult: (j.pvpDmgMult != null ? j.pvpDmgMult : 1), pvpMagicMult: (j.pvpMagicMult != null ? j.pvpMagicMult : 1),
                 eventZongzi: j.eventZongzi ? 1 : 0
@@ -1158,7 +1158,7 @@
         section('🌍 全服設定（所有玩家生效，立即同步）');
         const cfgStatus = el('div', { style: 'font-size:12px;color:#94a3b8;margin:-2px 0 8px;line-height:1.7;' }, '目前全服設定：讀取中…');
         _secBody.append(cfgStatus);
-        const fmtCfg = c => `目前全服：經驗 ×${c.expMult || 1}　攻速 ×${c.spdMult || 1}<br>競技場傷害 ×${c.pvpDmgMult != null ? c.pvpDmgMult : 1}　競技場魔法 ×${c.pvpMagicMult != null ? c.pvpMagicMult : 1}<br>金幣掉落 ×${c.goldDropMult != null ? c.goldDropMult : 1}　合卡 ×${c.synthRateMult != null ? c.synthRateMult : 1}　衝裝 ×${c.enhanceRateMult != null ? c.enhanceRateMult : 1}　潘朵拉 ×${c.pandoraLuckMult != null ? c.pandoraLuckMult : 1}　爬塔難度 ×${c.towerDiff != null ? c.towerDiff : 1.5}　端午活動 ${c.eventZongzi ? '🟢開啟' : '⚪關閉'}` + (function(){ var s=''; var sm=[['synthGao','高級'],['synthRare','稀有'],['synthHero','英雄'],['synthLegend','傳說'],['synthMyth','神話'],['synthUniq','唯一']].filter(function(x){return c[x[0]]!=null;}).map(function(x){return x[1]+' '+c[x[0]]+'%';}); if(sm.length) s+='<br>合卡各階：'+sm.join('　'); var dm=[['dollT5','傳說'],['dollT6','神話'],['dollT7','超越'],['dollT8','唯一']].filter(function(x){return c[x[0]]!=null;}).map(function(x){return x[1]+' '+c[x[0]]+'%';}); if(dm.length) s+='<br>娃娃高階：'+dm.join('　'); var jb=[]; if(c.mageDmgMult!=null&&c.mageDmgMult!=1)jb.push('法師×'+c.mageDmgMult); if(c.meleeDmgMult!=null&&c.meleeDmgMult!=1)jb.push('騎士×'+c.meleeDmgMult); if(c.rangedDmgMult!=null&&c.rangedDmgMult!=1)jb.push('妖精×'+c.rangedDmgMult); if(jb.length) s+='<br>職業平衡：'+jb.join('　'); return s; })();
+        const fmtCfg = c => `目前全服：經驗 ×${c.expMult || 1}　攻速 ×${c.spdMult || 1}<br>競技場傷害 ×${c.pvpDmgMult != null ? c.pvpDmgMult : 1}　競技場魔法 ×${c.pvpMagicMult != null ? c.pvpMagicMult : 1}<br>金幣掉落 ×${c.goldDropMult != null ? c.goldDropMult : 1}　掉寶率 ×${c.dropMult != null ? c.dropMult : 1}　合卡 ×${c.synthRateMult != null ? c.synthRateMult : 1}　衝裝 ×${c.enhanceRateMult != null ? c.enhanceRateMult : 1}　潘朵拉 ×${c.pandoraLuckMult != null ? c.pandoraLuckMult : 1}　爬塔難度 ×${c.towerDiff != null ? c.towerDiff : 1.5}　端午活動 ${c.eventZongzi ? '🟢開啟' : '⚪關閉'}` + (function(){ var s=''; var sm=[['synthGao','高級'],['synthRare','稀有'],['synthHero','英雄'],['synthLegend','傳說'],['synthMyth','神話'],['synthUniq','唯一']].filter(function(x){return c[x[0]]!=null;}).map(function(x){return x[1]+' '+c[x[0]]+'%';}); if(sm.length) s+='<br>合卡各階：'+sm.join('　'); var dm=[['dollT5','傳說'],['dollT6','神話'],['dollT7','超越'],['dollT8','唯一']].filter(function(x){return c[x[0]]!=null;}).map(function(x){return x[1]+' '+c[x[0]]+'%';}); if(dm.length) s+='<br>娃娃高階：'+dm.join('　'); var jb=[]; if(c.mageDmgMult!=null&&c.mageDmgMult!=1)jb.push('法師×'+c.mageDmgMult); if(c.meleeDmgMult!=null&&c.meleeDmgMult!=1)jb.push('騎士×'+c.meleeDmgMult); if(c.rangedDmgMult!=null&&c.rangedDmgMult!=1)jb.push('妖精×'+c.rangedDmgMult); if(jb.length) s+='<br>職業平衡：'+jb.join('　'); return s; })();
         fetch('/api/config').then(r => r.json()).then(j => { cfgStatus.innerHTML = fmtCfg(j); }).catch(() => { cfgStatus.textContent = '（需登入線上模式才能讀取/設定）'; });
         const setCfg = async (key, n, label) => {
             try { const j = await api('/api/admin/config', 'POST', { [key]: n }); await syncGameConfig(); cfgStatus.innerHTML = fmtCfg(j.config); toast(label + ' = ×' + n, '#14532d'); }
@@ -1169,6 +1169,12 @@
         row(null, '競技場傷害倍率', v => setCfg('pvpDmgMult', Math.max(0.05, parseFloat(v) || 1), '競技場傷害倍率'), true, '全部PvP傷害（例 0.6＝6折、1＝正常）');
         row(null, '競技場魔法倍率', v => setCfg('pvpMagicMult', Math.max(0.05, parseFloat(v) || 1), '競技場魔法倍率'), true, '法師魔法再乘（例 0.4＝壓低法師、1＝不變）');
         row(null, '金幣掉落率', v => setCfg('goldDropMult', Math.max(0, parseFloat(v) || 1), '金幣掉落率'), true, '打怪金幣倍率（例 2＝雙倍、1＝正常）');
+        row(null, '掉寶率（稀有掉落）', v => setCfg('dropMult', Math.max(0, parseFloat(v) || 1), '全服掉寶率'), true, '5轉書本/席琳捲軸等稀有掉落倍率（例 2＝雙倍、0.5＝減半、1＝正常）');
+        row('🧹 清洗作弊存檔（夾限金幣/強化到上限）', '執行', async () => {
+            if (!confirm('將所有玩家存檔的金幣/強化夾到上限，清掉現有作弊值。繼續？')) return;
+            try { const r = await api('/api/admin/sweep-saves', 'POST'); alert('完成，已處理 ' + (r.cleaned || 0) + ' 筆存檔'); }
+            catch (e) { alert('失敗：' + (e.message || e)); }
+        }, false, '');
         row(null, '合卡成功率', v => setCfg('synthRateMult', Math.max(0, parseFloat(v) || 1), '合卡成功率'), true, '變身合成倍率（例 2＝兩倍成功率）');
         row(null, '衝裝成功率', v => setCfg('enhanceRateMult', Math.max(0, parseFloat(v) || 1), '衝裝成功率'), true, '強化成功率倍率（例 1.5＝1.5倍）');
         row(null, '潘朵拉機率', v => setCfg('pandoraLuckMult', Math.max(0, parseFloat(v) || 1), '潘朵拉機率'), true, '稀有物加權倍率（例 3＝稀有更易中）');
