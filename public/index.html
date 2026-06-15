@@ -7749,19 +7749,30 @@ function _enhResolve(tuid,isEq){
     return t;
 }
 // 單件：自訂目標等級連衝（超安定值會爆裝）
-function executeAutoEnhanceTo(targetUid, isEq, useBless, targetLv){
+function executeAutoEnhanceTo(targetUid, isEq, useBless, targetLv, qty){
     let pre=isEq?Object.values(player.eq).find(e=>e&&e.uid===targetUid):player.inv.find(i=>i.uid===targetUid);
     if(!pre){ return; }
     let d=DB.items[pre.id]; let scrollId=_aeScrollId(d.type,useBless);
     if(!scrollId){ logSys('此裝備無對應卷軸。'); return; }
     targetLv=Math.max(1,parseInt(targetLv)||1);
-    if((Number(pre.en)||0)>=targetLv){ logSys(`${d.n} 已達 +${pre.en}。`); return; }
+    qty=Math.max(1,parseInt(qty)||1);
     if(!player.inv.find(i=>i.id===scrollId&&i.cnt>0)){ logSys(`<span class="text-red-400 font-bold">${DB.items[scrollId].n} 數量不足。</span>`); return; }
-    let target=_enhResolve(targetUid,isEq); if(!target) return;
-    let r=_enhCore(target,isEq,scrollId,targetLv);
-    if(r.destroyed) logSys(`\u{1F4A5} <b>${r.name}</b> 強化失敗，裝備消失！（嘗試 ${r.used} 次）`);
-    else if(r.out) logSys(`\u26A0\uFE0F <b>${r.name}</b>：卷軸用完，停在 +${r.to}（消耗 ${r.used} 張）。`);
-    else logSys(`\u2728 <b>${r.name}</b> 強化完成：+${r.from} \u2192 +${r.to}（消耗 ${r.used} 張）`);
+    let n = (!isEq && pre.cnt>1) ? Math.min(qty, pre.cnt) : 1;
+    let okN=0, boom=0, used=0, outFlag=false, lines=[];
+    for(let c=0;c<n;c++){
+        let target=_enhResolve(targetUid,isEq); if(!target) break;
+        if((Number(target.en)||0)>=targetLv){ okN++; lines.push(`${d.n} 已達 +${target.en}`); continue; }
+        let r=_enhCore(target,isEq,scrollId,targetLv);
+        used+=r.used;
+        if(r.destroyed){ boom++; lines.push(`💥 ${r.name} 爆裝`); }
+        else { okN++; lines.push(`✨ ${r.name} +${r.from}→+${r.to}`); }
+        if(r.out){ outFlag=true; break; }
+    }
+    if(n===1){ logSys((lines[0]||'') + (outFlag?'（卷軸不足）':'')); }
+    else {
+        logSys(`<b>強化完成</b>：成功 ${okN} 件、爆裝 ${boom} 件，共耗 ${used} 張卷軸${outFlag?'（卷軸不足提前停止）':''}。`);
+        lines.slice(0,15).forEach(l=>logSys(l));
+    }
     calcStats(); renderTabs(true); closeModal(); saveGame();
 }
 try { window.executeAutoEnhanceTo = executeAutoEnhanceTo; } catch(e) {}
@@ -8821,9 +8832,10 @@ function showEnhanceOptions(uid, isEq) {
     }
     
     // 🌟 自訂目標等級連衝（可超過安定值，超過後失敗會爆裝）
-    act += `<div class="col-span-2 flex items-center gap-2 mt-3 pt-2 border-t border-slate-700"><span class="text-slate-300 text-sm whitespace-nowrap">目標 +</span><input id="enh-target" type="number" value="${Math.max((item.en||0)+1, (d.safe||0))}" min="1" class="w-20 p-1 bg-slate-900 border border-slate-600 rounded text-center text-white"></div>`;
-    if (scrollNorm) act += `<button class="col-span-2 w-full btn border-orange-700 bg-orange-900 hover:bg-orange-800 py-3 text-base font-bold text-orange-200" onclick="executeAutoEnhanceTo('${item.uid}', ${isEq}, false, document.getElementById('enh-target').value)">一般 強化至目標（超安定值會爆裝）</button>`;
-    if (scrollBless) act += `<button class="col-span-2 w-full btn border-amber-600 bg-amber-800 hover:bg-amber-700 py-3 text-base font-bold text-amber-200" onclick="executeAutoEnhanceTo('${item.uid}', ${isEq}, true, document.getElementById('enh-target').value)">受祝福 強化至目標（超安定值會爆裝）</button>`;
+    let _isStack = !isEq && item.cnt > 1;
+    act += `<div class="col-span-2 flex items-center gap-3 mt-3 pt-2 border-t border-slate-700"><span class="text-slate-300 text-sm whitespace-nowrap">目標 +</span><input id="enh-target" type="number" value="${Math.max((item.en||0)+1, (d.safe||0))}" min="1" class="w-16 p-1 bg-slate-900 border border-slate-600 rounded text-center text-white">` + (_isStack ? `<span class="text-slate-300 text-sm whitespace-nowrap">件數</span><input id="enh-qty" type="number" value="1" min="1" max="${item.cnt}" class="w-16 p-1 bg-slate-900 border border-slate-600 rounded text-center text-white"><span class="text-slate-500 text-xs">/${item.cnt}</span>` : ``) + `</div>`;
+    if (scrollNorm) act += `<button class="col-span-2 w-full btn border-orange-700 bg-orange-900 hover:bg-orange-800 py-3 text-base font-bold text-orange-200" onclick="executeAutoEnhanceTo('${item.uid}', ${isEq}, false, document.getElementById('enh-target').value, (document.getElementById('enh-qty')?document.getElementById('enh-qty').value:1))">一般 強化至目標（超安定值會爆裝）</button>`;
+    if (scrollBless) act += `<button class="col-span-2 w-full btn border-amber-600 bg-amber-800 hover:bg-amber-700 py-3 text-base font-bold text-amber-200" onclick="executeAutoEnhanceTo('${item.uid}', ${isEq}, true, document.getElementById('enh-target').value, (document.getElementById('enh-qty')?document.getElementById('enh-qty').value:1))">受祝福 強化至目標（超安定值會爆裝）</button>`;
     act += `<button class="col-span-2 w-full btn py-3 bg-slate-700 text-lg font-bold mt-2" onclick="returnToItemModal('${item.uid}', ${isEq})">返回</button>`;
     
     document.getElementById('modal-actions').innerHTML = act;
