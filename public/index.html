@@ -3371,7 +3371,7 @@ function recomputeStats() {
     if (p.cls === 'knight') {
         d.mr = 0;
         d.ac -= Math.floor(p.lv / 6);          // 每提升6 AC-1
-        d.mr += Math.floor(p.lv / 12);         // 每提升12 MR+1
+        d.mr += Math.floor(p.lv / 6);          // 每提升6 MR+1（對齊天堂）
         d.meleeDmg += Math.floor(p.lv / 4);    // 每提升4 近距離傷害+1
         d.rangedDmg += Math.floor(p.lv / 12);  // 每提升12 遠距離傷害+1
         d.extraHit += Math.floor(p.lv / 3);    // 每提升3 額外命中+1
@@ -3393,7 +3393,7 @@ function recomputeStats() {
     } else { // mage
         d.mr = 15;
         d.ac -= Math.floor(p.lv / 8);          // 每提升8 AC-1
-        d.mr += Math.floor(p.lv / 8);          // 每提升8 MR+1
+        d.mr += Math.floor(p.lv / 4);          // 每提升4 MR+1（對齊天堂）
     }
 
     // 力量（近距離）
@@ -5871,7 +5871,8 @@ function checkLvUp() {
     while(player.lv < 100 && player.exp >= getExpReq(player.lv)) {
         player.exp -= getExpReq(player.lv);   // 達到「升下一等所需經驗」即扣除該需求並升一級（非累積）
         player.lv++;
-        if(player.lv >= 50) player.bonus++;
+        if(player.lv >= 50 && player.lv > (player.peakLv || 49)) player.bonus++;   // 升級點只認歷史最高（轉生重練不重複給）
+        if(player.lv > (player.peakLv || 0)) player.peakLv = player.lv;
         up = true;
     }
     if (up) {
@@ -7447,7 +7448,7 @@ function useItem(u, silent = false) {
             if (silent) return;   // 僅可手動使用
             if (player.lv < 99) { logSys(`等級需達到 <span class="text-yellow-300">99</span> 才能轉生（目前 ${player.lv}）。`); return; }
             if (!confirm(`確定要轉生嗎？\n等級將歸 1，進入 ${(player.reborn||0)+1} 轉。\n永久保留轉生前 30% 最大HP，能力上限 +20、萬能藥可再用 20 瓶。`)) return;
-            let keepHp = Math.floor(player.mhp * 0.30);
+            let keepHp = Math.floor((player.mhp - (player.rebornHpBonus || 0)) * 0.30);   // 非複利：只取自然HP的30%
             player.rebornHpBonus = (player.rebornHpBonus || 0) + keepHp;
             player.reborn = (player.reborn || 0) + 1;
             player.lv = 1; player.exp = 0;
@@ -11740,6 +11741,27 @@ function loadGame() {
         if(!player.panacea) player.panacea = { str:0, dex:0, con:0, int:0, wis:0, cha:0 };
         if(!player.siege) player.siege = { active:false, gateKilled:false, towerKilled:false, endTime:0, kills:0, result:null, cooldownUntil:0, rewardPending:false, victoryUntil:0, accCdUntil:0 };
         if(player.panaceaUsed === undefined) player.panaceaUsed = 0;
+        // === 一次性重置遷移 V2：修正升級點累積崩壞 + 轉生HP改非複利 ===
+        if (!player._pointResetV2) {
+            let _cb = createBase[player.cls] || {};
+            // peakLv：轉生過視為已達上限100；未轉生取目前等級
+            player.peakLv = ((player.reborn||0) > 0) ? 100 : Math.max(player.lv || 1, player.peakLv || 0);
+            // 正確升級點數 = max(0, min(100,peakLv) - 49)（轉生=51、未轉生=max(0,lv-49)）
+            let _correctPts = Math.max(0, Math.min(100, player.peakLv) - 49);
+            // 補償：曾用舊蠟燭把創角分配從 base 洗掉者，補回創角點數
+            let _creationInBase = ['str','dex','con','int','wis','cha'].reduce((s,k)=> s + Math.max(0,(player.base[k]||0)-(_cb[k]||0)), 0);
+            let _creationRefund = Math.max(0, (_cb.pts||0) - _creationInBase);
+            // 洗掉 alloc（虛增點數歸零），正確點數放回 bonus 重分配；base(創角)、panacea(萬能藥) 不動
+            player.alloc = { str:0, dex:0, con:0, int:0, wis:0, cha:0 };
+            player.bonus = _correctPts + _creationRefund;
+            // 轉生HP改非複利：rebornHpBonus = 轉生次數 × 30% × lv100自然HP
+            let _con = ((player.base&&player.base.con)||0) + ((player.panacea&&player.panacea.con)||0);
+            let _hpBase   = player.cls === 'knight' ? 16 : (player.cls === 'elf' ? (player.darkelf ? 13 : 15) : 12);
+            let _hpClsInc = player.cls === 'knight' ? 8.5 : (player.cls === 'elf' ? (player.darkelf ? 5.5 : 7.3) : 4.3);
+            let _natLv100 = _hpBase + 99 * (_hpClsInc + getConGrowth(_con, player.cls));
+            player.rebornHpBonus = (player.reborn || 0) * Math.floor(0.30 * _natLv100);
+            player._pointResetV2 = true;
+        }
         if(player.ismaelAccUsed === undefined) player.ismaelAccUsed = ((((player.siege || {}).accCdUntil) || 0) > Date.now());   // 🔧 舊檔遷移：飾品卷軸 24h 冷卻 → 次數制（冷卻中視為本額度已用）
         if(player.cds && player.cds.purifySk === undefined) player.cds.purifySk = 0;   // 🔧 舊檔遷移：淨化技獨立冷卻
         if(!player.lastMapByCat) player.lastMapByCat = {};
@@ -11869,15 +11891,11 @@ function useCandle() {
 }
 
 function resetStatsCandle() {
-    let b = createBase[player.cls];
-    // 還原為「創角時的初始狀態」：base = 純職業起始能力（不含創角分配）
-    player.base = { str: b.str, dex: b.dex, con: b.con, int: b.int, wis: b.wis, cha: b.cha };
+    // 回憶蠟燭：只重置「升級點數」(alloc)，保留創角分配(base)與萬能藥(panacea)
+    let _allocSum = (player.alloc.str||0)+(player.alloc.dex||0)+(player.alloc.con||0)+(player.alloc.int||0)+(player.alloc.wis||0)+(player.alloc.cha||0);
     player.alloc = { str:0, dex:0, con:0, int:0, wis:0, cha:0 };
-    let _usedPanacea = player.panaceaUsed || 0;   // 重置前先記錄已使用的萬能藥瓶數
-    player.panacea = { str:0, dex:0, con:0, int:0, wis:0, cha:0 }; player.panaceaUsed = 0;   // 回憶蠟燭同時清空萬能藥的加成與使用次數
-    if (_usedPanacea > 0) { gainItem('panacea_white', _usedPanacea, true, true); logSys(`回收已使用的萬能藥，獲得 <span class="text-slate-100 font-bold">純白的萬能藥</span> ×${_usedPanacea}。`); }
-    // 可重新分配的點數 = 創角可分配點數 + (等級-49) 升級點數
-    player.bonus = b.pts + Math.max(0, player.lv - 49);
+    // 退回所有已分配的升級點數（base 創角分配、panacea 萬能藥皆不動）
+    player.bonus = (player.bonus || 0) + _allocSum;
     // 重置點數時：自動賣出背包內所有項圈，並解除對應夥伴
     let collarIds = Object.keys(PET_DEF).map(nm => PET_DEF[nm].collar);
     let collars = player.inv.filter(i => collarIds.includes(i.id));
