@@ -700,7 +700,7 @@
                 <button id="btn-trash-gear" class="btn text-base py-2 font-bold px-0" style="grid-column:1 / -1; background: linear-gradient(135deg,#5b3a10 0%,#b45309 28%,#4a2f0c 52%,#d97706 76%,#3a2509 100%); color:#fde68a; border-color:#d97706;" onclick="sellUnlockedGear()">🗑️ 一鍵賣裝（賣掉未上鎖裝備/武器換金幣）</button>
             </div>
 
-            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
+            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openAutoEnhanceModal()"><span class="ic">🔨</span><span class="tx">強化</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
 
             <div class="panel flex-1 flex flex-col overflow-hidden relative">
                 <!-- 能力 -->
@@ -799,6 +799,8 @@ function isElfOnlySkill(sk) {
 
 const DB = {
         items: {
+        "gold_scroll": { n: "金幣捲軸", type: "scroll", req: "all", eff: "gold_scroll", c: "text-yellow-300", p: 1, gachaWeight: 0, noJunk: true, d: "深淵秘境的寶物，可交易。使用時開啟，隨機獲得 100萬~2000萬 金幣（金額越高越稀有）。" },
+        "char_delete_scroll": { n: "刪除角色卷", type: "scroll", req: "all", eff: "char_delete", c: "text-red-400", p: 20000000, noJunk: true, gachaWeight: 0, d: "使用後永久刪除「目前存檔位的角色」，釋出一個空位。使用時會再次確認，刪除後無法復原。" },
         "sherine_scroll": { n: "席琳附加捲軸", type: "scroll", req: "all", eff: "sherine_scroll", img: "assets/icons/items/sherine_scroll.png", c: "text-emerald-300", p: 1, gachaWeight: 0, d: "使用後選擇一件已裝備的部位，隨機附加一個席琳套裝效果（全 8 套 ×5 種＝40 種隨機抽一）。集齊同系列 2/3/5 件即啟動套裝加成。" },
         "sherine_carrier_helm":   { n: "席琳頭飾", type: "arm", slot: "helm",   ac: 4,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
         "sherine_carrier_armor":  { n: "席琳護甲", type: "arm", slot: "armor",  ac: 9,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
@@ -1433,6 +1435,13 @@ const DB = {
     },
             
     mobs: {
+        // ===== 深淵·終焉之地（8轉地圖）新增怪物 =====
+        "abyss_osiris":       { n: "深淵·歐西里斯", img: "assets/icons/monsters/thebes_osiris.png", lv: 100, s: "L", beh: "主動", race: "底比斯", boss: true, e: "dark",  hp: 2000000, ac: -120, mr: 260, exp: 800000, goldMin: 80000, goldMax: 400000, atkSpd: 1.6, dmg: [2, 600], db: 60, hit: 40 },
+        "abyss_anubis":       { n: "深淵·阿努比斯", img: "assets/icons/monsters/thebes_anubis.png", lv: 99, s: "L", beh: "主動", race: "底比斯", boss: true, e: "dark",  hp: 1500000, ac: -110, mr: 240, exp: 600000, goldMin: 60000, goldMax: 320000, atkSpd: 1.7, dmg: [2, 500], db: 50, hit: 38 },
+        "abyss_horus":        { n: "深淵·賀洛斯", img: "assets/icons/monsters/thebes_falcon.png", lv: 99, s: "L", beh: "主動", race: "底比斯", boss: true, e: "wind", hp: 1500000, ac: -110, mr: 240, exp: 600000, goldMin: 60000, goldMax: 320000, atkSpd: 1.7, dmg: [2, 500], db: 50, hit: 38 },
+        "abyss_fire_dragon":  { n: "深淵·炎龍", lv: 100, s: "L", beh: "主動", race: "龍", boss: true, e: "fire",  hp: 1800000, ac: -120, mr: 250, exp: 700000, goldMin: 70000, goldMax: 360000, atkSpd: 2.0, dmg: [3, 400], db: 600, hit: 60 },
+        "abyss_ice_dragon":   { n: "深淵·冰龍", lv: 100, s: "L", beh: "主動", race: "龍", boss: true, e: "water", hp: 1800000, ac: -120, mr: 250, exp: 700000, goldMin: 70000, goldMax: 360000, atkSpd: 2.0, dmg: [3, 400], db: 600, hit: 60 },
+        "abyss_earth_dragon": { n: "深淵·地龍", lv: 100, s: "L", beh: "主動", race: "龍", boss: true, e: "earth", hp: 1800000, ac: -120, mr: 250, exp: 700000, goldMin: 70000, goldMax: 360000, atkSpd: 2.0, dmg: [3, 400], db: 600, hit: 60 },
         // ===== 底比斯（埃及神殿）新增怪物 =====
         "thebes_mandragora": { n: "底比斯曼陀羅草", img: "assets/icons/monsters/thebes_mandragora.png", lv: 76, s: "S", beh: "被動", race: "底比斯", e: "earth", hp: 5000, ac: -22, mr: 30, exp: 15000, goldMin: 600, goldMax: 1400, atkSpd: 1.8, dmg: [1, 130], db: 14, hit: 10 },
         "thebes_falcon": { n: "神隼", img: "assets/icons/monsters/thebes_falcon.png", lv: 78, s: "M", beh: "主動", race: "底比斯", e: "wind", hp: 4200, ac: -26, mr: 28, exp: 16000, goldMin: 700, goldMax: 1500, atkSpd: 1.3, dmg: [1, 120], db: 12, hit: 16 },
@@ -2194,6 +2203,7 @@ const DB = {
         "thebes_2": ["thebes_sphinx","thebes_scorpion","thebes_scarab"],
         "thebes_3": ["thebes_golem","thebes_priest","thebes_sphinx"],
         "thebes_altar": ["thebes_anubis","thebes_horus","thebes_osiris","thebes_golem"],
+        "rebirth_abyss": ["abyss_osiris","abyss_anubis","abyss_horus","abyss_fire_dragon","abyss_ice_dragon","abyss_earth_dragon"],
         "graveyard": ["nw_038", "nw_051", "nw_052", "nw_053", "nw_064", "nw_117", "nw_119", "nw_181", "nw_043", "nw_044", "nw_045", "nw_046", "nw_088"],  // 骷髏墓地
         "demon_realm": ["nw_148", "nw_149", "nw_150", "nw_152", "nw_153", "nw_154", "nw_155", "nw_156", "nw_158", "nw_050", "nw_065", "nw_160"],  // 魔界
         "aden": ["nw_076", "nw_028", "nw_061", "nw_068", "nw_069", "nw_070", "nw_071", "nw_073", "nw_074", "nw_075", "nw_229"],  // 亞丁城
@@ -2309,6 +2319,13 @@ const DB = {
     // ===== 怪物專屬掉落表（依「怪物掉落資料.md」）=====
     // 格式：怪物顯示名稱: [[物品ID, 掉落機率(%)], ...]  每樣獨立判定一次
     const MOB_DROPS = {
+        // ===== 深淵·終焉之地（8轉）金幣捲軸掉落 =====
+        '深淵·歐西里斯': [['gold_scroll',10]],
+        '深淵·阿努比斯': [['gold_scroll',10]],
+        '深淵·賀洛斯': [['gold_scroll',10]],
+        '深淵·炎龍': [['gold_scroll',10]],
+        '深淵·冰龍': [['gold_scroll',10]],
+        '深淵·地龍': [['gold_scroll',10]],
         // ===== 傲慢塔怪物掉落 =====
         '梅杜莎': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
         '奇美拉': [['scroll_weapon',8],['scroll_armor',12],['potion_haste',1],['potion_blue',1]],
@@ -6121,7 +6138,7 @@ function summonElementDamage(dice, ele, t, flatBonus, mult) {
     return Math.max(1, Math.floor((Math.max(1, Math.floor(base * mrFactor) - (t.dr || 0)) + fixed) * fragileMult(t)));   // 🔮 脆弱（白鳥5）
 }
 // ===== 協力角色：讀取其他存檔位(非當前)的角色，以其真實戰力(等級/能力/裝備)一起作戰 =====
-function allySlotList() { return ['1','2','3'].filter(n => n !== String(currentSlot)); }
+function allySlotList() { return ['1','2','3','4','5'].filter(n => n !== String(currentSlot)); }
 function isAllyActive(slotN) { return !!(player.allies && player.allies.some(a => a && a._slot === String(slotN))); }
 // 由存檔位建立協力角色：載入該存檔 player → 暫時切換全域 player 跑 calcStats 取得真實衍生戰力 → 還原
 // 協力顯示名稱：有取名→角色名；否則用職業中文（騎士/法師/妖精）
@@ -7332,6 +7349,24 @@ function useItem(u, silent = false) {
     let d = DB.items[item.id];
     if (d.noUse) { if(!silent) logSys(`此物品無法直接使用。`); return; }
     if (d.eff === 'sherine_scroll') { if (!silent) openSherineScrollPicker(item.uid); return; }
+    if (d.eff === 'char_delete') {
+        if (silent) return;
+        if (!confirm(`確定要永久刪除角色「${player.name || '未命名'}」(Lv.${player.lv}) 嗎？\n\n此存檔位將被清空，刪除後無法復原！`)) return;
+        try { localStorage.removeItem('lineage_idle_save_' + currentSlot); } catch(e) {}
+        window._charDeleted = true;   // 阻止刪除後的自動存檔覆寫回來
+        location.reload();
+        return;
+    }
+    if (d.eff === 'gold_scroll') {
+        if (silent) return;   // 金幣捲軸只能手動開啟
+        let _r = Math.random() * 100;
+        let _amt = _r < 77 ? 1000000 : _r < 85 ? 2000000 : _r < 92 ? 5000000 : _r < 97 ? 10000000 : 20000000;
+        player.gold += _amt;
+        consume(item);
+        if (!silent) logSys(`開啟 ${d.n}，獲得 <span class="text-yellow-300 font-bold">${_amt.toLocaleString()}</span> 金幣！`);
+        updateUI();
+        return;
+    }
     
     if (d.type === 'pot' || d.eff === 'poly' || d.eff === 'reset' || d.eff === 'magicbarrier' || d.eff === 'teleport_scroll' || d.eff === 'panacea' || d.eff === 'reborn') {   // 變形卷軸(eff:poly)、回憶蠟燭(eff:reset)、魔法卷軸(eff:magicbarrier)、瞬間移動卷軸(eff:teleport_scroll)亦走此消耗品分支
         // 職業限定檢查（如慎重藥水=法師、勇敢藥水=騎士、精靈餅乾=妖精）
@@ -7650,6 +7685,90 @@ function buyItem(id, qty) {
 }
 
 let activeScroll = null;
+function _aeScrollId(type, useBless) {
+    if (type === 'wpn') return useBless ? 'scroll_weapon_b' : 'scroll_weapon';
+    if (type === 'arm') return useBless ? 'scroll_armor_b' : 'scroll_armor';
+    if (type === 'acc') return 'scroll_acc';   // 飾品無受祝福版
+    return null;
+}
+function _aeRate(type, safe, en) {   // 與 doEnhance 完全一致
+    if (type === 'wpn') return en === 6 ? 0.60 : en === 7 ? 0.50 : en === 8 ? 0.40 : 0.35;
+    if (type === 'acc') return en === 0 ? 0.50 : en === 1 ? 0.40 : en === 2 ? 0.30 : 0.20;
+    if (safe === 0) return en <= 4 ? 0.50 : en === 5 ? 0.40 : en === 6 ? 0.30 : 0.20;
+    if (safe === 4) return en === 4 ? 0.50 : en === 5 ? 0.40 : en === 6 ? 0.30 : 0.20;
+    return en === safe ? 0.30 : 0.20;
+}
+// 對單一已裝備物品自動連衝到 targetLv（沿用現行機制：一般+1/受祝福+1~3、安定值內必成、超安定值失敗爆裝）
+function _autoEnhanceOne(slot, useBless, targetLv) {
+    let target = player.eq[slot];
+    if (!target) return { name:'(空)', from:0, to:0, destroyed:false, ran:0, noScroll:false };
+    let d = DB.items[target.id];
+    let scrollId = _aeScrollId(d.type, useBless);
+    let mult = (window.__GAME_CONFIG && window.__GAME_CONFIG.enhanceRateMult) || 1;
+    let safe = d.safe || 0;
+    let from = Number(target.en) || 0; let ran = 0; let destroyed = false; let noScroll = false;
+    while ((Number(target.en) || 0) < targetLv) {
+        let scroll = player.inv.find(i => i.id === scrollId && i.cnt > 0);
+        if (!scroll) { noScroll = true; break; }
+        consume(scroll); ran++;
+        target.en = Number(target.en) || 0;
+        let success;
+        if (target.en < safe) success = true;
+        else success = Math.random() < _aeRate(d.type, safe, target.en) * mult;
+        if (success) {
+            let add = (DB.items[scrollId] && DB.items[scrollId].isB) ? roll(1, 3) : 1;
+            target.en += add;
+        } else {
+            player.eq[slot] = null; destroyed = true; break;   // 失敗即爆裝
+        }
+    }
+    return { name: DB.items[target.id] ? DB.items[target.id].n : '裝備', from, to: destroyed ? 0 : (Number(target.en)||0), destroyed, ran, noScroll };
+}
+function runAutoEnhance() {
+    let ov = document.getElementById('ae-ov'); if (!ov) return;
+    let useBless = ov.querySelector('input[name="ae-scroll"]:checked').value === 'b';
+    let targetLv = Math.max(1, parseInt(document.getElementById('ae-target').value) || 1);
+    let slots = Array.from(ov.querySelectorAll('input.ae-pick:checked')).map(c => c.value);
+    if (!slots.length) { logSys('請至少勾選一件裝備。'); return; }
+    let results = slots.map(s => _autoEnhanceOne(s, useBless, targetLv));
+    calcStats(); if (player.hp > player.mhp) player.hp = player.mhp; updateUI();
+    results.forEach(r => {
+        if (r.destroyed) logSys(`💥 <b>${r.name}</b> 強化失敗，裝備消失！（共嘗試 ${r.ran} 次）`);
+        else if (r.noScroll) logSys(`⚠️ <b>${r.name}</b> +${r.to}：對應卷軸用完，停止。`);
+        else logSys(`✨ <b>${r.name}</b> 強化完成：+${r.from} → +${r.to}（消耗 ${r.ran} 張）`);
+    });
+    closeAutoEnhanceModal();
+}
+function closeAutoEnhanceModal() { let ov = document.getElementById('ae-ov'); if (ov) ov.remove(); }
+function openAutoEnhanceModal() {
+    if (!player || !player.cls) { if (typeof toast === 'function') toast('請先建立角色', '#7f1d1d'); return; }
+    let old = document.getElementById('ae-ov'); if (old) old.remove();
+    let ov = document.createElement('div'); ov.id = 'ae-ov';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;';
+    let items = Object.keys(player.eq).filter(k => { let e = player.eq[k]; return e && DB.items[e.id] && ['wpn','arm','acc'].includes(DB.items[e.id].type); });
+    let rows = items.map(k => {
+        let e = player.eq[k]; let nm = (typeof getItemFullName === 'function') ? getItemFullName(e) : (DB.items[e.id].n + ' +' + (e.en||0));
+        return `<label style="display:flex;align-items:center;gap:8px;background:#1e293b;border-radius:6px;padding:6px 9px;margin-bottom:4px;cursor:pointer;"><input type="checkbox" class="ae-pick" value="${k}" checked style="width:16px;height:16px;"><span style="flex:1;font-size:13px;">${nm}（目前 +${e.en||0}）</span></label>`;
+    }).join('') || '<div style="color:#94a3b8;padding:8px;">身上沒有可強化的裝備。</div>';
+    ov.innerHTML = `<div style="background:#0f172a;border:1px solid #334155;border-radius:12px;max-width:460px;width:100%;max-height:86vh;overflow-y:auto;padding:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-size:18px;font-weight:bold;color:#fbbf24;">🔨 自動強化</span><span style="cursor:pointer;color:#94a3b8;font-size:20px;" onclick="closeAutoEnhanceModal()">✕</span></div>
+        <div style="color:#cbd5e1;font-size:13px;margin-bottom:6px;">勾選要強化的裝備（可多選）：</div>
+        ${rows}
+        <div style="border-top:1px solid #334155;margin:10px 0;padding-top:10px;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:14px;font-size:14px;color:#e2e8f0;">卷軸：
+            <label style="cursor:pointer;"><input type="radio" name="ae-scroll" value="n" checked> 一般(+1)</label>
+            <label style="cursor:pointer;"><input type="radio" name="ae-scroll" value="b"> 受祝福(+1~3)</label>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:14px;color:#e2e8f0;">目標等級：+<input type="number" id="ae-target" value="8" min="1" style="width:64px;padding:4px;background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:4px;text-align:center;"></div>
+          <div style="color:#f87171;font-size:12px;">超過安定值後失敗會「爆裝」（裝備消失）；飾品無受祝福版。卷軸不足會停止。</div>
+        </div>
+        <button onclick="runAutoEnhance()" style="width:100%;margin-top:10px;background:#b45309;color:#fff;border:none;border-radius:6px;padding:9px;font-weight:bold;font-size:15px;cursor:pointer;">開始強化</button>
+    </div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener('click', ev => { if (ev.target === ov) closeAutoEnhanceModal(); });
+}
+try { window.openAutoEnhanceModal = openAutoEnhanceModal; window.runAutoEnhance = runAutoEnhance; window.closeAutoEnhanceModal = closeAutoEnhanceModal; } catch(e) {}
+
 function openEnhanceModal(scroll) {
     activeScroll = scroll;
     let targets = Object.values(player.eq).filter(e => e && DB.items[e.id].type === scroll.target);
@@ -7954,16 +8073,32 @@ function updateUI() {
     
     renderStatusEffects();
     
-    // 🧪 萬能藥獨立顯示（永久加成，回憶蠟燭不洗；常駐，不受升級點面板隱藏影響）
-    { let _pn = player.panacea || {}; let _pmax = 20 + (player.reborn||0)*20;
-      let _prem = Math.max(0, _pmax - (player.panaceaUsed||0));
+    // 🧪 萬能藥獨立顯示（常駐；蠟燭後出現「待重新分配」+/-）
+    { if (!player.panacea) player.panacea = { str:0, dex:0, con:0, int:0, wis:0, cha:0 };
+      let _pn = player.panacea; let _pmax = 20 + (player.reborn||0)*20;
+      let _used = player.panaceaUsed || 0;
+      let _alloc = ['str','dex','con','int','wis','cha'].reduce((s,k)=>s+(_pn[k]||0),0);
+      let _pool = Math.max(0, _used - _alloc);
+      let _rem = Math.max(0, _pmax - _used);
       let _cn = { str:'力', dex:'敏', con:'體', int:'智', wis:'精', cha:'魅' };
-      let _parts = ['str','dex','con','int','wis','cha'].filter(s=>(_pn[s]||0)>0).map(s=>`${_cn[s]}+${_pn[s]}`);
       let _el = document.getElementById('ui-panacea-info');
-      if (_el) _el.innerHTML =
-          `<div class="text-emerald-400 font-bold mb-1">🧪 萬能藥永久加成 <span class="text-slate-400 font-normal text-sm">(回憶蠟燭不會洗掉)</span></div>`
-        + `<div class="text-slate-300">可再使用：<span class="text-emerald-200 font-bold">${_prem}</span> / ${_pmax} 瓶</div>`
-        + (_parts.length ? `<div class="text-emerald-200 mt-1">${_parts.join('　')}</div>` : `<div class="text-slate-500 mt-1">尚無萬能藥加成</div>`);
+      if (_el) {
+        let _html = `<div class="text-emerald-400 font-bold mb-1">🧪 萬能藥（已用 ${_used} / ${_pmax} 瓶）</div>`;
+        if (_pool > 0) {
+          _html += `<div class="text-amber-300 mb-2">待重新分配：<span class="font-bold">${_pool}</span> 點</div><div class="space-y-1">`
+            + ['str','dex','con','int','wis','cha'].map(s =>
+                `<div class="flex justify-between items-center"><span class="w-10 text-emerald-300">${_cn[s]}</span>`
+              + `<span class="w-8 text-center font-bold text-emerald-200">${_pn[s]||0}</span>`
+              + `<button class="btn px-3 py-0.5 text-base leading-none" onclick="adjPanaceaStat('${s}',-1)">−</button>`
+              + `<button class="btn px-3 py-0.5 text-base leading-none" onclick="adjPanaceaStat('${s}',1)">+</button></div>`
+              ).join('') + `</div>`;
+        } else {
+          let _parts = ['str','dex','con','int','wis','cha'].filter(s=>(_pn[s]||0)>0).map(s=>`${_cn[s]}+${_pn[s]}`);
+          _html += (_parts.length ? `<div class="text-emerald-200">${_parts.join('　')}</div>` : `<div class="text-slate-500">尚無萬能藥加成</div>`);
+        }
+        _html += `<div class="text-slate-400 text-sm mt-1">還可喝 ${_rem} 瓶（蠟燭可重新分配，不損失）</div>`;
+        _el.innerHTML = _html;
+      }
     }
     if (player.bonus > 0) {
         document.getElementById('ui-bonus-stats').classList.remove('hidden');
@@ -9287,6 +9422,7 @@ const MAP_CATEGORIES = {
         {v:'thebes_2',t:'底比斯②金字塔',c:'#fbbf24'},
         {v:'thebes_3',t:'底比斯③祭壇',c:'#fbbf24'},
         {v:'thebes_altar',t:'底比斯·神壇',c:'#f59e0b'},
+        {v:'rebirth_abyss',t:'深淵·終焉之地（8轉）',c:'#a855f7'},
     ],
     tower: [
             {v:'tower_1f',t:'傲慢塔 1樓'},
@@ -10303,6 +10439,10 @@ function changeMap(force) {
           logSys('🔒 此地圖為「轉生秘境」，需轉生 1 轉以上才能進入。');
           syncMapSelectors(); return;
       } }
+    { if (!force && document.getElementById('map-select').value === 'rebirth_abyss' && (player.reborn||0) < 8) {
+          logSys('🔒 此地圖為「深淵·終焉之地」，需轉生 8 轉以上才能進入。');
+          syncMapSelectors(); return;
+      } }
     mapState.current = document.getElementById('map-select').value;
     { let _c = mapCategoryOf(mapState.current); if(_c) { if(!player.lastMapByCat) player.lastMapByCat = {}; player.lastMapByCat[_c] = mapState.current; } }   // 記住各分類最後到過的地圖
     mapState.mobs = [null, null, null];
@@ -11216,6 +11356,7 @@ const SPECIAL_AREA_BG = {   // 特殊地圖：逐張對應背景
     antaras_lair: "Antharas's Lair.png",
     fafurion_lair: "Fafurion's Lair.png",
     valakas_lair: "Valakas' Lair.png",
+    rebirth_abyss: "Valakas' Lair.png",
     demon_realm: "Valakas' Lair.png",
     aden: "castle.png",
     lindvior_lair: "Fafurion's Lair.png",
@@ -11359,7 +11500,7 @@ function getShopItemsForNpc(npcId) {
             'wpn_38', 'wpn_20', 'wpn_silveraxe', 'wpn_witchwand', 'wpn_18',
             'wpn_giantaxe', 'wpn_28', 'wpn_14', 'wpn_6', 'wpn_3',
             'wpn_17', 'wpn_15', 'wpn_7', 'wpn_21', 'wpn_16',
-            'wpn_halberd', 'wpn_12'
+            'wpn_halberd', 'wpn_12', 'char_delete_scroll'
         ];
     } else {
         // 一般雜貨商 (格林、巴辛、帕羅、雜貨商等)
@@ -11443,7 +11584,7 @@ function migrateSaves(){
     let oldS = localStorage.getItem('lineage_idle_save');
     if(oldS && !localStorage.getItem('lineage_idle_save_1')) localStorage.setItem('lineage_idle_save_1', oldS);
 }
-function anySaveExists(){ return ['1','2','3'].some(n => localStorage.getItem('lineage_idle_save_' + n)); }
+function anySaveExists(){ return ['1','2','3','4','5'].some(n => localStorage.getItem('lineage_idle_save_' + n)); }
 function slotSummary(n){
     let s = localStorage.getItem('lineage_idle_save_' + n);
     if(!s) return null;
@@ -11461,7 +11602,7 @@ function openSlotSelect(mode){
     document.getElementById('slot-select-panel').classList.remove('hidden');
     document.getElementById('slot-select-title').innerText = (mode === 'new') ? '選擇存檔位（創建角色）' : '選擇存檔位（載入進度）';
     let list = document.getElementById('slot-list'); list.innerHTML = '';
-    for(let n = 1; n <= 3; n++){
+    for(let n = 1; n <= 5; n++){
         let sum = slotSummary(n);
         let label = sum ? `存檔 ${n}　${sum.cls} Lv.${sum.lv}　${sum.name}` : `存檔 ${n}　（空）`;
         let disabled = (mode === 'load' && !sum);
@@ -11653,6 +11794,7 @@ function updateClassPotionRows() {
 }
 
 function saveGame() {
+    if (window._charDeleted) return;   // 刪除角色流程中：禁止任何寫檔
     // 尚未建立角色（無職業）的空白 player 不寫檔：避免在「選存檔位→創角畫面」期間，
     // 背景自動存檔/雲端同步把預設空角色(cls=null)寫進該存檔位，造成「職業 null、Lv.1 未命名」的壞檔。
     if (!player || !player.cls) return;
@@ -11902,12 +12044,34 @@ function useCandle() {
     useItem(c.uid); // 走消耗品流程：確認 → resetStatsCandle() → 消耗一個蠟燭
 }
 
+function adjPanaceaStat(st, delta) {
+    if (!player.panacea) player.panacea = { str:0, dex:0, con:0, int:0, wis:0, cha:0 };
+    let pn = player.panacea;
+    let used = player.panaceaUsed || 0;
+    let alloc = ['str','dex','con','int','wis','cha'].reduce((s,k)=>s+(pn[k]||0),0);
+    let cap = 60 + (player.reborn||0)*20;
+    let cn = { str:'力量', dex:'敏捷', con:'體質', int:'智力', wis:'精神', cha:'魅力' };
+    if (delta > 0) {
+        if (alloc >= used) return;                       // 沒有「待分配」萬能藥點
+        if (naturalStat(st) >= cap) { logSys(`${cn[st]}已達上限（${cap}），無法再分配萬能藥。`); return; }
+        pn[st] = (pn[st] || 0) + 1;
+    } else {
+        if ((pn[st] || 0) <= 0) return;
+        pn[st]--;
+    }
+    calcStats();
+    if (player.hp > player.mhp) player.hp = player.mhp;   // 防堆疊
+    updateUI();
+}
+
 function resetStatsCandle() {
     // 回憶蠟燭：只重置「升級點數」(alloc)，保留創角分配(base)與萬能藥(panacea)
     let _allocSum = (player.alloc.str||0)+(player.alloc.dex||0)+(player.alloc.con||0)+(player.alloc.int||0)+(player.alloc.wis||0)+(player.alloc.cha||0);
     player.alloc = { str:0, dex:0, con:0, int:0, wis:0, cha:0 };
-    // 退回所有已分配的升級點數（base 創角分配、panacea 萬能藥皆不動）
+    // 退回所有已分配的升級點數（base 創角分配不動）
     player.bonus = (player.bonus || 0) + _allocSum;
+    // 萬能藥：清空配置、保留已擁有瓶數(panaceaUsed) → 轉為「待重新分配」，可無損重選屬性
+    player.panacea = { str:0, dex:0, con:0, int:0, wis:0, cha:0 };
     // 重置點數時：自動賣出背包內所有項圈，並解除對應夥伴
     let collarIds = Object.keys(PET_DEF).map(nm => PET_DEF[nm].collar);
     let collars = player.inv.filter(i => collarIds.includes(i.id));
@@ -11920,8 +12084,9 @@ function resetStatsCandle() {
         logSys(`重置配點：自動賣出所有項圈共 ${cnt} 個，獲得 <span class="text-yellow-400 font-bold">${g}</span> 金幣。`);
     }
     calcStats();
+    if (player.hp > player.mhp) player.hp = player.mhp;   // 防堆疊：HP 僅保留(自然成長 + 轉生30%)，不得超過重算後上限
     updateUI();
-    logSys(`所有配點已重置，請重新分配。`);
+    logSys(`配點已重置：升級點數與萬能藥皆可重新分配（創角初始點數保留）。`);
 }
 
 // ========== 製作系統核心邏輯 ==========
