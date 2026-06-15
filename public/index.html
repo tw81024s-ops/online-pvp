@@ -2711,11 +2711,23 @@ function getIconUrl(d, isSkill = false) {
 
 // ===== 能力換算輔助函數（依照「職業與基本設定」完整對照表）=====
 // 通用：依「門檻->數值」的階梯表查值（門檻為該級距上限）
-function lookupStep(val, table, def) {
+function lookupFlat(val, table, def) {   // 舊行為：超過表尾回固定預設（用於不該放開的%類）
     for (let i = 0; i < table.length; i++) {
         if (val <= table[i][0]) return table[i][1];
     }
     return def;
+}
+function lookupStep(val, table, def) {
+    for (let i = 0; i < table.length; i++) {
+        if (val <= table[i][0]) return table[i][1];
+    }
+    // 超過表尾(約60)：以表尾斜率的一半線性外推（高屬性遞減），效果封頂 200
+    let last = table[table.length - 1];
+    let prev = table[Math.max(0, table.length - 4)];
+    let span = (last[0] - prev[0]) || 1;
+    let slope = ((last[1] - prev[1]) / span) * 0.5;
+    let v = val > 200 ? 200 : val;
+    return Math.round(def + (v - (last[0] + 1)) * slope);
 }
 
 // ---------- 力量 STR：近距離傷害 / 近距離命中 / 近距離爆擊率 ----------
@@ -2740,7 +2752,10 @@ function getStrMeleeCrit(str) {
     if (str <= 44) return 1;
     if (str <= 49) return 2;
     if (str <= 59) return 3;
-    return 4;
+    if (str <= 99) return 4;
+    if (str <= 139) return 5;
+    if (str <= 179) return 6;
+    return 7;
 }
 
 // ---------- 敏捷 DEX：遠距離傷害 / 遠距離命中 / 遠距離爆擊率 / AC / ER ----------
@@ -2766,7 +2781,10 @@ function getDexRangedCrit(dex) {
     if (dex <= 44) return 1;
     if (dex <= 49) return 2;
     if (dex <= 59) return 3;
-    return 4;
+    if (dex <= 99) return 4;
+    if (dex <= 139) return 5;
+    if (dex <= 179) return 6;
+    return 7;
 }
 function getDexAC(dex) {
     // 回傳 AC 變化量（負值代表防禦提升）
@@ -2798,7 +2816,10 @@ function getIntMagicCrit(int) {
     if (int <= 49) return 4;
     if (int <= 54) return 5;
     if (int <= 59) return 6;
-    return 7;
+    if (int <= 99) return 7;
+    if (int <= 139) return 8;
+    if (int <= 179) return 9;
+    return 10;
 }
 function getIntExtraMp(int) {
     return lookupStep(int, [
@@ -2808,7 +2829,7 @@ function getIntExtraMp(int) {
 }
 function getIntMpReduce(int) {
     // MP消耗減少 %
-    return lookupStep(int, [
+    return lookupFlat(int, [
         [8,5],[10,6],[11,7],[13,8],[14,9],[16,10],[17,11],[19,12],[20,13],[22,14],
         [23,15],[25,16],[26,17],[28,18],[29,19],[31,20],[32,21],[34,22],[35,23],[37,24],
         [38,25],[40,26],[41,27],[43,28],[44,29]
@@ -2837,7 +2858,10 @@ function getConPotionPct(con) {
     if (con <= 35) return 3;
     if (con <= 40) return 4;
     if (con <= 45) return 5;
-    return 6;
+    if (con <= 99) return 6;
+    if (con <= 139) return 7;
+    if (con <= 179) return 8;
+    return 9;
 }
 
 // ---------- 精神 WIS：MP成長 / MP自然恢復量 / MR / 藍色藥水加成 ----------
@@ -2852,6 +2876,9 @@ function getWisMpRegen(wis) {
 }
 function getWisMpOnKill(wis) {
     // 精神(WIS)：擊殺敵人時立即額外恢復的 MP 量
+    if (wis >= 180) return 16;
+    if (wis >= 140) return 14;
+    if (wis >= 100) return 12;
     if (wis >= 60) return 10;
     if (wis >= 53) return 9;   // 53~59
     if (wis >= 45) return 8;   // 45~52
@@ -3346,7 +3373,7 @@ function recomputeStats() {
     // ===== Phase 0：基礎屬性 + 衍生欄位歸零（依基本設定，起始值0；AC起始10）=====
     let pn = player.panacea || {};
     d.str = b.str + a.str + (pn.str||0); d.dex = b.dex + a.dex + (pn.dex||0); d.con = b.con + a.con + (pn.con||0); d.int = b.int + a.int + (pn.int||0); d.wis = b.wis + a.wis + (pn.wis||0);
-    d.cha = Math.min(60 + (player.reborn||0)*20, (b.cha || 0) + (a.cha || 0) + (pn.cha||0));   // 魅力：第六屬性，上限60+轉生*20
+    d.cha = Math.min(200, (b.cha || 0) + (a.cha || 0) + (pn.cha||0));   // 魅力：第六屬性，上限60+轉生*20
 
     d.ac = 10; d.er = 0; d.dr = 0;
     d.meleeDmg = 0; d.meleeHit = 0; d.meleeCrit = 0;
@@ -7467,7 +7494,7 @@ function useItem(u, silent = false) {
             // 落到下方 consume(item)，消耗一張卷軸
         } else if (d.eff === 'panacea') {
             const STAT_CN = { str:'力量', dex:'敏捷', con:'體質', int:'智力', wis:'精神', cha:'魅力' };
-            let st = d.pstat, cap = 60 + (player.reborn||0)*20;   // 屬性上限：每轉生+20
+            let st = d.pstat, cap = 200;   // 屬性上限：每轉生+20
             // 萬能藥已取消等級限制（不再檢查 plv）
             let panaceaMax = 20 + (player.reborn||0)*20;
             if ((player.panaceaUsed || 0) >= panaceaMax) { if(!silent) logSys(`萬能藥最多只能使用 ${panaceaMax} 瓶，使用回憶蠟燭後可重新使用。`); return; }
@@ -7709,7 +7736,7 @@ function _enhCore(target, isEq, scrollId, targetLv){
     while((Number(target.en)||0)<targetLv){
         let scroll=player.inv.find(i=>i.id===scrollId&&i.cnt>0);
         if(!scroll) return {name:d.n,from,to:target.en,used,destroyed:false,out:true};
-        consume(scroll); used++; target.en=Number(target.en)||0;
+        scroll.cnt--; if(scroll.cnt<=0) player.inv=player.inv.filter(i=>i.uid!==scroll.uid); used++; target.en=Number(target.en)||0;
         let success = target.en<safe ? true : (Math.random()<_aeRate(d.type,safe,target.en)*mult);
         if(success){ target.en += (DB.items[scrollId]&&DB.items[scrollId].isB)?roll(1,3):1; }
         else { if(isEq&&slot) player.eq[slot]=null; else player.inv=player.inv.filter(x=>x.uid!==target.uid); return {name:d.n,from,to:target.en,used,destroyed:true}; }
@@ -7741,24 +7768,29 @@ function executeAutoEnhanceTo(targetUid, isEq, useBless, targetLv){
 }
 try { window.executeAutoEnhanceTo = executeAutoEnhanceTo; } catch(e) {}
 // 批量：對所有勾選的背包裝備連衝至目標
-function executeBulkEnhance(useBless, targetLv){
+function executeBulkEnhance(useBless, targetLv, qty){
     let sel=window._enhSel?[...window._enhSel]:[];
     if(!sel.length){ logSys('未勾選任何裝備。'); return; }
     targetLv=Math.max(1,parseInt(targetLv)||1);
+    qty=Math.max(1,parseInt(qty)||1);
     let okN=0, boom=0, totalUsed=0, outFlag=false, lines=[];
     sel.forEach(su=>{
         let pre=player.inv.find(i=>i.uid===su); if(!pre) return;
         let d=DB.items[pre.id]; let scrollId=_aeScrollId(d.type,useBless); if(!scrollId) return;
-        if((Number(pre.en)||0)>=targetLv){ return; }
-        let target=_enhResolve(su,false); if(!target) return;
-        let r=_enhCore(target,false,scrollId,targetLv);
-        totalUsed+=r.used;
-        if(r.destroyed){ boom++; lines.push(`\u{1F4A5} ${r.name} 爆裝`); }
-        else { okN++; if(r.out) outFlag=true; lines.push(`\u2728 ${r.name} +${r.from}\u2192+${r.to}`); }
+        let n = pre.cnt>1 ? Math.min(qty, pre.cnt) : 1;   // 堆疊：依數量逐件；單件：1 件
+        for(let c=0;c<n;c++){
+            let target=_enhResolve(su,false); if(!target) break;
+            if((Number(target.en)||0)>=targetLv){ okN++; continue; }
+            let r=_enhCore(target,false,scrollId,targetLv);
+            totalUsed+=r.used;
+            if(r.destroyed){ boom++; lines.push(`\u{1F4A5} ${r.name} 爆裝`); }
+            else { okN++; lines.push(`\u2728 ${r.name} +${r.from}\u2192+${r.to}`); }
+            if(r.out){ outFlag=true; break; }
+        }
     });
     window._enhSel.clear();
-    logSys(`<b>批量強化完成</b>：成功 ${okN} 件、爆裝 ${boom} 件，共消耗 ${totalUsed} 張卷軸${outFlag?'（部分因卷軸不足提前停止）':''}。`);
-    lines.slice(0,12).forEach(l=>logSys(l));
+    logSys(`<b>批量強化完成</b>：成功 ${okN} 件、爆裝 ${boom} 件，共消耗 ${totalUsed} 張卷軸${outFlag?'（卷軸不足提前停止）':''}。`);
+    lines.slice(0,15).forEach(l=>logSys(l));
     calcStats(); renderTabs(true); closeModal(); saveGame();
 }
 // 批量強化視窗
@@ -7768,10 +7800,10 @@ function openBulkEnhanceModal(){
     let mc=document.getElementById('modal-compare'); if(mc) mc.classList.add('hidden');
     document.getElementById('item-modal').classList.remove('hidden');
     let nm=document.getElementById('modal-item-name'); nm.innerHTML=`\u{1F528} 批量強化（已勾選 ${sel.length} 件）`; nm.className='text-xl font-bold mb-3 border-b border-slate-600 pb-3 text-orange-300';
-    document.getElementById('modal-item-desc').innerHTML='設定目標強化等級，對所有勾選的裝備連衝；超過安定值若失敗會爆裝。';
-    let act=`<div class="col-span-2 flex items-center gap-2 mb-1"><span class="text-slate-300 text-sm whitespace-nowrap">目標 +</span><input id="bulk-enh-target" type="number" value="7" min="1" class="w-20 p-1 bg-slate-900 border border-slate-600 rounded text-center text-white"></div>`;
-    act+=`<button class="col-span-2 w-full btn border-orange-700 bg-orange-900 hover:bg-orange-800 py-3 text-base font-bold text-orange-200" onclick="executeBulkEnhance(false, document.getElementById('bulk-enh-target').value)">一般 強化勾選至目標</button>`;
-    act+=`<button class="col-span-2 w-full btn border-amber-600 bg-amber-800 hover:bg-amber-700 py-3 text-base font-bold text-amber-200" onclick="executeBulkEnhance(true, document.getElementById('bulk-enh-target').value)">受祝福 強化勾選至目標</button>`;
+    document.getElementById('modal-item-desc').innerHTML='設定目標等級與數量；堆疊的裝備會依「每堆疊件數」逐件強化，超過安定值失敗即爆裝。';
+    let act=`<div class="col-span-2 flex items-center gap-3 mb-1"><span class="text-slate-300 text-sm whitespace-nowrap">目標 +</span><input id="bulk-enh-target" type="number" value="7" min="1" class="w-16 p-1 bg-slate-900 border border-slate-600 rounded text-center text-white"><span class="text-slate-300 text-sm whitespace-nowrap">每堆疊件數</span><input id="bulk-enh-qty" type="number" value="1" min="1" class="w-16 p-1 bg-slate-900 border border-slate-600 rounded text-center text-white"></div>`;
+    act+=`<button class="col-span-2 w-full btn border-orange-700 bg-orange-900 hover:bg-orange-800 py-3 text-base font-bold text-orange-200" onclick="executeBulkEnhance(false, document.getElementById('bulk-enh-target').value, document.getElementById('bulk-enh-qty').value)">一般 強化勾選至目標</button>`;
+    act+=`<button class="col-span-2 w-full btn border-amber-600 bg-amber-800 hover:bg-amber-700 py-3 text-base font-bold text-amber-200" onclick="executeBulkEnhance(true, document.getElementById('bulk-enh-target').value, document.getElementById('bulk-enh-qty').value)">受祝福 強化勾選至目標</button>`;
     act+=`<button class="col-span-2 w-full btn py-3 bg-slate-700 text-lg font-bold mt-2" onclick="closeModal()">取消</button>`;
     document.getElementById('modal-actions').innerHTML=act;
 }
@@ -12060,7 +12092,7 @@ function loadGame() {
 // 配點/萬能藥的「自然屬性值」：基礎+配點+萬能藥（不含裝備與 buff）；屬性上限只套用在此值上，裝備/buff 可再往上疊加
 function naturalStat(s) { return (player.base[s] || 0) + (player.alloc[s] || 0) + ((player.panacea && player.panacea[s]) || 0); }
 function adjBonusStat(s) {
-    let capN = 60 + (player.reborn||0)*20;   // 屬性配點上限：基礎60，每轉生+20；上限只看 naturalStat(base+配點+萬能藥)，裝備/buff 一律不計入、可再往上疊加
+    let capN = 200;   // 屬性配點上限：基礎60，每轉生+20；上限只看 naturalStat(base+配點+萬能藥)，裝備/buff 一律不計入、可再往上疊加
     if (player.bonus > 0 && naturalStat(s) < capN) {
         player.alloc[s]++; player.bonus--;
         calcStats();
@@ -12078,7 +12110,7 @@ function adjPanaceaStat(st, delta) {
     let pn = player.panacea;
     let used = player.panaceaUsed || 0;
     let alloc = ['str','dex','con','int','wis','cha'].reduce((s,k)=>s+(pn[k]||0),0);
-    let cap = 60 + (player.reborn||0)*20;
+    let cap = 200;
     let cn = { str:'力量', dex:'敏捷', con:'體質', int:'智力', wis:'精神', cha:'魅力' };
     if (delta > 0) {
         if (alloc >= used) return;                       // 沒有「待分配」萬能藥點
