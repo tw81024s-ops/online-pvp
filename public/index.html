@@ -700,7 +700,7 @@
                 <button id="btn-trash-gear" class="btn text-base py-2 font-bold px-0" style="grid-column:1 / -1; background: linear-gradient(135deg,#5b3a10 0%,#b45309 28%,#4a2f0c 52%,#d97706 76%,#3a2509 100%); color:#fde68a; border-color:#d97706;" onclick="sellUnlockedGear()">🗑️ 一鍵賣裝（賣掉未上鎖裝備/武器換金幣）</button>
             </div>
 
-            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openAutoEnhanceModal()"><span class="ic">🔨</span><span class="tx">強化</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
+            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
 
             <div class="panel flex-1 flex flex-col overflow-hidden relative">
                 <!-- 能力 -->
@@ -7698,76 +7698,84 @@ function _aeRate(type, safe, en) {   // 與 doEnhance 完全一致
     if (safe === 4) return en === 4 ? 0.50 : en === 5 ? 0.40 : en === 6 ? 0.30 : 0.20;
     return en === safe ? 0.30 : 0.20;
 }
-// 對單一已裝備物品自動連衝到 targetLv（沿用現行機制：一般+1/受祝福+1~3、安定值內必成、超安定值失敗爆裝）
-function _autoEnhanceOne(slot, useBless, targetLv) {
-    let target = player.eq[slot];
-    if (!target) return { name:'(空)', from:0, to:0, destroyed:false, ran:0, noScroll:false };
-    let d = DB.items[target.id];
-    let scrollId = _aeScrollId(d.type, useBless);
-    let mult = (window.__GAME_CONFIG && window.__GAME_CONFIG.enhanceRateMult) || 1;
-    let safe = d.safe || 0;
-    let from = Number(target.en) || 0; let ran = 0; let destroyed = false; let noScroll = false;
-    while ((Number(target.en) || 0) < targetLv) {
-        let scroll = player.inv.find(i => i.id === scrollId && i.cnt > 0);
-        if (!scroll) { noScroll = true; break; }
-        consume(scroll); ran++;
-        target.en = Number(target.en) || 0;
-        let success;
-        if (target.en < safe) success = true;
-        else success = Math.random() < _aeRate(d.type, safe, target.en) * mult;
-        if (success) {
-            let add = (DB.items[scrollId] && DB.items[scrollId].isB) ? roll(1, 3) : 1;
-            target.en += add;
-        } else {
-            player.eq[slot] = null; destroyed = true; break;   // 失敗即爆裝
-        }
+window._enhSel = window._enhSel || new Set();
+function _updateEnhSelBtns(){ let n=window._enhSel?window._enhSel.size:0; document.querySelectorAll('.enh-sel-count').forEach(e=>e.textContent=n); }
+// 連衝核心：對單一 target 衝到 targetLv（不存檔/不刷新），回傳結果
+function _enhCore(target, isEq, scrollId, targetLv){
+    let d=DB.items[target.id]; let safe=d.safe||0;
+    let mult=(window.__GAME_CONFIG&&window.__GAME_CONFIG.enhanceRateMult)||1;
+    target.en=Number(target.en)||0; let from=target.en, used=0;
+    let slot=isEq?Object.keys(player.eq).find(k=>player.eq[k]===target):null;
+    while((Number(target.en)||0)<targetLv){
+        let scroll=player.inv.find(i=>i.id===scrollId&&i.cnt>0);
+        if(!scroll) return {name:d.n,from,to:target.en,used,destroyed:false,out:true};
+        consume(scroll); used++; target.en=Number(target.en)||0;
+        let success = target.en<safe ? true : (Math.random()<_aeRate(d.type,safe,target.en)*mult);
+        if(success){ target.en += (DB.items[scrollId]&&DB.items[scrollId].isB)?roll(1,3):1; }
+        else { if(isEq&&slot) player.eq[slot]=null; else player.inv=player.inv.filter(x=>x.uid!==target.uid); return {name:d.n,from,to:target.en,used,destroyed:true}; }
     }
-    return { name: DB.items[target.id] ? DB.items[target.id].n : '裝備', from, to: destroyed ? 0 : (Number(target.en)||0), destroyed, ran, noScroll };
+    return {name:d.n,from,to:target.en,used,destroyed:false};
 }
-function runAutoEnhance() {
-    let ov = document.getElementById('ae-ov'); if (!ov) return;
-    let useBless = ov.querySelector('input[name="ae-scroll"]:checked').value === 'b';
-    let targetLv = Math.max(1, parseInt(document.getElementById('ae-target').value) || 1);
-    let slots = Array.from(ov.querySelectorAll('input.ae-pick:checked')).map(c => c.value);
-    if (!slots.length) { logSys('請至少勾選一件裝備。'); return; }
-    let results = slots.map(s => _autoEnhanceOne(s, useBless, targetLv));
-    calcStats(); if (player.hp > player.mhp) player.hp = player.mhp; updateUI();
-    results.forEach(r => {
-        if (r.destroyed) logSys(`💥 <b>${r.name}</b> 強化失敗，裝備消失！（共嘗試 ${r.ran} 次）`);
-        else if (r.noScroll) logSys(`⚠️ <b>${r.name}</b> +${r.to}：對應卷軸用完，停止。`);
-        else logSys(`✨ <b>${r.name}</b> 強化完成：+${r.from} → +${r.to}（消耗 ${r.ran} 張）`);
+// 取得 target；背包多件則拆一件出來衝
+function _enhResolve(tuid,isEq){
+    let t=isEq?Object.values(player.eq).find(e=>e&&e.uid===tuid):player.inv.find(i=>i.uid===tuid);
+    if(!t) return null;
+    if(!isEq && t.cnt>1){ t.cnt-=1; let s={...t,cnt:1,uid:uid()}; player.inv.push(s); t=s; }
+    return t;
+}
+// 單件：自訂目標等級連衝（超安定值會爆裝）
+function executeAutoEnhanceTo(targetUid, isEq, useBless, targetLv){
+    let pre=isEq?Object.values(player.eq).find(e=>e&&e.uid===targetUid):player.inv.find(i=>i.uid===targetUid);
+    if(!pre){ return; }
+    let d=DB.items[pre.id]; let scrollId=_aeScrollId(d.type,useBless);
+    if(!scrollId){ logSys('此裝備無對應卷軸。'); return; }
+    targetLv=Math.max(1,parseInt(targetLv)||1);
+    if((Number(pre.en)||0)>=targetLv){ logSys(`${d.n} 已達 +${pre.en}。`); return; }
+    if(!player.inv.find(i=>i.id===scrollId&&i.cnt>0)){ logSys(`<span class="text-red-400 font-bold">${DB.items[scrollId].n} 數量不足。</span>`); return; }
+    let target=_enhResolve(targetUid,isEq); if(!target) return;
+    let r=_enhCore(target,isEq,scrollId,targetLv);
+    if(r.destroyed) logSys(`\u{1F4A5} <b>${r.name}</b> 強化失敗，裝備消失！（嘗試 ${r.used} 次）`);
+    else if(r.out) logSys(`\u26A0\uFE0F <b>${r.name}</b>：卷軸用完，停在 +${r.to}（消耗 ${r.used} 張）。`);
+    else logSys(`\u2728 <b>${r.name}</b> 強化完成：+${r.from} \u2192 +${r.to}（消耗 ${r.used} 張）`);
+    calcStats(); renderTabs(true); closeModal(); saveGame();
+}
+try { window.executeAutoEnhanceTo = executeAutoEnhanceTo; } catch(e) {}
+// 批量：對所有勾選的背包裝備連衝至目標
+function executeBulkEnhance(useBless, targetLv){
+    let sel=window._enhSel?[...window._enhSel]:[];
+    if(!sel.length){ logSys('未勾選任何裝備。'); return; }
+    targetLv=Math.max(1,parseInt(targetLv)||1);
+    let okN=0, boom=0, totalUsed=0, outFlag=false, lines=[];
+    sel.forEach(su=>{
+        let pre=player.inv.find(i=>i.uid===su); if(!pre) return;
+        let d=DB.items[pre.id]; let scrollId=_aeScrollId(d.type,useBless); if(!scrollId) return;
+        if((Number(pre.en)||0)>=targetLv){ return; }
+        let target=_enhResolve(su,false); if(!target) return;
+        let r=_enhCore(target,false,scrollId,targetLv);
+        totalUsed+=r.used;
+        if(r.destroyed){ boom++; lines.push(`\u{1F4A5} ${r.name} 爆裝`); }
+        else { okN++; if(r.out) outFlag=true; lines.push(`\u2728 ${r.name} +${r.from}\u2192+${r.to}`); }
     });
-    closeAutoEnhanceModal();
+    window._enhSel.clear();
+    logSys(`<b>批量強化完成</b>：成功 ${okN} 件、爆裝 ${boom} 件，共消耗 ${totalUsed} 張卷軸${outFlag?'（部分因卷軸不足提前停止）':''}。`);
+    lines.slice(0,12).forEach(l=>logSys(l));
+    calcStats(); renderTabs(true); closeModal(); saveGame();
 }
-function closeAutoEnhanceModal() { let ov = document.getElementById('ae-ov'); if (ov) ov.remove(); }
-function openAutoEnhanceModal() {
-    if (!player || !player.cls) { if (typeof toast === 'function') toast('請先建立角色', '#7f1d1d'); return; }
-    let old = document.getElementById('ae-ov'); if (old) old.remove();
-    let ov = document.createElement('div'); ov.id = 'ae-ov';
-    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;';
-    let items = Object.keys(player.eq).filter(k => { let e = player.eq[k]; return e && DB.items[e.id] && ['wpn','arm','acc'].includes(DB.items[e.id].type); });
-    let rows = items.map(k => {
-        let e = player.eq[k]; let nm = (typeof getItemFullName === 'function') ? getItemFullName(e) : (DB.items[e.id].n + ' +' + (e.en||0));
-        return `<label style="display:flex;align-items:center;gap:8px;background:#1e293b;border-radius:6px;padding:6px 9px;margin-bottom:4px;cursor:pointer;"><input type="checkbox" class="ae-pick" value="${k}" checked style="width:16px;height:16px;"><span style="flex:1;font-size:13px;">${nm}（目前 +${e.en||0}）</span></label>`;
-    }).join('') || '<div style="color:#94a3b8;padding:8px;">身上沒有可強化的裝備。</div>';
-    ov.innerHTML = `<div style="background:#0f172a;border:1px solid #334155;border-radius:12px;max-width:460px;width:100%;max-height:86vh;overflow-y:auto;padding:16px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-size:18px;font-weight:bold;color:#fbbf24;">🔨 自動強化</span><span style="cursor:pointer;color:#94a3b8;font-size:20px;" onclick="closeAutoEnhanceModal()">✕</span></div>
-        <div style="color:#cbd5e1;font-size:13px;margin-bottom:6px;">勾選要強化的裝備（可多選）：</div>
-        ${rows}
-        <div style="border-top:1px solid #334155;margin:10px 0;padding-top:10px;display:flex;flex-direction:column;gap:8px;">
-          <div style="display:flex;align-items:center;gap:14px;font-size:14px;color:#e2e8f0;">卷軸：
-            <label style="cursor:pointer;"><input type="radio" name="ae-scroll" value="n" checked> 一般(+1)</label>
-            <label style="cursor:pointer;"><input type="radio" name="ae-scroll" value="b"> 受祝福(+1~3)</label>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:14px;color:#e2e8f0;">目標等級：+<input type="number" id="ae-target" value="8" min="1" style="width:64px;padding:4px;background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:4px;text-align:center;"></div>
-          <div style="color:#f87171;font-size:12px;">超過安定值後失敗會「爆裝」（裝備消失）；飾品無受祝福版。卷軸不足會停止。</div>
-        </div>
-        <button onclick="runAutoEnhance()" style="width:100%;margin-top:10px;background:#b45309;color:#fff;border:none;border-radius:6px;padding:9px;font-weight:bold;font-size:15px;cursor:pointer;">開始強化</button>
-    </div>`;
-    document.body.appendChild(ov);
-    ov.addEventListener('click', ev => { if (ev.target === ov) closeAutoEnhanceModal(); });
+// 批量強化視窗
+function openBulkEnhanceModal(){
+    let sel=window._enhSel?[...window._enhSel]:[];
+    if(!sel.length){ logSys('未勾選任何裝備。'); return; }
+    let mc=document.getElementById('modal-compare'); if(mc) mc.classList.add('hidden');
+    document.getElementById('item-modal').classList.remove('hidden');
+    let nm=document.getElementById('modal-item-name'); nm.innerHTML=`\u{1F528} 批量強化（已勾選 ${sel.length} 件）`; nm.className='text-xl font-bold mb-3 border-b border-slate-600 pb-3 text-orange-300';
+    document.getElementById('modal-item-desc').innerHTML='設定目標強化等級，對所有勾選的裝備連衝；超過安定值若失敗會爆裝。';
+    let act=`<div class="col-span-2 flex items-center gap-2 mb-1"><span class="text-slate-300 text-sm whitespace-nowrap">目標 +</span><input id="bulk-enh-target" type="number" value="7" min="1" class="w-20 p-1 bg-slate-900 border border-slate-600 rounded text-center text-white"></div>`;
+    act+=`<button class="col-span-2 w-full btn border-orange-700 bg-orange-900 hover:bg-orange-800 py-3 text-base font-bold text-orange-200" onclick="executeBulkEnhance(false, document.getElementById('bulk-enh-target').value)">一般 強化勾選至目標</button>`;
+    act+=`<button class="col-span-2 w-full btn border-amber-600 bg-amber-800 hover:bg-amber-700 py-3 text-base font-bold text-amber-200" onclick="executeBulkEnhance(true, document.getElementById('bulk-enh-target').value)">受祝福 強化勾選至目標</button>`;
+    act+=`<button class="col-span-2 w-full btn py-3 bg-slate-700 text-lg font-bold mt-2" onclick="closeModal()">取消</button>`;
+    document.getElementById('modal-actions').innerHTML=act;
 }
-try { window.openAutoEnhanceModal = openAutoEnhanceModal; window.runAutoEnhance = runAutoEnhance; window.closeAutoEnhanceModal = closeAutoEnhanceModal; } catch(e) {}
+try { window.executeBulkEnhance=executeBulkEnhance; window._updateEnhSelBtns=_updateEnhSelBtns; window.openBulkEnhanceModal=openBulkEnhanceModal; } catch(e){}
 
 function openEnhanceModal(scroll) {
     activeScroll = scroll;
@@ -8277,13 +8285,30 @@ player.inv.forEach(i => {
     // 保留點擊開啟 Modal 功能 (所有項目皆可點擊)
     el.onclick = () => openModal(i, false);
     
-    // 🎯 物品分流邏輯
-    if (d.type === 'wpn') {
-        wDiv.appendChild(el); 
-    } else if (d.type === 'arm' || d.type === 'acc') {
-        aDiv.appendChild(el); 
+    // 🎯 物品分流邏輯（武器/防具/飾品加勾選框，供多選強化）
+    if (d.type === 'wpn' || d.type === 'arm' || d.type === 'acc') {
+        let wrap = document.createElement('div');
+        wrap.className = 'flex items-center gap-2 mb-1';
+        let cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.className = 'w-5 h-5 flex-shrink-0 accent-orange-500 cursor-pointer';
+        cb.checked = window._enhSel.has(i.uid);
+        cb.onclick = (ev) => { ev.stopPropagation(); if (cb.checked) window._enhSel.add(i.uid); else window._enhSel.delete(i.uid); _updateEnhSelBtns(); };
+        el.classList.remove('mb-1'); el.style.flex = '1'; el.style.minWidth = '0';
+        wrap.appendChild(cb); wrap.appendChild(el);
+        (d.type === 'wpn' ? wDiv : aDiv).appendChild(wrap);
     } else {
-        iDiv.appendChild(el); 
+        iDiv.appendChild(el);
+    }
+});
+// 🔨 武器/防具頁頂端：強化勾選 工具列
+['tab-weapons','tab-armors'].forEach(tid => {
+    let dv = document.getElementById(tid);
+    if (dv && dv.children.length) {
+        let bar = document.createElement('div');
+        bar.className = 'flex gap-1 mb-2';
+        bar.innerHTML = `<button class="btn flex-1 bg-orange-800 hover:bg-orange-700 text-orange-100 text-sm font-bold py-2" onclick="openBulkEnhanceModal()">\u{1F528} 強化勾選 (<span class="enh-sel-count">${window._enhSel.size}</span>)</button><button class="btn bg-slate-700 text-slate-200 text-sm py-2 px-3" onclick="window._enhSel.clear(); renderTabs(true);">清除勾選</button>`;
+        dv.insertBefore(bar, dv.firstChild);
     }
 });
     
@@ -8754,6 +8779,10 @@ function showEnhanceOptions(uid, isEq) {
         act += `<button class="col-span-2 w-full btn border-blue-600 bg-blue-900 hover:bg-blue-800 py-3 text-base font-bold text-blue-300 shadow mt-2" onclick="executeAutoSafeEnhance('${item.uid}', ${isEq}, '${scrollNormId}')">一鍵強化至安定值 (+${safe})</button>`;
     }
     
+    // 🌟 自訂目標等級連衝（可超過安定值，超過後失敗會爆裝）
+    act += `<div class="col-span-2 flex items-center gap-2 mt-3 pt-2 border-t border-slate-700"><span class="text-slate-300 text-sm whitespace-nowrap">目標 +</span><input id="enh-target" type="number" value="${Math.max((item.en||0)+1, (d.safe||0))}" min="1" class="w-20 p-1 bg-slate-900 border border-slate-600 rounded text-center text-white"></div>`;
+    if (scrollNorm) act += `<button class="col-span-2 w-full btn border-orange-700 bg-orange-900 hover:bg-orange-800 py-3 text-base font-bold text-orange-200" onclick="executeAutoEnhanceTo('${item.uid}', ${isEq}, false, document.getElementById('enh-target').value)">一般 強化至目標（超安定值會爆裝）</button>`;
+    if (scrollBless) act += `<button class="col-span-2 w-full btn border-amber-600 bg-amber-800 hover:bg-amber-700 py-3 text-base font-bold text-amber-200" onclick="executeAutoEnhanceTo('${item.uid}', ${isEq}, true, document.getElementById('enh-target').value)">受祝福 強化至目標（超安定值會爆裝）</button>`;
     act += `<button class="col-span-2 w-full btn py-3 bg-slate-700 text-lg font-bold mt-2" onclick="returnToItemModal('${item.uid}', ${isEq})">返回</button>`;
     
     document.getElementById('modal-actions').innerHTML = act;
