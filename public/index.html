@@ -826,6 +826,20 @@ const DB = {
         "mat_griffon_feather": { n: "格利芬羽毛", p: 1000, gachaWeight: 0, d: "格利芬身上輕盈而堅韌的羽毛。（格利芬 1% 掉落）" },
         "mat_unicorn_horn": { n: "神聖獨角獸之角", p: 5000, gachaWeight: 0, d: "獨角獸頭上的神聖之角，蘊含純淨之力。製作熾炎天使弓的核心材料。（獨角獸 0.1% 掉落）" },
         // ===== 三職業技能書 =====
+        // ----- 自訂新技能書（gachaWeight:0 → 潘朵拉抽不到，只在墮落騎士團掉落）-----
+        "bk_mg_master": { type: "skillbk", n: "法師技能書(魔法大師)", p: 0, sk: "sk_mg_master", gachaWeight: 0, img: "assets/icons/skills/魔法大師.png" },
+        "bk_mg_master_ex": { type: "skillbk", n: "法師技能書(魔法大師·專家)", p: 0, sk: "sk_mg_master_ex", gachaWeight: 0, img: "assets/icons/skills/魔法大師.png" },
+        "bk_mg_master_gm": { type: "skillbk", n: "法師技能書(魔法大師·大師)", p: 0, sk: "sk_mg_master_gm", gachaWeight: 0, img: "assets/icons/skills/魔法大師.png" },
+        "bk_ef_steeldef": { type: "skillbk", n: "妖精技能書(鋼鐵防禦)", p: 0, sk: "sk_ef_steeldef", gachaWeight: 0, img: "assets/icons/skills/鋼鐵防禦.png" },
+        "bk_ef_truesight": { type: "skillbk", n: "妖精技能書(精準射擊)", p: 0, sk: "sk_ef_truesight", gachaWeight: 0, img: "assets/icons/skills/精準射擊.png" },
+        "bk_ef_elearrow": { type: "skillbk", n: "妖精技能書(元素之箭)", p: 0, sk: "sk_ef_elearrow", gachaWeight: 0, img: "assets/icons/skills/元素之箭.png" },
+        "bk_mg_icespike": { type: "skillbk", n: "法師技能書(寒冰尖刺)", p: 0, sk: "sk_mg_icespike", gachaWeight: 0, img: "assets/icons/skills/寒冰尖刺.png" },
+        "bk_kn_shockstun_ex": { type: "skillbk", n: "騎士技能書(衝擊之暈·專家)", p: 0, sk: "sk_kn_shockstun_ex", gachaWeight: 0, img: "assets/icons/skills/衝擊之暈專家.png" },
+        "bk_kn_shockstun_gm": { type: "skillbk", n: "騎士技能書(衝擊之暈·大師)", p: 0, sk: "sk_kn_shockstun_gm", gachaWeight: 0, img: "assets/icons/skills/衝擊之暈大師.png" },
+        "bk_de_armorbreak": { type: "skillbk", n: "黑暗妖精技能書(破壞盔甲)", p: 0, sk: "sk_de_armorbreak", gachaWeight: 0, img: "assets/icons/skills/破壞盔甲.png" },
+        "bk_de_armorbreak_ex": { type: "skillbk", n: "黑暗妖精技能書(破壞盔甲·專家)", p: 0, sk: "sk_de_armorbreak_ex", gachaWeight: 0, img: "assets/icons/skills/破壞盔甲.png" },
+        "bk_de_armorbreak_gm": { type: "skillbk", n: "黑暗妖精技能書(破壞盔甲·大師)", p: 0, sk: "sk_de_armorbreak_gm", gachaWeight: 0, img: "assets/icons/skills/破壞盔甲.png" },
+        "bk_mg_darksummon": { type: "skillbk", n: "法師技能書(黑暗召喚)", p: 0, sk: "sk_mg_darksummon", gachaWeight: 0, img: "assets/icons/skills/召喚守護者.png" },
         "bk_kn_berserk": { type: "skillbk", n: "騎士技能書(狂戰士)", p: 30000, sk: "sk_kn_berserk", gachaWeight: 20 },
         "bk_kn_rage": { type: "skillbk", n: "騎士技能書(怒氣)", p: 20000, sk: "sk_kn_rage", gachaWeight: 20 },
         "bk_kn_warcry": { type: "skillbk", n: "騎士技能書(戰吼)", p: 15000, sk: "sk_kn_warcry", gachaWeight: 20 },
@@ -1442,6 +1456,12 @@ const DB = {
         "abyss_fire_dragon":  { n: "深淵·炎龍", lv: 100, s: "L", beh: "主動", race: "龍", boss: true, e: "fire",  hp: 1800000, ac: -120, mr: 250, exp: 700000, goldMin: 70000, goldMax: 360000, atkSpd: 2.0, dmg: [3, 400], db: 600, hit: 60 },
         "abyss_ice_dragon":   { n: "深淵·冰龍", lv: 100, s: "L", beh: "主動", race: "龍", boss: true, e: "water", hp: 1800000, ac: -120, mr: 250, exp: 700000, goldMin: 70000, goldMax: 360000, atkSpd: 2.0, dmg: [3, 400], db: 600, hit: 60 },
         "abyss_earth_dragon": { n: "深淵·地龍", lv: 100, s: "L", beh: "主動", race: "龍", boss: true, e: "earth", hp: 1800000, ac: -120, mr: 250, exp: 700000, goldMin: 70000, goldMax: 360000, atkSpd: 2.0, dmg: [3, 400], db: 600, hit: 60 },
+        "fk_baphomet":    { n: "巴風特", lv: 86, s: "L", beh: "主動", race: "墮落騎士團", boss: true, e: "dark", hp: 420000, ac: -80, mr: 150, exp: 270000, goldMin: 30000, goldMax: 130000, atkSpd: 1.5, dmg: [2, 250], db: 180, hit: 32 },
+        "fk_balrog":      { n: "巴列斯", lv: 86, s: "L", beh: "主動", race: "墮落騎士團", boss: true, e: "dark", hp: 420000, ac: -80, mr: 150, exp: 270000, goldMin: 30000, goldMax: 130000, atkSpd: 1.5, dmg: [2, 250], db: 180, hit: 32, img: "assets/icons/monsters/巴列斯.png" },
+        "fk_kt":          { n: "克特", lv: 88, s: "L", beh: "主動", race: "墮落騎士團", boss: true, e: "dark", hp: 460000, ac: -84, mr: 160, exp: 300000, goldMin: 30000, goldMax: 150000, atkSpd: 1.4, dmg: [2, 280], db: 200, hit: 35 },
+        "fk_deathknight": { n: "死亡騎士", lv: 90, s: "L", beh: "主動", race: "墮落騎士團", boss: true, e: "dark", hp: 500000, ac: -88, mr: 170, exp: 330000, goldMin: 40000, goldMax: 180000, atkSpd: 1.3, dmg: [2, 310], db: 240, hit: 38 },
+        "fk_aris":        { n: "愛麗絲", lv: 92, s: "L", beh: "主動", race: "墮落騎士團", boss: true, e: "dark", hp: 540000, ac: -90, mr: 178, exp: 360000, goldMin: 40000, goldMax: 200000, atkSpd: 1.5, dmg: [2, 340], db: 280, hit: 41, img: "assets/icons/monsters/愛麗絲.png" },
+        "fk_vander":      { n: "騎士范德", lv: 94, s: "L", beh: "主動", race: "墮落騎士團", boss: true, e: "dark", hp: 580000, ac: -94, mr: 185, exp: 390000, goldMin: 50000, goldMax: 240000, atkSpd: 1.4, dmg: [3, 370], db: 320, hit: 44, img: "assets/icons/monsters/騎士范德.png" },
         // ===== 底比斯（埃及神殿）新增怪物 =====
         "thebes_mandragora": { n: "底比斯曼陀羅草", img: "assets/icons/monsters/thebes_mandragora.png", lv: 76, s: "S", beh: "被動", race: "底比斯", e: "earth", hp: 5000, ac: -22, mr: 30, exp: 15000, goldMin: 600, goldMax: 1400, atkSpd: 1.8, dmg: [1, 130], db: 14, hit: 10 },
         "thebes_falcon": { n: "神隼", img: "assets/icons/monsters/thebes_falcon.png", lv: 78, s: "M", beh: "主動", race: "底比斯", e: "wind", hp: 4200, ac: -26, mr: 28, exp: 16000, goldMin: 700, goldMax: 1500, atkSpd: 1.3, dmg: [1, 120], db: 12, hit: 16 },
@@ -2032,6 +2052,20 @@ const DB = {
 	
 	skills: {
         // ===== 三職業新技能（騎士/法師/妖精） =====
+        // ===== 自訂新增技能（玩家設計）=====
+        "sk_mg_master": { n: "魔法大師", type: "buff", tier: 9, reqM: 50, mp: 110, dur: 600, d: { mpR: 30 }, msg: "你領悟魔法大師奧義，回魔大幅提升。" , img: "assets/icons/skills/魔法大師.png" },
+        "sk_mg_master_ex": { n: "魔法大師(專家)", type: "buff", tier: 9, reqM: 50, reqReborn: 5, mp: 110, dur: 600, d: { mpR: 50 }, c: "text-red-400", msg: "魔法大師（專家）！回魔顯著提升。" , img: "assets/icons/skills/魔法大師.png" },
+        "sk_mg_master_gm": { n: "魔法大師(大師)", type: "buff", tier: 9, reqM: 50, reqReborn: 10, mp: 110, dur: 600, d: { mpR: 70 }, c: "text-purple-400", msg: "魔法大師（大師）！回魔極大提升。" , img: "assets/icons/skills/魔法大師.png" },
+        "sk_ef_steeldef": { n: "鋼鐵防禦", type: "buff", tier: 3, reqE: 24, mp: 18, dur: 1200, d: { ac: -20 }, msg: "你的防禦如鋼鐵般堅固。" , img: "assets/icons/skills/鋼鐵防禦.png" },
+        "sk_ef_truesight": { n: "精準射擊", type: "atk", tier: 5, reqE: 40, mp: 35, dmgType: "magic", ele: "none", dmgDice: [1, 6], status: { kind: "broken", pbase: 200, dur: 16 } , img: "assets/icons/skills/精準射擊.png" },
+        "sk_ef_elearrow": { n: "元素之箭", type: "buff", tier: 6, reqE: 50, mp: 30, dur: 1200, d: { rangedCrit: 10, rangedDmg: 5 }, msg: "你的箭矢蘊含元素之力。" , img: "assets/icons/skills/元素之箭.png" },
+        "sk_de_armorbreak": { darkOnly: true, n: "破壞盔甲", type: "buff", tier: 3, reqE: 45, mp: 20, dur: 5, d: { meleeCrit: 20, rangedCrit: 20, magicCrit: 20 }, msg: "你進入爆擊爆發狀態！" , img: "assets/icons/skills/破壞盔甲.png" },
+        "sk_de_armorbreak_ex": { darkOnly: true, n: "破壞盔甲(專家)", type: "buff", tier: 3, reqE: 45, reqReborn: 5, mp: 20, dur: 5, d: { meleeCrit: 40, rangedCrit: 40, magicCrit: 40 }, c: "text-red-400", msg: "破壞盔甲（專家）！爆擊大幅提升。" , img: "assets/icons/skills/破壞盔甲.png" },
+        "sk_de_armorbreak_gm": { darkOnly: true, n: "破壞盔甲(大師)", type: "buff", tier: 3, reqE: 45, reqReborn: 10, mp: 20, dur: 5, d: { meleeCrit: 80, rangedCrit: 80, magicCrit: 80 }, c: "text-purple-400", msg: "破壞盔甲（大師）！爆擊極大提升。" , img: "assets/icons/skills/破壞盔甲.png" },
+        "sk_mg_icespike": { n: "寒冰尖刺", type: "atk", tier: 10, reqM: 40, mp: 60, dmgType: "magic", ele: "water", dmgDice: [32, 6] , img: "assets/icons/skills/寒冰尖刺.png" },
+        "sk_kn_shockstun_ex": { n: "衝擊之暈(專家)", type: "atk", tier: 5, reqK: 60, reqReborn: 5, mp: 24, dmgType: "physical", reqWpn: "nonbow", stun: 300, stunChance: 75, dmgMul: 2, c: "text-red-400" , img: "assets/icons/skills/衝擊之暈專家.png" },
+        "sk_kn_shockstun_gm": { n: "衝擊之暈(大師)", type: "atk", tier: 5, reqK: 60, reqReborn: 10, mp: 30, dmgType: "physical", reqWpn: "nonbow", stun: 600, stunChance: 100, dmgMul: 4, c: "text-purple-400" , img: "assets/icons/skills/衝擊之暈大師.png" },
+        "sk_mg_darksummon": { n: "黑暗召喚", type: "manual", tier: 10, reqM: 40, reqReborn: 8, mp: 80 , img: "assets/icons/skills/召喚守護者.png" },
         "sk_kn_berserk": { n: "狂戰士", type: "buff", tier: 3, reqK: 45, mp: 20, dur: 600, d: { meleeDmg: 15, meleeHit: 5, ac: -8 } },
         "sk_kn_rage": { n: "怒氣", type: "buff", tier: 2, reqK: 30, mp: 10, dur: 1200, d: { meleeDmg: 8, extraDmg: 3 } },
         "sk_kn_warcry": { n: "戰吼", type: "buff", tier: 1, reqK: 25, mp: 8, dur: 1200, d: { str: 3, con: 3 } },
@@ -2048,7 +2082,7 @@ const DB = {
         "sk_de_dex":     { darkOnly: true, n: "敏捷提升", type: "buff", tier: 2, reqE: 30, mp: 10, dur: 1200, d: { dex: 5 } },
         "sk_de_will":    { darkOnly: true, n: "燃燒鬥志", type: "buff", tier: 2, reqE: 30, mp: 20, dur: 600,  d: { meleeDmg: 8, rangedDmg: 8, extraDmg: 5 } },
         "sk_de_double":  { darkOnly: true, n: "雙重破壞", type: "buff", tier: 3, reqE: 45, mp: 20, dur: 600,  d: { extraDmg: 10, meleeDmg: 6 } },
-        "sk_de_evasion": { darkOnly: true, n: "暗影閃避", type: "buff", tier: 3, reqE: 45, mp: 25, dur: 1200, d: { er: 30 } },
+        "sk_de_evasion": { darkOnly: true, n: "暗影閃避", type: "buff", tier: 3, reqE: 45, mp: 25, dur: 5, d: { er: 80 } },
         // ================= 【法師魔法】 =================
         // 一階魔法 (Lv 4)
         "sk_heal1": { n: "初級治癒術", type: "heal", tier: 1, reqM: 4, reqE: 8, reqK: 16, mp: 4, valBase: 0, valDice: [1, 15], healDice: [1, 20], healBase: 20, msg: "你感覺舒服了一點。" },
@@ -2204,6 +2238,7 @@ const DB = {
         "thebes_3": ["thebes_golem","thebes_priest","thebes_sphinx"],
         "thebes_altar": ["thebes_anubis","thebes_horus","thebes_osiris","thebes_golem"],
         "rebirth_abyss": ["abyss_osiris","abyss_anubis","abyss_horus","abyss_fire_dragon","abyss_ice_dragon","abyss_earth_dragon"],
+        "fallen_knights": ["fk_baphomet","fk_balrog","fk_kt","fk_deathknight","fk_aris","fk_vander"],
         "graveyard": ["nw_038", "nw_051", "nw_052", "nw_053", "nw_064", "nw_117", "nw_119", "nw_181", "nw_043", "nw_044", "nw_045", "nw_046", "nw_088"],  // 骷髏墓地
         "demon_realm": ["nw_148", "nw_149", "nw_150", "nw_152", "nw_153", "nw_154", "nw_155", "nw_156", "nw_158", "nw_050", "nw_065", "nw_160"],  // 魔界
         "aden": ["nw_076", "nw_028", "nw_061", "nw_068", "nw_069", "nw_070", "nw_071", "nw_073", "nw_074", "nw_075", "nw_229"],  // 亞丁城
@@ -5858,6 +5893,11 @@ function killMob(idx) {
         if (Math.random() < (mob.boss ? 0.10 : 0.05)) gainItem('sherine_scroll', 1, false);
     }
 
+    // ===== 墮落騎士團（5轉）：擊殺掉落新技能書（此地圖限定，潘朵拉抽不到）=====
+    if (mapState.current === 'fallen_knights') {
+        var _fkBooks = ['bk_mg_master','bk_mg_master_ex','bk_mg_master_gm','bk_kn_shockstun_ex','bk_kn_shockstun_gm','bk_ef_steeldef','bk_ef_truesight','bk_ef_elearrow','bk_mg_icespike','bk_de_armorbreak','bk_de_armorbreak_ex','bk_de_armorbreak_gm','bk_mg_darksummon'];
+        if (Math.random() < (mob.boss ? 0.08 : 0.03)) gainItem(_fkBooks[Math.floor(Math.random()*_fkBooks.length)], 1, false);
+    }
     _sherineLootCtx = null;   // 🔮 掉落判定結束，清除上下文
     // 🔧 架構#2：不在此處位移輸送帶（呼叫點可能正在迭代怪物陣列）。
     // tick 內的擊殺延後到 gameLoop 的 settleDeadMobs()；手動操作則立即清算。
@@ -6143,6 +6183,33 @@ function buildSummon(skId, def, durSec) {
         proc: base.proc ? { ...base.proc, cdCur: base.proc.cd } : null,
         cd: base.interval || 20, endTick: state.ticks + (durSec || 3600) * 10
     };
+}
+function openDarkSummonPicker() {
+    var old = document.getElementById('darksummon-modal'); if(old) old.remove();
+    var rb = player.reborn || 0;
+    var mk = function(label, sub, which, need) {
+        var ok = rb >= need;
+        return '<button onclick="pickDarkSummon(\''+which+'\')" '+(ok?'':'disabled')+' class="w-full mb-2 px-4 py-3 rounded text-left '+(ok?'bg-slate-700 hover:bg-slate-600':'bg-slate-800 opacity-50 cursor-not-allowed')+'"><div class="font-bold text-purple-200">'+label+'</div><div class="text-xs text-slate-300">'+sub+(ok?'':'（需 '+need+' 轉）')+'</div></button>';
+    };
+    var html = '<div id="darksummon-modal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/70" onclick="if(event.target===this)this.remove()"><div class="bg-slate-900 border border-purple-500 rounded-lg p-4 w-[88%] max-w-sm"><div class="text-purple-300 font-bold mb-3">黑暗召喚 — 選擇召喚對象（MP 80）</div>'+mk('召喚不死族 → 死亡騎士','傷害×2、攻速×1','undead',8)+mk('召喚守護者 → 騎士范德','傷害×4、攻速×2','guardian',10)+'<button onclick="var m=document.getElementById(\'darksummon-modal\');if(m)m.remove();" class="w-full mt-1 px-4 py-2 rounded bg-slate-700 text-slate-200">關閉</button></div></div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+    return true;
+}
+function pickDarkSummon(which) {
+    var rb = player.reborn || 0;
+    var specs = {
+        undead: { need: 8, spec: { n: "死亡騎士", dmgDice: [4, 14], dmgDiv: 6, dmgLvDiv: 10, interval: 10, kind: "melee", hitLvOff: 20, proc: { p: 0.20, cd: 50, dmgDice: [12, 10], ele: "none", name: "亡者斬" } } },
+        guardian: { need: 10, spec: { n: "騎士范德", dmgDice: [8, 14], dmgDiv: 6, dmgLvDiv: 10, interval: 5, kind: "melee", hitLvOff: 20, proc: { p: 0.20, cd: 50, dmgDice: [24, 10], ele: "none", name: "裂擊" } } }
+    };
+    var c = specs[which]; if(!c) return;
+    if(rb < c.need) { logSys('轉生次數不足，無法召喚此單位。'); return; }
+    if(player.mp < 80) { logSys('MP 不足，無法召喚。'); return; }
+    player.mp -= 80;
+    setupSummon('sk_mg_darksummon', { summon: c.spec, dur: 3600 });
+    var m = document.getElementById('darksummon-modal'); if(m) m.remove();
+    if(typeof calcStats==='function') calcStats();
+    if(typeof updateUI==='function') updateUI();
+    if(typeof saveGame==='function') saveGame();
 }
 function setupSummon(skId, sk) {
     // 同時只能有一個召喚物：清除其他召喚 buff
@@ -6683,6 +6750,7 @@ function manualCast(skId) {
     let needLv = player.cls === 'mage' ? sk.reqM : (player.cls === 'knight' ? sk.reqK : sk.reqE);
     if(!__granted && needLv === undefined) { logSys('你的職業無法使用此技能。'); return; }
     if(!__granted && player.lv < needLv) { logSys('等級不足，無法使用此技能。'); return; }
+    if(!__granted && sk.reqReborn && (player.reborn || 0) < sk.reqReborn) { logSys('轉生次數不足，無法使用此技能。'); return; }
     if((player.manualCd[skId] || 0) > 0) { logSys('技能冷卻中。'); return; }
     let cost = sk.mp ? player.d.getMpCost(sk.mp, sk.tier) : 0;
     if(player.mp < cost) { logSys('MP 不足。'); return; }
@@ -6726,6 +6794,7 @@ function rollDice(count, sides) { let s = 0; for(let i = 0; i < count; i++) s +=
 function castSkill(skId) {
     let sk = DB.skills[skId];
     if(!sk) return false;
+    if(skId === 'sk_mg_darksummon') { return openDarkSummonPicker(); }
     if(skId === 'sk_magic_shield' && (player.magicShieldCd || 0) > 0) return false;   // 魔法屏障抵擋技能後冷卻中，無法施放
     
     if(player.statuses.silence > 0 && skId !== 'sk_cancel') {
@@ -6740,6 +6809,7 @@ function castSkill(skId) {
     let __granted = player.grantedSkills && player.grantedSkills.includes(skId);
     let needLv = player.cls === 'mage' ? sk.reqM : (player.cls === 'knight' ? sk.reqK : sk.reqE);
     if(!__granted && (needLv === undefined || player.lv < needLv)) return false;
+    if(!__granted && sk.reqReborn && (player.reborn || 0) < sk.reqReborn) return false;
     if(!__granted && sk.reqEle && player.elfEle !== sk.reqEle) return false;      // 屬性不符
     if(!__granted && sk.reqEleAny && !player.elfEle) return false;                 // 尚未選擇屬性
     
@@ -6852,6 +6922,7 @@ function castSkill(skId) {
                 if(!res.hit) { hitsLog.push('Miss'); continue; }
                 landed++;
                 if (player._setRedLion5) res.dmg = Math.max(1, Math.floor(res.dmg * 1.2));   // 🔮 紅獅 5/5：攻擊技能最終傷害 +20%
+                if (sk.dmgMul) res.dmg = Math.max(1, Math.floor(res.dmg * sk.dmgMul));   // 倍率技（衝擊之暈專家等）
                 // 遠距離物理技能命中滿血被動怪物，賦予 3 秒延遲（整段只觸發一次）
                 if(!delayDone && t.curHp === t.hp && t.beh === '被動' && res.ranged) { t._delayTicks = 30; delayDone = true; }
                 t.curHp -= res.dmg;
@@ -8472,7 +8543,7 @@ function renderSkillSelects() {
             let __locked = (sid === 'sk_antidote' || sid === 'sk_holy_light') && __cancelOn;
             let __dis = (!isAvail || __locked) ? 'disabled' : '';
             let __purAttr = (sid === 'sk_cancel') ? ` onchange="renderSkillSelects()"` : '';
-            let __span = __isPurify ? 'text-teal-300' : 'text-purple-300';
+            let __span = (sk.c) ? sk.c : (__isPurify ? 'text-teal-300' : 'text-purple-300');
             buffHtml += `<label class="cursor-pointer flex items-center gap-2 ${(isAvail && !__locked)?'':'opacity-50'}"${__locked?' title="魔法相消術已涵蓋此效果"':''}><input type="checkbox" id="auto-sk-${sid}" ${checked} ${__dis}${sumAttr}${__purAttr}> <span class="${__span}">${sk.n}</span></label>`;
         }
         if(sk.type === 'convert') {
@@ -9501,6 +9572,7 @@ const MAP_CATEGORIES = {
         {v:'thebes_3',t:'底比斯③祭壇',c:'#fbbf24'},
         {v:'thebes_altar',t:'底比斯·神壇',c:'#f59e0b'},
         {v:'rebirth_abyss',t:'深淵·終焉之地（8轉）',c:'#a855f7'},
+        {v:'fallen_knights',t:'墮落騎士團（5轉）',c:'#dc2626'},
     ],
     tower: [
             {v:'tower_1f',t:'傲慢塔 1樓'},
@@ -10521,6 +10593,7 @@ function changeMap(force) {
           logSys('🔒 此地圖為「深淵·終焉之地」，需轉生 8 轉以上才能進入。');
           syncMapSelectors(); return;
       } }
+    { if (!force && document.getElementById('map-select').value === 'fallen_knights' && (player.reborn||0) < 5) { logSys('🔒 此地圖為「墮落騎士團」，需轉生 5 轉以上才能進入。'); syncMapSelectors(); return; } }
     mapState.current = document.getElementById('map-select').value;
     { let _c = mapCategoryOf(mapState.current); if(_c) { if(!player.lastMapByCat) player.lastMapByCat = {}; player.lastMapByCat[_c] = mapState.current; } }   // 記住各分類最後到過的地圖
     mapState.mobs = [null, null, null];
