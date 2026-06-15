@@ -738,6 +738,7 @@
                         <div class="text-slate-200">攻擊速度</div> <div class="text-white text-right font-bold" id="dt-spd">1.0s</div>
                     </div>
                     <div class="border-t border-slate-700 pt-4 text-base leading-relaxed" id="dt-buffs"></div>
+                    <div id="ui-panacea-info" class="border-t border-slate-700 pt-3 mt-3 text-base leading-relaxed"></div>
                     
                     <!-- 升級點數 -->
                     <div id="ui-bonus-stats" class="hidden mt-auto border-t border-slate-700 pt-4 bg-slate-800 -mx-5 -mb-5 p-5 rounded-b-xl">
@@ -7953,6 +7954,17 @@ function updateUI() {
     
     renderStatusEffects();
     
+    // 🧪 萬能藥獨立顯示（永久加成，回憶蠟燭不洗；常駐，不受升級點面板隱藏影響）
+    { let _pn = player.panacea || {}; let _pmax = 20 + (player.reborn||0)*20;
+      let _prem = Math.max(0, _pmax - (player.panaceaUsed||0));
+      let _cn = { str:'力', dex:'敏', con:'體', int:'智', wis:'精', cha:'魅' };
+      let _parts = ['str','dex','con','int','wis','cha'].filter(s=>(_pn[s]||0)>0).map(s=>`${_cn[s]}+${_pn[s]}`);
+      let _el = document.getElementById('ui-panacea-info');
+      if (_el) _el.innerHTML =
+          `<div class="text-emerald-400 font-bold mb-1">🧪 萬能藥永久加成 <span class="text-slate-400 font-normal text-sm">(回憶蠟燭不會洗掉)</span></div>`
+        + `<div class="text-slate-300">可再使用：<span class="text-emerald-200 font-bold">${_prem}</span> / ${_pmax} 瓶</div>`
+        + (_parts.length ? `<div class="text-emerald-200 mt-1">${_parts.join('　')}</div>` : `<div class="text-slate-500 mt-1">尚無萬能藥加成</div>`);
+    }
     if (player.bonus > 0) {
         document.getElementById('ui-bonus-stats').classList.remove('hidden');
         document.getElementById('ui-bonus-pts').innerText = player.bonus;
