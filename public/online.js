@@ -88,14 +88,19 @@
                 expMult: j.expMult || 1, spdMult: j.spdMult || 1,
                 goldDropMult: j.goldDropMult || 1, synthRateMult: j.synthRateMult || 1,
                 enhanceRateMult: j.enhanceRateMult || 1, pandoraLuckMult: j.pandoraLuckMult || 1,
-                towerDiff: j.towerDiff || 1.5,
+                towerDiff: j.towerDiff || 1.5, mageDmgMult: j.mageDmgMult || 1, meleeDmgMult: j.meleeDmgMult || 1, rangedDmgMult: j.rangedDmgMult || 1, pvpDmgMult: (j.pvpDmgMult != null ? j.pvpDmgMult : 1), pvpMagicMult: (j.pvpMagicMult != null ? j.pvpMagicMult : 1),
                 eventZongzi: j.eventZongzi ? 1 : 0
             };
             try { if (typeof calcStats === 'function') calcStats(); if (typeof updateUI === 'function') updateUI(); } catch (e) { }
         } catch (e) { }
     }
     syncGameConfig();
-    setInterval(syncGameConfig, 60000);
+    setInterval(syncGameConfig, 20000);
+    try {
+        document.addEventListener('visibilitychange', function () { if (!document.hidden) syncGameConfig(); });
+        window.addEventListener('focus', function () { syncGameConfig(); });
+        window.addEventListener('pageshow', function () { syncGameConfig(); });
+    } catch (e) { }
     // 回報角色名字給伺服器（競技場顯示），名字有變才送
     let onlineNames = {};
     let _lastSentName = null;
@@ -215,6 +220,9 @@
     // 對接遊戲原生欄位系統：用遊戲全域 currentSlot（1~3）與 lineage_idle_save_<slot>
     function activeSlot() { try { if (typeof window.__currentSlot === 'function') return window.__currentSlot() || 1; return (typeof currentSlot !== 'undefined' && currentSlot) ? currentSlot : 1; } catch (e) { return 1; } }
     function slotKey() { return 'lineage_idle_save_' + activeSlot(); }
+    window.__cloudDeleteSave = async function (slot) {
+        try { await api('/api/save?slot=' + (slot || activeSlot()), 'DELETE'); } catch (e) { }
+    };
     async function uploadSave() {
         try {
             const raw = localStorage.getItem(slotKey());
@@ -929,6 +937,7 @@
 
     function playBattle(m) {
         injectBattleCSS();
+        const BATTLE_SPEED = 3; // 回放加速倍率（3＝三倍速；越大越快）
         battleTimers.forEach(t => clearTimeout(t)); battleTimers = [];
         const emoji = { knight: '⚔️', mage: '🪄', elf: '🏹' };
         const clsZh = { knight: '騎士', mage: '法師', elf: '妖精' };
@@ -1013,7 +1022,7 @@
                     }
                     const close = bigBtn('關閉', '#475569'); close.onclick = () => ov.remove(); wrap.append(close);
                 }
-            }, wait + e.t * 100));
+            }, wait + e.t * (100 / BATTLE_SPEED)));
         });
     }
 
