@@ -7725,8 +7725,6 @@ function _aeRate(type, safe, en) {   // 與 doEnhance 完全一致
     if (safe === 4) return en === 4 ? 0.50 : en === 5 ? 0.40 : en === 6 ? 0.30 : 0.20;
     return en === safe ? 0.30 : 0.20;
 }
-window._enhSel = window._enhSel || new Set();
-function _updateEnhSelBtns(){ let n=window._enhSel?window._enhSel.size:0; document.querySelectorAll('.enh-sel-count').forEach(e=>e.textContent=n); }
 // 連衝核心：對單一 target 衝到 targetLv（不存檔/不刷新），回傳結果
 function _enhCore(target, isEq, scrollId, targetLv){
     let d=DB.items[target.id]; let safe=d.safe||0;
@@ -7768,46 +7766,64 @@ function executeAutoEnhanceTo(targetUid, isEq, useBless, targetLv){
 }
 try { window.executeAutoEnhanceTo = executeAutoEnhanceTo; } catch(e) {}
 // 批量：對所有勾選的背包裝備連衝至目標
-function executeBulkEnhance(useBless, targetLv, qty){
-    let sel=window._enhSel?[...window._enhSel]:[];
-    if(!sel.length){ logSys('未勾選任何裝備。'); return; }
-    targetLv=Math.max(1,parseInt(targetLv)||1);
-    qty=Math.max(1,parseInt(qty)||1);
+function openBatchEnhance(type){
+    let typeName = type==='wpn' ? '武器' : '防具';
+    let items = player.inv.filter(i=>{ let d=DB.items[i.id]; return d && (type==='wpn'? d.type==='wpn' : (d.type==='arm'||d.type==='acc')); });
+    let old=document.getElementById('batch-enh-modal'); if(old) old.remove();
+    let m=document.createElement('div');
+    m.id='batch-enh-modal';
+    m.className='fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-4';
+    let rows = items.map(i=>{
+        let d=DB.items[i.id]; let stack=i.cnt>1;
+        return `<label class="flex items-center gap-2 py-2 border-b border-slate-700">`+
+            `<input type="checkbox" class="be-chk w-5 h-5 flex-shrink-0 accent-orange-500" data-uid="${i.uid}">`+
+            `<span class="flex-1 min-w-0 ${getItemColor(i)} font-bold truncate">${getItemFullName(i)}</span>`+
+            (stack
+              ? `<span class="text-slate-400 text-xs whitespace-nowrap">×${i.cnt}</span><input type="number" class="be-qty w-14 p-1 bg-slate-900 border border-slate-600 rounded text-center text-white text-sm" data-uid="${i.uid}" value="${i.cnt}" min="1" max="${i.cnt}">`
+              : `<span class="text-slate-500 text-xs whitespace-nowrap">單件</span>`)+
+            `</label>`;
+    }).join('');
+    m.innerHTML = `<div class="bg-slate-900 border border-slate-600 rounded-lg w-full max-w-md flex flex-col p-4" style="max-height:85vh">`+
+        `<div class="text-xl font-bold text-orange-300 border-b border-slate-600 pb-2 mb-2">🔨 批量強化${typeName}</div>`+
+        `<div class="flex items-center gap-3 mb-2 flex-wrap"><span class="text-slate-300 text-sm">目標 +</span><input id="be-target" type="number" value="7" min="1" class="w-16 p-1 bg-slate-900 border border-slate-600 rounded text-center text-white"><label class="flex items-center gap-1 text-slate-300 text-sm"><input type="radio" name="be-scroll" value="norm" checked class="accent-orange-500">一般</label><label class="flex items-center gap-1 text-amber-300 text-sm"><input type="radio" name="be-scroll" value="bless" class="accent-amber-500">受祝福</label></div>`+
+        `<div class="text-xs text-slate-400 mb-2">勾選要強化的裝備；堆疊可設件數（預設帶滿）。每件各自衝到目標，超過安定值失敗即消失。</div>`+
+        `<div class="overflow-y-auto flex-1 mb-3" style="min-height:80px">${rows || ('<div class="text-slate-500 text-center py-6">背包沒有可強化的'+typeName+'</div>')}</div>`+
+        `<div class="flex gap-2"><button class="btn flex-1 bg-orange-700 hover:bg-orange-600 text-white font-bold py-3" onclick="runBatchEnhance()">開始強化</button><button class="btn bg-slate-700 text-slate-200 py-3 px-4" onclick="document.getElementById('batch-enh-modal').remove()">關閉</button></div>`+
+        `</div>`;
+    document.body.appendChild(m);
+}
+function runBatchEnhance(){
+    let m=document.getElementById('batch-enh-modal'); if(!m) return;
+    let targetLv=Math.max(1,parseInt(document.getElementById('be-target').value)||1);
+    let useBless=(m.querySelector('input[name="be-scroll"]:checked')||{}).value==='bless';
+    let picks=[...m.querySelectorAll('.be-chk')].filter(c=>c.checked).map(c=>{
+        let u=c.getAttribute('data-uid');
+        let qEl=m.querySelector('.be-qty[data-uid="'+u+'"]');
+        return { uid:u, qty: qEl?Math.max(1,parseInt(qEl.value)||1):1 };
+    });
+    if(!picks.length){ logSys('未勾選任何裝備。'); return; }
     let okN=0, boom=0, totalUsed=0, outFlag=false, lines=[];
-    sel.forEach(su=>{
-        let pre=player.inv.find(i=>i.uid===su); if(!pre) return;
+    picks.forEach(p=>{
+        let pre=player.inv.find(i=>i.uid===p.uid); if(!pre) return;
         let d=DB.items[pre.id]; let scrollId=_aeScrollId(d.type,useBless); if(!scrollId) return;
-        let n = pre.cnt>1 ? Math.min(qty, pre.cnt) : 1;   // 堆疊：依數量逐件；單件：1 件
+        let n = pre.cnt>1 ? Math.min(p.qty, pre.cnt) : 1;
         for(let c=0;c<n;c++){
-            let target=_enhResolve(su,false); if(!target) break;
+            let target=_enhResolve(p.uid,false); if(!target) break;
             if((Number(target.en)||0)>=targetLv){ okN++; continue; }
             let r=_enhCore(target,false,scrollId,targetLv);
             totalUsed+=r.used;
-            if(r.destroyed){ boom++; lines.push(`\u{1F4A5} ${r.name} 爆裝`); }
-            else { okN++; lines.push(`\u2728 ${r.name} +${r.from}\u2192+${r.to}`); }
+            if(r.destroyed){ boom++; lines.push(`💥 ${r.name} 爆裝`); }
+            else { okN++; lines.push(`✨ ${r.name} +${r.from}→+${r.to}`); }
             if(r.out){ outFlag=true; break; }
         }
     });
-    window._enhSel.clear();
-    logSys(`<b>批量強化完成</b>：成功 ${okN} 件、爆裝 ${boom} 件，共消耗 ${totalUsed} 張卷軸${outFlag?'（卷軸不足提前停止）':''}。`);
-    lines.slice(0,15).forEach(l=>logSys(l));
-    calcStats(); renderTabs(true); closeModal(); saveGame();
+    logSys(`<b>批量強化完成</b>：成功 ${okN} 件、爆裝 ${boom} 件，共耗 ${totalUsed} 張卷軸${outFlag?'（卷軸不足提前停止）':''}。`);
+    lines.slice(0,20).forEach(l=>logSys(l));
+    m.remove();
+    calcStats(); renderTabs(true); saveGame();
 }
 // 批量強化視窗
-function openBulkEnhanceModal(){
-    let sel=window._enhSel?[...window._enhSel]:[];
-    if(!sel.length){ logSys('未勾選任何裝備。'); return; }
-    let mc=document.getElementById('modal-compare'); if(mc) mc.classList.add('hidden');
-    document.getElementById('item-modal').classList.remove('hidden');
-    let nm=document.getElementById('modal-item-name'); nm.innerHTML=`\u{1F528} 批量強化（已勾選 ${sel.length} 件）`; nm.className='text-xl font-bold mb-3 border-b border-slate-600 pb-3 text-orange-300';
-    document.getElementById('modal-item-desc').innerHTML='設定目標等級與數量；堆疊的裝備會依「每堆疊件數」逐件強化，超過安定值失敗即爆裝。';
-    let act=`<div class="col-span-2 flex items-center gap-3 mb-1"><span class="text-slate-300 text-sm whitespace-nowrap">目標 +</span><input id="bulk-enh-target" type="number" value="7" min="1" class="w-16 p-1 bg-slate-900 border border-slate-600 rounded text-center text-white"><span class="text-slate-300 text-sm whitespace-nowrap">每堆疊件數</span><input id="bulk-enh-qty" type="number" value="1" min="1" class="w-16 p-1 bg-slate-900 border border-slate-600 rounded text-center text-white"></div>`;
-    act+=`<button class="col-span-2 w-full btn border-orange-700 bg-orange-900 hover:bg-orange-800 py-3 text-base font-bold text-orange-200" onclick="executeBulkEnhance(false, document.getElementById('bulk-enh-target').value, document.getElementById('bulk-enh-qty').value)">一般 強化勾選至目標</button>`;
-    act+=`<button class="col-span-2 w-full btn border-amber-600 bg-amber-800 hover:bg-amber-700 py-3 text-base font-bold text-amber-200" onclick="executeBulkEnhance(true, document.getElementById('bulk-enh-target').value, document.getElementById('bulk-enh-qty').value)">受祝福 強化勾選至目標</button>`;
-    act+=`<button class="col-span-2 w-full btn py-3 bg-slate-700 text-lg font-bold mt-2" onclick="closeModal()">取消</button>`;
-    document.getElementById('modal-actions').innerHTML=act;
-}
-try { window.executeBulkEnhance=executeBulkEnhance; window._updateEnhSelBtns=_updateEnhSelBtns; window.openBulkEnhanceModal=openBulkEnhanceModal; } catch(e){}
+try { window.openBatchEnhance=openBatchEnhance; window.runBatchEnhance=runBatchEnhance; } catch(e){}
 
 function openEnhanceModal(scroll) {
     activeScroll = scroll;
@@ -8317,29 +8333,22 @@ player.inv.forEach(i => {
     // 保留點擊開啟 Modal 功能 (所有項目皆可點擊)
     el.onclick = () => openModal(i, false);
     
-    // 🎯 物品分流邏輯（武器/防具/飾品加勾選框，供多選強化）
-    if (d.type === 'wpn' || d.type === 'arm' || d.type === 'acc') {
-        let wrap = document.createElement('div');
-        wrap.className = 'flex items-center gap-2 mb-1';
-        let cb = document.createElement('input');
-        cb.type = 'checkbox';
-        cb.className = 'w-5 h-5 flex-shrink-0 accent-orange-500 cursor-pointer';
-        cb.checked = window._enhSel.has(i.uid);
-        cb.onclick = (ev) => { ev.stopPropagation(); if (cb.checked) window._enhSel.add(i.uid); else window._enhSel.delete(i.uid); _updateEnhSelBtns(); };
-        el.classList.remove('mb-1'); el.style.flex = '1'; el.style.minWidth = '0';
-        wrap.appendChild(cb); wrap.appendChild(el);
-        (d.type === 'wpn' ? wDiv : aDiv).appendChild(wrap);
+    // 物品分流邏輯
+    if (d.type === 'wpn') {
+        wDiv.appendChild(el);
+    } else if (d.type === 'arm' || d.type === 'acc') {
+        aDiv.appendChild(el);
     } else {
         iDiv.appendChild(el);
     }
 });
-// 🔨 武器/防具頁頂端：強化勾選 工具列
-['tab-weapons','tab-armors'].forEach(tid => {
-    let dv = document.getElementById(tid);
+// 🔨 武器/防具頁頂端：批量強化入口
+[['tab-weapons','wpn'],['tab-armors','arm']].forEach(pair => {
+    let dv = document.getElementById(pair[0]);
     if (dv && dv.children.length) {
         let bar = document.createElement('div');
-        bar.className = 'flex gap-1 mb-2';
-        bar.innerHTML = `<button class="btn flex-1 bg-orange-800 hover:bg-orange-700 text-orange-100 text-sm font-bold py-2" onclick="openBulkEnhanceModal()">\u{1F528} 強化勾選 (<span class="enh-sel-count">${window._enhSel.size}</span>)</button><button class="btn bg-slate-700 text-slate-200 text-sm py-2 px-3" onclick="window._enhSel.clear(); renderTabs(true);">清除勾選</button>`;
+        bar.className = 'mb-2';
+        bar.innerHTML = `<button class="btn w-full bg-orange-800 hover:bg-orange-700 text-orange-100 text-sm font-bold py-2" onclick="openBatchEnhance('${pair[1]}')">🔨 批量強化（設目標等級與件數）</button>`;
         dv.insertBefore(bar, dv.firstChild);
     }
 });
