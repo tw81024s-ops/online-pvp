@@ -88,7 +88,7 @@
                 expMult: j.expMult || 1, spdMult: j.spdMult || 1,
                 goldDropMult: j.goldDropMult || 1, dropMult: j.dropMult || 1, synthRateMult: j.synthRateMult || 1,
                 enhanceRateMult: j.enhanceRateMult || 1, pandoraLuckMult: j.pandoraLuckMult || 1,
-                towerDiff: j.towerDiff || 1.5, mageDmgMult: j.mageDmgMult || 1, meleeDmgMult: j.meleeDmgMult || 1, rangedDmgMult: j.rangedDmgMult || 1, pvpDmgMult: (j.pvpDmgMult != null ? j.pvpDmgMult : 1), pvpMagicMult: (j.pvpMagicMult != null ? j.pvpMagicMult : 1),
+                towerDiff: j.towerDiff || 1.5, mageDmgMult: j.mageDmgMult || 1, meleeDmgMult: j.meleeDmgMult || 1, rangedDmgMult: j.rangedDmgMult || 1, pvpDmgMult: (j.pvpDmgMult != null ? j.pvpDmgMult : 1), pvpMagicMult: (j.pvpMagicMult != null ? j.pvpMagicMult : 1), pveMagicMult: (j.pveMagicMult != null ? j.pveMagicMult : 1),
                 eventZongzi: j.eventZongzi ? 1 : 0
             };
             try { if (typeof calcStats === 'function') calcStats(); if (typeof updateUI === 'function') updateUI(); } catch (e) { }
@@ -669,41 +669,42 @@
             refreshWB();
         };
 
-        // ===== 端午兌換 =====
-        wrap.append(el('div', { style: 'font-weight:bold;color:#34d399;font-size:15px;margin:6px 0;border-top:1px solid #334155;padding-top:12px;' }, '🎉 端午兌換所'));
+        // ===== 腿甲兌換 =====
+        wrap.append(el('div', { style: 'font-weight:bold;color:#34d399;font-size:15px;margin:6px 0;border-top:1px solid #334155;padding-top:12px;' }, '🦵 腿甲兌換所'));
         const zc = el('div', { style: 'font-size:13px;color:#cbd5e1;margin-bottom:8px;' }, '');
         wrap.append(zc);
         const COST = 5000;
-        const WEAPON_GROUPS = [
-            { cls: '🗡️ 騎士', ids: ['nwp_014', 'nwp_037', 'nwp_012'] },
-            { cls: '🪄 法師', ids: ['wpn_strwand', 'wpn_crystalwand', 'nwp_059'] },
-            { cls: '🏹 妖精', ids: ['nwp_033', 'nwp_031', 'wpn_flaming_angel'] },
-            { cls: '🦇 黑妖', ids: ['nwp_077', 'nwp_067', 'de_claw_spirit'] }
+        const LEG_TIERS = [
+            { t: '⚪ 普通', cost: 2000, ids: ['legs_iron', 'legs_con'] },
+            { t: '🔵 稀有', cost: 4000, ids: ['legs_irongate'] },
+            { t: '🔴 英雄', cost: 8000, ids: ['legs_str', 'legs_int', 'legs_dex', 'legs_growth', 'legs_anubis', 'legs_magicdef'] }
         ];
-        const GEAR = ['arm_82', 'arm_83', 'arm_81', 'arm_80', 'arm_88', 'amr_dk', 'de_ring_dark', 'de_amulet_shadow', 'acc_117', 'acc_116', 'amu_str', 'amu_int', 'acc_133'];
         function refreshZ() {
             const south = window.__countItem('zongzi_south'), north = window.__countItem('zongzi_north');
-            zc.innerHTML = `你的粽子：南部粽 <b style="color:#fbbf24">${south.toLocaleString()}</b>　北部粽 <b style="color:#fbbf24">${north.toLocaleString()}</b>`;
+            zc.innerHTML = `你的粽子：南部粽 <b style="color:#fbbf24">${south.toLocaleString()}</b>　北部粽 <b style="color:#fbbf24">${north.toLocaleString()}</b>　<span style="color:#94a3b8">（南+北合計可用）</span>`;
         }
-        function exRow(itemId, costId) {
-            const nm = (_DB && _DB.items[itemId]) ? _DB.items[itemId].n : itemId;
+        function exRow(itemId, cost) {
+            const di = (_DB && _DB.items[itemId]) ? _DB.items[itemId] : null;
+            const nm = di ? di.n : itemId;
+            const desc = (di && di.d) ? di.d : '';
             const r = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;background:#1e293b;border:1px solid #334155;border-radius:6px;padding:6px 10px;margin-bottom:6px;' });
-            r.append(el('div', { style: 'font-size:13px;' }, nm));
-            const btn = el('button', { style: 'background:#15803d;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-weight:bold;font-size:12px;white-space:nowrap;' }, '兌換 ' + COST.toLocaleString());
+            const left = el('div', { style: 'font-size:13px;' });
+            left.append(el('div', {}, nm));
+            if (desc) left.append(el('div', { style: 'font-size:11px;color:#94a3b8;margin-top:1px;' }, desc));
+            r.append(left);
+            const btn = el('button', { style: 'background:#15803d;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-weight:bold;font-size:12px;white-space:nowrap;' }, '兌換 ' + cost.toLocaleString());
             btn.onclick = () => {
-                const res = window.__zongziExchange(itemId, costId, COST);
-                if (res && res.ok) { toast('🎉 兌換成功：' + res.name, '#14532d'); refreshZ(); }
+                const res = window.__legExchange(itemId, cost);
+                if (res && res.ok) { toast('🦵 兌換成功：' + res.name, '#14532d'); refreshZ(); }
                 else toast((res && res.msg) || '兌換失敗', '#7f1d1d');
             };
             r.append(btn); return r;
         }
-        wrap.append(el('div', { style: 'font-size:13px;color:#93c5fd;margin:4px 0;' }, '🗡️ 北部粽 ×5000 → 各職業高階武器（騎士/法師/妖精/黑妖 各 3 把）'));
-        WEAPON_GROUPS.forEach(grp => {
-            wrap.append(el('div', { style: 'font-size:12px;color:#fbbf24;font-weight:bold;margin:4px 0 2px;' }, grp.cls));
-            grp.ids.forEach(id => wrap.append(exRow(id, 'zongzi_north')));
+        wrap.append(el('div', { style: 'font-size:13px;color:#93c5fd;margin:4px 0;' }, '🦵 粽子（南+北合計）兌換腿甲：T1 普通 2000／T2 稀有 4000／T3 英雄 8000'));
+        LEG_TIERS.forEach(grp => {
+            wrap.append(el('div', { style: 'font-size:12px;color:#fbbf24;font-weight:bold;margin:6px 0 2px;' }, grp.t + '（' + grp.cost.toLocaleString() + '）'));
+            grp.ids.forEach(id => wrap.append(exRow(id, grp.cost)));
         });
-        wrap.append(el('div', { style: 'font-size:13px;color:#93c5fd;margin:8px 0 4px;' }, '🛡️ 南部粽 ×5000 → 任選高階飾品/防具'));
-        GEAR.forEach(id => wrap.append(exRow(id, 'zongzi_south')));
 
         modal('🎉 每日活動', wrap, { w: '480px' });
         refreshWB(); refreshZ();
@@ -1201,7 +1202,7 @@
         section('🌍 全服設定（所有玩家生效，立即同步）');
         const cfgStatus = el('div', { style: 'font-size:12px;color:#94a3b8;margin:-2px 0 8px;line-height:1.7;' }, '目前全服設定：讀取中…');
         _secBody.append(cfgStatus);
-        const fmtCfg = c => `目前全服：經驗 ×${c.expMult || 1}　攻速 ×${c.spdMult || 1}<br>競技場傷害 ×${c.pvpDmgMult != null ? c.pvpDmgMult : 1}　競技場魔法 ×${c.pvpMagicMult != null ? c.pvpMagicMult : 1}<br>金幣掉落 ×${c.goldDropMult != null ? c.goldDropMult : 1}　掉寶率 ×${c.dropMult != null ? c.dropMult : 1}　合卡 ×${c.synthRateMult != null ? c.synthRateMult : 1}　衝裝 ×${c.enhanceRateMult != null ? c.enhanceRateMult : 1}　潘朵拉 ×${c.pandoraLuckMult != null ? c.pandoraLuckMult : 1}　爬塔難度 ×${c.towerDiff != null ? c.towerDiff : 1.5}　端午活動 ${c.eventZongzi ? '🟢開啟' : '⚪關閉'}` + (function(){ var s=''; var sm=[['synthGao','高級'],['synthRare','稀有'],['synthHero','英雄'],['synthLegend','傳說'],['synthMyth','神話'],['synthUniq','唯一']].filter(function(x){return c[x[0]]!=null;}).map(function(x){return x[1]+' '+c[x[0]]+'%';}); if(sm.length) s+='<br>合卡各階：'+sm.join('　'); var dm=[['dollT5','傳說'],['dollT6','神話'],['dollT7','超越'],['dollT8','唯一']].filter(function(x){return c[x[0]]!=null;}).map(function(x){return x[1]+' '+c[x[0]]+'%';}); if(dm.length) s+='<br>娃娃高階：'+dm.join('　'); var jb=[]; if(c.mageDmgMult!=null&&c.mageDmgMult!=1)jb.push('法師×'+c.mageDmgMult); if(c.meleeDmgMult!=null&&c.meleeDmgMult!=1)jb.push('騎士×'+c.meleeDmgMult); if(c.rangedDmgMult!=null&&c.rangedDmgMult!=1)jb.push('妖精×'+c.rangedDmgMult); if(jb.length) s+='<br>職業平衡：'+jb.join('　'); return s; })();
+        const fmtCfg = c => `目前全服：經驗 ×${c.expMult || 1}　攻速 ×${c.spdMult || 1}<br>競技場傷害 ×${c.pvpDmgMult != null ? c.pvpDmgMult : 1}　競技場魔法 ×${c.pvpMagicMult != null ? c.pvpMagicMult : 1}<br>金幣掉落 ×${c.goldDropMult != null ? c.goldDropMult : 1}　掉寶率 ×${c.dropMult != null ? c.dropMult : 1}　合卡 ×${c.synthRateMult != null ? c.synthRateMult : 1}　衝裝 ×${c.enhanceRateMult != null ? c.enhanceRateMult : 1}　潘朵拉 ×${c.pandoraLuckMult != null ? c.pandoraLuckMult : 1}　爬塔難度 ×${c.towerDiff != null ? c.towerDiff : 1.5}　端午活動 ${c.eventZongzi ? '🟢開啟' : '⚪關閉'}` + (function(){ var s=''; var sm=[['synthGao','高級'],['synthRare','稀有'],['synthHero','英雄'],['synthLegend','傳說'],['synthMyth','神話'],['synthUniq','唯一']].filter(function(x){return c[x[0]]!=null;}).map(function(x){return x[1]+' '+c[x[0]]+'%';}); if(sm.length) s+='<br>合卡各階：'+sm.join('　'); var dm=[['dollT5','傳說'],['dollT6','神話'],['dollT7','超越'],['dollT8','唯一']].filter(function(x){return c[x[0]]!=null;}).map(function(x){return x[1]+' '+c[x[0]]+'%';}); if(dm.length) s+='<br>娃娃高階：'+dm.join('　'); var jb=[]; if(c.mageDmgMult!=null&&c.mageDmgMult!=1)jb.push('法師×'+c.mageDmgMult); if(c.pveMagicMult!=null&&c.pveMagicMult!=1)jb.push('法師PvE×'+c.pveMagicMult); if(c.meleeDmgMult!=null&&c.meleeDmgMult!=1)jb.push('騎士×'+c.meleeDmgMult); if(c.rangedDmgMult!=null&&c.rangedDmgMult!=1)jb.push('妖精×'+c.rangedDmgMult); if(jb.length) s+='<br>職業平衡：'+jb.join('　'); return s; })();
         fetch('/api/config').then(r => r.json()).then(j => { cfgStatus.innerHTML = fmtCfg(j); }).catch(() => { cfgStatus.textContent = '（需登入線上模式才能讀取/設定）'; });
         const setCfg = async (key, n, label) => {
             try { const j = await api('/api/admin/config', 'POST', { [key]: n }); await syncGameConfig(); cfgStatus.innerHTML = fmtCfg(j.config); toast(label + ' = ×' + n, '#14532d'); }
@@ -1224,6 +1225,7 @@
         row(null, '爬塔難度倍率', v => setCfg('towerDiff', Math.max(0.5, parseFloat(v) || 1.5), '爬塔難度倍率'), true, '守護TD 怪物強度倍率（例 2＝更硬、1＝正常、預設1.5）');
         section('⚔️ 職業平衡（傷害倍率，1＝不變；法師<1下修、騎士/妖精>1上修）');
         row(null, '法師魔法倍率', v => setCfg('mageDmgMult', Math.max(0.1, Math.min(10, parseFloat(v) || 1)), '法師魔法倍率'), true, '攻擊魔法×（例 0.8＝下修；不影響治癒）');
+        row(null, '法師PvE魔法倍率', v => setCfg('pveMagicMult', Math.max(0.1, Math.min(10, parseFloat(v) || 1)), '法師PvE魔法倍率'), true, '只影響PvE攻擊魔法×（不影響競技場）');
         row(null, '騎士近戰倍率', v => setCfg('meleeDmgMult', Math.max(0.1, Math.min(10, parseFloat(v) || 1)), '騎士近戰倍率'), true, '普攻近戰×（例 1.2＝上修）');
         row(null, '妖精遠程倍率', v => setCfg('rangedDmgMult', Math.max(0.1, Math.min(10, parseFloat(v) || 1)), '妖精遠程倍率'), true, '普攻遠程×（例 1.2＝上修）');
         section('🎴 合卡各階成功率（%，留空＝用預設×倍率）');

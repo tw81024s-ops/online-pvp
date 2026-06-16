@@ -989,7 +989,7 @@ const DB = {
         "de_bracer": { darkOnly: true, n: "古代鬥士臂甲", type: "arm", slot: "gloves", ac: 2, str: 2, req: "elf", safe: 6, p: 80000, gachaWeight: 0, img: "assets/icons/armors/死亡騎士手套.png" },
         "de_cloak_dark": { darkOnly: true, n: "黑暗斗篷", type: "arm", slot: "cloak", ac: 2, er: 3, hpR: 5, req: "elf", safe: 6, p: 35000, gachaWeight: 0, img: "assets/icons/armors/抗魔法斗篷.png" },
         "de_boots_dark": { darkOnly: true, n: "黑暗長靴", type: "arm", slot: "boots", ac: 2, er: 2, req: "elf", safe: 6, p: 18000, gachaWeight: 0, img: "assets/icons/armors/死亡騎士長靴.png" },
-        "de_tshirt_str": { darkOnly: true, n: "強化力量內衣", type: "arm", slot: "tshirt", ac: 1, str: 1, req: "elf", safe: 5, p: 20000, gachaWeight: 0, img: "assets/icons/armors/死亡騎士手套.png" },
+        "de_tshirt_str": { n: "強化力量內衣", type: "arm", slot: "tshirt", ac: 1, str: 1, req: "all", safe: 5, p: 20000, gachaWeight: 0, img: "assets/icons/armors/死亡騎士手套.png" },
         "de_ring_dark": { darkOnly: true, n: "黑妖之戒", type: "acc", slot: "ring", str: 2, dex: 2, hpR: 3, req: "elf", safe: 6, p: 60000, gachaWeight: 0, img: "assets/icons/accessories/傳送控制戒指.png" },
         "de_amulet_shadow": { darkOnly: true, n: "暗影護符", type: "acc", slot: "amulet", mr: 5, er: 3, mpR: 3, req: "elf", safe: 6, p: 55000, gachaWeight: 0, img: "assets/icons/accessories/傳送控制戒指.png" },
         "bk_de_str":     { type: "skillbk", n: "黑魔法書(力量提升)", p: 1000,  sk: "sk_de_str",     gachaWeight: 100 },
@@ -1338,6 +1338,26 @@ const DB = {
 		"new_item_239": { n: "潘朵拉抽獎卷", p: 0, gachaWeight: 0 },
 		"zongzi_south": { n: "南部粽", p: 0, gachaWeight: 0 },
 		"zongzi_north": { n: "北部粽", p: 0, gachaWeight: 0 },
+        // ===== 腿甲（8轉深淵掉落 / 粽子兌換 T1-T3）=====
+        "legs_iron":       { n: "鐵褲子", type:"arm", slot:"legs", ac:2, req:"all", safe:5, p:20000, gachaWeight:0, c:"text-slate-200", legTier:1, d:"普通鐵製褲子。AC +2。" },
+        "legs_con":        { n: "體力褲子", type:"arm", slot:"legs", ac:4, con:1, req:"all", safe:5, p:30000, gachaWeight:0, c:"text-slate-200", legTier:1, d:"AC +4、體力 +1。" },
+        "legs_irongate":   { n: "鐵門褲子", type:"arm", slot:"legs", ac:4, req:"all", safe:5, p:45000, gachaWeight:0, c:"text-blue-300", legTier:2, d:"稀有堅固褲子。AC +4。" },
+        "legs_str":        { n: "力量脛甲", type:"arm", slot:"legs", ac:5, str:2, req:"all", safe:5, p:80000, gachaWeight:0, c:"text-red-400", legTier:3, d:"AC +5、力量 +2。" },
+        "legs_int":        { n: "智力脛甲", type:"arm", slot:"legs", ac:5, int:2, req:"all", safe:5, p:80000, gachaWeight:0, c:"text-red-400", legTier:3, d:"AC +5、智力 +2。" },
+        "legs_dex":        { n: "敏捷脛甲", type:"arm", slot:"legs", ac:5, dex:2, req:"all", safe:5, p:80000, gachaWeight:0, c:"text-red-400", legTier:3, d:"AC +5、敏捷 +2。" },
+        "legs_growth":     { n: "成長褲子", type:"arm", slot:"legs", ac:4, str:1, dex:1, int:1, con:1, wis:1, cha:1, req:"all", safe:5, p:90000, gachaWeight:0, c:"text-red-400", legTier:3, d:"AC +4、全屬性 +1。" },
+        "legs_anubis":     { n: "阿努比斯褲子", type:"arm", slot:"legs", ac:5, con:2, req:"all", safe:5, p:85000, gachaWeight:0, c:"text-red-400", legTier:3, d:"AC +5、體力 +2。" },
+        "legs_magicdef":   { n: "魔法防禦褲子", type:"arm", slot:"legs", ac:5, mr:10, req:"all", safe:5, p:90000, gachaWeight:0, c:"text-red-400", legTier:3, d:"AC +5、抗魔 +10。" },
+        "legs_holystr":    { n: "神聖的力量脛甲", type:"arm", slot:"legs", ac:7, str:3, req:"all", safe:5, p:200000, gachaWeight:0, c:"text-purple-400", legTier:4, d:"AC +7、力量 +3。" },
+        "legs_holyint":    { n: "神聖的智力脛甲", type:"arm", slot:"legs", ac:7, int:3, req:"all", safe:5, p:200000, gachaWeight:0, c:"text-purple-400", legTier:4, d:"AC +7、智力 +3。" },
+        "legs_holydex":    { n: "神聖的敏捷脛甲", type:"arm", slot:"legs", ac:7, dex:3, req:"all", safe:5, p:200000, gachaWeight:0, c:"text-purple-400", legTier:4, d:"AC +7、敏捷 +3。" },
+        "legs_holygrowth": { n: "神聖的成長褲子", type:"arm", slot:"legs", ac:5, str:1, dex:1, int:1, con:1, wis:1, cha:1, hpPct:0.03, req:"all", safe:5, p:220000, gachaWeight:0, c:"text-purple-400", legTier:4, d:"AC +5、全屬性 +1、最大HP +3%。" },
+        "legs_gladion":    { n: "格拉迪翁的褲子", type:"arm", slot:"legs", ac:5, str:2, hpPct:0.03, req:"all", safe:5, p:210000, gachaWeight:0, c:"text-purple-400", legTier:4, d:"AC +5、力量 +2、最大HP +3%。" },
+        "legs_nagbas":     { n: "納格巴斯褲子", type:"arm", slot:"legs", ac:5, int:2, mr:10, req:"all", safe:5, p:210000, gachaWeight:0, c:"text-purple-400", legTier:4, d:"AC +5、智力 +2、抗魔 +10。" },
+        "legs_deos":       { n: "戴歐斯的褲子", type:"arm", slot:"legs", ac:8, str:2, dex:2, int:2, con:2, wis:2, cha:2, req:"all", safe:5, p:260000, gachaWeight:0, c:"text-purple-400", legTier:4, d:"AC +8、全屬性 +2。" },
+        "legs_reaper":     { n: "死神的覺醒褲子", type:"arm", slot:"legs", ac:8, dex:3, extraDmg:5, req:"all", safe:5, p:260000, gachaWeight:0, c:"text-purple-400", legTier:4, d:"AC +8、敏捷 +3、額外傷害 +5。" },
+        "legs_salah":      { n: "薩拉赫的褲子", type:"arm", slot:"legs", ac:5, str:3, extraDmg:5, req:"all", safe:5, p:230000, gachaWeight:0, c:"text-purple-400", legTier:4, d:"AC +5、力量 +3、額外傷害 +5。" },
+        "legs_iodin":      { n: "艾歐丁的褲子", type:"arm", slot:"legs", ac:10, str:6, dex:6, int:6, con:6, wis:6, cha:6, hpPct:0.05, req:"all", safe:5, p:600000, gachaWeight:0, c:"text-yellow-300", legend:true, legTier:5, d:"傳說腿甲。AC +10、全屬性 +6、最大HP +5%。" },
 		"potion_reborn": { n: "轉生藥水", type: "misc", req: "all", p: 300000, c: "text-fuchsia-300", d: "等級達99時使用可『轉生』：等級歸1、轉生數+1，永久保留轉生前30%最大HP，能力上限+20、萬能藥可再用20瓶。各大商店有售。", eff: "reborn", gachaWeight: 0 },
 		"new_item_240": { n: "變形怪的血", p: 1, gachaWeight: 0 },
 		"new_item_241": { n: "王族搜索狀", p: 1000, gachaWeight: 0, d: "擊敗血盟敵人必定取得。可向血盟盟主交出，換取盟主的祝福。" },
@@ -2091,8 +2111,8 @@ const DB = {
         "sk_mg_icespike": { n: "寒冰尖刺", type: "atk", tier: 10, reqM: 40, mp: 60, dmgType: "magic", ele: "water", dmgDice: [1, 100] , img: "assets/icons/skills/寒冰尖刺.png" },
         "sk_kn_shockstun_ex": { n: "衝擊之暈(專家)", type: "atk", tier: 5, reqK: 60, reqReborn: 5, mp: 24, dmgType: "physical", reqWpn: "nonbow", stun: 300, stunChance: 75, dmgMul: 2, c: "text-red-400" , img: "assets/icons/skills/衝擊之暈專家.png" },
         "sk_kn_shockstun_gm": { n: "衝擊之暈(大師)", type: "atk", tier: 5, reqK: 60, reqReborn: 10, mp: 30, dmgType: "physical", reqWpn: "nonbow", stun: 600, stunChance: 100, dmgMul: 4, c: "text-purple-400" , img: "assets/icons/skills/衝擊之暈大師.png" },
-        "sk_mg_undead": { n: "召喚不死族", type: "buff", tier: 10, reqM: 40, reqReborn: 8, mp: 80, dur: 3600, summon: { n: "死亡騎士", dmgDice: [4, 14], dmgDiv: 4, dmgLvDiv: 8, interval: 10, kind: "melee", hitLvOff: 20, proc: { p: 0.20, cd: 50, dmgDice: [12, 10], ele: "none", name: "亡者斬" } }, img: "assets/icons/skills/召喚不死族.png" },
-        "sk_mg_guardian": { n: "召喚守護者", type: "buff", tier: 10, reqM: 40, reqReborn: 10, mp: 80, dur: 3600, summon: { n: "騎士范德", dmgDice: [8, 14], dmgDiv: 4, dmgLvDiv: 8, interval: 5, kind: "melee", hitLvOff: 20, proc: { p: 0.20, cd: 50, dmgDice: [24, 10], ele: "none", name: "裂擊" } }, img: "assets/icons/skills/召喚守護者.png" },
+        "sk_mg_undead": { n: "召喚不死族", type: "buff", tier: 10, reqM: 40, reqReborn: 8, mp: 80, dur: 3600, summon: { n: "死亡騎士", lv: 130, hit: 110, hits: 6, flat: 180, dmgDice: [4, 14], dmgDiv: 4, dmgLvDiv: 8, interval: 10, kind: "melee", hitLvOff: 20, proc: { p: 0.20, cd: 50, dmgDice: [12, 10], ele: "none", name: "亡者斬" } }, img: "assets/icons/skills/召喚不死族.png" },
+        "sk_mg_guardian": { n: "召喚守護者", type: "buff", tier: 10, reqM: 40, reqReborn: 10, mp: 80, dur: 3600, summon: { n: "騎士范德", lv: 130, hit: 110, hits: 8, flat: 250, dmgDice: [8, 14], dmgDiv: 4, dmgLvDiv: 8, interval: 5, kind: "melee", hitLvOff: 20, proc: { p: 0.20, cd: 50, dmgDice: [24, 10], ele: "none", name: "裂擊" } }, img: "assets/icons/skills/召喚守護者.png" },
         "sk_kn_berserk": { n: "狂戰士", type: "buff", tier: 3, reqK: 45, mp: 20, dur: 600, d: { meleeDmg: 15, meleeHit: 5, ac: -8 } },
         "sk_kn_rage": { n: "怒氣", type: "buff", tier: 2, reqK: 30, mp: 10, dur: 1200, d: { meleeDmg: 8, extraDmg: 3 } },
         "sk_kn_warcry": { n: "戰吼", type: "buff", tier: 1, reqK: 25, mp: 8, dur: 1200, d: { str: 3, con: 3 } },
@@ -3590,14 +3610,14 @@ function recomputeStats() {
     d.ac += getDexAC(d.dex);
     d.er += getDexER(d.dex);
     // 智力（魔法）
-    d.magicDmg  += getIntMagicDmg(d.int);
+    d.magicDmg  += getIntMagicDmg(d.int) * (p.cls === 'mage' ? 2 : 1);   // 🔮 法師智力傷害 ×2
     d.magicHit  += getIntMagicHit(d.int);
     d.magicCrit += getIntMagicCrit(d.int);
     d.extraMp   += getIntExtraMp(d.int);
     d.mpReduce  += getIntMpReduce(d.int);
     // 精神（MR / MP恢復）
     d.mr  += getWisMR(d.wis);
-    d.mpR  = getWisMpRegen(d.wis);
+    d.mpR  = getWisMpRegen(d.wis) * (p.cls === 'mage' ? 2 : 1);   // 🔮 法師精神回魔效率 ×2
     d.hpR  = 0;   // HP自然恢復量(裝備/精靈斗篷加成)：每次重算先歸零，避免持續疊加且卸下不還原
     // 體質（HP自然恢復量上限）
     d.hpRegenMax = getConHpRegenMax(d.con);
@@ -3657,6 +3677,7 @@ function recomputeStats() {
 let baseMr = ed.mr || 0;
 let bonusMr = (ed.mrPerEn || 0) * e.en; 
 d.mr += (baseMr + bonusMr);
+        if(ed.extraDmg) d.extraDmg += ed.extraDmg;   // 裝備額外傷害（如腿甲）
         // ed.str/dex/int/con/wis 已於 Phase 1 計入屬性
         if(ed.mhp) p.mhp += ed.mhp;
         if(ed.mmp) p.mmp += ed.mmp;
@@ -3709,6 +3730,8 @@ d.mr += (baseMr + bonusMr);
         }
     }
     
+    // 🦵 腿甲最大HP%（裝備迴圈後套用，乘到總HP）
+    if(p.eq.legs && DB.items[p.eq.legs.id] && DB.items[p.eq.legs.id].hpPct) p.mhp = Math.round(p.mhp * (1 + DB.items[p.eq.legs.id].hpPct));
     // 騎士：背包中持有的魔法頭盔也授予技能（擁有即可、不需裝備；背包與裝備都沒有對應頭盔時技能才會消失）
     if (p.cls === 'knight') {
         (p.inv || []).forEach(it => {
@@ -5067,7 +5090,7 @@ function procLightArrow(t) {
     let isCrit = Math.random() * 100 < player.d.magicCrit;
     let skillTier = sk.tier || 1;
     let spCoef = (1 + (3 * player.d.magicDmg / 16)) * (1 + (skillTier / 3));
-    let mageDmgMult = ((player.cls === 'mage') ? (skillTier >= 8 ? 4.8 : 3.0) : 1.0) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.mageDmgMult)||1);   // 與一般攻擊魔法一致（法師PvE強化）
+    let mageDmgMult = ((player.cls === 'mage') ? (skillTier >= 8 ? 4.8 : 3.0) : 1.0) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.mageDmgMult)||1) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.pveMagicMult)||1);   // 與一般攻擊魔法一致（法師PvE強化）
     let magicCritMult = isCrit ? (1 + player.d.magicCritDmg / 100) : 1.0;
     let baseMagicDmg = roll(sk.dmgDice[0], sk.dmgDice[1]);
     let core = baseMagicDmg * spCoef * magicCritMult;
@@ -6060,6 +6083,20 @@ function killMob(idx) {
         var _fkBooks = ['bk_mg_master','bk_mg_master_ex','bk_mg_master_gm','bk_kn_shockstun_ex','bk_kn_shockstun_gm','bk_ef_steeldef','bk_ef_truesight','bk_ef_elearrow','bk_mg_icespike','bk_de_armorbreak','bk_de_armorbreak_ex','bk_de_armorbreak_gm','bk_mg_undead','bk_mg_guardian'];
         if (Math.random() < 0.02 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1)) gainItem(_fkBooks[Math.floor(Math.random()*_fkBooks.length)], 1, false);
     }
+    // ===== 8轉深淵：腿甲掉落（10%，階級加權 T1:50/T2:25/T3:15/T4:7/T5:3；潘朵拉抽不到）=====
+    if (mapState.current === 'rebirth_abyss') {
+        if (Math.random() < 0.10 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1)) {
+            var _legPool = window.__LEG_POOL || (window.__LEG_POOL = (function(){
+                var g = {1:[],2:[],3:[],4:[],5:[]};
+                for (var _id in DB.items){ var _it=DB.items[_id]; if(_it && _it.slot==='legs' && _it.legTier) g[_it.legTier].push(_id); }
+                return g;
+            })());
+            var _tw=[[1,50],[2,25],[3,15],[4,7],[5,3]], _tot=100, _r=Math.random()*_tot, _tier=1;
+            for(var _ti=0;_ti<_tw.length;_ti++){ _r-=_tw[_ti][1]; if(_r<0){ _tier=_tw[_ti][0]; break; } }
+            var _arr=_legPool[_tier]; if(!_arr||!_arr.length) _arr=_legPool[1];
+            if(_arr&&_arr.length) gainItem(_arr[Math.floor(Math.random()*_arr.length)], 1, false);
+        }
+    }
     _sherineLootCtx = null;   // 🔮 掉落判定結束，清除上下文
     // 🔧 架構#2：不在此處位移輸送帶（呼叫點可能正在迭代怪物陣列）。
     // tick 內的擊殺延後到 gameLoop 的 settleDeadMobs()；手動操作則立即清算。
@@ -6824,12 +6861,14 @@ function summonAttack(sm) {
     }
 
     // === 魅力召喚物：近戰多段(floor(魅力/6)次) / 屬性精靈(單次遠距) ===
-    let hits = (sm.kind === 'melee') ? Math.max(1, Math.floor(cha / 6)) : 1;
+    let hits = sm.lv ? (sm.hits || 1) : ((sm.kind === 'melee') ? Math.max(1, Math.floor(cha / 6)) : 1);
     let hitLvOff = sm.hitLvOff || 0;
     for(let i = 0; i < hits; i++) {
         if(t.curHp <= 0) break;
-        // 命中值 = 玩家等級 + 偏移 + 魅力 - 目標等級 + 目標AC（d20）
-        let hv = Math.max(1, Math.min(20, player.lv + hitLvOff + cha - t.lv + mobEffAC(t)));
+        // 命中值：固定召喚物(有 lv)＝固定等級+固定命中；其餘＝玩家等級+偏移+魅力（d20）
+        let hv = sm.lv
+            ? Math.max(1, Math.min(20, sm.lv + (sm.hit || 0) - t.lv + mobEffAC(t)))
+            : Math.max(1, Math.min(20, player.lv + hitLvOff + cha - t.lv + mobEffAC(t)));
         let r = roll(1, 20);
         if(!((r === 20) || (r !== 1 && hv >= r))) { logCombat(`${sm.n} 的攻擊未命中。`, 'miss'); continue; }
         let dmg;
@@ -6839,7 +6878,7 @@ function summonAttack(sm) {
             t.justHit = sm.ele !== 'none' ? sm.ele : 'magic';
         } else {
             let flatBase = cha / (sm.dmgDiv || 5);                          // 近戰固定加成基底 = 魅力/dmgDiv
-            let flat = sm.dmgLvDiv ? Math.floor(flatBase * (1 + player.lv / sm.dmgLvDiv)) : Math.floor(flatBase);   // 造屍術等具 dmgLvDiv：再乘上 (1+玩家等級/dmgLvDiv)
+            let flat = sm.lv ? (sm.flat || 0) : (sm.dmgLvDiv ? Math.floor(flatBase * (1 + player.lv / sm.dmgLvDiv)) : Math.floor(flatBase));   // 固定召喚物用 sm.flat；其餘 dmgLvDiv
             dmg = Math.max(1, roll(sm.dmgDice[0], sm.dmgDice[1]) + flat - (t.dr || 0));
             t.justHit = 'normal';
         }
@@ -6963,7 +7002,9 @@ function castSkill(skId) {
             player.mp -= cost;
             player.hp = Math.max(1, player.hp - (sk.hpCost || 0));
             if(abnormalMagicHit(_t)) {
-                let gain = roll(1, Math.max(1, Math.floor((_t.lv || 1) / 2)));   // 🔧 吸取量＝1D(怪物等級/2)
+                let _drained = _t._mpDrained || 0;
+                let gain = Math.max(0, Math.min(10, 50 - _drained));   // 🔧 魔力奪取：一次吸 10、每隻怪上限 50
+                _t._mpDrained = _drained + gain;
                 player.mp = Math.min(player.mmp, player.mp + gain);
                 logCombat(`施放 ${sk.n}，從 <span class="${getMobColor(_t.lv)}">${_t.n}</span> 吸取了 ${gain} 點魔力。`, 'heal');
             } else {
@@ -7133,7 +7174,7 @@ function castSkill(skId) {
     // 套用新的魔攻係數 (SP Coefficient) 公式
     let spCoef = (1 + (3 * player.d.magicDmg / 16)) * (1 + (skillTier / 3));
     // 法師專屬：一般攻擊魔法（排除精靈魔法 sk_elf_*、裝備授予技能）最終傷害 ×(1.5 + 法術階級/20)；僅影響傷害，不影響命中/治癒/回血
-    let mageDmgMult = ((player.cls === 'mage' && !__granted && !skId.startsWith('sk_elf_')) ? (1.5 + skillTier / 20) : 1.0) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.mageDmgMult)||1);
+    let mageDmgMult = ((player.cls === 'mage' && !__granted && !skId.startsWith('sk_elf_')) ? (1.5 + skillTier / 20) : 1.0) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.mageDmgMult)||1) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.pveMagicMult)||1);
     
     let magicCritMult = isCrit ? (1 + player.d.magicCritDmg / 100) : 1.0;
 
@@ -8481,7 +8522,7 @@ function renderTabs(force) {
     ['tab-items','tab-weapons','tab-armors','tab-equip','tab-skill'].forEach(id => { let el = document.getElementById(id); if(el) _scroll[id] = el.scrollTop; });
 
     let eDiv = document.getElementById('tab-equip'); eDiv.innerHTML = '';
-    const slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'amulet',n:'項鍊'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'belt',n:'腰帶'},{k:'rune1',n:'符石'},{k:'rune2',n:'符石'},{k:'arrow',n:'箭矢'}];
+    const slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'legs',n:'腿甲'},{k:'amulet',n:'項鍊'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'belt',n:'腰帶'},{k:'rune1',n:'符石'},{k:'rune2',n:'符石'},{k:'arrow',n:'箭矢'}];
     
     let setCheck = {}, _setSeen = {};
     for (let k in player.eq) {
@@ -8982,7 +9023,7 @@ function openModal(item, isEq, slot) {
     // === 旁邊顯示「目前裝備中」對應欄位，方便比對（僅背包中的武器/防具/飾品，箭矢除外）===
     let _cmp = document.getElementById('modal-compare');
     if(_cmp) {
-        const SLOT_LABEL = { wpn:'武器', helm:'頭盔', armor:'盔甲', shield:'盾牌', cloak:'斗篷', tshirt:'內衣', gloves:'手套', boots:'鞋子', ring1:'戒指 1', ring2:'戒指 2', amulet:'項鍊', belt:'腰帶', rune1:'符石 1', rune2:'符石 2' };
+        const SLOT_LABEL = { wpn:'武器', helm:'頭盔', armor:'盔甲', shield:'盾牌', cloak:'斗篷', tshirt:'內衣', gloves:'手套', boots:'鞋子', ring1:'戒指 1', ring2:'戒指 2', amulet:'項鍊', belt:'腰帶', legs:'腿甲', rune1:'符石 1', rune2:'符石 2' };
         if(!isEq && !d.isArrow && (d.type === 'wpn' || d.type === 'arm' || d.type === 'acc')) {
             let slots = (d.type === 'wpn') ? ['wpn'] : (d.slot === 'ring' ? ['ring1','ring2'] : (d.slot === 'rune' ? ['rune1','rune2'] : [d.slot]));
             let cards = slots.map(sl => {
@@ -9629,6 +9670,22 @@ window.__zongziExchange = function(itemId, costId, costN){
     if(typeof logSys==='function') logSys('🎉 端午兌換：取得 '+nm);
     return {ok:true, name:nm};
 };
+// 🦵 腿甲兌換：合併消耗南+北部粽（共 5000），換一件腿甲
+window.__legExchange = function(itemId, cost){
+    if(typeof player==='undefined'||!player) return {ok:false,msg:'尚未載入角色'};
+    cost = cost || 5000;
+    var north=window.__countItem('zongzi_north'), south=window.__countItem('zongzi_south');
+    if(north+south < cost) return {ok:false,msg:'粽子不足（南+北合計需 '+cost.toLocaleString()+'）'};
+    var need=cost, un=Math.min(north,need);
+    if(un>0){ window.__consumeItem('zongzi_north', un); need-=un; }
+    if(need>0){ window.__consumeItem('zongzi_south', need); }
+    try{ gainItem(itemId, 1, true, true); }catch(e){ return {ok:false,msg:'發放失敗'}; }
+    if(typeof updateUI==='function') updateUI();
+    if(typeof saveGame==='function') saveGame();
+    var nm=(DB.items[itemId]&&DB.items[itemId].n)||itemId;
+    if(typeof logSys==='function') logSys('🦵 腿甲兌換：取得 '+nm);
+    return {ok:true, name:nm};
+};
 window.__polyFormList = function(){
     var out=[]; try{ var RP=RARITY_POLY; for(var t in RP){ (RP[t].forms||[]).forEach(function(f){ if(f&&f.n) out.push({tier:t, name:f.n}); }); } }catch(e){}
     return out;
@@ -10196,7 +10253,7 @@ function doBianUncurse(slotKey) {
     let _e = document.getElementById('interaction-content'); if (_e) renderBianBless(_e);
 }
 function renderBianBless(el) {
-    let slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'amulet',n:'項鍊'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'belt',n:'腰帶'}];
+    let slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'legs',n:'腿甲'},{k:'amulet',n:'項鍊'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'belt',n:'腰帶'}];
     let cnt = id => pledgeCountItem(id);
     let rows = slots.map(sl => {
         let it = player.eq[sl.k];
@@ -12225,7 +12282,7 @@ function loadGame() {
     if (s) {
         let d = JSON.parse(s);
         player = d.p; mapState = d.ms;
-        if (player.eq && player.eq.rune1 === undefined) { player.eq.rune1 = null; player.eq.rune2 = null; }
+        if (player.eq && player.eq.rune1 === undefined) { player.eq.rune1 = null; player.eq.rune2 = null; } if (player.eq && player.eq.legs === undefined) player.eq.legs = null;
         try { _dollSyncLocal(); } catch (e) { }   // 🧸 套用帳號層級娃娃（跨角色共用）
         // 遷移：舊「黑暗召喚(手動)」→ 拆成兩個召喚 buff 技；並移除 DB 不存在的技能 id 避免清單崩潰
         if (player.skills && player.skills.indexOf('sk_mg_darksummon') >= 0) {

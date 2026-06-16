@@ -150,7 +150,7 @@ app.get('/api/config', (req, res) => {
     res.json({
         expMult: c.expMult || 1, spdMult: c.spdMult || 1,
         pvpDmgMult: c.pvpDmgMult != null ? c.pvpDmgMult : 1,
-        pvpMagicMult: c.pvpMagicMult != null ? c.pvpMagicMult : 1,
+        pvpMagicMult: c.pvpMagicMult != null ? c.pvpMagicMult : 1, pveMagicMult: c.pveMagicMult != null ? c.pveMagicMult : 1,
         goldDropMult: c.goldDropMult != null ? c.goldDropMult : 1, dropMult: c.dropMult != null ? c.dropMult : 1,
         synthRateMult: c.synthRateMult != null ? c.synthRateMult : 1,
         enhanceRateMult: c.enhanceRateMult != null ? c.enhanceRateMult : 1,
@@ -167,6 +167,7 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
     if (b.spdMult !== undefined) cfg.spdMult = Math.max(1, Math.min(20, parseFloat(b.spdMult) || 1));
     if (b.pvpDmgMult !== undefined) cfg.pvpDmgMult = Math.max(0.05, Math.min(5, parseFloat(b.pvpDmgMult) || 1));
     if (b.pvpMagicMult !== undefined) cfg.pvpMagicMult = Math.max(0.05, Math.min(5, parseFloat(b.pvpMagicMult) || 1));
+    if (b.pveMagicMult !== undefined) cfg.pveMagicMult = Math.max(0.1, Math.min(10, parseFloat(b.pveMagicMult) || 1));
     if (b.goldDropMult !== undefined) cfg.goldDropMult = Math.max(0, Math.min(100, parseFloat(b.goldDropMult) || 1));
     if (b.dropMult !== undefined) cfg.dropMult = Math.max(0, Math.min(100, parseFloat(b.dropMult) || 1));
     if (b.synthRateMult !== undefined) cfg.synthRateMult = Math.max(0, Math.min(100, parseFloat(b.synthRateMult) || 1));
@@ -181,7 +182,7 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
     res.json({ ok: true, config: {
         expMult: out.expMult || 1, spdMult: out.spdMult || 1,
         pvpDmgMult: out.pvpDmgMult != null ? out.pvpDmgMult : 1,
-        pvpMagicMult: out.pvpMagicMult != null ? out.pvpMagicMult : 1,
+        pvpMagicMult: out.pvpMagicMult != null ? out.pvpMagicMult : 1, pveMagicMult: out.pveMagicMult != null ? out.pveMagicMult : 1,
         goldDropMult: out.goldDropMult != null ? out.goldDropMult : 1, dropMult: out.dropMult != null ? out.dropMult : 1,
         synthRateMult: out.synthRateMult != null ? out.synthRateMult : 1,
         enhanceRateMult: out.enhanceRateMult != null ? out.enhanceRateMult : 1,
