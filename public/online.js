@@ -146,6 +146,19 @@
                 if (!spell || (s.tier || 1) > (spell.tier || 1)) spell = _mkSpell(s, id);
             });
         }
+        // 🔮 4 攻擊技能槽（競技場輪替）：依序收集 sel-atk-skill / 2 / 3 / 4 的有效攻擊技能
+        let spells = [];
+        let _seenAtk = {};
+        ['sel-atk-skill', 'sel-atk-skill2', 'sel-atk-skill3', 'sel-atk-skill4'].forEach((eid, idx) => {
+            let v = '';
+            try { const _e = document.getElementById(eid); v = (_e && _e.value) || ''; } catch (e) { }
+            if (!v && p.config) v = p.config[idx === 0 ? 'selAtkSkill' : 'selAtkSkill' + (idx + 1)] || '';
+            if (v && _DB && _validAtk(_DB.skills[v]) && !_seenAtk[v]) { _seenAtk[v] = 1; spells.push(_mkSpell(_DB.skills[v], v)); }
+        });
+        if (!spells.length && spell) spells = [spell];
+        if (!spell && spells.length) spell = spells[0];
+        // 🔮 聖結界：玩家已習得 → 競技場進場自動帶（依 CD 自動掛、物理+魔法減傷 30%）
+        let holyBarrier = (p.skills || []).indexOf('sk_holy_barrier') !== -1;
         // 治癒魔法：同樣優先用玩家設定（sel-heal-skill / config.selHealSkill），否則挑最高階治癒術
         const _healDice = (s) => s ? (s.healDice || (s.type === 'heal' && s.valDice) || null) : null;
         let _selHeal = '';
@@ -179,7 +192,7 @@
             extraHit: d.extraHit, extraDmg: d.extraDmg,
             magicDmg: d.magicDmg, magicCrit: d.magicCrit, magicCritDmg: d.magicCritDmg, extraMp: d.extraMp,
             hpR: d.hpR, mpR: d.mpR, spdMult: d.spdMult || 1,
-            weapon, spell, heal
+            weapon, spell, spells, holyBarrier, heal
         };
     }
 
@@ -448,13 +461,7 @@
     function _stsKey(n){ return 'lineage_idle_save_sts_' + n; }
     function _getSts(n){ var v=localStorage.getItem(_stsKey(n)); return v ? new Date(v).getTime() : 0; }
     function _setSts(n, iso){ if(iso){ try{ localStorage.setItem(_stsKey(n), iso); }catch(e){} } }
-    async function afterLogin(isNew) {
-        toast('歡迎，' + myName + '！', '#14532d');
-        btnLoginFab.textContent = '🚪 登出';
-        refreshAdminBtn();
-        hookSave();
-        installFlushOnHide();
-        connectWS();
+    async function syncCloudSaves() {
         try {
             const _saveT = (raw, serverTs) => {
                 try { const o = JSON.parse(raw); if (o && typeof o.t === 'number') return o.t; } catch (e) { }
@@ -487,7 +494,7 @@
             }
             // 目前欄位被雲端更新/補上 → 重載以反映最新；目前欄位空但別處有角色 → 自動切過去
             if (localStorage.getItem(curKey)) {
-                if (curChanged && typeof loadGame === 'function') loadGame();
+                if (curChanged) { if (typeof loadGame === 'function') loadGame(); try { toast('☁️ 已拉取雲端最新存檔', '#1e3a5f'); } catch (e) { } }
             } else {
                 const other = [1, 2, 3, 4].find(x => localStorage.getItem('lineage_idle_save_' + x));
                 if (other) {
@@ -499,6 +506,15 @@
             try { if (typeof window.__refreshSlotScreen === 'function') window.__refreshSlotScreen(); } catch (e) { }
             setStatus('☁️ 已同步');
         } catch (e) { toast('雲端存檔同步失敗：' + e.message, '#7f1d1d'); }
+    }
+    async function afterLogin(isNew) {
+        toast('歡迎，' + myName + '！', '#14532d');
+        btnLoginFab.textContent = '🚪 登出';
+        refreshAdminBtn();
+        hookSave();
+        installFlushOnHide();
+        connectWS();
+        await syncCloudSaves();
         try { await pullMergePolyDex(); } catch (e) { }
         maybeOfflineToast();
     }
@@ -1405,6 +1421,9 @@
         if (token) {
             btnLoginFab.textContent = '🚪 登出';
             connectWS();
+            installFlushOnHide();
+            // 保持登入、重開 App / 重新整理時也主動拉雲端最新存檔（修正「保持登入永遠看本地舊資料」）
+            setTimeout(function () { try { syncCloudSaves(); } catch (e) { } }, 1500);
         }
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

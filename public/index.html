@@ -609,8 +609,11 @@
                     
                     <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
                         <div class="text-sm text-slate-400 mb-3 border-b border-slate-700 pb-1">自動施放設定</div>
-                        <div class="flex justify-between items-center mb-2 text-sm"><span class="text-cyan-400 font-bold">攻擊技能</span><span>MP &gt; <input type="number" id="set-mp-atk" value="50" class="w-12 bg-slate-900 border text-center text-white rounded">%</span></div>
-                        <select id="sel-atk-skill" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-3 rounded text-sm"><option value="">無</option></select>
+                        <div class="flex justify-between items-center mb-2 text-sm"><span class="text-cyan-400 font-bold">攻擊技能（最多4種·每招CD5秒）</span><span>MP &gt; <input type="number" id="set-mp-atk" value="50" class="w-12 bg-slate-900 border text-center text-white rounded">%</span></div>
+                        <select id="sel-atk-skill" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
+                        <select id="sel-atk-skill2" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
+                        <select id="sel-atk-skill3" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
+                        <select id="sel-atk-skill4" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-3 rounded text-sm"><option value="">無</option></select>
                         <div class="flex justify-between items-center mb-2 text-sm"><span class="text-green-400 font-bold">治癒魔法</span><span>HP &lt; <input type="number" id="set-mp-heal" value="50" class="w-12 bg-slate-900 border text-center text-white rounded">%</span></div>
                         <select id="sel-heal-skill" class="w-full bg-slate-900 border text-green-300 px-2 py-2 rounded text-sm"><option value="">無</option></select>
                         <div id="ui-convert-row" class="hidden">
@@ -831,7 +834,7 @@ const DB = {
         "sherine_carrier_cloak":  { set: "sherine", n: "席琳披風", type: "arm", slot: "cloak",  ac: 4,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
         "sherine_carrier_amulet": { set: "sherine", n: "席琳項鍊", type: "acc", slot: "amulet", ac: 3,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
 "wpn_dragonslayer": { n: "屠龍劍", type: "wpn", w2h: true, dmgS: 18, dmgL: 25, hit: 2, dmgBonus: 9, spd: 0.9, req: "knight", safe: 6, p: 100000, eff: "cleave", dragonStrike: 12, legend: true, gachaWeight: 0, d: "傳說中為屠龍而鍛造的雙手巨劍，劍身中沉眠著龍魂。<br>龍的一擊：發動一般攻擊時，固定機率對場上所有敵人造成無視防禦力的無屬性傷害。" },
-        "wpn_baless": { n: "巴列斯魔杖", type: "wpn", dmgS: 2, dmgL: 3, hit: 0, dmgBonus: 0, mdmg: 2, spd: 1.0, req: "mage", safe: 0, p: 0, mpR: 10, mpROverSafe: 2, legend: true, gachaWeight: 0, d: "重獲魔力的傳說魔杖，蘊含共鳴之力。" },
+        "wpn_baless": { n: "巴列斯魔杖", type: "wpn", dmgS: 2, dmgL: 3, hit: 0, dmgBonus: 0, mdmg: 2, spd: 1.0, req: "mage", safe: 0, p: 0, mpR: 80, mpROverSafe: 2, legend: true, gachaWeight: 0, d: "重獲魔力的傳說魔杖，蘊含共鳴之力。" },
         "wpn_powerless_baless": { n: "失去魔力的巴列斯魔杖", type: "wpn", dmgS: 1, dmgL: 1, hit: 0, dmgBonus: 0, spd: 1.0, req: "all", safe: 0, p: 0, noSell: true, gachaWeight: 0, d: "失去了魔力的古老魔杖。攜帶它並使用『靈魂之球』，或許能喚回沉睡的力量……" },
         "bot_baless": { n: "巴列斯長靴", type: "arm", slot: "boots", ac: 2, str: 1, req: "knight,elf", safe: 6, p: 30000, gachaWeight: 0 },
         "sherine_crystal": { n: "席琳結晶", type: "etc", p: 0, noUse: true, c: "c-sherine", gachaWeight: 0, d: "蘊含席琳力量的珍貴結晶，無法直接使用。進行「席琳製作」時加入材料，可使成品必定附帶一種席琳套裝效果。（席琳的世界掉落限定）" },
@@ -882,9 +885,9 @@ const DB = {
         "de_blade_gloom": { darkOnly: true, n: "幽暗雙刀", type: "wpn", dmgS: 34, dmgL: 24, hit: 4, dmgBonus: 2, spd: 1.0, req: "elf", safe: 6, p: 80000, gachaWeight: 10, procs: [{ name: "暗影爆裂", rate: 0.08, min: 10, max: 22, ele: null, color: "#7c3aed" }], img: "assets/icons/weapons/de_blade_gloom.jpg" },
         "de_blade_lindr": { darkOnly: true, n: "倫得雙刀", type: "wpn", dmgS: 40, dmgL: 22, hit: 8, dmgBonus: 6, str: 2, spd: 1.0, req: "elf", safe: 6, p: 260000, gachaWeight: 1, ignoreEva: 2, procs: [{ name: "地裂術", rate: 0.08, min: 8, max: 20, ele: "earth", color: "#d97706" }], img: "assets/icons/weapons/de_blade_lindr.jpg" },
         "de_blade_demonlord": { darkOnly: true, n: "惡魔王雙刀", type: "wpn", dmgS: 40, dmgL: 38, hit: 6, dmgBonus: 5, spd: 1.0, req: "elf", safe: 6, p: 320000, gachaWeight: 1, ignoreEva: 1, procs: [{ name: "疾病術", rate: 0.10, min: 6, max: 14, ele: null, color: "#65a30d" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/de_blade_demonlord.jpg" },
-        "mw_holycrystal": { n: "聖晶魔杖", type: "wpn", dmgS: 10, dmgL: 12, hit: 31, dmgBonus: 28, mdmg: 15, mpR: 15, spd: 1.0, req: "mage", safe: 6, p: 400000, gachaWeight: 1, procs: [{ name: "極道落雷", rate: 0.17, min: 20, max: 45, ele: "wind", color: "#fde047" }], img: "assets/icons/weapons/mw_holycrystal.jpg" },
-        "mw_aris": { n: "艾莉絲魔杖", type: "wpn", dmgS: 58, dmgL: 52, hit: 27, dmgBonus: 23, mdmg: 13, mpR: 15, spd: 1.0, req: "mage", safe: 6, p: 360000, gachaWeight: 1, procs: [{ name: "流星雨", rate: 0.05, min: 30, max: 60, ele: "fire", color: "#fb923c" }], img: "assets/icons/weapons/mw_aris.jpg" },
-        "mw_giran": { n: "吉倫的魔杖", type: "wpn", dmgS: 54, dmgL: 48, hit: 20, dmgBonus: 13, mdmg: 8, mpR: 15, spd: 1.0, req: "mage", safe: 6, p: 300000, gachaWeight: 1, ignoreEva: 2, procs: [{ name: "格蘭肯的詛咒", rate: 0.10, min: 12, max: 28, ele: null, color: "#a78bfa" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/mw_giran.jpg" },
+        "mw_holycrystal": { n: "聖晶魔杖", type: "wpn", dmgS: 10, dmgL: 12, hit: 31, dmgBonus: 28, mdmg: 15, mpR: 120, spd: 1.0, req: "mage", safe: 6, p: 400000, gachaWeight: 1, procs: [{ name: "極道落雷", rate: 0.17, min: 20, max: 45, ele: "wind", color: "#fde047" }], img: "assets/icons/weapons/mw_holycrystal.jpg" },
+        "mw_aris": { n: "艾莉絲魔杖", type: "wpn", dmgS: 58, dmgL: 52, hit: 27, dmgBonus: 23, mdmg: 13, mpR: 120, spd: 1.0, req: "mage", safe: 6, p: 360000, gachaWeight: 1, procs: [{ name: "流星雨", rate: 0.05, min: 30, max: 60, ele: "fire", color: "#fb923c" }], img: "assets/icons/weapons/mw_aris.jpg" },
+        "mw_giran": { n: "吉倫的魔杖", type: "wpn", dmgS: 54, dmgL: 48, hit: 20, dmgBonus: 13, mdmg: 8, mpR: 120, spd: 1.0, req: "mage", safe: 6, p: 300000, gachaWeight: 1, ignoreEva: 2, procs: [{ name: "格蘭肯的詛咒", rate: 0.10, min: 12, max: 28, ele: null, color: "#a78bfa" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/mw_giran.jpg" },
         // 🗡️ 騎士專屬高階武器（天堂經典雙手劍/匕首）
         "kn_blade_giltas": { n: "吉爾塔斯之劍", type: "wpn", dmgS: 42, dmgL: 42, hit: 8, dmgBonus: 21, str: 2, con: 1, spd: 1.0, req: "knight", safe: 6, p: 360000, gachaWeight: 1, procs: [{ name: "破壞之力", rate: 0.08, min: 12, max: 28, ele: null, color: "#f97316" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/kn_blade_giltas.png" },
         "kn_blade_emperor": { n: "真‧冥皇執行劍", type: "wpn", dmgS: 38, dmgL: 44, hit: 8, dmgBonus: 26, str: 2, spd: 1.0, req: "knight", safe: 6, p: 340000, gachaWeight: 1, procs: [{ name: "混沌狂襲", rate: 0.05, min: 20, max: 40, ele: null, color: "#7c3aed" }], img: "assets/icons/weapons/kn_blade_emperor.png" },
@@ -893,8 +896,8 @@ const DB = {
         "ef_bow_earthgoddess": { n: "大地女神的激怒", type: "wpn", isBow: true, ranged: true, dmgS: 40, dmgL: 42, hit: 10, dmgBonus: 27, dex: 3, ignoreEva: 5, spd: 1.0, req: "elf", safe: 6, p: 360000, gachaWeight: 1, procs: [{ name: "藍惡靈奪魔", rate: 0.10, min: 20, max: 40, ele: "wind", color: "#60a5fa" }], img: "assets/icons/weapons/ef_bow_earthgoddess.png" },
         "ef_bow_deicide": { n: "弒神弓", type: "wpn", isBow: true, ranged: true, dmgS: 44, dmgL: 40, hit: 8, dmgBonus: 24, dex: 3, ignoreEva: 3, spd: 1.0, req: "elf", safe: 6, p: 380000, gachaWeight: 1, procs: [{ name: "神之審判", rate: 0.08, min: 24, max: 48, ele: null, color: "#fbbf24" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/ef_bow_deicide.png" },
         "ef_bow_siren": { n: "賽倫之弓", type: "wpn", isBow: true, ranged: true, dmgS: 30, dmgL: 32, hit: 6, dmgBonus: 14, dex: 2, spd: 1.0, req: "elf", safe: 6, p: 180000, gachaWeight: 10, procs: [{ name: "海妖之歌", rate: 0.08, min: 10, max: 22, ele: "water", color: "#22d3ee" }], img: "assets/icons/weapons/ef_bow_siren.png" },
-        "mw_leah": { n: "蕾雅法杖", type: "wpn", dmgS: 32, dmgL: 16, hit: 13, dmgBonus: 4, str: 3, mdmg: 5, mpR: 10, spd: 1.0, req: "mage", safe: 6, p: 120000, gachaWeight: 1, procs: [{ name: "寒冰尖刺", rate: 0.07, min: 10, max: 22, ele: "water", color: "#67e8f9" }], img: "assets/icons/weapons/mw_leah.jpg" },
-        "mw_demonking": { n: "惡魔王魔杖", type: "wpn", dmgS: 24, dmgL: 24, hit: 8, dmgBonus: 2, mdmg: 2, mpR: 10, spd: 1.0, req: "mage", safe: 6, p: 90000, gachaWeight: 10, procs: [{ name: "疾病術", rate: 0.10, min: 6, max: 14, ele: null, color: "#65a30d" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/mw_demonking.jpg" },
+        "mw_leah": { n: "蕾雅法杖", type: "wpn", dmgS: 32, dmgL: 16, hit: 13, dmgBonus: 4, str: 3, mdmg: 5, mpR: 80, spd: 1.0, req: "mage", safe: 6, p: 120000, gachaWeight: 1, procs: [{ name: "寒冰尖刺", rate: 0.07, min: 10, max: 22, ele: "water", color: "#67e8f9" }], img: "assets/icons/weapons/mw_leah.jpg" },
+        "mw_demonking": { n: "惡魔王魔杖", type: "wpn", dmgS: 24, dmgL: 24, hit: 8, dmgBonus: 2, mdmg: 2, mpR: 80, spd: 1.0, req: "mage", safe: 6, p: 90000, gachaWeight: 10, procs: [{ name: "疾病術", rate: 0.10, min: 6, max: 14, ele: null, color: "#65a30d" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/mw_demonking.jpg" },
         "mw_icequeen": { n: "冰之女王魔杖", type: "wpn", dmgS: 6, dmgL: 8, hit: 7, dmgBonus: 1, spd: 1.0, req: "mage", safe: 6, p: 60000, gachaWeight: 10, procs: [{ name: "冰錐", rate: 0.07, min: 8, max: 18, ele: "water", color: "#38bdf8" }], img: "assets/icons/weapons/mw_icequeen.jpg" },
         // ===== 新增武器 ×81（截圖匯入；req依類型：劍/匕首/矛=knight,elf；雙手劍=knight；弓=elf；魔杖=mage；鋼爪/雙刀=暗黑妖精darkOnly）=====
         "nwp_001": { n: "屠龍劍", type: "wpn", dmgS: 32, dmgL: 32, hit: 28, dmgBonus: 28, str: 6, spd: 1.0, req: "knight,elf", safe: 6, p: 528000, gachaWeight: 1, procs: [{ name: "消除結界", rate: 0.02, min: 12, max: 28, ele: "none", color: "#22d3ee" }, { name: "混沌狂蝕", rate: 0.03, min: 20, max: 45, ele: null, color: "#7c3aed" }], img: "assets/icons/weapons/nwp_001.png" },
@@ -952,12 +955,12 @@ const DB = {
         "nwp_053": { n: "惡魔王的矛(劍印)", type: "wpn", dmgS: 25, dmgL: 25, hit: 3, dmgBonus: 4, w2h: true, spd: 1.0, req: "knight,elf", safe: 6, p: 198000, gachaWeight: 1, procs: [{ name: "疾病術", rate: 0.1, min: 6, max: 14, ele: null, color: "#65a30d" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/nwp_053.png" },
         "nwp_054": { n: "奧里哈魯根矛", type: "wpn", dmgS: 20, dmgL: 20, hit: 5, w2h: true, spd: 1.0, req: "knight,elf", safe: 6, p: 120000, gachaWeight: 3, img: "assets/icons/weapons/nwp_054.png" },
         "nwp_055": { n: "奧里哈魯根矛(劍印)", type: "wpn", dmgS: 20, dmgL: 20, hit: 5, w2h: true, spd: 1.0, req: "knight,elf", safe: 6, p: 120000, gachaWeight: 3, img: "assets/icons/weapons/nwp_055.png" },
-        "nwp_056": { n: "歐西里斯魔杖", type: "wpn", dmgS: 25, dmgL: 25, hit: 20, dmgBonus: 11, mdmg: 5, mpR: 15, spd: 1.0, req: "mage", safe: 6, p: 282000, gachaWeight: 1, procs: [{ name: "混沌庖比斯", rate: 0.1, min: 15, max: 35, ele: null, color: "#7c3aed" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/nwp_056.png" },
-        "nwp_057": { n: "傑羅斯的魔杖", type: "wpn", dmgS: 4, dmgL: 4, hit: 11, dmgBonus: 4, mdmg: 5, mpR: 10, spd: 1.0, req: "mage", safe: 4, p: 72000, gachaWeight: 8, procs: [{ name: "暴擊烈炎", rate: 0.09, min: 18, max: 40, ele: "fire", color: "#fb923c" }], img: "assets/icons/weapons/nwp_057.png" },
-        "nwp_058": { n: "傑羅斯的魔杖(劍印)", type: "wpn", dmgS: 4, dmgL: 4, hit: 11, dmgBonus: 4, mdmg: 5, mpR: 10, spd: 1.0, req: "mage", safe: 4, p: 72000, gachaWeight: 8, procs: [{ name: "暴擊烈炎", rate: 0.09, min: 18, max: 40, ele: "fire", color: "#fb923c" }], img: "assets/icons/weapons/nwp_058.png" },
+        "nwp_056": { n: "歐西里斯魔杖", type: "wpn", dmgS: 25, dmgL: 25, hit: 20, dmgBonus: 11, mdmg: 5, mpR: 120, spd: 1.0, req: "mage", safe: 6, p: 282000, gachaWeight: 1, procs: [{ name: "混沌庖比斯", rate: 0.1, min: 15, max: 35, ele: null, color: "#7c3aed" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/nwp_056.png" },
+        "nwp_057": { n: "傑羅斯的魔杖", type: "wpn", dmgS: 4, dmgL: 4, hit: 11, dmgBonus: 4, mdmg: 5, mpR: 80, spd: 1.0, req: "mage", safe: 4, p: 72000, gachaWeight: 8, procs: [{ name: "暴擊烈炎", rate: 0.09, min: 18, max: 40, ele: "fire", color: "#fb923c" }], img: "assets/icons/weapons/nwp_057.png" },
+        "nwp_058": { n: "傑羅斯的魔杖(劍印)", type: "wpn", dmgS: 4, dmgL: 4, hit: 11, dmgBonus: 4, mdmg: 5, mpR: 80, spd: 1.0, req: "mage", safe: 4, p: 72000, gachaWeight: 8, procs: [{ name: "暴擊烈炎", rate: 0.09, min: 18, max: 40, ele: "fire", color: "#fb923c" }], img: "assets/icons/weapons/nwp_058.png" },
         "nwp_059": { n: "惡魔鐮刀", type: "wpn", dmgS: 1, dmgL: 1, hit: 2, mdmg: 5, spd: 1.0, req: "mage", safe: 4, p: 20000, gachaWeight: 8, img: "assets/icons/weapons/nwp_059.png" },
         "nwp_060": { n: "惡魔鐮刀(劍印)", type: "wpn", dmgS: 1, dmgL: 1, hit: 2, mdmg: 5, spd: 1.0, req: "mage", safe: 4, p: 20000, gachaWeight: 8, img: "assets/icons/weapons/nwp_060.png" },
-        "nwp_061": { n: "惡魔王魔杖(劍印)", type: "wpn", dmgS: 12, dmgL: 12, hit: 8, dmgBonus: 2, mdmg: 2, mpR: 10, spd: 1.0, req: "mage", safe: 4, p: 96000, gachaWeight: 3, procs: [{ name: "疾病術", rate: 0.1, min: 6, max: 14, ele: null, color: "#65a30d" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/nwp_061.png" },
+        "nwp_061": { n: "惡魔王魔杖(劍印)", type: "wpn", dmgS: 12, dmgL: 12, hit: 8, dmgBonus: 2, mdmg: 2, mpR: 80, spd: 1.0, req: "mage", safe: 4, p: 96000, gachaWeight: 3, procs: [{ name: "疾病術", rate: 0.1, min: 6, max: 14, ele: null, color: "#65a30d" }, { name: "格蘭肯的憤怒", rate: 0.01, min: 40, max: 80, ele: null, color: "#dc2626" }], img: "assets/icons/weapons/nwp_061.png" },
         "nwp_062": { n: "冰之女王魔杖(劍印)", type: "wpn", dmgS: 3, dmgL: 3, hit: 7, dmgBonus: 1, spd: 1.0, req: "mage", safe: 4, p: 30000, gachaWeight: 8, procs: [{ name: "冰錐", rate: 0.07, min: 8, max: 18, ele: "water", color: "#38bdf8" }], img: "assets/icons/weapons/nwp_062.png" },
         "nwp_063": { n: "紅影雙刀", type: "wpn", darkOnly: true, dmgS: 34, dmgL: 34, hit: 23, dmgBonus: 30, str: 3, ignoreEva: 3, w2h: true, spd: 1.0, req: "elf", safe: 6, p: 564000, gachaWeight: 1, procs: [{ name: "消除聖結界", rate: 0.02, min: 12, max: 28, ele: "none", color: "#22d3ee" }, { name: "混沌狂蝕", rate: 0.03, min: 20, max: 45, ele: null, color: "#7c3aed" }], img: "assets/icons/weapons/nwp_063.png" },
         "nwp_064": { n: "倫得雙刀(劍印)", type: "wpn", darkOnly: true, dmgS: 18, dmgL: 18, hit: 7, dmgBonus: 5, str: 2, ignoreEva: 2, w2h: true, spd: 1.0, req: "elf", safe: 4, p: 168000, gachaWeight: 3, procs: [{ name: "地裂術", rate: 0.12, min: 8, max: 20, ele: null, color: "#a16207" }], img: "assets/icons/weapons/nwp_064.png" },
@@ -1058,7 +1061,7 @@ const DB = {
         "wpn_witchwand": { n: "巫術魔法杖", type: "wpn", dmgS: 2, dmgL: 3, hit: 0, mdmg: 1, spd: 1.0, req: "mage", safe: 6, p: 12600, gachaWeight: 50, extraMpPerEn: 1 },
         "wpn_strwand": { n: "力量魔法杖", type: "wpn", dmgS: 9, dmgL: 9, hit: 0, dmgBonus: 3, mdmg: -2, str: 3, spd: 1.0, req: "mage", safe: 6, p: 71500, meleeHitPerEn: 1, eff: "magicstrike", gachaWeight: 10 },
         "wpn_manawand": { n: "瑪那魔杖", type: "wpn", dmgS: 3, dmgL: 3, hit: -1, spd: 1.0, req: "mage", safe: 6, p: 18000, eff: "mp_drain", gachaWeight: 10 },
-        "wpn_crystalwand": { n: "水晶魔杖", type: "wpn", dmgS: 1, dmgL: 1, hit: 0, spd: 1.0, req: "mage", safe: 6, p: 36000, mpR: 10, mpROverSafe: 2, gachaWeight: 20 },
+        "wpn_crystalwand": { n: "水晶魔杖", type: "wpn", dmgS: 1, dmgL: 1, hit: 0, spd: 1.0, req: "mage", safe: 6, p: 36000, mpR: 80, mpROverSafe: 2, gachaWeight: 20 },
         "wpn_39": { n: "潘的角", type: "wpn", dmgS: 3, dmgL: 4, hit: 0, spd: 1.2, req: "all", safe: 6, p: 10, gachaWeight: 100 },
         "wpn_40": { n: "覆上米索莉的角", type: "wpn", dmgS: 4, dmgL: 4, hit: 0, spd: 1.2, req: "all", safe: 6, p: 178, unBonus: true, gachaWeight: 100 },
         "wpn_41": { n: "覆上奧里哈魯根的角", type: "wpn", dmgS: 14, dmgL: 16, hit: 0, spd: 1.2, req: "all", safe: 6, p: 1430, unBonus: true, gachaWeight: 100 },
@@ -3708,7 +3711,7 @@ d.mr += (baseMr + bonusMr);
     if(setCheck['guard'] >= 3) { d.ac -= 1; }
     // 🔮 席琳套裝（載體本體）：3/5/6 件加成（全屬+5 已於 Phase 1 處理）
     if(setCheck['sherine'] >= 3) { d.ac -= 10; d.mr += 20; }
-    if(setCheck['sherine'] >= 5) { d.extraDmg += 10; p.mhp = Math.round(p.mhp * 1.05); }
+    if(setCheck['sherine'] >= 5) { d.extraDmg += 10; d.extraMp += 10; p.mhp = Math.round(p.mhp * 1.05); }
     if(setCheck['sherine'] >= 6) { d.dr += 5; d.aspd = Math.max(0.2, d.aspd * 0.9); }
 
     // ===== 🔮 席琳套裝效果：以「不重複效果」計件（同效果多件僅計 1；5/5 同時擁有 2/5、3/5 加成）=====
@@ -3832,10 +3835,13 @@ d.mr += (baseMr + bonusMr);
 
 function _takenMult() {   // 職業受傷倍率（套在 AC/MR/DR 抵抗之後）
     if (!player || !player.cls) return 1;
-    if (player.cls === 'knight') return 0.5;   // 鐵壁：全傷-50%
-    if (player.cls === 'mage') return 1.5;     // 法術玻璃砲：+50%
-    if (player.darkelf) return 1.3;            // 近戰玻璃刺客：+30%
-    return 1.0;                                // 妖精：正常
+    let m;
+    if (player.cls === 'knight') m = 0.5;   // 鐵壁：全傷-50%
+    else if (player.cls === 'mage') m = 1.5;     // 法術玻璃砲：+50%
+    else if (player.darkelf) m = 1.3;            // 近戰玻璃刺客：+30%
+    else m = 1.0;                                // 妖精：正常
+    if (player.buffs && player.buffs.sk_holy_barrier > 0) m *= 0.7;   // 聖結界：物理+魔法減傷30%
+    return m;
 }
 function calcStats() {   // 🔧 架構#4：對外介面不變（重算 + UI 刷新）
     recomputeStats();
@@ -4384,13 +4390,15 @@ function tick() {
     // 法術自動施放冷卻：改以 tick(0.1秒) 遞減，讓施法間隔能受攻速效果細緻影響
     if(player.cds.atkSk > 0) player.cds.atkSk--;
     if(player.cds.healSk > 0) player.cds.healSk--;
-    if((player.cds.purifySk || 0) > 0) player.cds.purifySk--;   // 🔧 淨化技獨立冷卻
+    if((player.cds.purifySk || 0) > 0) player.cds.purifySk--;
+    if(player.cds.spellCd) { for(let _k in player.cds.spellCd) { if(player.cds.spellCd[_k] > 0) player.cds.spellCd[_k]--; } }   // 4攻擊技能槽各自5秒CD遞減   // 🔧 淨化技獨立冷卻
     if(canAct) autoCastSpells();   // 每 tick 嘗試自動施法，實際間隔由上方冷卻控制
 
     if(state.ticks % 10 === 0) {
         if(player.cds.pot > 0) player.cds.pot--;   // 藥水冷卻維持每秒遞減
         if(player.reviveScrollCd > 0) player.reviveScrollCd--;   // 復活卷軸冷卻：僅存活時倒數（此區塊死亡時不執行）
-        if(player.magicShieldCd > 0) player.magicShieldCd--;     // 魔法屏障抵擋後冷卻：僅存活時倒數
+        if(player.magicShieldCd > 0) player.magicShieldCd--;
+        if((player.holyBarrierCd || 0) > 0) player.holyBarrierCd--;   // 聖結界冷卻倒數     // 魔法屏障抵擋後冷卻：僅存活時倒數
         // 🔧 架構統一：所有 buff（以秒計）的「唯一」遞減點，每秒扣 1。
         // 原於 regenTick 每 160 tick 批次扣 16，到期誤差可達 0~16 秒（如 16 秒的魔法屏障可能瞬間過期）；
         // taming 原本另有專屬遞減，一併整合於此。
@@ -4705,7 +4713,7 @@ function buildShadowBase(key){
   var t=SHADOW_TIERS[key]; if(!t) return null;
   var pm=Math.max(500, player.mhp||1000);
   var hp=Math.round(pm*t.mult);
-  var dmax=Math.max(10, Math.round(pm*0.05*t.mult));
+  var dmax=Math.max(10, Math.round(pm*0.012*(t.strong?1.4:1.0)));   // 影子傷害大幅下修：與血量倍率脫鉤，強者~1.7% mhp/擊，避免秒殺
   return { n:t.n, img:SHADOW_IMG[key]||'', lv:player.lv||1, s:'M', beh:'主動', race:'影子', e:'none',
     hp:hp, ac:(t.strong?-30:-10), mr:(t.strong?50:20),
     exp:Math.round((player.lv||1)*100*t.mult), goldMin:Math.round(1000*t.mult), goldMax:Math.round(5000*t.mult),
@@ -5035,7 +5043,7 @@ function procLightArrow(t) {
     let isCrit = Math.random() * 100 < player.d.magicCrit;
     let skillTier = sk.tier || 1;
     let spCoef = (1 + (3 * player.d.magicDmg / 16)) * (1 + (skillTier / 3));
-    let mageDmgMult = ((player.cls === 'mage') ? (skillTier >= 8 ? 4.0 : 2.5) : 1.0) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.mageDmgMult)||1);   // 與一般攻擊魔法一致（法師PvE強化）
+    let mageDmgMult = ((player.cls === 'mage') ? (skillTier >= 8 ? 4.8 : 3.0) : 1.0) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.mageDmgMult)||1);   // 與一般攻擊魔法一致（法師PvE強化）
     let magicCritMult = isCrit ? (1 + player.d.magicCritDmg / 100) : 1.0;
     let baseMagicDmg = roll(sk.dmgDice[0], sk.dmgDice[1]);
     let core = baseMagicDmg * spCoef * magicCritMult;
@@ -5247,7 +5255,7 @@ function witchIceLance() {
     let isCrit = Math.random()*100 < player.d.magicCrit;
     let tier = sk.tier || 1;
     let spCoef = (1 + 3*player.d.magicDmg/16) * (1 + tier/3);
-    let mageMult = (player.cls === 'mage') ? (tier >= 8 ? 4.0 : 2.5) : 1.0;   // 法師PvE傷害：一般技能×2.5、高階技能(tier>=8 流星雨/冰雪暴/雷霆風暴/火風暴/究極光裂術)×4（兩數字可調）
+    let mageMult = (player.cls === 'mage') ? (tier >= 8 ? 4.8 : 3.0) : 1.0;   // 法師PvE傷害：一般技能×2.5、高階技能(tier>=8 流星雨/冰雪暴/雷霆風暴/火風暴/究極光裂術)×4（兩數字可調）
     let critMult = isCrit ? (1 + player.d.magicCritDmg/100) : 1;
     let core = roll(sk.dmgDice[0], sk.dmgDice[1]) * spCoef * critMult;
     let fixed = (t.e === 'fire') ? 6 : 0;   // 水剋火
@@ -6900,6 +6908,7 @@ function castSkill(skId) {
     let sk = DB.skills[skId];
     if(!sk) return false;
     if(skId === 'sk_magic_shield' && (player.magicShieldCd || 0) > 0) return false;   // 魔法屏障抵擋技能後冷卻中，無法施放
+    if(skId === 'sk_holy_barrier' && (player.holyBarrierCd || 0) > 0) return false;   // 聖結界冷卻中，無法施放
     
     if(player.statuses.silence > 0 && skId !== 'sk_cancel') {
         logSys(`沉默狀態中，無法施展魔法。`);
@@ -7180,6 +7189,7 @@ function castSkill(skId) {
             player.statuses.stone = 0; player.statuses.paralyze = 0;
         } else {
             player.buffs[skId] = sk.dur;
+            if(skId === 'sk_holy_barrier') player.holyBarrierCd = 45;   // 聖結界 CD 45 秒（>持續32）
         }
         if(sk.haste) player.buffs.haste = Math.max(player.buffs.haste || 0, sk.dur); // 加速術 → 套用 haste 效果
         player.mp -= cost;
@@ -7312,15 +7322,22 @@ function autoCastSpells() {
     let hasEnemy = mapState.mobs.some(m => m && m.curHp > 0);
     if(!hasEnemy) player.cds.atkSk = 0;
 
-    let atkSk = document.getElementById('sel-atk-skill').value;
     let atkThr = parseInt(document.getElementById('set-mp-atk').value) || 0;
     let atkTarget = getTarget();
-    if(atkSk && mpPct >= atkThr && atkTarget) {
-        // 標籤型即死技能（起死回生術→不死、釋放元素→元素）：
-        //   僅在「目標具備對應標籤且非 BOSS」時才自動施放，避免對多羅等無效目標空放、浪費 MP 與冷卻。
-        let skDef = DB.skills[atkSk];
-        let tagReq = (skDef && skDef.instakill && skDef.instakill.tag) || null;
-        if(!tagReq || (!atkTarget.boss && mobHasTag(atkTarget, tagReq))) castSkill(atkSk);
+    // 🔮 4 攻擊技能槽輪替：每招獨立 5 秒 CD（player.cds.spellCd）；全域施法節奏仍由 player.cds.atkSk 控制（每間隔放 1 招）
+    if(mpPct >= atkThr && atkTarget && player.cds.atkSk <= 0) {
+        player.cds.spellCd = player.cds.spellCd || {};
+        let _slots = ['sel-atk-skill','sel-atk-skill2','sel-atk-skill3','sel-atk-skill4'];
+        for(let _si=0; _si<_slots.length; _si++) {
+            let _el = document.getElementById(_slots[_si]);
+            let _id = _el ? _el.value : '';
+            if(!_id || (player.cds.spellCd[_id] || 0) > 0) continue;   // 未選 or 該招冷卻中
+            let skDef = DB.skills[_id];
+            let tagReq = (skDef && skDef.instakill && skDef.instakill.tag) || null;
+            if(tagReq && (atkTarget.boss || !mobHasTag(atkTarget, tagReq))) continue;   // 即死技：目標無標籤/BOSS→跳過
+            castSkill(_id);
+            if(player.cds.atkSk > 0) { player.cds.spellCd[_id] = 50; break; }   // 確實施放→該招進 5 秒CD，本次僅放 1 招
+        }
     }
 
     let healSk = document.getElementById('sel-heal-skill').value;
@@ -8642,6 +8659,9 @@ function onSummonToggle(sid) {
 function renderSkillSelects() {
     // 先記住目前選擇，重建後還原（避免穿脫裝備/學技能等呼叫時被重設為「無」）
     let prevAtk = document.getElementById('sel-atk-skill') ? document.getElementById('sel-atk-skill').value : '';
+    let prevAtk2 = document.getElementById('sel-atk-skill2') ? document.getElementById('sel-atk-skill2').value : '';
+    let prevAtk3 = document.getElementById('sel-atk-skill3') ? document.getElementById('sel-atk-skill3').value : '';
+    let prevAtk4 = document.getElementById('sel-atk-skill4') ? document.getElementById('sel-atk-skill4').value : '';
     let prevHeal = document.getElementById('sel-heal-skill') ? document.getElementById('sel-heal-skill').value : '';
     let prevConvert = document.getElementById('sel-convert-skill') ? document.getElementById('sel-convert-skill').value : '';
     let aHtml = '<option value="">無</option>', hHtml = '<option value="">無</option>', cHtml = '<option value="">無</option>';
@@ -8679,11 +8699,13 @@ function renderSkillSelects() {
     });
     
     document.getElementById('sel-atk-skill').innerHTML = aHtml;
+    ['sel-atk-skill2','sel-atk-skill3','sel-atk-skill4'].forEach(_id=>{ let _e=document.getElementById(_id); if(_e) _e.innerHTML = aHtml; });
     document.getElementById('sel-heal-skill').innerHTML = hHtml;
     // 還原先前選擇（該技能選項仍存在才還原；已不可用則自然回到「無」）
     let _atkEl = document.getElementById('sel-atk-skill');
     let _healEl = document.getElementById('sel-heal-skill');
     if(prevAtk && _atkEl.querySelector(`option[value="${prevAtk}"]`)) _atkEl.value = prevAtk;
+    [['sel-atk-skill2',prevAtk2],['sel-atk-skill3',prevAtk3],['sel-atk-skill4',prevAtk4]].forEach(([_id,_pv])=>{ let _e=document.getElementById(_id); if(_e && _pv && _e.querySelector(`option[value="${_pv}"]`)) _e.value=_pv; });
     if(prevHeal && _healEl.querySelector(`option[value="${prevHeal}"]`)) _healEl.value = prevHeal;
     let _convEl = document.getElementById('sel-convert-skill');
     if(_convEl) {
@@ -12104,6 +12126,9 @@ function saveGame() {
         setHpPot: document.getElementById('set-hp-pot').value,
         setAutoBuyPot: document.getElementById('set-auto-buy-pot').checked,
         selAtkSkill: document.getElementById('sel-atk-skill').value,
+        selAtkSkill2: (document.getElementById('sel-atk-skill2')||{}).value || '',
+        selAtkSkill3: (document.getElementById('sel-atk-skill3')||{}).value || '',
+        selAtkSkill4: (document.getElementById('sel-atk-skill4')||{}).value || '',
         setMpAtk: document.getElementById('set-mp-atk').value,
         selHealSkill: document.getElementById('sel-heal-skill').value,
         setMpHeal: document.getElementById('set-mp-heal').value,
@@ -12283,6 +12308,9 @@ function loadGame() {
             
             // 施法設定
             if (c.selAtkSkill) document.getElementById('sel-atk-skill').value = c.selAtkSkill;
+            if (c.selAtkSkill2 && document.getElementById('sel-atk-skill2')) document.getElementById('sel-atk-skill2').value = c.selAtkSkill2;
+            if (c.selAtkSkill3 && document.getElementById('sel-atk-skill3')) document.getElementById('sel-atk-skill3').value = c.selAtkSkill3;
+            if (c.selAtkSkill4 && document.getElementById('sel-atk-skill4')) document.getElementById('sel-atk-skill4').value = c.selAtkSkill4;
             if (c.setMpAtk) document.getElementById('set-mp-atk').value = c.setMpAtk;
             if (c.selHealSkill) document.getElementById('sel-heal-skill').value = c.selHealSkill;
             if (c.setMpHeal) document.getElementById('set-mp-heal').value = c.setMpHeal;

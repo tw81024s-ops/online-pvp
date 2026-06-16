@@ -141,49 +141,65 @@ function simulate(profileA, profileB, opts) {
                 push(t, side, 'heal', `${me.name} 施放 ${me.p.heal.name}，恢復 ${h} 點生命。`, 0);
             }
 
-            // 攻擊技能（魔法 or 物理；忠實採用玩家設定的攻擊技能）
-            if (me.p.spell && me.atkSkCd <= 0 && me.mp >= me.p.spell.mp) {
-                me.mp -= me.p.spell.mp;
+            // 🔮 聖結界（PvP 壓低版照吃）：帶聖結界者依 CD 自動掛，生效視窗物理+魔法減傷30%
+            if (me.p.holyBarrier && me.hbCd <= 0 && me.hbActive <= 0 && me.mp >= 30) {
+                me.mp -= 30; me.hbActive = 320; me.hbCd = 450;
+                push(t, side, 'buff', `${me.name} 施放 聖結界，30% 減傷（32 秒）。`, 0);
+            }
+            // 攻擊技能：🔮 4 槽輪替，每招獨立 5 秒(50tick) CD；全域施法節奏仍由 atkSkCd 控制（每間隔放 1 招）
+            let _spList = (Array.isArray(me.p.spells) && me.p.spells.length) ? me.p.spells : (me.p.spell ? [me.p.spell] : []);
+            if (!me.spCd) me.spCd = _spList.map(() => 0);
+            let cs = null, csIdx = -1;
+            if (me.atkSkCd <= 0) {
+                for (let _i = 0; _i < _spList.length; _i++) {
+                    if ((me.spCd[_i] || 0) > 0) continue;
+                    if (me.mp < _spList[_i].mp) continue;
+                    cs = _spList[_i]; csIdx = _i; break;
+                }
+            }
+            if (cs) {
+                me.mp -= cs.mp;
                 me.atkSkCd = me.castInterval;
-                if (me.p.spell.phys && me.p.spell.stun) {
+                me.spCd[csIdx] = 50;
+                if (cs.phys && cs.stun) {
                     // 衝擊之暈：擲暈眩判定。暈到→1.5~2 倍傷害並暈眩；沒暈到→僅 1 點傷害
                     let r = physicalAttack(me.p, foe.p);
-                    let stunOk = (r.type === 'hit') && (Math.random() * 100 < (me.p.spell.stunChance || 50));
+                    let stunOk = (r.type === 'hit') && (Math.random() * 100 < (cs.stunChance || 50));
                     if (stunOk) {
                         let mult = 1.5 + Math.random() * 0.5;                 // 1.5 ~ 2.0 倍
-                        let dmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * mult * (r.ranged ? RANGED_X : MELEE_X) * tkMult(foe.p)));
+                        let dmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * mult * (r.ranged ? RANGED_X : MELEE_X) * tkMult(foe.p) * (foe.hbActive > 0 ? 0.7 : 1)));
                         foe.hp -= dmg;
-                        foe.stunT = Math.max(foe.stunT, Math.round(me.p.spell.stun / 10));
-                        push(t, side, 'crit', `${me.name} 施放 ${me.p.spell.name} 命中要害！對 ${foe.name} 造成 ${dmg} 點傷害並暈眩 ${(Math.round(me.p.spell.stun / 10) / 10).toFixed(1)} 秒！`, dmg);
+                        foe.stunT = Math.max(foe.stunT, Math.round(cs.stun / 10));
+                        push(t, side, 'crit', `${me.name} 施放 ${cs.name} 命中要害！對 ${foe.name} 造成 ${dmg} 點傷害並暈眩 ${(Math.round(cs.stun / 10) / 10).toFixed(1)} 秒！`, dmg);
                     } else {
                         foe.hp -= 1;
-                        push(t, side, 'attack', `${me.name} 施放 ${me.p.spell.name}，未能暈眩 ${foe.name}，僅造成 1 點傷害。`, 1);
+                        push(t, side, 'attack', `${me.name} 施放 ${cs.name}，未能暈眩 ${foe.name}，僅造成 1 點傷害。`, 1);
                     }
-                } else if (me.p.spell.phys) {
+                } else if (cs.phys) {
                     // 多段物理攻擊技能（六重矢等）：依 hits 次數連續物理攻擊（用武器骰）
-                    let hits = Math.max(1, me.p.spell.hits || 1);
+                    let hits = Math.max(1, cs.hits || 1);
                     let total = 0, anyCrit = false, parts = [];
                     for (let h = 0; h < hits; h++) {
                         if (foe.hp <= 0) break;
                         let r = physicalAttack(me.p, foe.p);
                         if (r.type === 'evade' || r.type === 'miss') { parts.push('Miss'); continue; }
-                        let pdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * (r.ranged ? RANGED_X : MELEE_X) * tkMult(foe.p)));
+                        let pdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * (r.ranged ? RANGED_X : MELEE_X) * tkMult(foe.p) * (foe.hbActive > 0 ? 0.7 : 1)));
                         foe.hp -= pdmg; total += pdmg;
                         if (r.crit || r.heavy) anyCrit = true;
                         parts.push(pdmg + (r.heavy && r.crit ? '(會心)' : r.crit ? '(爆)' : r.heavy ? '(重)' : ''));
                     }
                     let detail = hits > 1 ? `[${parts.join(', ')}] 共 ${total}` : `${total}`;
                     push(t, side, anyCrit ? 'crit' : 'attack',
-                        `${me.name} 施放 ${me.p.spell.name}，對 ${foe.name} 造成 ${detail} 點物理傷害。`, total);
+                        `${me.name} 施放 ${cs.name}，對 ${foe.name} 造成 ${detail} 點物理傷害。`, total);
                 } else {
-                    let r = magicAttack(me.p, foe.p, me.p.spell);
+                    let r = magicAttack(me.p, foe.p, cs);
                     if (r.type === 'evade') {
                         push(t, side, 'evade', `${foe.name} 以身法迴避了 ${me.name} 的魔法攻擊！`, 0);
                     } else if (foe.mShield) {
                         foe.mShield = false; foe.mShieldCd = 30;   // 吸收一次，3 秒後重新就緒
                         push(t, side, 'evade', `🛡️ ${foe.name} 的魔法屏障吸收了 ${me.name} 的魔法攻擊！`, 0);
                     } else {
-                        let mdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * PVP_MAGIC * MAGE_X * tkMult(foe.p)));
+                        let mdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * PVP_MAGIC * MAGE_X * tkMult(foe.p) * (foe.hbActive > 0 ? 0.7 : 1)));
                         foe.hp -= mdmg;
                         push(t, side, r.crit ? 'crit' : 'magic',
                             `${me.name} 施放 ${r.spell}，對 ${foe.name} 造成 ${mdmg} 點傷害${r.crit ? '（爆擊！）' : ''}。`, mdmg);
@@ -199,7 +215,7 @@ function simulate(profileA, profileB, opts) {
                 if (r.type === 'evade') push(t, side, 'evade', `${foe.name} 成功迴避了 ${me.name} 的攻擊。`);
                 else if (r.type === 'miss') push(t, side, 'miss', `${me.name} 對 ${foe.name} 的攻擊未命中。`);
                 else {
-                    let pdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * (r.ranged ? RANGED_X : MELEE_X) * tkMult(foe.p)));
+                    let pdmg = Math.max(1, Math.floor(r.dmg * PVP_DMG * (r.ranged ? RANGED_X : MELEE_X) * tkMult(foe.p) * (foe.hbActive > 0 ? 0.7 : 1)));
                     foe.hp -= pdmg;
                     let ext = r.heavy && r.crit ? '（會心一擊！）' : r.crit ? '（爆擊！）' : r.heavy ? '（重擊！）' : r.graze ? '（擦傷）' : '';
                     push(t, side, r.crit || r.heavy ? 'crit' : 'attack',
@@ -209,6 +225,9 @@ function simulate(profileA, profileB, opts) {
             }
 
             me.atkCd--; me.atkSkCd--; me.healCd--;
+            if (me.spCd) { for (let _i = 0; _i < me.spCd.length; _i++) if (me.spCd[_i] > 0) me.spCd[_i]--; }
+            if (me.hbActive > 0) me.hbActive--;
+            if (me.hbCd > 0) me.hbCd--;
         }
         if (A.hp <= 0 || B.hp <= 0) {
             let winner = A.hp <= 0 && B.hp <= 0 ? 'draw' : (B.hp <= 0 ? 'A' : 'B');
@@ -234,7 +253,8 @@ function initSide(p) {
         atkInterval: Math.max(1, Math.round(wSpd * 10 * spdMult)),
         castInterval: Math.max(1, Math.round(20 * spdMult)),
         atkCd: randInt(0, 5), atkSkCd: randInt(0, 5), healCd: 0,
-        magicBarrier: !!p.magicBarrier, mShield: !!p.magicBarrier, mShieldCd: 0
+        magicBarrier: !!p.magicBarrier, mShield: !!p.magicBarrier, mShieldCd: 0,
+        hbActive: 0, hbCd: 0, spCd: null
     };
 }
 
@@ -284,6 +304,20 @@ function clampProfile(p) {
             mp: n(p.spell.mp, 0, 999, 10),
             ele: p.spell.ele || null
         } : null,
+        spells: Array.isArray(p.spells) ? p.spells.slice(0, 4).filter(s => s && (s.phys || s.dmgDice || (Array.isArray(s.multiDmg) && s.multiDmg.length))).map(s => ({
+            name: sanitize(s.name || '技能'),
+            phys: !!s.phys,
+            hits: n(s.hits, 1, 10, 1),
+            dmgDice: Array.isArray(s.dmgDice) ? [n(s.dmgDice[0], 1, 50, 1), n(s.dmgDice[1], 1, 100, 6)] : null,
+            multiDmg: Array.isArray(s.multiDmg) ? s.multiDmg.slice(0, 6).map(d => [n(d[0], 1, 50, 1), n(d[1], 1, 100, 6)]) : null,
+            dmgBase: n(s.dmgBase, 0, 500, 0),
+            tier: n(s.tier, 1, 10, 1),
+            mp: n(s.mp, 0, 999, 10),
+            ele: s.ele || null,
+            stun: n(s.stun, 0, 100, 0),
+            stunChance: n(s.stunChance, 0, 100, 0)
+        })) : null,
+        holyBarrier: !!p.holyBarrier,
         heal: p.heal && p.heal.dice ? {
             name: sanitize(p.heal.name || '治癒'),
             dice: [n(p.heal.dice[0], 1, 50, 1), n(p.heal.dice[1], 1, 100, 8)],
