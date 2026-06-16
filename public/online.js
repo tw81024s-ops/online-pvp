@@ -227,7 +227,8 @@
         try {
             const raw = localStorage.getItem(slotKey());
             if (!raw) return;
-            await api('/api/save?slot=' + activeSlot(), 'PUT', { data: JSON.parse(raw) });
+            const _ur = await api('/api/save?slot=' + activeSlot(), 'PUT', { data: JSON.parse(raw) });
+            if (_ur && _ur.updatedAt) _setSts(activeSlot(), _ur.updatedAt);
             setStatus('☁️ 已同步（角色' + activeSlot() + '）');
         } catch (e) { setStatus('☁️ 同步失敗', true); }
     }
@@ -235,6 +236,7 @@
         const j = await api('/api/save?slot=' + activeSlot());
         if (j.data) {
             localStorage.setItem(slotKey(), typeof j.data === 'string' ? j.data : JSON.stringify(j.data));
+            if (j.updatedAt) _setSts(activeSlot(), j.updatedAt);
             return true;
         }
         return false;
@@ -443,6 +445,9 @@
         bLogin.onclick = () => go('login');
         bReg.onclick = () => go('register');
     }
+    function _stsKey(n){ return 'lineage_idle_save_sts_' + n; }
+    function _getSts(n){ var v=localStorage.getItem(_stsKey(n)); return v ? new Date(v).getTime() : 0; }
+    function _setSts(n, iso){ if(iso){ try{ localStorage.setItem(_stsKey(n), iso); }catch(e){} } }
     async function afterLogin(isNew) {
         toast('歡迎，' + myName + '！', '#14532d');
         btnLoginFab.textContent = '🚪 登出';
@@ -467,14 +472,17 @@
                     const jj = await api('/api/save?slot=' + sN);
                     if (jj && jj.data) { cloudStr = typeof jj.data === 'string' ? jj.data : JSON.stringify(jj.data); cTs = jj.updatedAt || null; }
                 } catch (e) { }
+                const cloudT = cTs ? new Date(cTs).getTime() : 0;
+                const anchorT = _getSts(sN);   // 本地上次同步到的「伺服器時間」
                 if (cloudStr && localStr) {
-                    const ct = _saveT(cloudStr, cTs), lt = _saveT(localStr, 0);
-                    if (ct > lt) { localStorage.setItem(k, cloudStr); if (sN === cur) curChanged = true; }
-                    else if (lt > ct) { try { await api('/api/save?slot=' + sN, 'PUT', { data: JSON.parse(localStr) }); } catch (e) { } }
+                    // 雲端在本機上次同步「之後」被別的裝置更新 → 雲端較新 → 載入雲端
+                    if (cloudT > anchorT) { localStorage.setItem(k, cloudStr); _setSts(sN, cTs); if (sN === cur) curChanged = true; }
+                    // 否則本地是基於最新雲端（或有未同步變更）→ 上傳本地
+                    else { try { const r = await api('/api/save?slot=' + sN, 'PUT', { data: JSON.parse(localStr) }); if (r && r.updatedAt) _setSts(sN, r.updatedAt); } catch (e) { } }
                 } else if (cloudStr) {
-                    localStorage.setItem(k, cloudStr); if (sN === cur) curChanged = true;
+                    localStorage.setItem(k, cloudStr); _setSts(sN, cTs); if (sN === cur) curChanged = true;
                 } else if (localStr) {
-                    try { await api('/api/save?slot=' + sN, 'PUT', { data: JSON.parse(localStr) }); } catch (e) { }
+                    try { const r = await api('/api/save?slot=' + sN, 'PUT', { data: JSON.parse(localStr) }); if (r && r.updatedAt) _setSts(sN, r.updatedAt); } catch (e) { }
                 }
             }
             // 目前欄位被雲端更新/補上 → 重載以反映最新；目前欄位空但別處有角色 → 自動切過去

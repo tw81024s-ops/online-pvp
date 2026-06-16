@@ -121,7 +121,8 @@ app.put('/api/save', auth, (req, res) => {
     if (!data || data === 'null') return res.status(400).json({ error: '存檔資料為空' });
     if (data.length > 4 * 1024 * 1024) return res.status(400).json({ error: '存檔過大' });
     store.putSave(req.user.id, data, reqSlot(req));
-    res.json({ ok: true });
+    const _r = store.getSave(req.user.id, reqSlot(req));
+    res.json({ ok: true, updatedAt: _r ? _r.updated_at : null });
 });
 app.delete('/api/save', auth, (req, res) => {
     store.deleteSave(req.user.id, reqSlot(req));
