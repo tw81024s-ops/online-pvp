@@ -6378,6 +6378,7 @@ function buildSummon(skId, def, durSec) {
     return {
         skId: skId, n: nm, dmgDice: base.dmgDice, interval: base.interval || 20,
         ele: ele, kind: base.kind || 'melee', hitLvOff: base.hitLvOff || 0,
+        lv: base.lv || 0, hit: base.hit || 0, hits: base.hits || 0, flat: base.flat || 0,   // 🔧 固定召喚物欄位（守護/不死）
         dmgDiv: base.dmgDiv || 5, dmgLvDiv: base.dmgLvDiv || 0, elemScale: base.elemScale || 20,
         proc: base.proc ? { ...base.proc, cdCur: base.proc.cd } : null,
         cd: base.interval || 20, endTick: state.ticks + (durSec || 3600) * 10
