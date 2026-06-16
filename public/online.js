@@ -271,6 +271,24 @@
         pushPolyDexNow();
     }
     window.__pushPolyDex = function () { if (!token) return; clearTimeout(_pdTimer); _pdTimer = setTimeout(pushPolyDexNow, 3000); };
+    // 🧸 娃娃（帳號層級共用）：與 polyDex 同模式
+    let _dollTimer = null;
+    function pushDollsNow() {
+        if (!token) return;
+        try { const raw = localStorage.getItem('lineage_idle_dolls'); if (!raw) return; api('/api/dolls', 'PUT', { dolls: JSON.parse(raw) }).catch(() => { }); } catch (e) { }
+    }
+    async function pullMergeDolls() {
+        if (!token) return;
+        try {
+            const j = await api('/api/dolls');
+            if (j && j.dolls) {
+                localStorage.setItem('lineage_idle_dolls', JSON.stringify(j.dolls));
+                if (typeof window.__applyAccountDolls === 'function') window.__applyAccountDolls();
+            }
+        } catch (e) { }
+        pushDollsNow();   // 把本地合併後（含本機獨有娃娃）的結果推回雲端，伺服器再做 union
+    }
+    window.__pushDolls = function () { if (!token) return; clearTimeout(_dollTimer); _dollTimer = setTimeout(pushDollsNow, 3000); };
     let _offToastDone = false;
     function maybeOfflineToast() {
         if (_offToastDone) return; _offToastDone = true;
@@ -285,7 +303,7 @@
         ws.onopen = () => ws.send(JSON.stringify({ type: 'auth', token }));
         ws.onmessage = (ev) => {
             let m; try { m = JSON.parse(ev.data); } catch (e) { return; }
-            if (m.type === 'auth_ok') { wsReady = true; isAdmin = m.isAdmin; setStatus('🟢 ' + m.username); refreshAdminBtn(); pushName(); try { pullMergePolyDex(); } catch (e) { } maybeOfflineToast(); }
+            if (m.type === 'auth_ok') { wsReady = true; isAdmin = m.isAdmin; setStatus('🟢 ' + m.username); refreshAdminBtn(); pushName(); try { pullMergePolyDex(); } catch (e) { } try { pullMergeDolls(); } catch (e) { } maybeOfflineToast(); }
             if (m.type === 'auth_fail') { logout(true); }
             if (m.type === 'kicked') { toast('此帳號已在其他視窗登入', '#7f1d1d'); wsReady = false; }
             if (m.type === 'online_list') { onlineUsers = m.users; onlineNames = m.names || {}; renderOnline(); }
@@ -516,6 +534,7 @@
         connectWS();
         await syncCloudSaves();
         try { await pullMergePolyDex(); } catch (e) { }
+        try { await pullMergeDolls(); } catch (e) { }
         maybeOfflineToast();
     }
     function logout(silent) {

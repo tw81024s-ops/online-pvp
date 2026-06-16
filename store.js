@@ -4,7 +4,7 @@ const path = require('path');
 
 const FILE = process.env.DB_PATH || path.join(__dirname, 'data.json');
 
-let data = { users: [], saves: {}, tokens: {}, battles: [], pvp: {}, worldBoss: null, polyDex: {}, nextUserId: 1 };
+let data = { users: [], saves: {}, tokens: {}, battles: [], pvp: {}, worldBoss: null, polyDex: {}, dolls: {}, nextUserId: 1 };
 try {
     if (fs.existsSync(FILE)) data = Object.assign(data, JSON.parse(fs.readFileSync(FILE, 'utf8')));
 } catch (e) { console.error('讀取資料檔失敗，使用空白資料庫：', e.message); }
@@ -50,6 +50,7 @@ module.exports = {
         delete data.saves[u.id];
         for (let sl = 2; sl <= 4; sl++) delete data.saves[u.id + ':' + sl];
         if (data.polyDex) delete data.polyDex[u.id];
+        if (data.dolls) delete data.dolls[u.id];
         for (const t in data.tokens) if (data.tokens[t] === u.id) delete data.tokens[t];
         flush(); return true;
     },
@@ -83,6 +84,27 @@ module.exports = {
     },
     // 帳號變身圖鑑（每帳號一筆：{ formName: count }，所有角色共用）
     getPolyDex(userId) { if (!data.polyDex) data.polyDex = {}; return data.polyDex[userId] || {}; },
+    // 娃娃（帳號層級共用，合併 union 取較高星/碎片，永不掉資料）
+    getDolls(userId) { if (!data.dolls) data.dolls = {}; return data.dolls[userId] || null; },
+    putDolls(userId, obj) {
+        if (!data.dolls) data.dolls = {};
+        const cur = data.dolls[userId] || { dolls: {}, dollEquip: [], dollDraws: 0 };
+        const inc = obj || {};
+        const md = Object.assign({}, cur.dolls || {});
+        const ind = inc.dolls || {};
+        for (const id in ind) {
+            const a = md[id], b = ind[id] || {};
+            if (!a) md[id] = { star: b.star || 1, shards: b.shards || 0 };
+            else md[id] = { star: Math.max(a.star || 1, b.star || 1), shards: Math.max(a.shards || 0, b.shards || 0) };
+        }
+        const rec = {
+            dolls: md,
+            dollEquip: (Array.isArray(inc.dollEquip) && inc.dollEquip.length) ? inc.dollEquip : (cur.dollEquip || []),
+            dollDraws: Math.max(cur.dollDraws || 0, inc.dollDraws || 0),
+            updated_at: new Date().toISOString()
+        };
+        data.dolls[userId] = rec; flush(); return rec;
+    },
     mergePolyDex(userId, dexObj) {
         if (!data.polyDex) data.polyDex = {};
         const cur = data.polyDex[userId] || {};

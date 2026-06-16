@@ -384,6 +384,15 @@ app.post('/api/polydex', auth, (req, res) => {
     const merged = store.mergePolyDex(req.user.id, dex);
     res.json({ dex: merged });
 });
+// 娃娃（帳號層級共用）
+app.get('/api/dolls', auth, (req, res) => {
+    res.json({ dolls: store.getDolls(req.user.id) });
+});
+app.put('/api/dolls', auth, (req, res) => {
+    const d = (req.body && req.body.dolls) || {};
+    const merged = store.putDolls(req.user.id, d);
+    res.json({ dolls: merged });
+});
 // 管理員：給予指定變身（推送給在線玩家，由客戶端寫入圖鑑＋存檔）
 app.post('/api/admin/grant-poly', auth, adminOnly, (req, res) => {
     const { username, formName } = req.body || {};

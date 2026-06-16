@@ -3109,6 +3109,30 @@ function _dollInit() {
   if (!player.dollEquip) player.dollEquip = [];
   if (typeof player.dollDraws !== 'number') player.dollDraws = 0;
 }
+// 🧸 娃娃帳號共用：把「帳號快取」與目前角色的娃娃做 union（取較高星/碎片，永不掉資料），回寫 player + 快取
+function _dollSyncLocal() {
+  if (!player) return;
+  _dollInit();
+  var acc = {};
+  try { acc = JSON.parse(localStorage.getItem('lineage_idle_dolls') || '{}'); } catch (e) { }
+  var accDolls = acc.dolls || {};
+  var merged = Object.assign({}, accDolls);
+  for (var id in player.dolls) {
+    var a = merged[id], b = player.dolls[id] || {};
+    if (!a) merged[id] = { star: b.star || 1, shards: b.shards || 0 };
+    else merged[id] = { star: Math.max(a.star || 1, b.star || 1), shards: Math.max(a.shards || 0, b.shards || 0) };
+  }
+  player.dolls = merged;
+  if ((!player.dollEquip || !player.dollEquip.length) && Array.isArray(acc.dollEquip)) player.dollEquip = acc.dollEquip.slice();
+  player.dollDraws = Math.max(player.dollDraws || 0, acc.dollDraws || 0);
+  try { localStorage.setItem('lineage_idle_dolls', JSON.stringify({ dolls: player.dolls, dollEquip: player.dollEquip, dollDraws: player.dollDraws })); } catch (e) { }
+}
+// 雲端拉取帳號娃娃後由 online.js 呼叫：合併 + 刷新
+window.__applyAccountDolls = function () {
+  _dollSyncLocal();
+  try { if (typeof calcStats === 'function') calcStats(); } catch (e) { }
+  try { if (typeof renderDollPanel === 'function' && document.querySelector('.doll-ov')) renderDollPanel(); } catch (e) { }
+};
 function dollVal(rarity, eff, star) {
   const base = (DOLL_VAL[eff] || [])[rarity - 1] || 0;
   return base * (1 + 0.25 * (Math.max(1, star) - 1));
@@ -12160,6 +12184,16 @@ function saveGame() {
     });
 
     localStorage.setItem('lineage_idle_save_' + currentSlot, JSON.stringify({ v: SAVE_VERSION, p: player, ms: mapState, ticks: state.ticks, t: Date.now() }));   // t：存檔時間戳，供跨裝置比新舊   // 🔧 架構#6：寫入存檔版本   // 🔧 一併保存 tick 計數：召喚物/迷魅的 endTick 為絕對 tick，不存會在重載後失準（迷魅重新計時 1 小時）
+    // 🧸 娃娃帳號共用：鏡射到帳號快取，內容有變才推雲端
+    try {
+        _dollInit();
+        var _dc = JSON.stringify({ dolls: player.dolls, dollEquip: player.dollEquip, dollDraws: player.dollDraws || 0 });
+        if (_dc !== window.__lastDollCache) {
+            window.__lastDollCache = _dc;
+            localStorage.setItem('lineage_idle_dolls', _dc);
+            if (typeof window.__pushDolls === 'function') window.__pushDolls();
+        }
+    } catch (e) { }
     logSys(`遊戲進度已儲存。`);
 }
 
@@ -12192,6 +12226,7 @@ function loadGame() {
         let d = JSON.parse(s);
         player = d.p; mapState = d.ms;
         if (player.eq && player.eq.rune1 === undefined) { player.eq.rune1 = null; player.eq.rune2 = null; }
+        try { _dollSyncLocal(); } catch (e) { }   // 🧸 套用帳號層級娃娃（跨角色共用）
         // 遷移：舊「黑暗召喚(手動)」→ 拆成兩個召喚 buff 技；並移除 DB 不存在的技能 id 避免清單崩潰
         if (player.skills && player.skills.indexOf('sk_mg_darksummon') >= 0) {
             player.skills = player.skills.filter(function(s){ return s !== 'sk_mg_darksummon'; });
