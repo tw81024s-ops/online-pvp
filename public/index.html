@@ -3025,24 +3025,37 @@ function getWisBlueBonus(wis) {
     ], 31); // 60 = +31
 }
 
-// ===== 日誌框增強：鎖定捲動 + 回到最新 + 可調整高度（lazy init，第一次寫log即生效）=====
+// ===== 日誌框增強：鎖定時「凍結」日誌（暫存訊息）+ 回到最新 + 可調整高度 =====
 window._logState = window._logState || {};
+window._logBuf = window._logBuf || {};
+function _logUpdBtn(el){
+    var id=el.id, b=document.getElementById(id+'-tobottom'); if(!b) return;
+    var buf=window._logBuf[id]||[];
+    if(window._logState[id] && window._logState[id].atBottom){ b.style.display='none'; }
+    else { b.style.display='flex'; b.textContent = buf.length ? ('🔒 已鎖定（'+buf.length+'）▾ 回到最新') : '🔒 已鎖定捲動 ▾ 回到最新'; }
+}
+function flushLogBuf(el){
+    var id=el.id, buf=window._logBuf[id]; if(!buf) return;
+    if(buf.length){ el.insertAdjacentHTML('beforeend', buf.join('')); buf.length=0; while(el.children.length>50) el.removeChild(el.firstChild); }
+    el.scrollTop=el.scrollHeight; window._logState[id].atBottom=true; _logUpdBtn(el);
+}
 function ensureLogEnhanced(el){
     if(!el || el._enhanced) return; el._enhanced=true;
     var id=el.id, panel=el.parentElement;
     panel.style.position='relative'; panel.style.flexGrow='0'; panel.style.flexBasis='auto'; panel.style.height='auto';
-    window._logState[id]={atBottom:true};
+    window._logState[id]={atBottom:true}; window._logBuf[id]=window._logBuf[id]||[];
     var saved=parseInt((localStorage.getItem('logH_'+id))||'0');
     var defH=(id==='combat-log')?260:150;
     var _cv=(id==='combat-log')?'--clh':'--slh'; el._cssVar=_cv; document.documentElement.style.setProperty(_cv,(saved>60?saved:defH)+'px');
     var btn=document.createElement('div'); btn.id=id+'-tobottom';
     btn.textContent='🔒 已鎖定捲動 ▾ 回到最新';
     btn.style.cssText='display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:34px;z-index:30;background:#b45309;color:#fff;font-size:13px;font-weight:bold;padding:6px 14px;border-radius:9999px;box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:pointer;white-space:nowrap;';
-    btn.onclick=function(){ el.scrollTop=el.scrollHeight; window._logState[id].atBottom=true; btn.style.display='none'; };
+    btn.onclick=function(){ flushLogBuf(el); };
     panel.appendChild(btn);
     el.addEventListener('scroll',function(){
-        var nb=(el.scrollHeight-el.scrollTop-el.clientHeight)<30;
-        window._logState[id].atBottom=nb; btn.style.display=nb?'none':'flex';
+        var nbm=(el.scrollHeight-el.scrollTop-el.clientHeight)<30;
+        window._logState[id].atBottom=nbm;
+        if(nbm && window._logBuf[id].length){ flushLogBuf(el); } else { _logUpdBtn(el); }
     });
     var grip=document.createElement('div');
     grip.textContent='⋯ 拖曳調整高度 ⋯';
@@ -3058,19 +3071,17 @@ function ensureLogEnhanced(el){
     grip.addEventListener('mousedown',function(e){ sY=e.clientY; sH=el.clientHeight; document.addEventListener('mousemove',mm); document.addEventListener('mouseup',endR); e.preventDefault(); });
     grip.addEventListener('touchstart',function(e){ if(e.touches[0]){ sY=e.touches[0].clientY; sH=el.clientHeight; document.addEventListener('touchmove',tm,{passive:false}); document.addEventListener('touchend',endR); } },{passive:true});
 }
-function logAtBottom(el){ ensureLogEnhanced(el); if(!el) return true; return (el.scrollHeight - el.scrollTop - el.clientHeight) < 30; }
-function logFollow(el, wasBottom){
-    if(!el) return;
-    var st=window._logState[el.id]; if(st) st.atBottom=wasBottom;
-    var b=document.getElementById(el.id+'-tobottom');
-    if(wasBottom){ el.scrollTop=el.scrollHeight; if(b) b.style.display='none'; }
-    else { if(b) b.style.display='flex'; }
-}
-function logCap(el, wasBottom){
-    while(el.children.length > 50){
-        var before = el.scrollHeight;
-        el.removeChild(el.firstChild);
-        if(!wasBottom){ var delta = before - el.scrollHeight; if(delta>0) el.scrollTop = Math.max(0, el.scrollTop - delta); }
+function logPush(el, html){
+    ensureLogEnhanced(el); if(!el) return;
+    var id=el.id;
+    var atBottom=(el.scrollHeight-el.scrollTop-el.clientHeight)<30;
+    if(atBottom){
+        el.insertAdjacentHTML('beforeend', html);
+        while(el.children.length>50) el.removeChild(el.firstChild);
+        el.scrollTop=el.scrollHeight; window._logState[id].atBottom=true; _logUpdBtn(el);
+    } else {
+        var buf=window._logBuf[id]; buf.push(html); if(buf.length>80) buf.shift();
+        window._logState[id].atBottom=false; _logUpdBtn(el);
     }
 }
 function initLogEnhance(){ ['combat-log','sys-log'].forEach(function(id){ ensureLogEnhanced(document.getElementById(id)); }); }
@@ -3094,19 +3105,13 @@ function logCombat(msg, type="player") {
     else if (type === "miss" || type === "dodge") { colorClass = "text-slate-200"; } // 未命中/閃避 (淺灰，避免與灰底相近)
     else if (type === "evade") { colorClass = "text-teal-300"; } // ER獨立迴避 (淡青綠色)
     
-    var _wb = logAtBottom(el);
-    el.insertAdjacentHTML('beforeend', `<div class="log-entry ${colorClass}">${msg}</div>`);
-    logCap(el, _wb);
-    logFollow(el, _wb);
+    logPush(el, `<div class="log-entry ${colorClass}">${msg}</div>`);
 }
 
 function logSys(msg) {
     if(state.ff) return; // 補跑期間不洗版
     const el = document.getElementById('sys-log');
-    var _wb = logAtBottom(el);
-    el.insertAdjacentHTML('beforeend', `<div class="log-entry text-slate-100">${msg}</div>`);
-    logCap(el, _wb);
-    logFollow(el, _wb);
+    logPush(el, `<div class="log-entry text-slate-100">${msg}</div>`);
 }
 
 // 🔧 架構#4：calcStats 職責拆分 ——
