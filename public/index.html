@@ -2111,8 +2111,8 @@ const DB = {
         "sk_mg_icespike": { n: "寒冰尖刺", type: "atk", tier: 10, reqM: 40, mp: 60, dmgType: "magic", ele: "water", dmgDice: [1, 100] , img: "assets/icons/skills/寒冰尖刺.png" },
         "sk_kn_shockstun_ex": { n: "衝擊之暈(專家)", type: "atk", tier: 5, reqK: 60, reqReborn: 5, mp: 24, dmgType: "physical", reqWpn: "nonbow", stun: 300, stunChance: 75, dmgMul: 2, c: "text-red-400" , img: "assets/icons/skills/衝擊之暈專家.png" },
         "sk_kn_shockstun_gm": { n: "衝擊之暈(大師)", type: "atk", tier: 5, reqK: 60, reqReborn: 10, mp: 30, dmgType: "physical", reqWpn: "nonbow", stun: 600, stunChance: 100, dmgMul: 4, c: "text-purple-400" , img: "assets/icons/skills/衝擊之暈大師.png" },
-        "sk_mg_undead": { n: "召喚不死族", type: "buff", tier: 10, reqM: 40, reqReborn: 8, mp: 80, dur: 3600, summon: { n: "死亡騎士", lv: 130, hit: 110, hits: 6, flat: 180, dmgDice: [4, 14], dmgDiv: 4, dmgLvDiv: 8, interval: 10, kind: "melee", hitLvOff: 20, proc: { p: 0.20, cd: 50, dmgDice: [12, 10], ele: "none", name: "亡者斬" } }, img: "assets/icons/skills/召喚不死族.png" },
-        "sk_mg_guardian": { n: "召喚守護者", type: "buff", tier: 10, reqM: 40, reqReborn: 10, mp: 80, dur: 3600, summon: { n: "騎士范德", lv: 130, hit: 110, hits: 8, flat: 250, dmgDice: [8, 14], dmgDiv: 4, dmgLvDiv: 8, interval: 5, kind: "melee", hitLvOff: 20, proc: { p: 0.20, cd: 50, dmgDice: [24, 10], ele: "none", name: "裂擊" } }, img: "assets/icons/skills/召喚守護者.png" },
+        "sk_mg_undead": { n: "召喚不死族", type: "buff", tier: 10, reqM: 40, reqReborn: 8, mp: 80, dur: 3600, summon: { n: "死亡騎士", lv: 130, hit: 110, hits: 6, flat: 800, dmgPctMax: 0.003, dmgDice: [4, 14], dmgDiv: 4, dmgLvDiv: 8, interval: 10, kind: "melee", hitLvOff: 20, proc: { p: 0.20, cd: 50, dmgDice: [12, 10], ele: "none", name: "亡者斬" } }, img: "assets/icons/skills/召喚不死族.png" },
+        "sk_mg_guardian": { n: "召喚守護者", type: "buff", tier: 10, reqM: 40, reqReborn: 10, mp: 80, dur: 3600, summon: { n: "騎士范德", lv: 130, hit: 110, hits: 8, flat: 1000, dmgPctMax: 0.004, dmgDice: [8, 14], dmgDiv: 4, dmgLvDiv: 8, interval: 5, kind: "melee", hitLvOff: 20, proc: { p: 0.20, cd: 50, dmgDice: [24, 10], ele: "none", name: "裂擊" } }, img: "assets/icons/skills/召喚守護者.png" },
         "sk_kn_berserk": { n: "狂戰士", type: "buff", tier: 3, reqK: 45, mp: 20, dur: 600, d: { meleeDmg: 15, meleeHit: 5, ac: -8 } },
         "sk_kn_rage": { n: "怒氣", type: "buff", tier: 2, reqK: 30, mp: 10, dur: 1200, d: { meleeDmg: 8, extraDmg: 3 } },
         "sk_kn_warcry": { n: "戰吼", type: "buff", tier: 1, reqK: 25, mp: 8, dur: 1200, d: { str: 3, con: 3 } },
@@ -6378,7 +6378,7 @@ function buildSummon(skId, def, durSec) {
     return {
         skId: skId, n: nm, dmgDice: base.dmgDice, interval: base.interval || 20,
         ele: ele, kind: base.kind || 'melee', hitLvOff: base.hitLvOff || 0,
-        lv: base.lv || 0, hit: base.hit || 0, hits: base.hits || 0, flat: base.flat || 0,   // 🔧 固定召喚物欄位（守護/不死）
+        lv: base.lv || 0, hit: base.hit || 0, hits: base.hits || 0, flat: base.flat || 0, dmgPctMax: base.dmgPctMax || 0,   // 🔧 固定召喚物欄位（守護/不死）
         dmgDiv: base.dmgDiv || 5, dmgLvDiv: base.dmgLvDiv || 0, elemScale: base.elemScale || 20,
         proc: base.proc ? { ...base.proc, cdCur: base.proc.cd } : null,
         cd: base.interval || 20, endTick: state.ticks + (durSec || 3600) * 10
@@ -6880,7 +6880,7 @@ function summonAttack(sm) {
         } else {
             let flatBase = cha / (sm.dmgDiv || 5);                          // 近戰固定加成基底 = 魅力/dmgDiv
             let flat = sm.lv ? (sm.flat || 0) : (sm.dmgLvDiv ? Math.floor(flatBase * (1 + player.lv / sm.dmgLvDiv)) : Math.floor(flatBase));   // 固定召喚物用 sm.flat；其餘 dmgLvDiv
-            dmg = Math.max(1, roll(sm.dmgDice[0], sm.dmgDice[1]) + flat - (t.dr || 0));
+            dmg = Math.max(1, roll(sm.dmgDice[0], sm.dmgDice[1]) + flat + (sm.dmgPctMax ? Math.floor((t.hp || 0) * sm.dmgPctMax) : 0) - (t.dr || 0));
             t.justHit = 'normal';
         }
         t.curHp -= dmg; mobWake(t);
