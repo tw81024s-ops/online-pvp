@@ -8433,7 +8433,7 @@ function renderTabs(force) {
     ['tab-items','tab-weapons','tab-armors','tab-equip','tab-skill'].forEach(id => { let el = document.getElementById(id); if(el) _scroll[id] = el.scrollTop; });
 
     let eDiv = document.getElementById('tab-equip'); eDiv.innerHTML = '';
-    const slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'amulet',n:'項鍊'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'belt',n:'腰帶'},{k:'arrow',n:'箭矢'}];
+    const slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'amulet',n:'項鍊'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'belt',n:'腰帶'},{k:'rune1',n:'符石'},{k:'rune2',n:'符石'},{k:'arrow',n:'箭矢'}];
     
     let setCheck = {}, _setSeen = {};
     for (let k in player.eq) {
@@ -8930,7 +8930,7 @@ function openModal(item, isEq, slot) {
     if(_cmp) {
         const SLOT_LABEL = { wpn:'武器', helm:'頭盔', armor:'盔甲', shield:'盾牌', cloak:'斗篷', tshirt:'內衣', gloves:'手套', boots:'鞋子', ring1:'戒指 1', ring2:'戒指 2', amulet:'項鍊', belt:'腰帶', rune1:'符石 1', rune2:'符石 2' };
         if(!isEq && !d.isArrow && (d.type === 'wpn' || d.type === 'arm' || d.type === 'acc')) {
-            let slots = (d.type === 'wpn') ? ['wpn'] : (d.slot === 'ring' ? ['ring1','ring2'] : [d.slot]);
+            let slots = (d.type === 'wpn') ? ['wpn'] : (d.slot === 'ring' ? ['ring1','ring2'] : (d.slot === 'rune' ? ['rune1','rune2'] : [d.slot]));
             let cards = slots.map(sl => {
                 let eq = player.eq[sl];
                 let label = SLOT_LABEL[sl] || sl;
