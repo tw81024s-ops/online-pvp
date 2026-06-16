@@ -5898,6 +5898,13 @@ function killMob(idx) {
         let gMax = mob.goldMax || (mob.lv * 10);
         let g = gMin + Math.floor(Math.random() * (gMax - gMin + 1));
         player.gold += Math.round(g * (isTowerMap(mapState.current)?2:1) * mapRewardMult(mapState.current) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.goldDropMult)||1));
+        // 💰 隨機金幣暴擊（取代金幣捲軸）：0.5% 機率直接給大量金幣
+        if (Math.random() < 0.005) {
+            let _jr = Math.random() * 100;
+            let _jamt = _jr < 77 ? 1000000 : _jr < 85 ? 2000000 : _jr < 92 ? 5000000 : _jr < 97 ? 10000000 : 20000000;
+            player.gold += _jamt;
+            if (typeof logSys === 'function') logSys(`💰 幸運！怪物掉落 <span class="text-yellow-300 font-bold">${_jamt.toLocaleString()}</span> 金幣！`);
+        }
         if (window.__GAME_CONFIG && window.__GAME_CONFIG.eventZongzi && Math.random() < 0.5) gainItem(Math.random() < 0.5 ? 'zongzi_south' : 'zongzi_north', 1, true);   // 端午活動：每隻怪 50% 掉 1 顆粽子
         logSys(`獲得 <span class="text-yellow-400 font-bold">${g} 金幣</span>。`);
     }
@@ -7484,11 +7491,8 @@ function useItem(u, silent = false) {
     }
     if (d.eff === 'gold_scroll') {
         if (silent) return;   // 金幣捲軸只能手動開啟
-        let _r = Math.random() * 100;
-        let _amt = _r < 77 ? 1000000 : _r < 85 ? 2000000 : _r < 92 ? 5000000 : _r < 97 ? 10000000 : 20000000;
-        player.gold += _amt;
         consume(item);
-        if (!silent) logSys(`開啟 ${d.n}，獲得 <span class="text-yellow-300 font-bold">${_amt.toLocaleString()}</span> 金幣！`);
+        if (!silent) logSys(`${d.n} 已停用（改由怪物隨機掉落金幣）。`);
         updateUI();
         return;
     }
@@ -8138,7 +8142,22 @@ function renderStatusEffects() {
     el.innerHTML = html;
 }
 
+const PLAYER_GOLD_CAP = 100000000000; // 玩家金幣上限 1000億
+function capGold() {
+    if (typeof player === 'undefined' || !player) return;
+    if (player.gold > PLAYER_GOLD_CAP) {
+        player.gold = PLAYER_GOLD_CAP;
+        if (!window._goldCapWarned) {
+            window._goldCapWarned = true;
+            if (typeof toast === 'function') toast('💰 金幣已達上限 1000億！', '#7f1d1d');
+            else if (typeof logSys === 'function') logSys('💰 金幣已達上限 1000億，無法再增加！');
+        }
+    } else if (player.gold < PLAYER_GOLD_CAP) {
+        window._goldCapWarned = false;
+    }
+}
 function updateUI() {
+    capGold();
     if(state.ff) return; // 補跑期間不刷新畫面
     document.getElementById('st-lv').innerText = ((player.reborn||0) > 0 ? (player.reborn + '轉 ') : '') + player.lv;
     { let rb = document.getElementById('btn-return-town'); if (rb) rb.textContent = siegeVictoryActive() ? '回城' : '回村'; }

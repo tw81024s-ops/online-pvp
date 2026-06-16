@@ -44,8 +44,8 @@ function isAdminUser(u) {
     return !!(u && (u.is_admin || (process.env.ADMIN_USERNAME && u.username === process.env.ADMIN_USERNAME)));
 }
 // ===== 防作弊：上傳存檔時夾限可被竄改的數值（金幣/強化）=====
-const GOLD_CAP = 1e12;   // 金幣上限（超過視為作弊，可調整）
 const EN_CAP = 30;       // 裝備強化上限（+501 之類為作弊，可調整）
+// 金幣不設上限：玩家可透過潘朵拉抽獎賣道具合法累積大量金幣，難判斷；只擋非法值（負/NaN/Infinity）
 function clampNum(v, lo, hi, dflt) {
     v = Number(v);
     if (!isFinite(v)) return dflt;
@@ -55,7 +55,7 @@ function sanitizeSaveObj(obj) {
     try {
         const p = obj && obj.p;
         if (!p || typeof p !== 'object') return obj;
-        if ('gold' in p) p.gold = clampNum(p.gold, 0, GOLD_CAP, 0);
+        if ('gold' in p) { var _g = Number(p.gold); p.gold = (isFinite(_g) && _g >= 0) ? Math.min(_g, 1e11) : 0; }   // 金幣上限 1000億
         const cEn = it => { if (it && typeof it === 'object' && 'en' in it) it.en = clampNum(it.en, 0, EN_CAP, 0); };
         if (p.eq && typeof p.eq === 'object') Object.keys(p.eq).forEach(k => cEn(p.eq[k]));
         if (Array.isArray(p.inv)) p.inv.forEach(cEn);
