@@ -3020,6 +3020,52 @@ function getWisBlueBonus(wis) {
     ], 31); // 60 = +31
 }
 
+// ===== 日誌框增強：鎖定捲動 + 回到最新 + 可調整高度（滑鼠/觸控）=====
+window._logState = window._logState || {};
+function logAutoScroll(el){
+    if(!el) return;
+    var st = window._logState[el.id];
+    if(!st || st.atBottom){ el.scrollTop = el.scrollHeight; }
+    else { var b=document.getElementById(el.id+'-tobottom'); if(b) b.style.display='flex'; }
+}
+function initLogEnhance(){
+    ['combat-log','sys-log'].forEach(function(id){
+        var el=document.getElementById(id); if(!el||el._enhanced) return; el._enhanced=true;
+        var panel=el.parentElement; panel.style.position='relative';
+        panel.style.flexGrow='0'; panel.style.flexBasis='auto'; panel.style.height='auto';
+        window._logState[id]={atBottom:true};
+        var saved=parseInt((localStorage.getItem('logH_'+id))||'0');
+        var defH=(id==='combat-log')?260:150;
+        el.style.flex='none'; el.style.height=((saved>60?saved:defH))+'px'; el.style.maxHeight='none';
+        var btn=document.createElement('div'); btn.id=id+'-tobottom';
+        btn.textContent='🔒 已鎖定捲動 ▾ 回到最新';
+        btn.style.cssText='display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:32px;z-index:30;background:#b45309;color:#fff;font-size:13px;font-weight:bold;padding:6px 14px;border-radius:9999px;box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:pointer;white-space:nowrap;';
+        btn.onclick=function(){ el.scrollTop=el.scrollHeight; window._logState[id].atBottom=true; btn.style.display='none'; };
+        panel.appendChild(btn);
+        el.addEventListener('scroll',function(){
+            var nb=(el.scrollHeight-el.scrollTop-el.clientHeight)<24;
+            window._logState[id].atBottom=nb;
+            btn.style.display=nb?'none':'flex';
+        });
+        var grip=document.createElement('div');
+        grip.textContent='⋯ 拖曳調整高度 ⋯';
+        grip.style.cssText='flex:none;height:24px;line-height:24px;text-align:center;font-size:11px;color:#94a3b8;background:rgba(15,23,42,.9);cursor:ns-resize;user-select:none;touch-action:none;border-top:1px solid rgba(148,163,184,.25);border-bottom-left-radius:.75rem;border-bottom-right-radius:.75rem;';
+        panel.appendChild(grip);
+        var sY=0,sH=0;
+        function move(cy){ var hh=Math.max(80,Math.min(window.innerHeight*0.8, sH+(cy-sY))); el.style.height=hh+'px'; }
+        function endR(){ try{localStorage.setItem('logH_'+id, String(parseInt(el.style.height)||0));}catch(e){}
+            document.removeEventListener('mousemove',mm); document.removeEventListener('mouseup',endR);
+            document.removeEventListener('touchmove',tm); document.removeEventListener('touchend',endR); }
+        function mm(e){ move(e.clientY); }
+        function tm(e){ if(e.touches[0]){ move(e.touches[0].clientY); e.preventDefault(); } }
+        grip.addEventListener('mousedown',function(e){ sY=e.clientY; sH=el.clientHeight; document.addEventListener('mousemove',mm); document.addEventListener('mouseup',endR); e.preventDefault(); });
+        grip.addEventListener('touchstart',function(e){ if(e.touches[0]){ sY=e.touches[0].clientY; sH=el.clientHeight; document.addEventListener('touchmove',tm,{passive:false}); document.addEventListener('touchend',endR); } },{passive:true});
+    });
+}
+if(document.readyState!=='loading') setTimeout(initLogEnhance,300);
+else document.addEventListener('DOMContentLoaded',function(){ setTimeout(initLogEnhance,300); });
+window.initLogEnhance=initLogEnhance;
+
 function logCombat(msg, type="player") {
     if(state.ff) return; // 補跑期間不洗版
     const el = document.getElementById('combat-log');
@@ -3038,7 +3084,7 @@ function logCombat(msg, type="player") {
     
     el.innerHTML += `<div class="log-entry ${colorClass}">${msg}</div>`;
     if(el.children.length > 50) el.removeChild(el.firstChild);
-    el.scrollTop = el.scrollHeight;
+    logAutoScroll(el);
 }
 
 function logSys(msg) {
@@ -3046,7 +3092,7 @@ function logSys(msg) {
     const el = document.getElementById('sys-log');
     el.innerHTML += `<div class="log-entry text-slate-100">${msg}</div>`;
     if(el.children.length > 50) el.removeChild(el.firstChild);
-    el.scrollTop = el.scrollHeight;
+    logAutoScroll(el);
 }
 
 // 🔧 架構#4：calcStats 職責拆分 ——
