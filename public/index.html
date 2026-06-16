@@ -824,12 +824,12 @@ const DB = {
         "rune_gaia": { n: "大地女神符石", type: "acc", slot: "rune", req: "all", con: 4, wis: 2, c: "text-amber-400", p: 2000000, gachaWeight: 0, runeTier: 4, legend: true, d: "大地女神的符石。體力+4 智慧+2。" },
         "char_delete_scroll": { n: "刪除角色卷", type: "scroll", req: "all", eff: "char_delete", c: "text-red-400", p: 20000000, noJunk: true, gachaWeight: 0, d: "使用後永久刪除「目前存檔位的角色」，釋出一個空位。使用時會再次確認，刪除後無法復原。" },
         "sherine_scroll": { n: "席琳附加捲軸", type: "scroll", req: "all", eff: "sherine_scroll", img: "assets/icons/items/sherine_scroll.png", c: "text-emerald-300", p: 1, gachaWeight: 0, d: "使用後選擇一件已裝備的部位，隨機附加一個席琳套裝效果（全 8 套 ×5 種＝40 種隨機抽一）。集齊同系列 2/3/5 件即啟動套裝加成。" },
-        "sherine_carrier_helm":   { n: "席琳頭飾", type: "arm", slot: "helm",   ac: 4,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
-        "sherine_carrier_armor":  { n: "席琳護甲", type: "arm", slot: "armor",  ac: 9,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
-        "sherine_carrier_gloves": { n: "席琳手套", type: "arm", slot: "gloves", ac: 3,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
-        "sherine_carrier_boots":  { n: "席琳長靴", type: "arm", slot: "boots",  ac: 3,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
-        "sherine_carrier_cloak":  { n: "席琳披風", type: "arm", slot: "cloak",  ac: 4,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
-        "sherine_carrier_amulet": { n: "席琳項鍊", type: "acc", slot: "amulet", ac: 3,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
+        "sherine_carrier_helm":   { set: "sherine", n: "席琳頭飾", type: "arm", slot: "helm",   ac: 4,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
+        "sherine_carrier_armor":  { set: "sherine", n: "席琳護甲", type: "arm", slot: "armor",  ac: 9,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
+        "sherine_carrier_gloves": { set: "sherine", n: "席琳手套", type: "arm", slot: "gloves", ac: 3,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
+        "sherine_carrier_boots":  { set: "sherine", n: "席琳長靴", type: "arm", slot: "boots",  ac: 3,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
+        "sherine_carrier_cloak":  { set: "sherine", n: "席琳披風", type: "arm", slot: "cloak",  ac: 4,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
+        "sherine_carrier_amulet": { set: "sherine", n: "席琳項鍊", type: "acc", slot: "amulet", ac: 3,  req: "all", safe: 4, p: 1, gachaWeight: 0, d: "席琳世界的載體裝備（全職業可裝），本身樸素，價值在於可承載席琳套裝效果。" },
 "wpn_dragonslayer": { n: "屠龍劍", type: "wpn", w2h: true, dmgS: 18, dmgL: 25, hit: 2, dmgBonus: 9, spd: 0.9, req: "knight", safe: 6, p: 100000, eff: "cleave", dragonStrike: 12, legend: true, gachaWeight: 0, d: "傳說中為屠龍而鍛造的雙手巨劍，劍身中沉眠著龍魂。<br>龍的一擊：發動一般攻擊時，固定機率對場上所有敵人造成無視防禦力的無屬性傷害。" },
         "wpn_baless": { n: "巴列斯魔杖", type: "wpn", dmgS: 2, dmgL: 3, hit: 0, dmgBonus: 0, mdmg: 2, spd: 1.0, req: "mage", safe: 0, p: 0, mpR: 10, mpROverSafe: 2, legend: true, gachaWeight: 0, d: "重獲魔力的傳說魔杖，蘊含共鳴之力。" },
         "wpn_powerless_baless": { n: "失去魔力的巴列斯魔杖", type: "wpn", dmgS: 1, dmgL: 1, hit: 0, dmgBonus: 0, spd: 1.0, req: "all", safe: 0, p: 0, noSell: true, gachaWeight: 0, d: "失去了魔力的古老魔杖。攜帶它並使用『靈魂之球』，或許能喚回沉睡的力量……" },
@@ -3519,6 +3519,9 @@ function recomputeStats() {
         }
     }
 
+    // 🔮 席琳套裝：全套 6 件 → 全屬性 +5（在 Phase 2 換算前加入，確保傳導到 HP/傷害等衍生值）
+    { let _shN6 = 0; for (let _sk in p.eq) { let _se = p.eq[_sk]; if (_se && DB.items[_se.id] && DB.items[_se.id].set === 'sherine') _shN6++; } if (_shN6 >= 6) { d.str += 5; d.dex += 5; d.int += 5; d.con += 5; d.wis += 5; d.cha += 5; } }
+
     // ===== Phase 2：依「最終屬性」一次性換算所有衍生戰鬥數值 =====
     // 職業基礎 MR 與 等級成長
     if (p.cls === 'knight') {
@@ -3703,6 +3706,10 @@ d.mr += (baseMr + bonusMr);
     if(setCheck['steel'] >= 5) { d.ac -= 2; d.dr += 2; }
     if(setCheck['mr'] >= 3) { d.mr += 5; }
     if(setCheck['guard'] >= 3) { d.ac -= 1; }
+    // 🔮 席琳套裝（載體本體）：3/5/6 件加成（全屬+5 已於 Phase 1 處理）
+    if(setCheck['sherine'] >= 3) { d.ac -= 10; d.mr += 20; }
+    if(setCheck['sherine'] >= 5) { d.extraDmg += 10; p.mhp = Math.round(p.mhp * 1.05); }
+    if(setCheck['sherine'] >= 6) { d.dr += 5; d.aspd = Math.max(0.2, d.aspd * 0.9); }
 
     // ===== 🔮 席琳套裝效果：以「不重複效果」計件（同效果多件僅計 1；5/5 同時擁有 2/5、3/5 加成）=====
     // 同步寫入傭兵快照：buildAlly 換身重算時 p=ally，旗標自然存於傭兵物件上
@@ -8454,6 +8461,7 @@ function renderTabs(force) {
     if(setCheck['kurt'] >= 4) activeSets.push('kurt');
     if(setCheck['mr'] >= 2) activeSets.push('mr');   // 抗魔套裝僅 2 件，門檻應為 2
     if(setCheck['guard'] >= 3) activeSets.push('guard');
+    if(setCheck['sherine'] >= 3) activeSets.push('sherine');
     if(setCheck['steel'] >= 5) activeSets.push('steel');
 
     slots.forEach(s => {
@@ -11789,14 +11797,14 @@ function getShopItemsForNpc(npcId) {
             'wpn_38', 'wpn_20', 'wpn_silveraxe', 'wpn_witchwand', 'wpn_18',
             'wpn_giantaxe', 'wpn_28', 'wpn_14', 'wpn_6', 'wpn_3',
             'wpn_17', 'wpn_15', 'wpn_7', 'wpn_21', 'wpn_16',
-            'wpn_halberd', 'wpn_12', 'char_delete_scroll'
+            'wpn_halberd', 'wpn_12'
         ];
     } else {
         // 一般雜貨商 (格林、巴辛、帕羅、雜貨商等)
         list = [
             'potion_heal', 'potion_strong', 'potion_ult', 'potion_blue',
             'potion_haste', 'potion_brave', 'new_item_140', 'new_item_139',
-            'scroll_poly', 'scroll_magicbarrier', 'scroll_teleport', 'scroll_revive', 'wpn_5', 'wpn_22', 'new_item_142', 'candle', 'new_item_143'
+            'scroll_poly', 'scroll_magicbarrier', 'scroll_teleport', 'scroll_revive', 'wpn_5', 'wpn_22', 'new_item_142', 'candle', 'new_item_143', 'char_delete_scroll'
         ];
     }
 
