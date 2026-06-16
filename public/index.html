@@ -498,6 +498,11 @@
 .doll-cur{color:#cbd5e1;font-size:12px;background:#0b1220;border:1px solid #334155;border-radius:8px;padding:8px;margin-bottom:10px;line-height:1.5;}
 .doll-empty{color:#94a3b8;grid-column:1/-1;text-align:center;padding:16px;}
 </style>
+<style id="log-enhance-css">
+#combat-log,#sys-log{flex:0 0 auto !important;overflow-y:auto !important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;min-height:80px;}
+#combat-log{height:var(--clh,260px) !important;}
+#sys-log{height:var(--slh,150px) !important;}
+</style>
 </head>
 <body class="min-h-screen lg:h-screen w-screen flex items-start lg:items-center justify-center p-2 lg:p-4 overflow-y-auto">
 
@@ -3029,7 +3034,7 @@ function ensureLogEnhanced(el){
     window._logState[id]={atBottom:true};
     var saved=parseInt((localStorage.getItem('logH_'+id))||'0');
     var defH=(id==='combat-log')?260:150;
-    el.style.flex='none'; el.style.height=((saved>60?saved:defH))+'px'; el.style.maxHeight='none'; el.style.overflowY='auto';
+    var _cv=(id==='combat-log')?'--clh':'--slh'; el._cssVar=_cv; document.documentElement.style.setProperty(_cv,(saved>60?saved:defH)+'px');
     var btn=document.createElement('div'); btn.id=id+'-tobottom';
     btn.textContent='🔒 已鎖定捲動 ▾ 回到最新';
     btn.style.cssText='display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:34px;z-index:30;background:#b45309;color:#fff;font-size:13px;font-weight:bold;padding:6px 14px;border-radius:9999px;box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:pointer;white-space:nowrap;';
@@ -3044,8 +3049,8 @@ function ensureLogEnhanced(el){
     grip.style.cssText='flex:none;height:24px;line-height:24px;text-align:center;font-size:11px;color:#94a3b8;background:rgba(15,23,42,.9);cursor:ns-resize;user-select:none;touch-action:none;border-top:1px solid rgba(148,163,184,.25);border-bottom-left-radius:.75rem;border-bottom-right-radius:.75rem;';
     panel.appendChild(grip);
     var sY=0,sH=0;
-    function move(cy){ el.style.height=Math.max(80,Math.min(window.innerHeight*0.85, sH+(cy-sY)))+'px'; }
-    function endR(){ try{localStorage.setItem('logH_'+id,String(parseInt(el.style.height)||0));}catch(e){}
+    function move(cy){ var hh=Math.max(80,Math.min(window.innerHeight*0.85, sH+(cy-sY))); el._lastH=hh; document.documentElement.style.setProperty(el._cssVar,hh+'px'); }
+    function endR(){ try{localStorage.setItem('logH_'+id,String(el._lastH||el.clientHeight||0));}catch(e){}
         document.removeEventListener('mousemove',mm); document.removeEventListener('mouseup',endR);
         document.removeEventListener('touchmove',tm); document.removeEventListener('touchend',endR); }
     function mm(e){ move(e.clientY); }
@@ -3060,6 +3065,13 @@ function logFollow(el, wasBottom){
     var b=document.getElementById(el.id+'-tobottom');
     if(wasBottom){ el.scrollTop=el.scrollHeight; if(b) b.style.display='none'; }
     else { if(b) b.style.display='flex'; }
+}
+function logCap(el, wasBottom){
+    while(el.children.length > 50){
+        var before = el.scrollHeight;
+        el.removeChild(el.firstChild);
+        if(!wasBottom){ var delta = before - el.scrollHeight; if(delta>0) el.scrollTop = Math.max(0, el.scrollTop - delta); }
+    }
 }
 function initLogEnhance(){ ['combat-log','sys-log'].forEach(function(id){ ensureLogEnhanced(document.getElementById(id)); }); }
 if(document.readyState!=='loading') setTimeout(initLogEnhance,300);
@@ -3083,8 +3095,8 @@ function logCombat(msg, type="player") {
     else if (type === "evade") { colorClass = "text-teal-300"; } // ER獨立迴避 (淡青綠色)
     
     var _wb = logAtBottom(el);
-    el.innerHTML += `<div class="log-entry ${colorClass}">${msg}</div>`;
-    if(el.children.length > 50) el.removeChild(el.firstChild);
+    el.insertAdjacentHTML('beforeend', `<div class="log-entry ${colorClass}">${msg}</div>`);
+    logCap(el, _wb);
     logFollow(el, _wb);
 }
 
@@ -3092,8 +3104,8 @@ function logSys(msg) {
     if(state.ff) return; // 補跑期間不洗版
     const el = document.getElementById('sys-log');
     var _wb = logAtBottom(el);
-    el.innerHTML += `<div class="log-entry text-slate-100">${msg}</div>`;
-    if(el.children.length > 50) el.removeChild(el.firstChild);
+    el.insertAdjacentHTML('beforeend', `<div class="log-entry text-slate-100">${msg}</div>`);
+    logCap(el, _wb);
     logFollow(el, _wb);
 }
 
