@@ -867,6 +867,9 @@ const DB = {
         "bk_dragon_special": { type: "skillbk", n: "龍騎技能書(特殊攻擊)", p: 50000, sk: "sk_dragon_special", gachaWeight: 10, img: "assets/icons/skills/特殊攻擊龍鬥士.png" },
         "bk_dragon_slayer": { type: "skillbk", n: "龍騎技能書(屠宰者)", p: 80000, sk: "sk_dragon_slayer", gachaWeight: 8, img: "assets/icons/skills/屠宰者.png" },
         "bk_dragon_heartpierce": { type: "skillbk", n: "龍騎技能書(刺心者)", p: 120000, sk: "sk_dragon_heartpierce", gachaWeight: 5, img: "assets/icons/skills/刺心者.png" },
+        "bk_dragon_slayer_ex": { type: "skillbk", n: "龍騎技能書(屠宰者強化)", p: 0, sk: "sk_dragon_slayer_ex", gachaWeight: 0, noSell: true, img: "assets/icons/skills/屠宰者強化.png" },
+        "bk_dragon_guardbreak": { type: "skillbk", n: "龍騎技能書(護衛毀滅)", p: 0, sk: "sk_dragon_guardbreak", gachaWeight: 0, noSell: true, img: "assets/icons/skills/護衛毀滅強化.png" },
+        "bk_dragon_armorimpact": { type: "skillbk", n: "龍騎技能書(龍之鎧甲衝擊)", p: 0, sk: "sk_dragon_armorimpact", gachaWeight: 0, noSell: true, img: "assets/icons/skills/龍之鎧甲衝擊.png" },
         "bk_mg_master_ex": { type: "skillbk", n: "法師技能書(魔法大師·專家)", p: 0, sk: "sk_mg_master_ex", gachaWeight: 0, img: "assets/icons/skills/魔法大師.png" },
         "bk_mg_master_gm": { type: "skillbk", n: "法師技能書(魔法大師·大師)", p: 0, sk: "sk_mg_master_gm", gachaWeight: 0, img: "assets/icons/skills/魔法大師.png" },
         "bk_ef_steeldef": { type: "skillbk", n: "妖精技能書(鋼鐵防禦)", p: 0, sk: "sk_ef_steeldef", gachaWeight: 0, img: "assets/icons/skills/鋼鐵防禦.png" },
@@ -2131,6 +2134,9 @@ const DB = {
         "sk_dragon_special": { n: "特殊攻擊:龍鬥士", type: "atk", tier: 1, reqD: 1, mp: 10, dmgType: "magic", reqWpn: "chain", dmgMul: 1.5, c: "text-yellow-300", img: "assets/icons/skills/特殊攻擊龍鬥士.png" },
         "sk_dragon_slayer": { n: "屠宰者", type: "atk", tier: 2, reqD: 15, mp: 8, dmgType: "physical", reqWpn: "chain", dmgMul: 2.2, c: "text-white", img: "assets/icons/skills/屠宰者.png" },
         "sk_dragon_heartpierce": { n: "刺心者", type: "atk", tier: 4, reqD: 40, mp: 6, dmgType: "magic", reqWpn: "chain", ranged: true, dmgMul: 2.8, c: "text-sky-300", img: "assets/icons/skills/刺心者.png" },
+        "sk_dragon_slayer_ex": { n: "屠宰者(強化)", type: "atk", tier: 6, reqD: 60, reqReborn: 8, mp: 14, dmgType: "physical", reqWpn: "chain", dmgMul: 3.8, c: "text-purple-400", img: "assets/icons/skills/屠宰者強化.png" },
+        "sk_dragon_guardbreak": { n: "護衛毀滅(強化)", type: "atk", tier: 7, reqD: 65, reqReborn: 8, mp: 16, dmgType: "physical", reqWpn: "chain", dmgMul: 4.2, c: "text-purple-400", img: "assets/icons/skills/護衛毀滅強化.png" },
+        "sk_dragon_armorimpact": { n: "龍之鎧甲(衝擊)", type: "atk", tier: 8, reqD: 70, reqReborn: 8, mp: 18, dmgType: "magic", reqWpn: "chain", dmgMul: 4.8, c: "text-purple-400", img: "assets/icons/skills/龍之鎧甲衝擊.png" },
         // ===== 三職業新技能（騎士/法師/妖精） =====
         // ===== 自訂新增技能（玩家設計）=====
         "sk_mg_master": { n: "魔法大師", type: "buff", tier: 9, reqM: 50, mp: 110, dur: 600, d: { mpR: 30 }, msg: "你領悟魔法大師奧義，回魔大幅提升。" , img: "assets/icons/skills/魔法大師.png" },
@@ -6336,6 +6342,11 @@ function killMob(idx) {
         var _diPan = ['panacea_str','panacea_dex','panacea_con','panacea_int','panacea_wis','panacea_cha'];
         if (Math.random() < 0.002 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1)) gainItem(_diPan[Math.floor(Math.random()*_diPan.length)], 1, false);
     }
+    // ===== 8轉終焉之地：龍騎高階技能書掉落（0.3%，潘朵拉抽不到）=====
+    if (mapState.current === 'rebirth_abyss') {
+        var _diSk = ['bk_dragon_slayer_ex','bk_dragon_guardbreak','bk_dragon_armorimpact'];
+        if (Math.random() < 0.003 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1)) gainItem(_diSk[Math.floor(Math.random()*_diSk.length)], 1, false);
+    }
     // ===== 8轉深淵：腿甲掉落（10%，階級加權 T1:50/T2:25/T3:15/T4:7/T5:3；潘朵拉抽不到）=====
     if (mapState.current === 'rebirth_abyss') {
         if (Math.random() < 0.10 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1)) {
@@ -8052,6 +8063,7 @@ function useItem(u, silent = false) {
         if(player.darkelf && isElfOnlySkill(sd)) { logSys(`「${sd.n}」是精靈專屬技能（精靈水晶），黑妖無法學習。`); return; }
         if(reqLv === undefined) { logSys(`你的職業無法學習「${sd.n}」。`); return; }
         if(player.lv < reqLv) { logSys(`等級不足，需要等級 ${reqLv} 才能學習「${sd.n}」。`); return; }
+        if(sd.reqReborn && (player.reborn || 0) < sd.reqReborn) { logSys(`轉生次數不足，需要 ${sd.reqReborn} 轉才能學習「${sd.n}」。`); return; }
         
         // 👇 補上這兩行：確保屬性相符才能吃水晶！
         if(sd.reqEle && player.elfEle !== sd.reqEle) { logSys(`屬性不符，無法學習「${sd.n}」。`); return; }
