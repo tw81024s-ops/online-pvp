@@ -3228,11 +3228,17 @@ function _polySyncLocal() {
   if (!player.polyDex) player.polyDex = {};
   var acc = {};
   try { acc = JSON.parse(localStorage.getItem('lineage_idle_poly') || '{}'); } catch (e) { }
-  var accDex = acc.dex || {};
-  var merged = Object.assign({}, accDex);
-  for (var n in player.polyDex) { merged[n] = Math.max(merged[n] || 0, player.polyDex[n] || 0); }
-  player.polyDex = merged;
-  try { localStorage.setItem('lineage_idle_poly', JSON.stringify({ dex: merged })); } catch (e) { }
+  var pool = acc.dex || {};
+  // 真‧守恆轉移：把帳號池的卡「搬」進角色（加法累加），搬完立刻清空帳號池。
+  // 不再用 max 寫回高水位 → 同一批卡不會被重複同步、合成消耗後再同步也補不回來。
+  var moved = 0;
+  for (var n in pool) {
+    var add = Math.max(0, Math.floor(pool[n] || 0));
+    if (add > 0) { player.polyDex[n] = (player.polyDex[n] || 0) + add; moved += add; }
+  }
+  try { localStorage.setItem('lineage_idle_poly', JSON.stringify({ dex: {} })); } catch (e) { }
+  try { if (typeof saveGame === 'function') saveGame(); } catch (e) { }
+  return moved;
 }
 window.__applyAccountPoly = function () {
   _polySyncLocal();
