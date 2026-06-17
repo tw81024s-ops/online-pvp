@@ -3256,7 +3256,7 @@ window.__deskSkinApply = function(){
     body.ornate-desk .panel{ position:relative;
       box-shadow:0 0 0 1px rgba(205,166,78,.6),0 0 0 3px rgba(20,13,7,.92),0 0 0 4px rgba(205,166,78,.35),0 14px 30px rgba(0,0,0,.72),inset 0 1px 0 rgba(251,233,168,.3) !important; }
     /* 暖色化面板與內框：把藍灰底換成深褐黑金，新版一眼不同 */
-    body.ornate-desk .panel{ background:linear-gradient(180deg,#251a12 0%,#160e08 100%) !important; }
+    body.ornate-desk .panel:not(#status-panel){ background:linear-gradient(180deg,#251a12 0%,#160e08 100%) !important; }
     body.ornate-desk .bg-slate-800{ background:linear-gradient(180deg,rgba(50,36,21,.94),rgba(28,19,11,.96)) !important; }
     body.ornate-desk .bg-slate-900{ background:rgba(17,11,6,.96) !important; }
     body.ornate-desk .bg-slate-700{ background:rgba(60,44,25,.92) !important; }
