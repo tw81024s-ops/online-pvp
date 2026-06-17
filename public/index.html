@@ -8949,6 +8949,24 @@ function buildItemDescHTML(item) {
              + `<span class="text-green-300 text-xs">【${_g}套裝】</span><br>${_lines}`
              + (desc ? `<br>${desc}` : '');
     }
+    // \ud83d\udd28 \u5f37\u5316\u52a0\u6210\u986f\u793a\uff08\u4f9d\u578b\u5225\uff09
+    (function(){
+      var _en = item.en || 0;
+      if(_en > 0){
+        var _t = d.type, _line = '';
+        if(_t === 'wpn'){
+          var _w = Math.min(_en,30), _pct = (_w>=10)?(Math.floor((_w-10)/5)+1):0;
+          _line = '\u50b7\u5bb3 +'+(_w*2)+'\u3001\u547d\u4e2d +'+(_w*3)+(_pct?('\u3001\u7e3d\u50b7 +'+_pct+'%'):'');
+        } else if(_t === 'arm'){
+          var _a = Math.min(_en,30), _hp = (_a>=10)?(Math.floor((_a-10)/5)+1):0;
+          _line = '\u9632\u79a6(AC) -'+_a+'\u3001\u6e1b\u50b7 +'+(_a*0.1).toFixed(1)+(_hp?('\u3001\u7e3d\u8840 +'+_hp+'%'):'');
+        } else if(_t === 'acc'){
+          var _c = Math.min(_en,20), _adr = Math.floor(_c/4)*0.5, _apct = Math.floor(_c/8);
+          _line = '\u547d\u4e2d +'+(_c*3)+(_adr?('\u3001\u6e1b\u50b7 +'+_adr+'%'):'')+(_apct?('\u3001\u7e3d\u50b7 +'+_apct+'%'):'');
+        }
+        if(_line) desc += '<br><span class="text-emerald-300 font-bold">\ud83d\udd28 \u5f37\u5316\u52a0\u6210\uff08+'+_en+'\uff09\uff1a'+_line+'</span>';
+      }
+    })();
     if(d.type === 'wpn') {
         desc += `<br><span class="text-orange-300">小型傷害: ${d.dmgS} / 大型傷害: ${d.dmgL}</span>`;
         
@@ -9092,6 +9110,26 @@ function compareCardHTML(eqItem, slotLabel) {
     return `<div class="text-emerald-300 text-xs font-bold mb-1">【${slotLabel}】</div>${header}<div class="text-sm text-slate-300 leading-relaxed">${body}</div>`;
 }
 
+function _enhBonusHTML(item, d){
+  var en = (item&&item.en)||0; if(en<=0||!d) return '';
+  var rows=[];
+  if(d.type==='wpn'){
+    var w=Math.min(en,30);
+    rows.push('\u50b7\u5bb3 +'+(w*2)); rows.push('\u547d\u4e2d +'+(w*3));
+    var p=(w>=10)?(Math.floor((w-10)/5)+1):0; if(p>0) rows.push('\u7e3d\u50b7 +'+p+'%');
+  } else if(d.type==='arm'){
+    var a=Math.min(en,30);
+    rows.push('AC \u2212'+a); rows.push('\u50b7\u5bb3\u6e1b\u514d +'+(a*0.1).toFixed(1));
+    var hp=(a>=10)?(Math.floor((a-10)/5)+1):0; if(hp>0) rows.push('\u6700\u5927HP +'+hp+'%');
+  } else if(d.type==='acc'){
+    var c=Math.min(en,20);
+    rows.push('AC \u2212'+c); rows.push('\u547d\u4e2d +'+(c*3));
+    var dr=Math.floor(c/4)*0.5; if(dr>0) rows.push('\u6e1b\u50b7 +'+dr+'%');
+    var dp=Math.floor(c/8); if(dp>0) rows.push('\u7e3d\u50b7 +'+dp+'%');
+  } else return '';
+  return '<br><span class="text-cyan-300 font-bold mt-2 block">\ud83d\udd27 \u5f37\u5316 +'+en+' \u52a0\u6210\uff1a</span>'
+       + '<span class="text-emerald-300 block">'+rows.join('\u3001')+'</span>';
+}
 function openModal(item, isEq, slot) {
     let d = DB.items[item.id];
     if(!d) return; 
@@ -9108,6 +9146,7 @@ function openModal(item, isEq, slot) {
     document.getElementById('modal-item-name').className = `text-2xl font-bold mb-3 border-b border-slate-600 pb-3 flex justify-between items-center ${getItemColor(item)}`;
     
     let desc = buildItemDescHTML(item);
+    try{ desc += _enhBonusHTML(item, d); }catch(e){}
     
     let sellPrice = getSellPrice(item);
 
@@ -9778,7 +9817,7 @@ function hubSync(){
             var av=hub.querySelector('.ava'); if(av) av.style.backgroundImage=bg;
         }
     }
-    try{ var _avp=hub.querySelector('.ava'); if(_avp && player.poly && player.poly.n){ var _pi="assets/icons/monsters/"+player.poly.n+".png"; for(var _mk in DB.mobs){ if(DB.mobs[_mk].n===player.poly.n){ _pi=DB.mobs[_mk].img||_pi; break; } } _avp.style.backgroundImage="url('"+_pi+"')"; } }catch(e){}
+    try{ var _avp=hub.querySelector('.ava'); if(_avp && player.polyLock && player.poly && player.poly.n){ var _pi="assets/icons/monsters/"+player.poly.n+".png"; for(var _mk in DB.mobs){ if(DB.mobs[_mk].n===player.poly.n){ _pi=DB.mobs[_mk].img||_pi; break; } } _avp.style.backgroundImage="url('"+_pi+"')"; } }catch(e){}
     var cls=(document.getElementById('st-classname')||{}).innerText||'';
     var nm=(document.getElementById('st-class')||{}).innerText||'';
     var el;
