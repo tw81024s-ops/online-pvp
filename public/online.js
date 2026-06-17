@@ -1272,7 +1272,7 @@
         _secBody.append(buildItemBrowser((id, it, qty) => {
             try { gainItem(id, qty || 1, true, true); refreshGame(); toast('已取得 ' + it.n + ' ×' + (qty || 1)); } catch (e) { toast('失敗：' + e.message, '#7f1d1d'); }
         }));
-        section('🗡️ 武器改造（本機角色：強化 / 四大元素 / 祝福）');
+        section('🗡️ 裝備改造（武器／防具／飾品·本機角色：強化 / 四大元素 / 祝福）');
         {
             let weps = []; try { weps = (typeof window.__admWeapons === 'function') ? window.__admWeapons() : []; } catch (e) { }
             if (!weps.length) {
@@ -1299,7 +1299,7 @@
                         try { const nw = window.__admWeapons(); weps.length = 0; nw.forEach(x => weps.push(x)); const ci = wSel.value; wSel.innerHTML = ''; weps.forEach((x, i) => wSel.append(el('option', { value: String(i) }, x.label))); wSel.value = ci; fill(); } catch (e) { }
                     } else { toast('失敗：' + ((r && r.msg) || '未知'), '#7f1d1d'); }
                 };
-                _secBody.append(el('div', { style: 'color:#94a3b8;font-size:12px;margin-bottom:6px;line-height:1.6;' }, '選擇本機角色的武器（裝備中或背包），調整強化等級、四大元素屬性與祝福。改完自動重算數值並雲端同步。'),
+                _secBody.append(el('div', { style: 'color:#94a3b8;font-size:12px;margin-bottom:6px;line-height:1.6;' }, '選擇本機角色的武器／防具／飾品（裝備中或背包），調整強化等級、四大元素屬性與祝福。改完自動重算數值並雲端同步。'),
                     wSel,
                     el('div', { style: 'color:#94a3b8;font-size:12px;margin-bottom:2px;' }, '強化等級 (+N)'), enInp,
                     el('div', { style: 'color:#94a3b8;font-size:12px;margin-bottom:2px;' }, '四大元素屬性'), aSel,

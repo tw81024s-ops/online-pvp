@@ -3713,8 +3713,8 @@ function recomputeStats() {
     if (p.eq.wpn) {
         let w = DB.items[p.eq.wpn.id];
         let isRanged = !!w.ranged;
-        let wBonus = (w.dmgBonus||0) + p.eq.wpn.en;
-        let wHit = (w.hit||0) + p.eq.wpn.en;
+        let wBonus = (w.dmgBonus||0) + Math.min(p.eq.wpn.en||0, 30) * 2;
+        let wHit = (w.hit||0) + Math.min(p.eq.wpn.en||0, 30) * 3;
         if (isRanged) { d.rangedDmg += wBonus; d.rangedHit += wHit; }
         else { d.meleeDmg += wBonus; d.meleeHit += wHit; }
         d.aspd = w.spd;
@@ -3737,7 +3737,7 @@ function recomputeStats() {
         let e = p.eq[k];
         if (!e || k === 'wpn') continue;
         let ed = DB.items[e.id];
-        d.ac -= (ed.ac||0) + e.en; 
+        d.ac -= (ed.ac||0) + Math.min(e.en||0, ed.type==='arm'?30:20); 
         // 計算防具的基礎 MR 與強化的額外 MR 加成
 let baseMr = ed.mr || 0;
 let bonusMr = (ed.mrPerEn || 0) * e.en; 
@@ -3941,6 +3941,38 @@ d.mr += (baseMr + bonusMr);
     { let _gc = (typeof window !== 'undefined' && window.__GAME_CONFIG) ? window.__GAME_CONFIG : null; if (_gc && _gc.spdMult && _gc.spdMult > 1) d.aspd = d.aspd / _gc.spdMult; }   // 全服攻速倍率（管理者面板設定，所有玩家生效）
 
     try { applyDollStats(); } catch (e) { }   // 娃娃輔助加成
+    // === 強化加成：武器/防具/飾品（上限 武30/防30/飾20；減傷%上限50）===
+    try {
+        var _eD = player.d, _eP = player;
+        var _eDmgPct = 0, _eHpPct = 0, _eDrPct = 0, _eHit = 0;
+        for (var _ek in _eP.eq) {
+            var _eit = _eP.eq[_ek]; if (!_eit) continue;
+            var _eed = DB.items[_eit.id]; if (!_eed) continue;
+            var _en = _eit.en || 0;
+            if (_eed.type === 'wpn') {
+                var _w = Math.min(_en, 30);
+                if (_w >= 10) _eDmgPct += Math.floor((_w - 10) / 5) + 1;            // 武器總傷% 階梯
+            } else if (_eed.type === 'arm') {
+                var _a = Math.min(_en, 30);
+                _eD.dr = (_eD.dr || 0) + _a * 0.1;                                  // 防具減傷(固定值) 每級+0.1
+                if (_a >= 10) _eHpPct += Math.floor((_a - 10) / 5) + 1;             // 防具總血% 階梯
+            } else {
+                var _c = Math.min(_en, 20);                                          // 飾品/無安定
+                _eHit += _c * 3;                                                     // 命中 每級+3
+                _eDrPct += Math.floor(_c / 4) * 0.5;                                 // 減傷% 每4級+0.5
+                _eDmgPct += Math.floor(_c / 8);                                      // 總傷% 每8級+1
+            }
+        }
+        if (_eHit) { _eD.meleeHit = (_eD.meleeHit || 0) + _eHit; _eD.rangedHit = (_eD.rangedHit || 0) + _eHit; _eD.magicHit = (_eD.magicHit || 0) + _eHit; }
+        if (_eDmgPct) {
+            _eD.meleeDmg = Math.round((_eD.meleeDmg || 0) * (1 + _eDmgPct / 100));
+            _eD.rangedDmg = Math.round((_eD.rangedDmg || 0) * (1 + _eDmgPct / 100));
+            _eD.magicDmg = Math.round((_eD.magicDmg || 0) * (1 + _eDmgPct / 100));
+        }
+        if (_eHpPct) _eP.mhp = Math.round(_eP.mhp * (1 + _eHpPct / 100));
+        var _allDrPct = _eDrPct + (_eP._setIron3 ? 20 : 0);                         // 合併：裝備(飾品強化)+套裝(鐵衛20%)+天生/技能(預留)
+        _eD.drPct = Math.min(70, _allDrPct);                                        // 總減傷% 上限 70%（單一來源亦適用，未達上限照全額）
+    } catch (e) { }
     p.hp = Math.min(p.hp, p.mhp);
     p.mp = Math.min(p.mp, p.mmp);
 }
@@ -5610,7 +5642,8 @@ function enemyPhysicalAttack(mob, idx, stunChance = 0) {
 
         totalDmg -= player.d.dr; // 傷害減免（已含增幅防禦）
         totalDmg -= randomDr;    // 隨機減免
-        if (player._setIron3) totalDmg = Math.floor(totalDmg * 0.8);   // 🔮 鐵衛 3/5：受到傷害減少 20%
+        if (player.d.drPct > 0) totalDmg = Math.round(totalDmg * (1 - player.d.drPct / 100));   // 百分比減傷（強化）
+        // 鐵衛 20% 已併入 player.d.drPct（總減傷上限70%），不再分開相乘
 
         if(player.buffs.sk_holy_barrier > 0) totalDmg = Math.floor(totalDmg * 0.7);
         if(player.statuses.freeze > 0) {
@@ -5884,6 +5917,7 @@ function applyMobMagic(mob, sk) {
         // 怪物技能傷害公式: (怪物技能傷害 × 屬抗係數) × 抗魔係數 - 傷害減免
         var _twMag = mob._towerMob ? 0.5 : 1;   // 爬塔王魔法傷害折減（×0.5，避免低魔防被秒；要再調改這個數）
         let dmg = Math.floor(Math.floor((baseMagicDmg + extraMagicDmg) * resFactor * _twMag) * mrFactor) - player.d.dr;
+        if (player.d.drPct > 0) dmg = Math.round(dmg * (1 - player.d.drPct / 100));   // 百分比減傷（強化）
         if(sk.ext_freeze && player.statuses.freeze > 0) dmg += sk.ext_freeze;
 
         if(player.buffs.sk_holy_barrier > 0) dmg = Math.floor(dmg * 0.7);
@@ -5893,7 +5927,7 @@ function applyMobMagic(mob, sk) {
         }
         if (mob._sherine) dmg = Math.floor(dmg * 2);            // 🔮 席琳的世界：技能最終傷害 ×2
         if (mob._grace) dmg = Math.floor(dmg * 2);              // 🔮 席琳的恩賜：再 ×2
-        if (player._setIron3) dmg = Math.floor(dmg * 0.8);      // 🔮 鐵衛 3/5：受到傷害減少 20%
+        // 鐵衛 20% 已併入 player.d.drPct（總減傷上限70%），不再分開相乘
         dmg = Math.max(1, Math.floor(dmg * _takenMult()));
 
         player.hp -= dmg;
@@ -9760,8 +9794,8 @@ window.__admWeapons = function(){
     if(typeof player==='undefined'||!player) return [];
     var plain=function(it){ var d=DB.items[it.id]||{}; var s=''; var a=getAttrAffix(it.attr); if(a)s+=a.n; if(it.bless)s+=(it.bless==='cursed'?'\u8a5b\u5492\u7684':'\u795d\u798f\u7684'); var en=it.en>0?('+'+it.en+' '):''; return en+s+(d.n||it.id); };
     var out=[];
-    if(player.eq&&player.eq.wpn){ var it=player.eq.wpn; out.push({ref:'eq',label:'\u3010\u88dd\u5099\u4e2d\u3011'+plain(it),en:it.en||0,attr:it.attr||'',bless:!!(it.bless&&it.bless!=='cursed')}); }
-    (player.inv||[]).forEach(function(it,i){ var d=DB.items[it.id]; if(d&&d.type==='wpn'&&!d.isArrow) out.push({ref:'inv:'+i,label:plain(it),en:it.en||0,attr:it.attr||'',bless:!!(it.bless&&it.bless!=='cursed')}); });
+    if(player.eq){ for(var _ek in player.eq){ var it=player.eq[_ek]; if(!it) continue; var _ed2=DB.items[it.id]; if(!_ed2||!(_ed2.type==='wpn'||_ed2.type==='arm'||_ed2.type==='acc')) continue; out.push({ref:'eq:'+_ek,label:'\u3010\u88dd\u5099\u4e2d\u3011'+plain(it),en:it.en||0,attr:it.attr||'',bless:!!(it.bless&&it.bless!=='cursed')}); } }
+    (player.inv||[]).forEach(function(it,i){ var d=DB.items[it.id]; if(d&&(d.type==='wpn'||d.type==='arm'||d.type==='acc')&&!d.isArrow) out.push({ref:'inv:'+i,label:plain(it),en:it.en||0,attr:it.attr||'',bless:!!(it.bless&&it.bless!=='cursed')}); });
     return out;
 };
 window.__admAttrOptions = function(){
@@ -9792,10 +9826,11 @@ window.__admApplyWeapon = function(ref,en,attr,bless){
     if(typeof player==='undefined'||!player) return {ok:false,msg:'\u7121\u89d2\u8272'};
     var it=null;
     if(ref==='eq') it=player.eq&&player.eq.wpn;
+    else if(ref&&ref.indexOf('eq:')===0) it=player.eq&&player.eq[ref.slice(3)];
     else if(ref&&ref.indexOf('inv:')===0) it=(player.inv||[])[parseInt(ref.slice(4))];
     if(!it) return {ok:false,msg:'\u627e\u4e0d\u5230\u6b66\u5668'};
     var d=DB.items[it.id];
-    if(!d||d.type!=='wpn') return {ok:false,msg:'\u975e\u6b66\u5668'};
+    if(!d||!(d.type==='wpn'||d.type==='arm'||d.type==='acc')) return {ok:false,msg:'\u975e\u88dd\u5099'};
     it.en=Math.max(0,Math.min(99,parseInt(en)||0));
     it.attr=attr||false;
     it.bless=bless?'blessed':false;
