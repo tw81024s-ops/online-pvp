@@ -598,6 +598,10 @@
             <div class="panel flex-1 overflow-hidden flex flex-col">
                 <div class="panel-header text-center">自動化設定</div>
                 <div class="p-4 text-base flex flex-col gap-4 overflow-y-auto">
+                    <div class="bg-slate-800 p-3 rounded-lg border border-amber-700/70 flex justify-between items-center gap-2">
+                        <span class="text-amber-200 text-sm font-bold">🎨 介面風格<br><span class="text-xs text-slate-400 font-normal">天堂華麗皮膚（壞掉可切回舊版）</span></span>
+                        <button id="skin-toggle-btn" onclick="window.__toggleSkin()" class="px-3 py-2 rounded text-sm font-bold whitespace-nowrap" style="background:#334155;color:#e2e8f0;">舊版</button>
+                    </div>
                     <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
                         <div class="flex flex-col gap-2">
                             <div class="flex justify-between items-center">
@@ -3235,6 +3239,53 @@ window.__applyAccountPoly = function () {
   try { if (typeof calcStats === 'function') calcStats(); } catch (e) { }
   try { if (typeof _polyGachaRender === 'function' && document.getElementById('poly-gacha-modal')) _polyGachaRender('\ud83e\uddec \u5df2\u540c\u6b65\u5e33\u865f\u6700\u65b0\u8b8a\u8eab\u6536\u85cf'); } catch (e) { }
 };
+window.__deskSkinApply = function(){
+  if(document.getElementById('desk-skin')) { document.body.classList.add('ornate-desk'); return; }
+  // SVG 漸層
+  if(!document.getElementById('hub-svgdefs')){
+    var dd=document.createElement('div'); dd.id='hub-svgdefs'; dd.style.cssText='position:absolute;width:0;height:0;overflow:hidden';
+    dd.innerHTML='<svg width="0" height="0"><defs><linearGradient id="gg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbe9a8"/><stop offset="0.5" stop-color="#cda64e"/><stop offset="1" stop-color="#7a5c25"/></linearGradient></defs></svg>';
+    document.body.appendChild(dd);
+  }
+  var st=document.createElement('style'); st.id='desk-skin';
+  st.textContent = `
+    body.ornate-desk{ background-color:#0c0907 !important; }
+    body.ornate-desk #game-screen::before{ content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+      background:radial-gradient(120% 70% at 50% -10%,rgba(90,40,16,.55),transparent 55%),radial-gradient(140% 80% at 50% 115%,rgba(92,34,12,.5),transparent 52%); }
+    body.ornate-desk .panel{ box-shadow:0 0 0 1px rgba(205,166,78,.35),0 12px 24px rgba(0,0,0,.6),inset 0 1px 0 rgba(251,233,168,.28) !important; position:relative; }
+    body.ornate-desk .panel-header{ position:relative; text-shadow:0 0 8px rgba(255,160,60,.4),0 1px 0 #000 !important; }
+    body.ornate-desk .panel-header::before{ content:"\u2756";color:#fbe9a8;margin-right:6px;font-size:.85em;filter:drop-shadow(0 0 5px rgba(255,160,60,.6)); }
+    body.ornate-desk .tab-bar .btn.active, body.ornate-desk .tab-bar .btn:hover{
+      box-shadow:0 0 16px rgba(255,122,42,.55),inset 0 1px 0 rgba(251,233,168,.35) !important;
+      border-color:#ffbf5a !important; color:#ffe9b8 !important; }
+    body.ornate-desk .btn:hover{ box-shadow:0 0 12px rgba(255,150,50,.4) !important; }
+    body.ornate-desk #status-panel{ overflow:visible !important; }
+    body.ornate-desk .desk-cn{ position:absolute;width:26px;height:26px;z-index:6;pointer-events:none;stroke:#fbe9a8;fill:none;stroke-width:1.4;filter:drop-shadow(0 1px 1px #000); }
+    body.ornate-desk .desk-cn.tl{top:-3px;left:-3px;}
+    body.ornate-desk .desk-cn.tr{top:-3px;right:-3px;transform:scaleX(-1);}
+    body.ornate-desk .desk-cn.bl{bottom:-3px;left:-3px;transform:scaleY(-1);}
+    body.ornate-desk .desk-cn.br{bottom:-3px;right:-3px;transform:scale(-1,-1);}
+    body.ornate-desk .desk-crest{ position:absolute;top:-20px;left:50%;transform:translateX(-50%);z-index:7;display:flex;flex-direction:column;align-items:center;pointer-events:none; }
+    body.ornate-desk .desk-crest .gem{ width:10px;height:10px;border-radius:50%;margin-top:-4px;background:radial-gradient(circle at 35% 30%,#ff6a6a,#c5263a 55%,#5e0f1a);box-shadow:0 0 8px rgba(255,60,80,.7),0 0 0 2px #cda64e; }
+  `;
+  document.head.appendChild(st);
+  document.body.classList.add('ornate-desk');
+  // 在角色面板加龍頭＋四角
+  var sp=document.getElementById('status-panel');
+  if(sp && !sp.querySelector('.desk-crest')){
+    sp.insertAdjacentHTML('beforeend',
+      '<div class="desk-crest"><svg width="92" height="30" viewBox="0 0 120 40"><g fill="none" stroke="url(#gg)" stroke-width="1.6" stroke-linecap="round"><path d="M60 6c-6 0-9 4-9 9 0 6 5 9 9 9s9-3 9-9c0-5-3-9-9-9z"/><path d="M51 11c-7-3-14-2-20 2M69 11c7-3 14-2 20 2"/><path d="M44 9c-5-4-12-4-18-1M76 9c5-4 12-4 18-1"/><circle cx="56" cy="13" r="1.1" fill="url(#gg)"/><circle cx="64" cy="13" r="1.1" fill="url(#gg)"/><path d="M31 13c-6 1-11 5-13 11M89 13c6 1 11 5 13 11"/></g></svg><span class="gem"></span></div>'
+      +'<svg class="desk-cn tl" viewBox="0 0 28 28"><path d="M2 26C2 13 6 6 13 4M2 15C2 8 6 4 11 3"/></svg>'
+      +'<svg class="desk-cn tr" viewBox="0 0 28 28"><path d="M2 26C2 13 6 6 13 4M2 15C2 8 6 4 11 3"/></svg>'
+      +'<svg class="desk-cn bl" viewBox="0 0 28 28"><path d="M2 26C2 13 6 6 13 4M2 15C2 8 6 4 11 3"/></svg>'
+      +'<svg class="desk-cn br" viewBox="0 0 28 28"><path d="M2 26C2 13 6 6 13 4M2 15C2 8 6 4 11 3"/></svg>');
+  }
+};
+window.__skinOn = function(){ try{ return localStorage.getItem('uiSkin')==='new'; }catch(e){ return false; } };
+window.__skinSyncBtn = function(){ var b=document.getElementById('skin-toggle-btn'); if(!b) return; var on=window.__skinOn(); b.textContent=on?'\u73fe\u5728\uff1a\u65b0\u7248 \u2726':'\u73fe\u5728\uff1a\u820a\u7248'; b.style.background=on?'linear-gradient(180deg,#5a2c10,#180d06)':'#334155'; b.style.color=on?'#fbe9a8':'#e2e8f0'; b.style.boxShadow=on?'0 0 10px rgba(255,122,42,.45)':'none'; };
+window.__toggleSkin = function(){ try{ var on=window.__skinOn(); localStorage.setItem('uiSkin', on?'old':'new'); }catch(e){} location.reload(); };
+try{ if(window.__skinOn() || /[?&]ornate=1/.test(location.search)){ window.addEventListener('load', function(){ setTimeout(function(){ try{ window.__deskSkinApply(); }catch(e){} }, 400); }); } }catch(e){}
+window.addEventListener('load', function(){ setTimeout(function(){ try{ window.__skinSyncBtn(); }catch(e){} }, 200); });
 window.__dollSyncBtn = function () {
   try { if (typeof __applyAccountDolls === 'function') __applyAccountDolls(); } catch (e) { }
   try { if (typeof dollTab === 'function') dollTab('codex'); } catch (e) { }
@@ -9649,6 +9700,7 @@ setTimeout(setupPanelCollapse, 1500);
 /* ===================== 手機 HUB 主畫面 ===================== */
 function _hubSkinApply(){
   var hub=document.getElementById('mhub'); if(!hub) return;
+  if(localStorage.getItem('uiSkin')!=='new') return;
   if(!document.getElementById('hub-skin')){
     var st=document.createElement('style'); st.id='hub-skin';
     st.textContent = `
