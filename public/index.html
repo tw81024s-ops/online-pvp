@@ -2131,12 +2131,12 @@ const DB = {
 	
 	skills: {
         // ===== 龍騎士專屬技能（batch 1：主動攻擊，需鎖鏈劍）=====
-        "sk_dragon_special": { n: "特殊攻擊:龍鬥士", type: "atk", tier: 1, reqD: 1, mp: 10, dmgType: "magic", reqWpn: "chain", dmgMul: 1.5, c: "text-yellow-300", img: "assets/icons/skills/特殊攻擊龍鬥士.png" },
+        "sk_dragon_special": { n: "特殊攻擊:龍鬥士", type: "atk", tier: 1, reqD: 1, mp: 10, dmgType: "physical", reqWpn: "chain", dmgMul: 1.5, c: "text-yellow-300", img: "assets/icons/skills/特殊攻擊龍鬥士.png" },
         "sk_dragon_slayer": { n: "屠宰者", type: "atk", tier: 2, reqD: 15, mp: 8, dmgType: "physical", reqWpn: "chain", dmgMul: 2.2, c: "text-white", img: "assets/icons/skills/屠宰者.png" },
-        "sk_dragon_heartpierce": { n: "刺心者", type: "atk", tier: 4, reqD: 40, mp: 6, dmgType: "magic", reqWpn: "chain", ranged: true, dmgMul: 2.8, c: "text-sky-300", img: "assets/icons/skills/刺心者.png" },
+        "sk_dragon_heartpierce": { n: "刺心者", type: "atk", tier: 4, reqD: 40, mp: 6, dmgType: "physical", reqWpn: "chain", dmgMul: 2.8, c: "text-sky-300", img: "assets/icons/skills/刺心者.png" },
         "sk_dragon_slayer_ex": { n: "屠宰者(強化)", type: "atk", tier: 6, reqD: 60, reqReborn: 8, mp: 14, dmgType: "physical", reqWpn: "chain", dmgMul: 3.8, c: "text-purple-400", img: "assets/icons/skills/屠宰者強化.png" },
         "sk_dragon_guardbreak": { n: "護衛毀滅(強化)", type: "atk", tier: 7, reqD: 65, reqReborn: 8, mp: 16, dmgType: "physical", reqWpn: "chain", dmgMul: 4.2, c: "text-purple-400", img: "assets/icons/skills/護衛毀滅強化.png" },
-        "sk_dragon_armorimpact": { n: "龍之鎧甲(衝擊)", type: "atk", tier: 8, reqD: 70, reqReborn: 8, mp: 18, dmgType: "magic", reqWpn: "chain", dmgMul: 4.8, c: "text-purple-400", img: "assets/icons/skills/龍之鎧甲衝擊.png" },
+        "sk_dragon_armorimpact": { n: "龍之鎧甲(衝擊)", type: "atk", tier: 8, reqD: 70, reqReborn: 8, mp: 18, dmgType: "physical", reqWpn: "chain", dmgMul: 4.8, c: "text-purple-400", img: "assets/icons/skills/龍之鎧甲衝擊.png" },
         // ===== 三職業新技能（騎士/法師/妖精） =====
         // ===== 自訂新增技能（玩家設計）=====
         "sk_mg_master": { n: "魔法大師", type: "buff", tier: 9, reqM: 50, mp: 110, dur: 600, d: { mpR: 30 }, msg: "你領悟魔法大師奧義，回魔大幅提升。" , img: "assets/icons/skills/魔法大師.png" },
@@ -6069,7 +6069,7 @@ function applyMobMagic(mob, sk) {
         // 屬性抗性與魔防一律生效：有屬性者受該屬性抗性折減、所有魔法傷害受抗魔(MR)折減（alwaysHit 不再無視防禦）
         // 怪物技能傷害公式: (怪物技能傷害 × 屬抗係數) × 抗魔係數 - 傷害減免
         var _twMag = mob._towerMob ? 0.5 : 1;   // 爬塔王魔法傷害折減（×0.5，避免低魔防被秒；要再調改這個數）
-        let dmg = Math.floor(Math.floor((baseMagicDmg + extraMagicDmg) * resFactor * _twMag) * mrFactor) - player.d.dr;
+        let dmg = Math.floor(Math.floor((baseMagicDmg + extraMagicDmg) * resFactor * _twMag * 0.5) * mrFactor) - player.d.dr;   // 全怪物魔法攻擊×0.5（要調改 0.5）
         if (player.d.drPct > 0) dmg = Math.round(dmg * (1 - player.d.drPct / 100));   // 百分比減傷（強化）
         if(sk.ext_freeze && player.statuses.freeze > 0) dmg += sk.ext_freeze;
 
@@ -6337,10 +6337,11 @@ function killMob(idx) {
         var _fkChains = ['dragon_chain_alice','dragon_chain_chronos'];
         if (Math.random() < 0.002 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1)) gainItem(_fkChains[Math.floor(Math.random()*_fkChains.length)], 1, false);
     }
-    // ===== 夢幻之島（3轉）：萬能藥水掉落 0.2%（隨機一種屬性萬能藥）=====
+    // ===== 夢幻之島（3轉）：萬能藥水掉落（6種各自獨立 2%）=====
     if (mapState.current === 'dream_island') {
         var _diPan = ['panacea_str','panacea_dex','panacea_con','panacea_int','panacea_wis','panacea_cha'];
-        if (Math.random() < 0.002 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1)) gainItem(_diPan[Math.floor(Math.random()*_diPan.length)], 1, false);
+        var _diRate = 0.02 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1);
+        _diPan.forEach(function(pid){ if (Math.random() < _diRate) gainItem(pid, 1, false); });
     }
     // ===== 8轉終焉之地：龍騎高階技能書掉落（0.3%，潘朵拉抽不到）=====
     if (mapState.current === 'rebirth_abyss') {
