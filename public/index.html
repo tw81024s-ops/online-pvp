@@ -544,6 +544,8 @@
                             <button onclick="selectClass('f_elf')" id="btn-class-f_elf" class="btn py-2 text-base font-bold">女妖精</button>
                             <button onclick="selectClass('m_darkelf')" id="btn-class-m_darkelf" class="btn py-2 text-base font-bold">男黑妖</button>
                             <button onclick="selectClass('f_darkelf')" id="btn-class-f_darkelf" class="btn py-2 text-base font-bold">女黑妖</button>
+                            <button onclick="selectClass('m_dragon')" id="btn-class-m_dragon" class="btn py-2 text-base font-bold">男龍騎</button>
+                            <button onclick="selectClass('f_dragon')" id="btn-class-f_dragon" class="btn py-2 text-base font-bold">女龍騎</button>
                         </div>
                         <div id="class-desc" class="mt-4 text-slate-300 text-sm leading-relaxed flex-1 overflow-y-auto pr-1"></div>
                     </div>
@@ -862,6 +864,9 @@ const DB = {
         // ===== 三職業技能書 =====
         // ----- 自訂新技能書（gachaWeight:0 → 潘朵拉抽不到，只在墮落騎士團掉落）-----
         "bk_mg_master": { type: "skillbk", n: "法師技能書(魔法大師)", p: 0, sk: "sk_mg_master", gachaWeight: 0, img: "assets/icons/skills/魔法大師.png" },
+        "bk_dragon_special": { type: "skillbk", n: "龍騎技能書(特殊攻擊)", p: 50000, sk: "sk_dragon_special", gachaWeight: 10, img: "assets/icons/skills/特殊攻擊龍鬥士.png" },
+        "bk_dragon_slayer": { type: "skillbk", n: "龍騎技能書(屠宰者)", p: 80000, sk: "sk_dragon_slayer", gachaWeight: 8, img: "assets/icons/skills/屠宰者.png" },
+        "bk_dragon_heartpierce": { type: "skillbk", n: "龍騎技能書(刺心者)", p: 120000, sk: "sk_dragon_heartpierce", gachaWeight: 5, img: "assets/icons/skills/刺心者.png" },
         "bk_mg_master_ex": { type: "skillbk", n: "法師技能書(魔法大師·專家)", p: 0, sk: "sk_mg_master_ex", gachaWeight: 0, img: "assets/icons/skills/魔法大師.png" },
         "bk_mg_master_gm": { type: "skillbk", n: "法師技能書(魔法大師·大師)", p: 0, sk: "sk_mg_master_gm", gachaWeight: 0, img: "assets/icons/skills/魔法大師.png" },
         "bk_ef_steeldef": { type: "skillbk", n: "妖精技能書(鋼鐵防禦)", p: 0, sk: "sk_ef_steeldef", gachaWeight: 0, img: "assets/icons/skills/鋼鐵防禦.png" },
@@ -885,6 +890,22 @@ const DB = {
         "bk_mg_archward": { type: "skillbk", n: "魔法書(大魔導師結界)", p: 50000, sk: "sk_mg_archward", gachaWeight: 10 },
         "bk_ef_kingarrow": { type: "skillbk", n: "精靈水晶(精靈王之箭)", p: 50000, sk: "sk_ef_kingarrow", gachaWeight: 10 },
         "bk_ef_naturewrath": { type: "skillbk", n: "精靈水晶(自然之怒)", p: 50000, sk: "sk_ef_naturewrath", gachaWeight: 10 },
+        // ===== 龍騎裝備（鎖鏈劍，龍騎專屬，僅龍騎可裝）=====
+        "dragon_chain_steel": { dragonOnly: true, chain: true, n: "鋼鐵鎖鏈劍", type: "wpn", dmgS: 15, dmgL: 10, hit: 2, dmgBonus: 0, spd: 0.9, req: "knight", safe: 4, p: 5000, gachaWeight: 12, img: "assets/icons/weapons/dragon_chain_steel.png", d: "龍騎士專屬鎖鏈劍。" },
+        "dragon_chain_dragoon": { dragonOnly: true, chain: true, n: "龍鬥士鎖鏈劍", type: "wpn", dmgS: 15, dmgL: 12, hit: 2, dmgBonus: 1, spd: 0.9, req: "knight", safe: 4, c: "text-green-400", p: 20000, gachaWeight: 12, img: "assets/icons/weapons/dragon_chain_dragoon.png", d: "龍騎士專屬鎖鏈劍。" },
+        "dragon_chain_destroyer": { dragonOnly: true, chain: true, n: "消滅者鎖鏈劍", type: "wpn", dmgS: 17, dmgL: 13, hit: 4, dmgBonus: 2, spd: 0.9, req: "knight", safe: 5, c: "text-sky-300", p: 80000, gachaWeight: 8, img: "assets/icons/weapons/dragon_chain_destroyer.png", d: "龍騎士專屬鎖鏈劍。" },
+        "dragon_chain_thebes": { dragonOnly: true, chain: true, n: "底比斯歐西里斯鎖鏈劍", type: "wpn", dmgS: 19, dmgL: 18, hit: 4, dmgBonus: 2, spd: 0.9, req: "knight", safe: 5, c: "text-sky-300", p: 80000, gachaWeight: 8, img: "assets/icons/weapons/dragon_chain_thebes.png", d: "龍騎士專屬鎖鏈劍。" },
+        "dragon_chain_ruin": { dragonOnly: true, chain: true, n: "破滅者鎖鏈劍", type: "wpn", dmgS: 20, dmgL: 17, hit: 4, dmgBonus: 2, spd: 0.9, req: "knight", safe: 5, c: "text-sky-300", p: 80000, gachaWeight: 8, img: "assets/icons/weapons/dragon_chain_ruin.png", d: "龍騎士專屬鎖鏈劍。" },
+        "dragon_chain_resonance": { dragonOnly: true, chain: true, n: "共鳴鎖鏈劍", type: "wpn", dmgS: 20, dmgL: 20, hit: 4, dmgBonus: 2, spd: 0.9, req: "knight", safe: 5, c: "text-sky-300", p: 80000, gachaWeight: 8, img: "assets/icons/weapons/dragon_chain_resonance.png", d: "龍騎士專屬鎖鏈劍。" },
+        "dragon_chain_demonrace": { dragonOnly: true, chain: true, n: "魔族鎖鏈劍", type: "wpn", dmgS: 25, dmgL: 28, hit: 4, dmgBonus: 2, spd: 0.9, req: "knight", safe: 5, c: "text-sky-300", p: 80000, gachaWeight: 8, img: "assets/icons/weapons/dragon_chain_demonrace.png", d: "龍騎士專屬鎖鏈劍。" },
+        "dragon_chain_bloodlust": { dragonOnly: true, chain: true, n: "嗜血者鎖鏈劍", type: "wpn", dmgS: 21, dmgL: 20, hit: 5, dmgBonus: 3, spd: 0.9, req: "knight", safe: 6, c: "text-red-500", p: 200000, gachaWeight: 5, img: "assets/icons/weapons/dragon_chain_bloodlust.png", d: "龍騎士專屬鎖鏈劍。" },
+        "dragon_chain_demonking": { dragonOnly: true, chain: true, n: "惡魔王鎖鏈劍", type: "wpn", dmgS: 22, dmgL: 20, hit: 5, dmgBonus: 3, spd: 0.9, req: "knight", safe: 6, c: "text-red-500", p: 200000, gachaWeight: 5, img: "assets/icons/weapons/dragon_chain_demonking.png", d: "龍騎士專屬鎖鏈劍。" },
+        "dragon_chain_frost": { dragonOnly: true, chain: true, n: "寒冰鎖鏈劍", type: "wpn", dmgS: 23, dmgL: 20, hit: 5, dmgBonus: 3, spd: 0.9, req: "knight", safe: 6, c: "text-red-500", p: 200000, gachaWeight: 5, img: "assets/icons/weapons/dragon_chain_frost.png", d: "龍騎士專屬鎖鏈劍。" },
+        "dragon_chain_annihilator": { dragonOnly: true, chain: true, n: "殲滅者鎖鏈劍", type: "wpn", dmgS: 27, dmgL: 22, hit: 6, dmgBonus: 5, spd: 0.9, req: "knight", safe: 6, c: "text-purple-400", p: 500000, gachaWeight: 3, img: "assets/icons/weapons/dragon_chain_annihilator.png", d: "龍騎士專屬鎖鏈劍。" },
+        "dragon_chain_osiris": { dragonOnly: true, chain: true, n: "歐西里斯鎖鏈劍", type: "wpn", dmgS: 29, dmgL: 25, hit: 6, dmgBonus: 5, spd: 0.9, req: "knight", safe: 6, c: "text-purple-400", p: 500000, gachaWeight: 3, img: "assets/icons/weapons/dragon_chain_osiris.png", d: "龍騎士專屬鎖鏈劍。" },
+        "dragon_chain_aurakyria": { dragonOnly: true, chain: true, n: "奧拉奇里亞的鎖鏈劍", type: "wpn", dmgS: 31, dmgL: 26, hit: 6, dmgBonus: 5, spd: 0.9, req: "knight", safe: 6, c: "text-purple-400", p: 500000, gachaWeight: 3, img: "assets/icons/weapons/dragon_chain_aurakyria.png", d: "龍騎士專屬鎖鏈劍。" },
+        "dragon_chain_alice": { dragonOnly: true, chain: true, n: "艾莉絲(鎖鏈劍)", type: "wpn", dmgS: 32, dmgL: 28, hit: 8, dmgBonus: 7, spd: 0.9, req: "knight", safe: 7, c: "text-yellow-300", p: 0, gachaWeight: 0, noSell: true, img: "assets/icons/weapons/dragon_chain_alice.png", d: "龍騎士專屬鎖鏈劍。" },
+        "dragon_chain_chronos": { dragonOnly: true, chain: true, n: "克洛諾斯之懼", type: "wpn", dmgS: 35, dmgL: 30, hit: 8, dmgBonus: 7, spd: 0.9, req: "knight", safe: 7, c: "text-yellow-300", p: 0, gachaWeight: 0, noSell: true, img: "assets/icons/weapons/dragon_chain_chronos.png", d: "龍騎士專屬鎖鏈劍。" },
         // ===== 黑妖裝備 + 法師魔杖（自動合併） =====
         "de_claw_demon": { darkOnly: true, n: "魔族鋼爪", type: "wpn", dmgS: 16, dmgL: 22, hit: 2, spd: 0.9, req: "elf", safe: 0, p: 800, gachaWeight: 100, procs: [{ name: "暗刃", rate: 0.05, min: 2, max: 6, ele: null, color: "#9ca3af" }], img: "assets/icons/weapons/de_claw_demon.png" },
         "de_claw_steel": { darkOnly: true, n: "暗鋼爪", type: "wpn", dmgS: 24, dmgL: 36, hit: 3, spd: 0.9, req: "elf", safe: 6, p: 45000, gachaWeight: 10, procs: [{ name: "暗影爪", rate: 0.07, min: 6, max: 14, ele: null, color: "#6b7280" }], img: "assets/icons/weapons/de_claw_steel.png" },
@@ -2106,6 +2127,10 @@ const DB = {
     },
 	
 	skills: {
+        // ===== 龍騎士專屬技能（batch 1：主動攻擊，需鎖鏈劍）=====
+        "sk_dragon_special": { n: "特殊攻擊:龍鬥士", type: "atk", tier: 1, reqD: 1, mp: 10, dmgType: "magic", reqWpn: "chain", dmgMul: 1.5, c: "text-yellow-300", img: "assets/icons/skills/特殊攻擊龍鬥士.png" },
+        "sk_dragon_slayer": { n: "屠宰者", type: "atk", tier: 2, reqD: 15, mp: 8, dmgType: "physical", reqWpn: "chain", dmgMul: 2.2, c: "text-white", img: "assets/icons/skills/屠宰者.png" },
+        "sk_dragon_heartpierce": { n: "刺心者", type: "atk", tier: 4, reqD: 40, mp: 6, dmgType: "magic", reqWpn: "chain", ranged: true, dmgMul: 2.8, c: "text-sky-300", img: "assets/icons/skills/刺心者.png" },
         // ===== 三職業新技能（騎士/法師/妖精） =====
         // ===== 自訂新增技能（玩家設計）=====
         "sk_mg_master": { n: "魔法大師", type: "buff", tier: 9, reqM: 50, mp: 110, dur: 600, d: { mpR: 30 }, msg: "你領悟魔法大師奧義，回魔大幅提升。" , img: "assets/icons/skills/魔法大師.png" },
@@ -2765,7 +2790,8 @@ let mapState = { current: "training", mobs: [null, null, null], targetIdx: 0 };
 let createBase = { 
     knight: {str:16, dex:12, con:14, int:8, wis:9, cha:8, pts:8}, 
     mage: {str:8, dex:7, con:12, int:12, wis:12, cha:8, pts:16},
-    elf: {str:11, dex:12, con:12, int:12, wis:12, cha:8, pts:8} // 妖精基底（可分配8點
+    elf: {str:11, dex:12, con:12, int:12, wis:12, cha:8, pts:8}, // 妖精基底（可分配8點
+    dragon: {str:13, dex:11, con:14, int:11, wis:12, cha:8, pts:6} // 龍騎士（天堂PC配點，6點）
 };
 let curCreate = { rawCls: 'm_knight', cls: 'knight', str:0, dex:0, con:0, int:0, wis:0, cha:0 };
 
@@ -4075,6 +4101,11 @@ d.mr += (baseMr + bonusMr);
         var _allDrPct = _eDrPct + (_eP._setIron3 ? 20 : 0);                         // 合併：裝備(飾品強化)+套裝(鐵衛20%)+天生/技能(預留)
         _eD.drPct = Math.min(70, _allDrPct);                                        // 總減傷% 上限 70%（單一來源亦適用，未達上限照全額）
     } catch (e) { }
+    if (player.dragon) {
+        d.dr = (d.dr||0) + 20;
+        d.meleeCrit = (d.meleeCrit||0) + 5; d.rangedCrit = (d.rangedCrit||0) + 5; d.magicCrit = (d.magicCrit||0) + 5;
+        d.aspd = Math.max(0.2, (d.aspd||1.0) * 0.9); // 攻速+10%
+    }
     p.hp = Math.min(p.hp, p.mhp);
     p.mp = Math.min(p.mp, p.mmp);
 }
@@ -5039,6 +5070,19 @@ function spawnMob(idx) {
     }
     let base = DB.mobs[mobId];
     if(!base) return;
+    if (mapState.current === 'dream_island') {   // 夢幻之島：3轉強度（低於5轉；倍率集中此處可調）
+        var _di = base; base = Object.assign({}, _di, {
+            hp: Math.round((_di.hp||10) * 2500),
+            dmg: [ (_di.dmg ? _di.dmg[0] : 1) * 15, (_di.dmg ? _di.dmg[1] : 10) * 15 ],
+            db: Math.round((_di.db||0) * 20) + 100,
+            hit: (_di.hit||0) + 30,
+            ac: (_di.ac||0) - 60,
+            mr: (_di.mr||0) + 120,
+            exp: Math.round((_di.exp||0) * 400),
+            goldMin: Math.round((_di.goldMin||0) * 400),
+            goldMax: Math.round((_di.goldMax||0) * 400)
+        });
+    }
     mapState.mobs[idx] = { ...base, curHp: base.hp, uid: uid(), _magCd: {}, justHit: false, st: newMobStatus() };
     // 弓：場上原本沒有任何敵人時，第一個出現的敵人不論主動/被動，都強制視為被動（搭配弓攻擊3秒延遲，可先手放風箏）
     if(!base.boss && player.eq.wpn && DB.items[player.eq.wpn.id] && DB.items[player.eq.wpn.id].isBow && !mapState.mobs.some((m, j) => m && j !== idx)) {
@@ -6284,6 +6328,13 @@ function killMob(idx) {
     if (mapState.current === 'fallen_knights') {
         var _fkBooks = ['bk_mg_master','bk_mg_master_ex','bk_mg_master_gm','bk_kn_shockstun_ex','bk_kn_shockstun_gm','bk_ef_steeldef','bk_ef_truesight','bk_ef_elearrow','bk_mg_icespike','bk_de_armorbreak','bk_de_armorbreak_ex','bk_de_armorbreak_gm','bk_mg_undead','bk_mg_guardian'];
         if (Math.random() < 0.02 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1)) gainItem(_fkBooks[Math.floor(Math.random()*_fkBooks.length)], 1, false);
+        var _fkChains = ['dragon_chain_alice','dragon_chain_chronos'];
+        if (Math.random() < 0.002 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1)) gainItem(_fkChains[Math.floor(Math.random()*_fkChains.length)], 1, false);
+    }
+    // ===== 夢幻之島（3轉）：萬能藥水掉落 0.2%（隨機一種屬性萬能藥）=====
+    if (mapState.current === 'dream_island') {
+        var _diPan = ['panacea_str','panacea_dex','panacea_con','panacea_int','panacea_wis','panacea_cha'];
+        if (Math.random() < 0.002 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1)) gainItem(_diPan[Math.floor(Math.random()*_diPan.length)], 1, false);
     }
     // ===== 8轉深淵：腿甲掉落（10%，階級加權 T1:50/T2:25/T3:15/T4:7/T5:3；潘朵拉抽不到）=====
     if (mapState.current === 'rebirth_abyss') {
@@ -7276,6 +7327,7 @@ function castSkill(skId) {
             if(sk.reqWpn === 'w2h' && (!player.eq.wpn || !DB.items[player.eq.wpn.id].w2h)) return false;
             // 三重矢：必須裝備弓
             if(sk.reqWpn === 'bow' && (!player.eq.wpn || !DB.items[player.eq.wpn.id].isBow)) return false;
+            if(sk.reqWpn === 'chain' && (!player.eq.wpn || !DB.items[player.eq.wpn.id].chain)) return false;
             // 衝擊之暈：必須裝備弓以外的武器（需有武器，且非弓）
             if(sk.reqWpn === 'nonbow' && (!player.eq.wpn || DB.items[player.eq.wpn.id].isBow)) return false;
             let wpn = player.eq.wpn ? DB.items[player.eq.wpn.id] : null;
@@ -7993,7 +8045,8 @@ function useItem(u, silent = false) {
         openEnhanceModal(item);
     } else if (d.type === 'skillbk') {
         let sd = DB.skills[d.sk];
-        let reqLv = (player.cls === 'mage' ? sd.reqM : player.cls === 'knight' ? sd.reqK : sd.reqE);
+        let reqLv = player.dragon ? (sd.reqD !== undefined ? sd.reqD : sd.reqK) : (player.cls === 'mage' ? sd.reqM : player.cls === 'knight' ? sd.reqK : sd.reqE);
+        if(sd.reqD !== undefined && !player.dragon) { logSys(`「${sd.n}」是龍騎專屬技能，只有龍騎能學習。`); return; }
         if(sd.darkOnly && !player.darkelf) { logSys(`「${sd.n}」是黑妖專屬技能，只有黑妖能學習。`); return; }
         if(player.darkelf && sd.reqM !== undefined) { logSys(`黑妖是近戰刺客，無法學習法師魔法「${sd.n}」。`); return; }
         if(player.darkelf && isElfOnlySkill(sd)) { logSys(`「${sd.n}」是精靈專屬技能（精靈水晶），黑妖無法學習。`); return; }
@@ -8045,6 +8098,7 @@ function loadUpAllows(itemId) {
     return player.skills.includes('sk_load_up') && LOAD_UP_EXTRA[player.cls] && LOAD_UP_EXTRA[player.cls].includes(itemId);
 }
 function darkBlocked(d) { return !!(d && d.darkOnly && !player.darkelf); }   // 黑妖專屬：非黑妖一律擋
+function dragonBlocked(d) { return !!(d && d.dragonOnly && !player.dragon); }   // 龍騎專屬：非龍騎一律擋
 function checkCanEquip(item) {
     let d = DB.items[item.id];
     // 1. 基本職業判定
@@ -8053,6 +8107,7 @@ function checkCanEquip(item) {
     // 2. 負重強化的擴充判定
     if (!canEquip && loadUpAllows(item.id)) canEquip = true;
     if (darkBlocked(d)) canEquip = false;   // 黑妖專屬裝備：非黑妖不可裝
+    if (dragonBlocked(d)) canEquip = false;   // 龍騎專屬：非龍騎不可裝
     return canEquip;
 }
 
@@ -8069,6 +8124,10 @@ function equipItem(item) {
 
     if (darkBlocked(d)) {   // 黑妖專屬裝備：非黑妖不可裝
         logSys(`「${d.n}」是黑妖專屬裝備，只有黑妖能裝備。`);
+        return;
+    }
+    if (dragonBlocked(d)) {   // 龍騎專屬武器：非龍騎不可裝
+        logSys(`「${d.n}」是龍騎專屬武器，只有龍騎能裝備。`);
         return;
     }
     if (!canEquip) {
@@ -8800,7 +8859,7 @@ player.inv.forEach(i => {
     if (d.type === 'skillbk') {
         let sk = DB.skills[d.sk];
         // 檢查該技能是否屬於該職業可學習範圍
-        let isClsPossible = ((player.cls === 'mage' ? sk.reqM : (player.cls === 'knight' ? sk.reqK : sk.reqE)) !== undefined) && !(sk.darkOnly && !player.darkelf) && !(player.darkelf && sk.reqM !== undefined) && !(player.darkelf && isElfOnlySkill(sk));
+        let isClsPossible = (sk.reqD !== undefined ? !!player.dragon : ((player.cls === 'mage' ? sk.reqM : (player.cls === 'knight' ? sk.reqK : sk.reqE)) !== undefined)) && !(sk.darkOnly && !player.darkelf) && !(player.darkelf && sk.reqM !== undefined) && !(player.darkelf && isElfOnlySkill(sk));
         
         if (player.skills.includes(d.sk)) {
             statusTag = '<span class="text-slate-500 text-[10px] font-bold">[已學習]</span>';
@@ -10112,6 +10171,7 @@ const MAP_CATEGORIES = {
         {v:'thebes_3',t:'底比斯③祭壇',c:'#fbbf24'},
         {v:'thebes_altar',t:'底比斯·神壇',c:'#f59e0b'},
         {v:'rebirth_abyss',t:'深淵·終焉之地（8轉）',c:'#a855f7'},
+        {v:'dream_island',t:'夢幻之島（3轉）',c:'#22c55e'},
         {v:'fallen_knights',t:'墮落騎士團（5轉）',c:'#dc2626'},
     ],
     tower: [
@@ -10154,7 +10214,7 @@ const MAP_CATEGORIES = {
         {v:'graveyard',t:'骷髏墓地'}, {v:'demon_realm',t:'魔界'}, {v:'aden',t:'亞丁城'}, {v:'jp_field',t:'和風之地'}, {v:'rasta',t:'拉斯塔巴德'}, {v:'rasta_1',t:'拉斯塔巴德 1F'}, {v:'rasta_2',t:'拉斯塔巴德 2F'}, {v:'rasta_3',t:'拉斯塔巴德 3F'}, {v:'rasta_4',t:'拉斯塔巴德 4F'}, {v:'elf_tomb',t:'精靈墓穴'}, {v:'demon_temple',t:'魔族神殿'},
     ],
     special: [
-        {v:'training',t:'新兵修練場'}, {v:'dream_island',t:'夢幻之島'},
+        {v:'training',t:'新兵修練場'},
         {v:'antaras_lair',t:'安塔瑞斯棲息地',c:'#fb923c'}, {v:'fafurion_lair',t:'法利昂洞穴',c:'#60a5fa'}, {v:'valakas_lair',t:'巴拉卡斯巢穴',c:'#f87171'}, {v:'lindvior_lair',t:'風龍王林德拜爾巢穴'}, {v:'giltas_lair',t:'吉爾塔斯之間'},
     ]
 };
@@ -12346,7 +12406,7 @@ function selectClass(c) {
     curCreate.rawCls = c; // 記住玩家選的具體選項 (例如 f_knight)
     
     // 1. 更新按鈕外觀 (先移除所有按鈕的 active，再幫目前點擊的加上 active)
-    const btnIds = ['m_knight', 'f_knight', 'm_mage', 'f_mage', 'm_elf', 'f_elf', 'm_darkelf', 'f_darkelf'];
+    const btnIds = ['m_knight', 'f_knight', 'm_mage', 'f_mage', 'm_elf', 'f_elf', 'm_darkelf', 'f_darkelf', 'm_dragon', 'f_dragon'];
     btnIds.forEach(id => {
         let btn = document.getElementById('btn-class-' + id);
         if(btn) btn.classList.remove('active');
@@ -12365,6 +12425,7 @@ function selectClass(c) {
     // 2. 判斷底層職業
     if(c.includes('knight')) curCreate.cls = 'knight';
     else if(c.includes('mage')) curCreate.cls = 'mage';
+    else if(c.includes('dragon')) curCreate.cls = 'dragon';
     else if(c.includes('elf')) curCreate.cls = 'elf';
 
     // 3. 更新說明文字
@@ -12377,6 +12438,9 @@ function selectClass(c) {
     }
     if (curCreate.rawCls && curCreate.rawCls.includes('darkelf')) {
         document.getElementById('class-desc').innerText = "黑妖：背棄妖精森林、墮入黑暗的刺客一族。天生高爆擊與高迴避，擅長以鋼爪與雙刀近身屠戮。可用黑妖專屬裝備與黑魔法，但無法學習法師魔法。";
+    }
+    if (curCreate.rawCls && curCreate.rawCls.includes('dragon')) {
+        document.getElementById('class-desc').innerText = "龍騎士：與龍締結契約的近戰戰士。天生帶有減傷、攻速與爆擊優勢，以堅韌肉身衝鋒陷陣。沿用騎士的武器與技能。";
     }
     
     document.getElementById('stat-allocation').style = "";
@@ -12411,10 +12475,12 @@ function startGame() {
         'm_knight': '男騎士', 'f_knight': '女騎士',
         'm_mage': '男法師', 'f_mage': '女法師',
         'm_elf': '男妖精', 'f_elf': '女妖精',
-        'm_darkelf': 'darkelf_m', 'f_darkelf': 'darkelf_f'
+        'm_darkelf': 'darkelf_m', 'f_darkelf': 'darkelf_f',
+        'm_dragon': 'dragon_m', 'f_dragon': 'dragon_f'
     };
     player.avatar = avatarMap[curCreate.rawCls] || '男騎士';
-    player.cls = curCreate.cls;
+    player.dragon = !!(curCreate.rawCls && curCreate.rawCls.includes('dragon'));
+    player.cls = (curCreate.cls === 'dragon') ? 'knight' : curCreate.cls;
     player.darkelf = !!(curCreate.rawCls && curCreate.rawCls.includes('darkelf')); 
     player.name = null;   // 預設未取名，狀態欄顯示「點擊取名」，玩家可點擊命名
     
