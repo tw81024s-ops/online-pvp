@@ -510,11 +510,15 @@
                     try { const r = await api('/api/save?slot=' + sN, 'PUT', { data: JSON.parse(localStr) }); if (r && r.updatedAt) _setSts(sN, r.updatedAt); } catch (e) { }
                 }
             }
-            // 目前欄位被雲端更新/補上 → 重載以反映最新；目前欄位空但別處有角色 → 自動切過去
-            if (localStorage.getItem(curKey)) {
-                if (curChanged) { if (typeof loadGame === 'function') loadGame(); try { toast('☁️ 已拉取雲端最新存檔', '#1e3a5f'); } catch (e) { } }
-            } else {
-                const other = [1, 2, 3, 4].find(x => localStorage.getItem('lineage_idle_save_' + x));
+            // 重新取「現在實際所在欄位」，避免用同步開始時的舊 cur 蓋掉玩家剛手動載入的角色
+            const curNow = activeSlot();
+            const hasActiveChar = !!(typeof window.player !== 'undefined' && window.player && window.player.cls);
+            if (localStorage.getItem('lineage_idle_save_' + curNow)) {
+                // 目前欄位有存檔，且正好是這次同步偵測到雲端更新的同一欄位 → 重載；但玩家已載入角色(正在玩)時不打斷
+                if (curChanged && curNow === cur && !hasActiveChar) { if (typeof loadGame === 'function') loadGame(); try { toast('☁️ 已拉取雲端最新存檔', '#1e3a5f'); } catch (e) { } }
+            } else if (!hasActiveChar) {
+                // 只有在「還沒載入任何角色」(例如剛登入)時，才自動切到第一個有角色的欄位；避免把已選好的角色硬切走
+                const other = [1, 2, 3, 4, 5].find(x => localStorage.getItem('lineage_idle_save_' + x));
                 if (other) {
                     if (typeof window.__cloudSwitchSlot === 'function') window.__cloudSwitchSlot(other, true);
                     else { try { window.currentSlot = other; } catch (e) { } if (typeof loadGame === 'function') loadGame(); }

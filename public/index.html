@@ -3249,22 +3249,35 @@ window.__deskSkinApply = function(){
   }
   var st=document.createElement('style'); st.id='desk-skin';
   st.textContent = `
-    body.ornate-desk{ background-color:#0c0907 !important; }
+    body.ornate-desk{ background-color:#0b0806 !important; }
     body.ornate-desk #game-screen::before{ content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
-      background:radial-gradient(120% 70% at 50% -10%,rgba(90,40,16,.55),transparent 55%),radial-gradient(140% 80% at 50% 115%,rgba(92,34,12,.5),transparent 52%); }
-    body.ornate-desk .panel{ box-shadow:0 0 0 1px rgba(205,166,78,.35),0 12px 24px rgba(0,0,0,.6),inset 0 1px 0 rgba(251,233,168,.28) !important; position:relative; }
-    body.ornate-desk .panel-header{ position:relative; text-shadow:0 0 8px rgba(255,160,60,.4),0 1px 0 #000 !important; }
-    body.ornate-desk .panel-header::before{ content:"\u2756";color:#fbe9a8;margin-right:6px;font-size:.85em;filter:drop-shadow(0 0 5px rgba(255,160,60,.6)); }
+      background:radial-gradient(120% 75% at 50% -12%,rgba(112,50,18,.62),transparent 56%),radial-gradient(150% 85% at 50% 118%,rgba(98,34,12,.56),transparent 54%); }
+    /* 面板：分層金框 + 暖陰影 */
+    body.ornate-desk .panel{ position:relative;
+      box-shadow:0 0 0 1px rgba(205,166,78,.6),0 0 0 3px rgba(20,13,7,.92),0 0 0 4px rgba(205,166,78,.35),0 14px 30px rgba(0,0,0,.72),inset 0 1px 0 rgba(251,233,168,.3) !important; }
+    /* 標題：雙 ❖ + 金色漸層底線 */
+    body.ornate-desk .panel-header{ position:relative; text-shadow:0 0 9px rgba(255,160,60,.5),0 1px 0 #000 !important;
+      border-bottom:2px solid transparent !important;
+      border-image:linear-gradient(90deg,transparent,#cda64e 18%,#fbe9a8 50%,#cda64e 82%,transparent) 1 !important; }
+    body.ornate-desk .panel-header::before{ content:"\u2756";color:#fbe9a8;margin-right:7px;font-size:.85em;filter:drop-shadow(0 0 6px rgba(255,160,60,.7)); }
+    body.ornate-desk .panel-header::after{ content:"\u2756";color:#fbe9a8;margin-left:7px;font-size:.85em;filter:drop-shadow(0 0 6px rgba(255,160,60,.7)); }
+    /* 分頁鈕：金邊 + 啟用發光 */
+    body.ornate-desk .tab-bar .btn{ border:1px solid rgba(205,166,78,.5) !important; }
     body.ornate-desk .tab-bar .btn.active, body.ornate-desk .tab-bar .btn:hover{
-      box-shadow:0 0 16px rgba(255,122,42,.55),inset 0 1px 0 rgba(251,233,168,.35) !important;
-      border-color:#ffbf5a !important; color:#ffe9b8 !important; }
-    body.ornate-desk .btn:hover{ box-shadow:0 0 12px rgba(255,150,50,.4) !important; }
+      box-shadow:0 0 18px rgba(255,122,42,.6),inset 0 1px 0 rgba(251,233,168,.4) !important; border-color:#ffcf6a !important; color:#fff0cf !important; }
+    /* 右側功能 icon：華麗金框 + hover 發光 */
+    body.ornate-desk .fn-ic{ position:relative; border:1px solid rgba(205,166,78,.5) !important;
+      background:linear-gradient(180deg,#2a1e13,#0d0805) !important; box-shadow:inset 0 1px 0 rgba(251,233,168,.18) !important; }
+    body.ornate-desk .fn-ic:hover{ box-shadow:0 0 15px rgba(255,122,42,.55),inset 0 1px 0 rgba(251,233,168,.3) !important; border-color:#ffcf6a !important; }
+    body.ornate-desk .fn-ic .tx{ color:#e7d6ab !important; }
+    body.ornate-desk .btn:hover{ box-shadow:0 0 12px rgba(255,150,50,.45) !important; }
+    /* 狀態欄龍紋角飾 */
     body.ornate-desk #status-panel{ overflow:visible !important; }
-    body.ornate-desk .desk-cn{ position:absolute;width:26px;height:26px;z-index:6;pointer-events:none;stroke:#fbe9a8;fill:none;stroke-width:1.4;filter:drop-shadow(0 1px 1px #000); }
-    body.ornate-desk .desk-cn.tl{top:-3px;left:-3px;}
-    body.ornate-desk .desk-cn.tr{top:-3px;right:-3px;transform:scaleX(-1);}
-    body.ornate-desk .desk-cn.bl{bottom:-3px;left:-3px;transform:scaleY(-1);}
-    body.ornate-desk .desk-cn.br{bottom:-3px;right:-3px;transform:scale(-1,-1);}
+    body.ornate-desk .desk-cn{ position:absolute;width:28px;height:28px;z-index:6;pointer-events:none;stroke:#fbe9a8;fill:none;stroke-width:1.5;filter:drop-shadow(0 1px 1px #000); }
+    body.ornate-desk .desk-cn.tl{top:-4px;left:-4px;}
+    body.ornate-desk .desk-cn.tr{top:-4px;right:-4px;transform:scaleX(-1);}
+    body.ornate-desk .desk-cn.bl{bottom:-4px;left:-4px;transform:scaleY(-1);}
+    body.ornate-desk .desk-cn.br{bottom:-4px;right:-4px;transform:scale(-1,-1);}
     body.ornate-desk .desk-crest{ position:absolute;top:-20px;left:50%;transform:translateX(-50%);z-index:7;display:flex;flex-direction:column;align-items:center;pointer-events:none; }
     body.ornate-desk .desk-crest .gem{ width:10px;height:10px;border-radius:50%;margin-top:-4px;background:radial-gradient(circle at 35% 30%,#ff6a6a,#c5263a 55%,#5e0f1a);box-shadow:0 0 8px rgba(255,60,80,.7),0 0 0 2px #cda64e; }
   `;
