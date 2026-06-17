@@ -3218,6 +3218,27 @@ window.__applyAccountDolls = function () {
   try { if (typeof calcStats === 'function') calcStats(); } catch (e) { }
   try { if (typeof renderDollPanel === 'function' && document.querySelector('.doll-ov')) renderDollPanel(); } catch (e) { }
 };
+// 🧬 變身帳號共用：帳號快取 union 目前角色變身圖鑑（取較高張數、永不掉資料），回寫 player + 快取
+function _polySyncLocal() {
+  if (!player) return;
+  if (!player.polyDex) player.polyDex = {};
+  var acc = {};
+  try { acc = JSON.parse(localStorage.getItem('lineage_idle_poly') || '{}'); } catch (e) { }
+  var accDex = acc.dex || {};
+  var merged = Object.assign({}, accDex);
+  for (var n in player.polyDex) { merged[n] = Math.max(merged[n] || 0, player.polyDex[n] || 0); }
+  player.polyDex = merged;
+  try { localStorage.setItem('lineage_idle_poly', JSON.stringify({ dex: merged })); } catch (e) { }
+}
+window.__applyAccountPoly = function () {
+  _polySyncLocal();
+  try { if (typeof calcStats === 'function') calcStats(); } catch (e) { }
+  try { if (typeof _polyGachaRender === 'function' && document.getElementById('poly-gacha-modal')) _polyGachaRender('\ud83e\uddec \u5df2\u540c\u6b65\u5e33\u865f\u6700\u65b0\u8b8a\u8eab\u6536\u85cf'); } catch (e) { }
+};
+window.__dollSyncBtn = function () {
+  try { if (typeof __applyAccountDolls === 'function') __applyAccountDolls(); } catch (e) { }
+  try { if (typeof dollTab === 'function') dollTab('codex'); } catch (e) { }
+};
 function dollVal(rarity, eff, star) {
   const base = (DOLL_VAL[eff] || [])[rarity - 1] || 0;
   return base * (1 + 0.25 * (Math.max(1, star) - 1));
@@ -3368,6 +3389,7 @@ function openDollWindow() {
       '    <button id="dtab-gacha" class="doll-tab" onclick="dollTab(\'gacha\')">🎲 抽卡</button>' +
       '    <button id="dtab-codex" class="doll-tab" onclick="dollTab(\'codex\')">📖 圖鑑</button>' +
       '    <button id="dtab-equip" class="doll-tab" onclick="dollTab(\'equip\')">🎽 裝備</button>' +
+      '    <button class="doll-tab" style="color:#67e8f9" onclick="__dollSyncBtn()">🔄 同步</button>' +
       '  </div>' +
       '  <div id="doll-body" class="doll-body"></div>' +
       '</div>';
@@ -3725,7 +3747,7 @@ function recomputeStats() {
         if(w.meleeHitPerEn) d.meleeHit += p.eq.wpn.en * w.meleeHitPerEn;   // 每強化+1 → 近距離命中
         // 武器祝福/遠古：依規格計入（同時影響遠近距離）
         // 祝福的武器：額外傷害+1、額外魔法點數+2、額外命中+1
-        applyBlessStats(d, p.eq.wpn.bless, 'wpn');   // 祝福的/詛咒的
+        applyBlessStats(d, p.eq.wpn.bless, 'wpn', (p.eq.wpn.en||0));   // 祝福的/詛咒的
         // 遠古武器：額外傷害+2、魔法傷害+1
         applyAncStats(d, p.eq.wpn.anc, 'wpn');   // 遠古系變體能力
 		
@@ -3762,7 +3784,7 @@ d.mr += (baseMr + bonusMr);
         if(ed.eff && ed.eff === 'haste') p._equipHaste = true;   // 不再借用 buffs.haste 計時通道，避免卸裝後永久加速殘留
         
         // 祝福的：防具→AC-1、傷害減免+1；飾品→AC-1、MR+1
-        applyBlessStats(d, e.bless, (ed.slot==='ring'||ed.slot==='amulet'||ed.slot==='belt') ? 'acc' : 'arm');   // 祝福的/詛咒的
+        applyBlessStats(d, e.bless, (ed.slot==='ring'||ed.slot==='amulet'||ed.slot==='belt') ? 'acc' : 'arm', (e.en||0));   // 祝福的/詛咒的
         applyAncStats(d, e.anc, (ed.slot==='ring'||ed.slot==='amulet'||ed.slot==='belt') ? 'acc' : 'arm');   // 遠古系變體能力
         // 屬性詞綴（防具/飾品）：對應元素抗性 + MR，依階級 1/2/3
         let _aAff = getAttrAffix(e.attr);
@@ -4361,7 +4383,7 @@ function _polyGachaRender(msg){
     let cur=(player.polyLock&&player.poly)?player.poly.n:'無';
     m.innerHTML='<div class="absolute inset-0 bg-black/80" onclick="closePolyGacha()"></div>'+
     '<div class="panel border-slate-500 p-4 relative w-[480px] max-h-[85vh] flex flex-col" style="background:#0f172a;box-shadow:0 0 30px rgba(0,0,0,.85)">'+
-      '<div class="panel-header rounded-md mb-2 flex justify-between"><span>🧬 變身殿堂</span><span class="text-sm text-yellow-400">金幣 '+(player.gold||0).toLocaleString()+'</span></div>'+
+      '<div class="panel-header rounded-md mb-2 flex justify-between"><span>🧬 變身殿堂 <button class="underline text-cyan-300" style="font-size:12px" onclick="__applyAccountPoly()">🔄同步</button></span><span class="text-sm text-yellow-400">金幣 '+(player.gold||0).toLocaleString()+'</span></div>'+
       '<div class="text-xs text-slate-300 mb-2">目前變身：<b class="'+((player.poly&&player.poly.c)||'')+'">'+cur+'</b>'+(cur!=='無'?'　<button class="underline text-rose-300" onclick="polyDeactivate();_polyGachaRender(\'已解除變身\')">解除</button>':'')+'</div>'+
       '<div class="flex gap-2 mb-2">'+
         '<button class="btn flex-1 !py-2" onclick="_polyDoPull()">🎲 抽卡 ('+POLY_GACHA_COST+'金)</button>'+
@@ -4571,7 +4593,7 @@ function tick() {
         for(let i=0; i<3; i++) {
             if(mapState.mobs[i]) { mapState.spawnAt[i] = null; continue; } // 有怪：清除排程
             if(isPureBossMap && i !== 1) continue;                          // 純 BOSS 房只生中央
-            let delay = (player.buffs.sk_sunlight > 0) ? 10 : 50;           // 50 tick = 5 秒（日光術約 1 秒）
+            let delay = (player.buffs.sk_sunlight > 0) ? 10 : 30;           // 50 tick = 5 秒（日光術約 1 秒）
             if (sherineWorldActive() && !isSiegeArea(mapState.current)) delay = Math.max(1, delay - 10);   // 🔮 席琳的世界：搜索時間 −1 秒（與日光術疊加）
             if(mapState.spawnAt[i] == null) mapState.spawnAt[i] = nowT + delay; // 空格剛出現：排程 5 秒後
             if(nowT >= mapState.spawnAt[i]) { spawnMob(i); mapState.spawnAt[i] = null; }
@@ -7682,12 +7704,13 @@ function ancColorClass(anc) {   // 遠古=紫、永恆=紅、不朽=綠、太初
 // 祝福系：祝福的(bless=true) / 詛咒的(bless='cursed')
 function blessName(bless) { return !bless ? '' : (bless === 'cursed' ? '詛咒的' : '祝福的'); }
 function blessColorClass(bless) { return (bless === 'cursed') ? 'c-cursed' : 'c-blessed'; }
-function applyBlessStats(d, bless, slot) {   // slot: 'wpn' | 'arm' | 'acc'；詛咒的＝祝福的負鏡像
+function applyBlessStats(d, bless, slot, en) {   // slot: 'wpn' | 'arm' | 'acc'；詛咒的＝祝福的負鏡像；固定加成每強化等級額外 +1（百分比不變）
     if (!bless) return;
     let sg = (bless === 'cursed') ? -1 : 1;
-    if (slot === 'wpn') { d.extraDmg += sg*1; d.extraHit += sg*1; d.extraMp += sg*2; }   // 武器：傷害/命中/額外魔法點數
-    else if (slot === 'arm') { d.ac -= sg*1; d.dr += sg*1; }                              // 防具：AC(祝-1/詛+1)、傷害減免
-    else { d.ac -= sg*1; d.mr += sg*1; }                                                  // 飾品：AC、MR
+    let lv = Math.min(en || 0, slot === 'acc' ? 20 : 30);   // 強化等級加成（上限 武/防30、飾20）
+    if (slot === 'wpn') { d.extraDmg += sg*(1+lv); d.extraHit += sg*(1+lv); d.extraMp += sg*(2+lv); }   // 武器：傷害/命中/額外魔法點數
+    else if (slot === 'arm') { d.ac -= sg*(1+lv); d.dr += sg*(1+lv); }                              // 防具：AC、傷害減免
+    else { d.ac -= sg*(1+lv); d.mr += sg*(1+lv); }                                                  // 飾品：AC、MR
 }
 function applyAncStats(d, anc, slot) {   // slot: 'wpn' | 'arm' | 'acc'
     if (!anc) return;
@@ -8669,6 +8692,19 @@ function renderTabs(force) {
     
     // 👇 清空新的三個面板
     let wDiv = document.getElementById('tab-weapons'); wDiv.innerHTML = '';
+    (function(){ try{
+      var _wq = player.eq && player.eq.wpn;
+      if(_wq){
+        var _wd = DB.items[_wq.id]||{}; var _en=_wq.en||0; var _w=Math.min(_en,30);
+        var _dDmg=_w*2, _dHit=_w*3, _dPct=(_w>=10)?(Math.floor((_w-10)/5)+1):0;
+        var _nm=(_en>0?('+'+_en+' '):'')+(_wd.n||_wq.id);
+        wDiv.innerHTML = '<div style="border:1px solid #c9a24b;border-radius:8px;padding:8px 10px;margin-bottom:6px;background:linear-gradient(180deg,#2a1e13,#0c0805)">'
+          + '<div style="color:#fbe9a8;font-weight:bold;font-size:13px;margin-bottom:4px">\ud83d\udde1\ufe0f \u76ee\u524d\u6b66\u5668\uff1a'+_nm+'</div>'
+          + '<div style="color:#cdd6e6;font-size:12px;line-height:1.7">\u5f37\u5316\u52a0\u6210\uff5c\u50b7\u5bb3 <b style="color:#7CFC7C">+'+_dDmg+'</b>\u3000\u547d\u4e2d <b style="color:#7CFC7C">+'+_dHit+'</b>\u3000\u7e3d\u50b7 <b style="color:#7CFC7C">+'+_dPct+'%</b></div>'
+          + (_w<10?'<div style="color:#9aa3b2;font-size:11px;margin-top:3px">\uff08\u5f37\u5316 +10 \u8d77\uff0c\u6bcf +5 \u7d1a\u591a 1% \u7e3d\u50b7\uff09</div>':'')
+          + '</div>';
+      }
+    }catch(e){} })();
     let aDiv = document.getElementById('tab-armors'); aDiv.innerHTML = '';
     let iDiv = document.getElementById('tab-items'); iDiv.innerHTML = '';
     
@@ -9572,6 +9608,55 @@ setTimeout(setupPanelCollapse, 1500);
 })();
 
 /* ===================== 手機 HUB 主畫面 ===================== */
+function _hubSkinApply(){
+  var hub=document.getElementById('mhub'); if(!hub) return;
+  if(!document.getElementById('hub-skin')){
+    var st=document.createElement('style'); st.id='hub-skin';
+    st.textContent = `
+      #mhub{ padding-top:22px !important; background:radial-gradient(120% 70% at 50% -6%,#45200f,transparent 55%),radial-gradient(150% 90% at 50% 116%,#5c220c,transparent 52%),linear-gradient(#0d0a07,#060403) !important; }
+      #mhub .top{ position:relative;overflow:visible;border:none !important;border-radius:14px;background:linear-gradient(180deg,rgba(38,27,17,.96),rgba(11,8,5,.98));box-shadow:inset 0 1px 0 rgba(251,233,168,.4),0 3px 8px rgba(0,0,0,.55);padding:13px 14px; }
+      #mhub .top::before{ content:"";position:absolute;inset:0;border-radius:14px;padding:2px;background:linear-gradient(150deg,#fbe9a8,#cda64e 38%,#7a5c25 68%,#3a2a12);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none; }
+      #mhub .ava{ width:60px;height:60px;border-radius:50% !important;border:none !important;position:relative;background-color:#1c130b;background-size:cover;background-position:center 30%;box-shadow:inset 0 0 0 3px rgba(0,0,0,.5),0 0 14px rgba(255,122,42,.25); }
+      #mhub .ava::before{ content:"";position:absolute;inset:-3px;border-radius:50%;padding:3px;background:conic-gradient(from 210deg,#3a2a12,#cda64e 20%,#fbe9a8 38%,#cda64e 56%,#3a2a12 78%,#fbe9a8);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none; }
+      #mhub .hub-rib{ position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);z-index:3;font-family:Cinzel,serif;font-weight:900;font-size:10px;color:#2a1808;letter-spacing:.5px;padding:1px 9px;white-space:nowrap;background:linear-gradient(180deg,#fbe9a8,#cda64e 60%,#7a5c25);box-shadow:0 2px 4px rgba(0,0,0,.6);clip-path:polygon(8% 0,92% 0,100% 50%,92% 100%,8% 100%,0 50%); }
+      #mhub .nm{ color:#fff6e2;font-size:16px;letter-spacing:1px;text-shadow:0 1px 0 #000,0 0 10px rgba(255,150,60,.3); }
+      #mhub .lv{ display:none; }
+      #mhub .bar{ height:12px;border-radius:4px;background:linear-gradient(#060403,#160f0a);box-shadow:inset 0 2px 4px rgba(0,0,0,.85),inset 0 0 0 1px rgba(205,166,78,.4); }
+      #mhub .fbtn{ position:relative;border:none !important;border-radius:11px;background:linear-gradient(180deg,#2a1e13,#0c0805);box-shadow:inset 0 1px 0 rgba(251,233,168,.18),inset 0 -2px 4px rgba(0,0,0,.5);color:#c9b78c; }
+      #mhub .fbtn::before{ content:"";position:absolute;inset:0;border-radius:11px;padding:1.5px;background:linear-gradient(160deg,#fbe9a8,#cda64e 45%,#7a5c25 72%,#3a2a12);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.85; }
+      #mhub .fbtn.gold{ background:linear-gradient(180deg,#3a2a14,#140d06);color:#fbe9a8; }
+      #mhub .fbtn.gold::before{ opacity:1;background:linear-gradient(160deg,#fff0c0,#cda64e 45%,#7a5c25 75%,#3a2a12); }
+      #mhub .fbtn.gacha{ background:radial-gradient(120% 120% at 50% 25%,#5a2c10,#180d06) !important;border:none !important;box-shadow:0 0 12px rgba(255,122,42,.4),inset 0 1px 0 rgba(251,233,168,.3);color:#ffcf8a; }
+      #mhub .stage{ border:none !important;box-shadow:inset 0 0 0 1px rgba(205,166,78,.25),inset 0 0 60px rgba(0,0,0,.6); }
+      #mhub .stage .badge{ background:rgba(20,14,8,.78);border:1px solid rgba(205,166,78,.5);color:#fbe9a8; }
+      #mhub .cta{ position:relative;border:none !important;background:linear-gradient(180deg,#3a2a16,#140d06);color:#fff4dc;box-shadow:inset 0 1px 0 rgba(251,233,168,.22),inset 0 -3px 6px rgba(0,0,0,.5); }
+      #mhub .cta::before{ content:"";position:absolute;inset:0;border-radius:14px;padding:2px;background:linear-gradient(160deg,#fbe9a8,#cda64e 45%,#7a5c25 75%,#3a2a12);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude; }
+      #mhub .cta.fight{ background:radial-gradient(120% 120% at 50% 20%,#7a2410,#1a0c06);color:#ffd9b0;box-shadow:0 0 14px rgba(255,90,30,.4),inset 0 1px 0 rgba(251,233,168,.3); }
+      #mhub .cta.fight::before{ background:linear-gradient(160deg,#ffd9a0,#e8741f 45%,#7a3a12 80%); }
+      #mhub .cta.arena{ background:linear-gradient(180deg,#3a2a16,#140d06);color:#e7d2ff; }
+      #mhub .cta.online{ background:linear-gradient(180deg,#3a2a16,#140d06);color:#bfe2ff; }
+      #mhub .hub-corner{ position:absolute;width:26px;height:26px;z-index:5;pointer-events:none;stroke:#fbe9a8;fill:none;stroke-width:1.4;filter:drop-shadow(0 1px 1px #000); }
+      #mhub .hub-crest{ position:absolute;top:-20px;left:50%;transform:translateX(-50%);z-index:6;display:flex;flex-direction:column;align-items:center;pointer-events:none; }
+      #mhub .hub-crest .gem{ width:10px;height:10px;border-radius:50%;margin-top:-4px;background:radial-gradient(circle at 35% 30%,#ff6a6a,#c5263a 55%,#5e0f1a);box-shadow:0 0 8px rgba(255,60,80,.7),0 0 0 2px #cda64e; }
+    `;
+    document.head.appendChild(st);
+  }
+  if(!document.getElementById('hub-svgdefs')){
+    var d=document.createElement('div'); d.id='hub-svgdefs'; d.style.cssText='position:absolute;width:0;height:0;overflow:hidden';
+    d.innerHTML='<svg width="0" height="0"><defs><linearGradient id="gg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbe9a8"/><stop offset="0.5" stop-color="#cda64e"/><stop offset="1" stop-color="#7a5c25"/></linearGradient></defs></svg>';
+    document.body.appendChild(d);
+  }
+  var top=hub.querySelector('.top'), ava=hub.querySelector('.ava');
+  if(ava && !ava.querySelector('.hub-rib')){ var rib=document.createElement('span'); rib.className='hub-rib'; rib.textContent='Lv \u2014'; ava.appendChild(rib); }
+  if(top && !top.querySelector('.hub-crest')){
+    top.insertAdjacentHTML('beforeend',
+      '<div class="hub-crest"><svg width="100" height="32" viewBox="0 0 120 40"><g fill="none" stroke="url(#gg)" stroke-width="1.6" stroke-linecap="round"><path d="M60 6c-6 0-9 4-9 9 0 6 5 9 9 9s9-3 9-9c0-5-3-9-9-9z"/><path d="M51 11c-7-3-14-2-20 2M69 11c7-3 14-2 20 2"/><path d="M44 9c-5-4-12-4-18-1M76 9c5-4 12-4 18-1"/><circle cx="56" cy="13" r="1.1" fill="url(#gg)"/><circle cx="64" cy="13" r="1.1" fill="url(#gg)"/><path d="M31 13c-6 1-11 5-13 11M89 13c6 1 11 5 13 11"/></g></svg><span class="gem"></span></div>'
+      +'<svg class="hub-corner" style="top:-3px;left:-3px" viewBox="0 0 28 28"><path d="M2 26C2 13 6 6 13 4M2 15C2 8 6 4 11 3"/></svg>'
+      +'<svg class="hub-corner" style="top:-3px;right:-3px;transform:scaleX(-1)" viewBox="0 0 28 28"><path d="M2 26C2 13 6 6 13 4M2 15C2 8 6 4 11 3"/></svg>'
+      +'<svg class="hub-corner" style="bottom:-3px;left:-3px;transform:scaleY(-1)" viewBox="0 0 28 28"><path d="M2 26C2 13 6 6 13 4M2 15C2 8 6 4 11 3"/></svg>'
+      +'<svg class="hub-corner" style="bottom:-3px;right:-3px;transform:scale(-1,-1)" viewBox="0 0 28 28"><path d="M2 26C2 13 6 6 13 4M2 15C2 8 6 4 11 3"/></svg>');
+  }
+}
 function _hubBuildOnce(){
     if(document.getElementById('mhub')) return;
     var hub=document.createElement('div'); hub.id='mhub';
@@ -9613,6 +9698,7 @@ function _hubBuildOnce(){
     hub.querySelectorAll('[data-act]').forEach(function(b){
         b.addEventListener('click', function(){ hubAct(b.getAttribute('data-act')); });
     });
+    try{ _hubSkinApply(); }catch(e){}
 }
 function _hubPanels(){
     var gs=document.getElementById('game-screen'); var map={}; if(!gs) return map;
@@ -9692,12 +9778,13 @@ function hubSync(){
             var av=hub.querySelector('.ava'); if(av) av.style.backgroundImage=bg;
         }
     }
+    try{ var _avp=hub.querySelector('.ava'); if(_avp && player.poly && player.poly.n){ var _pi="assets/icons/monsters/"+player.poly.n+".png"; for(var _mk in DB.mobs){ if(DB.mobs[_mk].n===player.poly.n){ _pi=DB.mobs[_mk].img||_pi; break; } } _avp.style.backgroundImage="url('"+_pi+"')"; } }catch(e){}
     var cls=(document.getElementById('st-classname')||{}).innerText||'';
     var nm=(document.getElementById('st-class')||{}).innerText||'';
     var el;
     el=hub.querySelector('.nm'); if(el) el.textContent=(nm?nm+' · ':'')+(cls||'冒險者');
     var lvtxt=(document.getElementById('st-lv')||{}).innerText||'';
-    el=hub.querySelector('.lv'); if(el) el.textContent='Lv '+(lvtxt||'—');
+    el=hub.querySelector('.lv'); if(el) el.textContent='Lv '+(lvtxt||'—'); var _rb=hub.querySelector('.hub-rib'); if(_rb) _rb.textContent='Lv '+(lvtxt||'—');
     [['hp','hp'],['mp','mp'],['exp','xp']].forEach(function(pr){
         var src=document.getElementById('bar-'+pr[0]); var dst=hub.querySelector('.bar.'+pr[1]+'>i');
         if(src&&dst){ var w=src.style.width||getComputedStyle(src).width; if(w) dst.style.width=w; }
@@ -12385,6 +12472,7 @@ function loadGame() {
         player = d.p; mapState = d.ms;
         if (player.eq && player.eq.rune1 === undefined) { player.eq.rune1 = null; player.eq.rune2 = null; } if (player.eq && player.eq.legs === undefined) player.eq.legs = null;
         try { _dollSyncLocal(); } catch (e) { }   // 🧸 套用帳號層級娃娃（跨角色共用）
+        try { _polySyncLocal(); } catch (e) { }   // 🧬 套用帳號層級變身
         // 遷移：舊「黑暗召喚(手動)」→ 拆成兩個召喚 buff 技；並移除 DB 不存在的技能 id 避免清單崩潰
         if (player.skills && player.skills.indexOf('sk_mg_darksummon') >= 0) {
             player.skills = player.skills.filter(function(s){ return s !== 'sk_mg_darksummon'; });
