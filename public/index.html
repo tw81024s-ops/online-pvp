@@ -9326,17 +9326,7 @@ function showEnhanceOptions(uid, isEq) {
         scrollNorm = player.inv.find(i => i.id === 'scroll_acc');
     }
     
-    // 飾品特殊處理：若有卷軸直接點爆，不用選
-    if (d.type === 'acc') {
-        if (!scrollNorm) {
-            logSys(`<span class="text-red-400 font-bold">強化卷軸不足。</span>`);
-            return;
-        }
-        activeScroll = scrollNorm;
-        doEnhance(item.uid, isEq);
-        return;
-    }
-    
+    // 飾品改走與防具相同的強化選單（支援件數／目標連衝／批量）
     // 武器/防具：如果兩種卷軸都沒有，直接跳錯
     if (!scrollNorm && !scrollBless) {
         logSys(`<span class="text-red-400 font-bold">強化卷軸不足。</span>`);
