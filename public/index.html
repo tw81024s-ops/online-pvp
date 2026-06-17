@@ -3255,6 +3255,13 @@ window.__deskSkinApply = function(){
     /* 面板：分層金框 + 暖陰影 */
     body.ornate-desk .panel{ position:relative;
       box-shadow:0 0 0 1px rgba(205,166,78,.6),0 0 0 3px rgba(20,13,7,.92),0 0 0 4px rgba(205,166,78,.35),0 14px 30px rgba(0,0,0,.72),inset 0 1px 0 rgba(251,233,168,.3) !important; }
+    /* 暖色化面板與內框：把藍灰底換成深褐黑金，新版一眼不同 */
+    body.ornate-desk .panel{ background:linear-gradient(180deg,#251a12 0%,#160e08 100%) !important; }
+    body.ornate-desk .bg-slate-800{ background:linear-gradient(180deg,rgba(50,36,21,.94),rgba(28,19,11,.96)) !important; }
+    body.ornate-desk .bg-slate-900{ background:rgba(17,11,6,.96) !important; }
+    body.ornate-desk .bg-slate-700{ background:rgba(60,44,25,.92) !important; }
+    body.ornate-desk .border-slate-700,body.ornate-desk .border-slate-600{ border-color:rgba(205,166,78,.42) !important; }
+    body.ornate-desk .log-bg{ background:rgba(14,9,5,.9) !important; }
     /* 標題：雙 ❖ + 金色漸層底線 */
     body.ornate-desk .panel-header{ position:relative; text-shadow:0 0 9px rgba(255,160,60,.5),0 1px 0 #000 !important;
       border-bottom:2px solid transparent !important;
