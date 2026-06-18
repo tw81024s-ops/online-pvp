@@ -621,12 +621,12 @@
                     <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
                         <div class="text-sm text-slate-400 mb-3 border-b border-slate-700 pb-1">自動施放設定</div>
                         <div class="flex justify-between items-center mb-2 text-sm"><span class="text-cyan-400 font-bold">攻擊技能（最多4種·每招CD5秒）</span><span>MP &gt; <input type="number" id="set-mp-atk" value="50" class="w-12 bg-slate-900 border text-center text-white rounded">%</span></div>
-                        <select id="sel-atk-skill" onchange="try{saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
-                        <select id="sel-atk-skill2" onchange="try{saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
-                        <select id="sel-atk-skill3" onchange="try{saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
-                        <select id="sel-atk-skill4" onchange="try{saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-3 rounded text-sm"><option value="">無</option></select>
+                        <select id="sel-atk-skill" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
+                        <select id="sel-atk-skill2" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
+                        <select id="sel-atk-skill3" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
+                        <select id="sel-atk-skill4" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-3 rounded text-sm"><option value="">無</option></select>
                         <div class="flex justify-between items-center mb-2 text-sm"><span class="text-green-400 font-bold">治癒魔法</span><span>HP &lt; <input type="number" id="set-mp-heal" value="50" class="w-12 bg-slate-900 border text-center text-white rounded">%</span></div>
-                        <select id="sel-heal-skill" onchange="try{saveGame()}catch(e){}" class="w-full bg-slate-900 border text-green-300 px-2 py-2 rounded text-sm"><option value="">無</option></select>
+                        <select id="sel-heal-skill" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-green-300 px-2 py-2 rounded text-sm"><option value="">無</option></select>
                         <div id="ui-convert-row" class="hidden">
                             <div class="flex justify-between items-center mb-2 mt-3 text-sm"><span class="text-cyan-400 font-bold">轉換魔法</span><span>HP &gt; <input type="number" id="set-hp-convert" value="50" class="w-12 bg-slate-900 border text-center text-white rounded">%</span></div>
                             <select id="sel-convert-skill" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 rounded text-sm"><option value="">無</option></select>
@@ -9062,6 +9062,20 @@ function onSummonToggle(sid) {
     updateSummonLock();
 }
 
+// 🔧 技能選擇額外存一份到「該存檔位專屬 localStorage」：登出不清、與雲端存檔無關，
+//    解決「登入後 player.config 為空 → 自動施放技能要重設」的問題。
+function _skillSelKey(){ return 'lineage_idle_skillsel_' + ((typeof currentSlot!=='undefined' && currentSlot) ? currentSlot : 1); }
+function __persistSkillSel(){
+    try{
+        if(!(typeof player!=='undefined' && player && player.cls)) return;   // 沒載入角色不寫，避免空白覆蓋
+        var g=function(id){ var e=document.getElementById(id); return e?e.value:''; };
+        var o={ a1:g('sel-atk-skill'), a2:g('sel-atk-skill2'), a3:g('sel-atk-skill3'), a4:g('sel-atk-skill4'), h:g('sel-heal-skill') };
+        if(!(o.a1||o.a2||o.a3||o.a4||o.h)) return;   // 全空不寫：避免登入瞬間（下拉尚未還原）把已存的好紀錄覆蓋成空
+        localStorage.setItem(_skillSelKey(), JSON.stringify(o));
+    }catch(e){}
+}
+function __loadSkillSel(){ try{ var r=localStorage.getItem(_skillSelKey()); return r?JSON.parse(r):null; }catch(e){ return null; } }
+
 function renderSkillSelects() {
     // 先記住目前選擇，重建後還原（避免穿脫裝備/學技能等呼叫時被重設為「無」）
     let prevAtk = document.getElementById('sel-atk-skill') ? document.getElementById('sel-atk-skill').value : '';
@@ -9070,13 +9084,14 @@ function renderSkillSelects() {
     let prevAtk4 = document.getElementById('sel-atk-skill4') ? document.getElementById('sel-atk-skill4').value : '';
     let prevHeal = document.getElementById('sel-heal-skill') ? document.getElementById('sel-heal-skill').value : '';
     let prevConvert = document.getElementById('sel-convert-skill') ? document.getElementById('sel-convert-skill').value : '';
-    // 🔧 登入/讀檔後下拉可能是空的：若 DOM 為空就用存檔設定(player.config)回填，避免每次登入都要重設技能
+    // 🔧 登入/讀檔後下拉可能是空的：依序用 存檔設定(player.config) → 該存檔位localStorage 回填，避免每次登入都要重設技能
     let _cfg = (player && player.config) || {};
-    if(!prevAtk) prevAtk = _cfg.selAtkSkill || '';
-    if(!prevAtk2) prevAtk2 = _cfg.selAtkSkill2 || '';
-    if(!prevAtk3) prevAtk3 = _cfg.selAtkSkill3 || '';
-    if(!prevAtk4) prevAtk4 = _cfg.selAtkSkill4 || '';
-    if(!prevHeal) prevHeal = _cfg.selHealSkill || '';
+    let _ls = __loadSkillSel() || {};
+    if(!prevAtk) prevAtk = _cfg.selAtkSkill || _ls.a1 || '';
+    if(!prevAtk2) prevAtk2 = _cfg.selAtkSkill2 || _ls.a2 || '';
+    if(!prevAtk3) prevAtk3 = _cfg.selAtkSkill3 || _ls.a3 || '';
+    if(!prevAtk4) prevAtk4 = _cfg.selAtkSkill4 || _ls.a4 || '';
+    if(!prevHeal) prevHeal = _cfg.selHealSkill || _ls.h || '';
     if(!prevConvert) prevConvert = _cfg.selConvertSkill || '';
     let aHtml = '<option value="">無</option>', hHtml = '<option value="">無</option>', cHtml = '<option value="">無</option>';
     let buffHtml = '';
@@ -12852,6 +12867,7 @@ function saveGame() {
         if (chk) player.config.autoBuffSkills[sid] = chk.checked;
     });
 
+    try{ __persistSkillSel(); }catch(e){}   // 技能選擇額外存一份到該存檔位localStorage
     localStorage.setItem('lineage_idle_save_' + currentSlot, JSON.stringify({ v: SAVE_VERSION, p: player, ms: mapState, ticks: state.ticks, t: Date.now() }));   // t：存檔時間戳，供跨裝置比新舊   // 🔧 架構#6：寫入存檔版本   // 🔧 一併保存 tick 計數：召喚物/迷魅的 endTick 為絕對 tick，不存會在重載後失準（迷魅重新計時 1 小時）
     // 🧸 娃娃帳號共用：鏡射到帳號快取，內容有變才推雲端
     try {
@@ -13068,6 +13084,7 @@ function loadGame() {
         }
         
         updateClassPotionRows();
+        try{ renderSkillSelects(); __persistSkillSel(); }catch(e){}   // 還原後再刷一次並把技能選擇種子寫入 localStorage
         
         state.running = true;
         // 自然恢復（每 16 秒）已由主迴圈 tick() 內的 state.ticks % 160 統一驅動，不再額外 setInterval。
