@@ -621,12 +621,12 @@
                     <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
                         <div class="text-sm text-slate-400 mb-3 border-b border-slate-700 pb-1">自動施放設定</div>
                         <div class="flex justify-between items-center mb-2 text-sm"><span class="text-cyan-400 font-bold">攻擊技能（最多4種·每招CD5秒）</span><span>MP &gt; <input type="number" id="set-mp-atk" value="50" class="w-12 bg-slate-900 border text-center text-white rounded">%</span></div>
-                        <select id="sel-atk-skill" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
-                        <select id="sel-atk-skill2" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
-                        <select id="sel-atk-skill3" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
-                        <select id="sel-atk-skill4" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-3 rounded text-sm"><option value="">無</option></select>
+                        <select id="sel-atk-skill" onchange="try{saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
+                        <select id="sel-atk-skill2" onchange="try{saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
+                        <select id="sel-atk-skill3" onchange="try{saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
+                        <select id="sel-atk-skill4" onchange="try{saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-3 rounded text-sm"><option value="">無</option></select>
                         <div class="flex justify-between items-center mb-2 text-sm"><span class="text-green-400 font-bold">治癒魔法</span><span>HP &lt; <input type="number" id="set-mp-heal" value="50" class="w-12 bg-slate-900 border text-center text-white rounded">%</span></div>
-                        <select id="sel-heal-skill" class="w-full bg-slate-900 border text-green-300 px-2 py-2 rounded text-sm"><option value="">無</option></select>
+                        <select id="sel-heal-skill" onchange="try{saveGame()}catch(e){}" class="w-full bg-slate-900 border text-green-300 px-2 py-2 rounded text-sm"><option value="">無</option></select>
                         <div id="ui-convert-row" class="hidden">
                             <div class="flex justify-between items-center mb-2 mt-3 text-sm"><span class="text-cyan-400 font-bold">轉換魔法</span><span>HP &gt; <input type="number" id="set-hp-convert" value="50" class="w-12 bg-slate-900 border text-center text-white rounded">%</span></div>
                             <select id="sel-convert-skill" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 rounded text-sm"><option value="">無</option></select>
@@ -9070,6 +9070,14 @@ function renderSkillSelects() {
     let prevAtk4 = document.getElementById('sel-atk-skill4') ? document.getElementById('sel-atk-skill4').value : '';
     let prevHeal = document.getElementById('sel-heal-skill') ? document.getElementById('sel-heal-skill').value : '';
     let prevConvert = document.getElementById('sel-convert-skill') ? document.getElementById('sel-convert-skill').value : '';
+    // 🔧 登入/讀檔後下拉可能是空的：若 DOM 為空就用存檔設定(player.config)回填，避免每次登入都要重設技能
+    let _cfg = (player && player.config) || {};
+    if(!prevAtk) prevAtk = _cfg.selAtkSkill || '';
+    if(!prevAtk2) prevAtk2 = _cfg.selAtkSkill2 || '';
+    if(!prevAtk3) prevAtk3 = _cfg.selAtkSkill3 || '';
+    if(!prevAtk4) prevAtk4 = _cfg.selAtkSkill4 || '';
+    if(!prevHeal) prevHeal = _cfg.selHealSkill || '';
+    if(!prevConvert) prevConvert = _cfg.selConvertSkill || '';
     let aHtml = '<option value="">無</option>', hHtml = '<option value="">無</option>', cHtml = '<option value="">無</option>';
     let buffHtml = '';
     let sortedSkills = [...player.skills].sort((a,b) => DB.skills[a].tier - DB.skills[b].tier);
