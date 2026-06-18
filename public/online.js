@@ -91,8 +91,8 @@
     window.__addJackpot = jackpotAdd;
     window.__claimJackpot = jackpotClaim;
     // ============ 賭場淨輸贏排行榜（贏錢榜＋輸錢榜）============
-    async function gambleSubmit(net) {
-        try { const p = getPlayer(); return await api('/api/gamble/submit', 'POST', { net: Math.floor(net) || 0, name: (p && p.name) || myName || '' }); } catch (e) { return null; }
+    async function gambleSubmit(won, lost) {
+        try { const p = getPlayer(); return await api('/api/gamble/submit', 'POST', { won: Math.max(0, Math.floor(won) || 0), lost: Math.max(0, Math.floor(lost) || 0), name: (p && p.name) || myName || '' }); } catch (e) { return null; }
     }
     async function gambleBoard() {
         try { return await api('/api/gamble/board', 'GET'); } catch (e) { return { topWin: [], topLoss: [] }; }

@@ -9151,6 +9151,19 @@ function __applyCfgToDOM(c){
     }catch(e){}
 }
 window.__applyCfgToDOM = __applyCfgToDOM;
+// 🔧 任何自動化設定（藥水/施法/被動buff）變更 → 立刻存檔（去抖），確保即時持久化，不必等定期存檔，
+//    也讓「重設一次就會記住」生效。saveGame 內含 player.cls 防呆，創角前不會誤寫。
+(function(){
+    try{
+        document.addEventListener('change', function(e){
+            var t=e.target; if(!t||!t.id) return;
+            if(/^(set-|sel-|auto-sk-)/.test(t.id)){
+                clearTimeout(window.__cfgSaveT);
+                window.__cfgSaveT=setTimeout(function(){ try{ if(typeof saveGame==='function') saveGame(); }catch(_e){} }, 400);
+            }
+        }, true);
+    }catch(e){}
+})();
 
 function renderSkillSelects() {
     // 🔧 被動buff種子：首次渲染（勾選框尚不存在）時，從該存檔位 localStorage 帶回被動技能勾選，解決重登後被動沒回來
@@ -10591,7 +10604,10 @@ window.__adminGrantPoly = function(formName){
       +'<div id="cas-board-body" style="font-size:13px;color:#cbd5e1;text-align:center;padding:20px;">載入中…</div>';
     ov.appendChild(box); document.body.appendChild(ov); ov.onclick=function(e){ if(e.target===ov) ov.remove(); };
     if(typeof window.__gambleBoard!=='function'){ document.getElementById('cas-board-body').innerHTML='需登入線上才能看全服排行榜。'; return; }
-    window.__gambleBoard().then(function(r){
+    // 先把自己最新累積（贏/輸）推上伺服器，確保自己這列即時正確；推完再抓全服榜
+    var _push;
+    try{ _push = (typeof window.__gambleSubmit==='function') ? window.__gambleSubmit(player.gambleWon||0, player.gambleLost||0) : null; }catch(e){ _push=null; }
+    Promise.resolve(_push).catch(function(){}).then(function(){ return window.__gambleBoard(); }).then(function(r){
       var body=document.getElementById('cas-board-body'); if(!body) return;
       r=r||{}; var win=r.topWin||[], lose=r.topLoss||[];
       function tbl(list, col, emptyMsg){
@@ -13457,7 +13473,7 @@ function saveGame() {
     var __cfgHasContent = function(c){
         if (!c) return false;
         if (c.selAtkSkill || c.selAtkSkill2 || c.selAtkSkill3 || c.selAtkSkill4 || c.selHealSkill || c.selConvertSkill) return true;
-        var bk = ['setAutoBuyPot','setHaste','setAutoBuyHaste','setBrave','setAutoBuyBrave','setBlue','setAutoBuyBlue','setCautious','setAutoBuyCautious','setElfcookie','setAutoBuyElfcookie','setPoly','setAutoBuyPoly','setMagicbarrier','setTeleport','setAutoBuyTeleport','setAutoBuyArrow'];
+        var bk = ['setAutoBuyPot','setHaste','setAutoBuyHaste','setBrave','setAutoBuyBrave','setBlue','setAutoBuyBlue','setCautious','setAutoBuyCautious','setElfcookie','setAutoBuyElfcookie','setPoly','setAutoBuyPoly','setMagicbarrier','setTeleport','setAutoBuyTeleport'];   // ⚠️ 不含 setAutoBuyArrow：它 HTML 預設打勾，還原未完成的空白面板也會是 true，若計入會誤判「有內容」而覆蓋好設定
         for (var i=0;i<bk.length;i++){ if (c[bk[i]]) return true; }
         if (c.autoBuffSkills){ for (var s in c.autoBuffSkills){ if (c.autoBuffSkills[s]) return true; } }
         return false;

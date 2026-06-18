@@ -198,6 +198,7 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
 
 // ====== 全服累積頭獎池（刮刮卡＋拉霸共用）======
 const JACKPOT_BASE = 100000000;   // 底值 1 億
+const JACKPOT_MAX = 100000000000; // 池上限 1000 億（中獎換頭獎金幣捲，避免無限累積）
 function getJackpot() {
     const c = store.getConfig() || {};
     return (typeof c.jackpotPool === 'number' && c.jackpotPool >= JACKPOT_BASE) ? c.jackpotPool : JACKPOT_BASE;
@@ -207,7 +208,7 @@ app.get('/api/jackpot', (req, res) => {
 });
 app.post('/api/jackpot/add', auth, (req, res) => {
     const amt = Math.max(0, Math.min(200000000, parseInt((req.body || {}).amount) || 0));   // 單次最多撥 2 億，防灌爆
-    const v = getJackpot() + amt;
+    const v = Math.min(JACKPOT_MAX, getJackpot() + amt);
     store.setConfig({ jackpotPool: v });
     res.json({ pool: v });
 });
@@ -217,20 +218,21 @@ app.post('/api/jackpot/claim', auth, (req, res) => {
     res.json({ won: won, pool: JACKPOT_BASE });
 });
 
-// ====== 賭場淨輸贏排行榜（贏錢榜＋輸錢榜共用同一筆 net）======
+// ====== 賭場排行榜：分別累積「贏的總額」與「輸的總額」（只要有贏就計入贏錢榜）======
 app.post('/api/gamble/submit', auth, (req, res) => {
     const u = req.user;
-    let net = Math.floor(Number((req.body || {}).net));
-    if (!isFinite(net)) net = 0;
-    net = Math.max(-1e15, Math.min(1e15, net));     // 累積淨輸贏：+ 贏 / - 輸
-    const name = (req.body && req.body.name) ? String(req.body.name).slice(0, 20) : u.username;
+    const b = req.body || {};
+    let won = Math.floor(Number(b.won)); if (!isFinite(won) || won < 0) won = 0; won = Math.min(1e15, won);
+    let lost = Math.floor(Number(b.lost)); if (!isFinite(lost) || lost < 0) lost = 0; lost = Math.min(1e15, lost);
+    const name = b.name ? String(b.name).slice(0, 20) : u.username;
     const c = store.getConfig() || {};
     const gb = c.gambleBoard || {};
-    gb[u.username] = { name, net, ts: Date.now() };
+    const prev = gb[u.username] || {};
+    gb[u.username] = { name, won: Math.max(won, prev.won || 0), lost: Math.max(lost, prev.lost || 0), ts: Date.now() };   // 取較大值，避免舊資料覆蓋
     const all = Object.entries(gb);
-    const byWin = all.slice().sort((a, b) => (b[1].net || 0) - (a[1].net || 0)).slice(0, 100);
-    const byLoss = all.slice().sort((a, b) => (a[1].net || 0) - (b[1].net || 0)).slice(0, 100);
-    const keep = {}; byWin.concat(byLoss).forEach(([k, v]) => { keep[k] = v; });   // 各保留前 100，避免無限長
+    const byWon = all.slice().sort((a, b2) => (b2[1].won || 0) - (a[1].won || 0)).slice(0, 100);
+    const byLost = all.slice().sort((a, b2) => (b2[1].lost || 0) - (a[1].lost || 0)).slice(0, 100);
+    const keep = {}; byWon.concat(byLost).forEach(([k, v]) => { keep[k] = v; });
     store.setConfig({ gambleBoard: keep });
     res.json({ ok: true });
 });
@@ -238,8 +240,8 @@ app.get('/api/gamble/board', auth, (req, res) => {
     const c = store.getConfig() || {};
     const gb = c.gambleBoard || {};
     const vals = Object.values(gb);
-    const topWin = vals.filter(x => (x.net || 0) > 0).map(x => ({ name: x.name, net: x.net })).sort((a, b) => b.net - a.net).slice(0, 20);
-    const topLoss = vals.filter(x => (x.net || 0) < 0).map(x => ({ name: x.name, net: x.net })).sort((a, b) => a.net - b.net).slice(0, 20);
+    const topWin = vals.filter(x => (x.won || 0) > 0).map(x => ({ name: x.name, amt: x.won })).sort((a, b) => b.amt - a.amt).slice(0, 20);
+    const topLoss = vals.filter(x => (x.lost || 0) > 0).map(x => ({ name: x.name, amt: x.lost })).sort((a, b) => b.amt - a.amt).slice(0, 20);
     res.json({ topWin, topLoss });
 });
 
