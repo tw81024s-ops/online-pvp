@@ -10805,6 +10805,8 @@ window.__adminGrantPoly = function(formName){
     var box=document.createElement('div'); box.id='casino-box';
     box.style.cssText='width:100%;max-width:520px;background:linear-gradient(160deg,#1a0f1f,#0b0f1a);border:1px solid #a21caf;border-radius:16px;box-shadow:0 0 30px rgba(217,70,239,.25);padding:16px;color:#e2e8f0;';
     ov.appendChild(box); document.body.appendChild(ov); refreshCasino(); refreshPool();
+    // 進賭場即把自己的累積贏/輸推上全服榜（不必特地開排行榜），讓更多玩家被看到
+    try{ if(typeof window.__gambleSubmit==='function' && ((player.gambleWon||0)>0 || (player.gambleLost||0)>0)) window.__gambleSubmit(player.gambleWon||0, player.gambleLost||0); }catch(e){}
   };
 
   function refreshCasino(){
