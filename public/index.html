@@ -735,7 +735,7 @@
                 <button id="btn-trash-gear" class="btn text-base py-2 font-bold px-0" style="grid-column:1 / -1; background: linear-gradient(135deg,#5b3a10 0%,#b45309 28%,#4a2f0c 52%,#d97706 76%,#3a2509 100%); color:#fde68a; border-color:#d97706;" onclick="sellUnlockedGear()">🗑️ 一鍵賣裝（賣掉未上鎖裝備/武器換金幣）</button>
             </div>
 
-            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic casino-marquee" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
+            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic casino-marquee" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openTreasurePanel()"><span class="ic">🗺️</span><span class="tx">奪寶</span></button><button class="fn-ic" onclick="openMapFragPanel()"><span class="ic">🧩</span><span class="tx">寶圖</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
 
             <div class="panel flex-1 flex flex-col overflow-hidden relative">
                 <!-- 能力 -->
@@ -876,6 +876,9 @@ const DB = {
         "item_crystal_ball": { n: "水晶球", p: 1, c: "text-blue-300", noUse: true, gachaWeight: 0, d: "巫師用以窺探命運的水晶球，似乎與龍之谷深處的傳說有關……（無法使用）" },
         "item_mastery_proof": { n: "精通之證", p: 0, c: "text-blue-300", noUse: true, noSell: true, gachaWeight: 0, d: "證明你已超越自身極限的徽記。帶回威頓村交給「漢」，開啟職業精通之路。（唯一・無法存入倉庫・無法販售）" },
         "item_soul_orb": { n: "靈魂之球", type: "misc", p: 0, c: "text-slate-200", eff: "soulorb", gachaWeight: 0, d: "蘊含微弱靈魂之力的水晶球。據說與某把失去魔力的魔杖共鳴時，能喚回沉睡的傳說。" },
+        "map_frag_hero":   { n: "英雄寶圖碎片", type: "misc", p: 0, c: "text-red-300",    gachaWeight: 0, d: "打怪掉落。集滿 10 個可在『🧩寶圖』兌換英雄寶箱（高階符石）。" },
+        "map_frag_legend": { n: "傳說寶圖碎片", type: "misc", p: 0, c: "text-purple-300", gachaWeight: 0, d: "打怪掉落（中高等怪）。集滿 6 個可在『🧩寶圖』兌換傳說寶箱（靈魂石 T4）。" },
+        "map_frag_myth":   { n: "神話寶圖碎片", type: "misc", p: 0, c: "text-amber-300",  gachaWeight: 0, d: "打怪掉落（高等怪）。集滿 3 個可在『🧩寶圖』兌換神話寶箱（靈魂石 T5 ＋ 潘朵拉卷×20）。" },
         "item_dragon_claw": { n: "飛龍的爪子", p: 1, c: "text-blue-300", noUse: true, gachaWeight: 0, d: "鋒利如刃的巨爪，似乎與龍之谷深處的傳說有關……（無法使用）" },
         "item_lizard_horn": { n: "蜥蜴的角", p: 1, c: "text-blue-300", noUse: true, gachaWeight: 0, d: "邪惡蜥蜴額上的尖角，似乎與龍之谷深處的傳說有關……（無法使用）" },
         "item_orc_amulet": { n: "妖魔戰士護身符", p: 1, c: "text-blue-300", noUse: true, gachaWeight: 0, d: "妖魔戰士隨身佩戴的護身符，似乎與龍之谷深處的傳說有關……（無法使用）" },
@@ -6367,6 +6370,13 @@ function killMob(idx) {
         gainItem('scroll_armor', _sQty, true);
         logSys(`獲得 <span class="text-sky-200 font-bold">對武器施法的卷軸 ×${_sQty}、對盔甲施法的卷軸 ×${_sQty}</span>。`);
     }
+    // ===== 寶圖碎片掉落（打怪掉落；高階碎片需較高等級怪）：英雄 0.5%／傳說 0.1%(Lv40+)／神話 0.02%(Lv60+) =====
+    {
+        var _fdm = (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult) || 1;
+        if (Math.random() < 0.005 * _fdm) gainItem('map_frag_hero', 1, false);
+        if ((mob.lv || 1) >= 40 && Math.random() < 0.001 * _fdm) gainItem('map_frag_legend', 1, false);
+        if ((mob.lv || 1) >= 60 && Math.random() < 0.0002 * _fdm) gainItem('map_frag_myth', 1, false);
+    }
     // ===== 轉生秘境：擊殺掉落「席琳附加捲軸」（一般 5%／頭目 10%）=====
     if (typeof _rbM !== 'undefined' && _rbM) {
         if (Math.random() < (mob.boss ? 0.10 : 0.05) * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1)) gainItem('sherine_scroll', 1, false);
@@ -11541,6 +11551,16 @@ function claimSiegeReward(faction) {
 }
 
 var PATCH_NOTES = [
+    { v:'奪寶 1.0', date:'2026-06', title:'🗺️ 奪寶玩法上線！',
+      lines:[
+        '【🗺️ 奪寶】功能列新增「奪寶」，內含兩款小遊戲：',
+        '・⛏️ 挖寶：每局 500 萬金幣，5×5 共 25 格藏 3 顆炸彈，自由翻格挖金幣（100～1億），翻到炸彈該局結束、已得保留，見好就收。',
+        '・🎴 翻牌：每局 300 萬金幣，4×4＝8 對，配對成功拿金幣，翻錯 5 次該局結束，全配對有額外獎。',
+        '【🧩 寶圖】功能列新增「寶圖」獨立兌換介面。寶圖碎片由「打怪掉落」，集滿可開寶箱（必出）：',
+        '・英雄碎片（全怪 0.5%）集滿 10 → 高階符石',
+        '・傳說碎片（Lv40+ 怪 0.1%）集滿 6 → 靈魂石 T4',
+        '・神話碎片（Lv60+ 怪 0.02%）集滿 3 → 靈魂石 T5 ＋ 潘朵拉抽獎卷×20',
+      ] },
     { v:'賭場 1.0', date:'2026-06', title:'🎲 賭場開幕！', html:function(){ return window.__casinoRulesHTML ? window.__casinoRulesHTML() : ''; } },
     { v:'符石系統 1.0', date:'2026-06', title:'💠 符石系統上線！',
       lines:[
@@ -11785,6 +11805,225 @@ window.openSherinePanel = function (tab) {
             }
         } catch (e) { }
     };
+    /* ===================== 🗺️ 奪寶 / 🧩 寶圖 ===================== */
+    (function(){
+      var DIG_COST = 5000000;     // 挖寶 500萬/局
+      var MEM_COST = 3000000;     // 翻牌 300萬/局
+      var FRAG = { hero:{id:'map_frag_hero', n:'英雄', need:10, c:'#fca5a5'},
+                   legend:{id:'map_frag_legend', n:'傳說', need:6, c:'#d8b4fe'},
+                   myth:{id:'map_frag_myth', n:'神話', need:3, c:'#fcd34d'} };
+      var GOLD_CAP = (typeof PLAYER_GOLD_CAP!=='undefined') ? PLAYER_GOLD_CAP : 100000000000;
+
+      function fmtN(n){ try{ return Math.floor(n).toLocaleString(); }catch(e){ return ''+n; } }
+      function addGold(g){ g=Math.floor(g)||0; player.gold = Math.min(GOLD_CAP, (player.gold||0)+g); if(typeof capGold==='function') capGold(); if(typeof updateUI==='function') updateUI(); }
+      function cnt(id){ return (typeof invCountId==='function')?invCountId(id):0; }
+      // 金幣加權表：100 ~ 1億
+      function goldRoll(){
+        var r=Math.random()*100, lo, hi;
+        if(r<60){lo=100;hi=50000;}
+        else if(r<85){lo=50000;hi=1000000;}
+        else if(r<95){lo=1000000;hi=10000000;}
+        else if(r<99){lo=10000000;hi=50000000;}
+        else {lo=50000000;hi=100000000;}
+        return Math.floor(lo + Math.random()*(hi-lo));
+      }
+
+      // ---------- 主面板（奪寶：挖寶 / 翻牌）----------
+      var tTab='dig';
+      window.openTreasurePanel=function(){
+        var old=document.getElementById('tre-overlay'); if(old) old.remove();
+        var ov=document.createElement('div'); ov.id='tre-overlay';
+        ov.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(2,6,23,.82);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:16px;';
+        ov.addEventListener('click',function(e){ if(e.target===ov) ov.remove(); });
+        var box=document.createElement('div'); box.id='tre-box';
+        box.style.cssText='width:100%;max-width:520px;background:linear-gradient(160deg,#10221a,#0b0f1a);border:1px solid #0e7490;border-radius:16px;box-shadow:0 0 30px rgba(13,148,136,.25);padding:16px;color:#e2e8f0;';
+        ov.appendChild(box); document.body.appendChild(ov);
+        renderTreasure();
+      };
+      function tMsg(t,err){ var e=document.getElementById('tre-msg'); if(e){ e.innerHTML=t; e.style.color=err?'#fca5a5':'#a7f3d0'; } }
+      function renderTreasure(){
+        var box=document.getElementById('tre-box'); if(!box) return;
+        var h='';
+        h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+        h+='<div style="font-size:20px;font-weight:800;color:#5eead4;">🗺️ 奪寶</div>';
+        h+='<button onclick="document.getElementById(\'tre-overlay\').remove()" style="background:#334155;border:none;color:#e2e8f0;border-radius:8px;padding:4px 10px;cursor:pointer;">✕</button></div>';
+        h+='<div style="font-size:12px;color:#94a3b8;margin-bottom:8px;">金幣：'+fmtN(player.gold||0)+'</div>';
+        h+='<div style="display:flex;gap:6px;margin-bottom:10px;">';
+        h+=tBtn('dig','⛏️ 挖寶'); h+=tBtn('mem','🎴 翻牌');
+        h+='</div>';
+        h+='<div id="tre-content"></div>';
+        h+='<div id="tre-msg" style="margin-top:10px;font-size:13px;min-height:18px;color:#a7f3d0;"></div>';
+        box.innerHTML=h;
+        if(tTab==='dig') renderDig(); else renderMem();
+      }
+      function tBtn(k,label){ var on=(tTab===k); return '<button onclick="__treTab(\''+k+'\')" style="flex:1;padding:8px;border-radius:8px;border:1px solid '+(on?'#14b8a6':'#334155')+';background:'+(on?'#0f766e':'#1e293b')+';color:'+(on?'#fff':'#cbd5e1')+';font-weight:700;cursor:pointer;">'+label+'</button>'; }
+      window.__treTab=function(k){ tTab=k; renderTreasure(); };
+
+      // ---------- 挖寶 ----------
+      var dig=null;
+      function newDig(){
+        if((player.gold||0) < DIG_COST){ tMsg('金幣不足（需 '+fmtN(DIG_COST)+'）',true); return; }
+        player.gold -= DIG_COST; if(typeof updateUI==='function') updateUI();
+        var tiles=[]; var i;
+        for(i=0;i<25;i++) tiles.push({bomb:false,gold:goldRoll(),dug:false});
+        var bn=0; while(bn<3){ var p=Math.floor(Math.random()*25); if(!tiles[p].bomb){ tiles[p].bomb=true; bn++; } }
+        dig={tiles:tiles, won:0, over:false};
+        renderTreasure();
+        tMsg('開新局！翻到 💣 該局結束，已得金幣保留。');
+      }
+      window.__digTile=function(i){
+        if(!dig || dig.over) return;
+        var c=dig.tiles[i]; if(!c || c.dug) return;
+        c.dug=true;
+        if(c.bomb){ dig.over=true; renderDig(); tMsg('💥 踩到炸彈！本局結束，已得 '+fmtN(dig.won)+' 金幣。',true); return; }
+        dig.won += c.gold; addGold(c.gold);
+        renderDig();
+        tMsg('挖到 '+fmtN(c.gold)+' 金幣！本局累積 '+fmtN(dig.won)+'。');
+      };
+      function renderDig(){
+        var el=document.getElementById('tre-content'); if(!el) return;
+        var h='';
+        h+='<div style="font-size:12px;color:#94a3b8;margin-bottom:6px;">每局 '+fmtN(DIG_COST)+' 金幣・25 格藏 3 顆炸彈・翻到炸彈該局結束（已得保留）</div>';
+        if(!dig){
+          h+='<div style="text-align:center;padding:18px;"><button onclick="__newDig()" style="background:linear-gradient(135deg,#0d9488,#14b8a6);border:none;color:#fff;font-weight:800;font-size:16px;border-radius:10px;padding:12px 22px;cursor:pointer;">⛏️ 開始挖寶（'+fmtN(DIG_COST)+'）</button></div>';
+          el.innerHTML=h; return;
+        }
+        h+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">';
+        for(var i=0;i<25;i++){
+          var c=dig.tiles[i]; var face, bg, col='#e2e8f0';
+          if(!c.dug){ face='❓'; bg='#1e293b'; }
+          else if(c.bomb){ face='💣'; bg='#7f1d1d'; }
+          else { face='💰'; bg='#064e3b'; col='#fde68a'; }
+          h+='<button '+((!dig.over&&!c.dug)?('onclick="__digTile('+i+')"'):'disabled')+' style="aspect-ratio:1;border:1px solid #334155;border-radius:8px;background:'+bg+';color:'+col+';font-size:18px;'+((!dig.over&&!c.dug)?'cursor:pointer;':'')+'">'+face+'</button>';
+        }
+        h+='</div>';
+        h+='<div style="text-align:center;margin-top:10px;font-weight:700;color:#fde68a;">本局已得：'+fmtN(dig.won)+' 金幣</div>';
+        h+='<div style="display:flex;gap:8px;margin-top:8px;">';
+        if(dig.over) h+='<button onclick="__newDig()" style="flex:1;background:linear-gradient(135deg,#0d9488,#14b8a6);border:none;color:#fff;font-weight:800;border-radius:10px;padding:10px;cursor:pointer;">再來一局（'+fmtN(DIG_COST)+'）</button>';
+        else h+='<button onclick="__digStop()" style="flex:1;background:#475569;border:none;color:#fff;font-weight:700;border-radius:10px;padding:10px;cursor:pointer;">✋ 收手（保留已得）</button>';
+        h+='</div>';
+        el.innerHTML=h;
+      }
+      window.__newDig=newDig;
+      window.__digStop=function(){ dig=null; renderTreasure(); tMsg('已收手，金幣已入袋。'); };
+
+      // ---------- 翻牌 ----------
+      var EMO=['💎','👑','🏺','🗡️','🛡️','💍','📜','🔮'];
+      var mem=null;
+      function newMem(){
+        if((player.gold||0) < MEM_COST){ tMsg('金幣不足（需 '+fmtN(MEM_COST)+'）',true); return; }
+        player.gold -= MEM_COST; if(typeof updateUI==='function') updateUI();
+        var cards=[]; var p;
+        for(p=0;p<8;p++){ var g=goldRoll(); cards.push({pair:p,gold:g}); cards.push({pair:p,gold:g}); }
+        for(var i=cards.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var tmp=cards[i];cards[i]=cards[j];cards[j]=tmp; }
+        mem={cards:cards, flipped:[], matched:{}, mistakes:0, won:0, busy:false, over:false};
+        renderTreasure();
+        tMsg('開新局！配對成功拿金幣，翻錯 5 次該局結束。');
+      }
+      window.__memFlip=function(i){
+        if(!mem || mem.over || mem.busy) return;
+        if(mem.matched[i] || mem.flipped.indexOf(i)>=0) return;
+        mem.flipped.push(i); renderMem();
+        if(mem.flipped.length===2){
+          var a=mem.flipped[0], b=mem.flipped[1];
+          if(mem.cards[a].pair===mem.cards[b].pair){
+            mem.matched[a]=1; mem.matched[b]=1; mem.flipped=[];
+            var g=mem.cards[a].gold; mem.won+=g; addGold(g);
+            var done=Object.keys(mem.matched).length;
+            if(done>=16){ var bonus=goldRoll(); mem.won+=bonus; addGold(bonus); mem.over=true; renderMem(); tMsg('🎉 全部配對完成！額外獎勵 '+fmtN(bonus)+'，本局共得 '+fmtN(mem.won)+'。'); return; }
+            renderMem(); tMsg('配對成功！+'+fmtN(g)+' 金幣（本局 '+fmtN(mem.won)+'）。');
+          } else {
+            mem.mistakes++; mem.busy=true; renderMem();
+            if(mem.mistakes>=5){ setTimeout(function(){ if(!mem) return; mem.over=true; mem.flipped=[]; mem.busy=false; renderMem(); tMsg('翻錯 5 次，本局結束。已得 '+fmtN(mem.won)+' 金幣。',true); },700); }
+            else { tMsg('沒對上…（翻錯 '+mem.mistakes+'/5）',true); setTimeout(function(){ if(!mem) return; mem.flipped=[]; mem.busy=false; renderMem(); },700); }
+          }
+        }
+      };
+      function renderMem(){
+        var el=document.getElementById('tre-content'); if(!el) return;
+        var h='';
+        h+='<div style="font-size:12px;color:#94a3b8;margin-bottom:6px;">每局 '+fmtN(MEM_COST)+' 金幣・4×4＝8 對・配對拿金幣・翻錯 5 次結束・全配對有額外獎</div>';
+        if(!mem){
+          h+='<div style="text-align:center;padding:18px;"><button onclick="__newMem()" style="background:linear-gradient(135deg,#7c3aed,#a855f7);border:none;color:#fff;font-weight:800;font-size:16px;border-radius:10px;padding:12px 22px;cursor:pointer;">🎴 開始翻牌（'+fmtN(MEM_COST)+'）</button></div>';
+          el.innerHTML=h; return;
+        }
+        h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">';
+        for(var i=0;i<16;i++){
+          var up=(mem.matched[i] || mem.flipped.indexOf(i)>=0);
+          var face=up?EMO[mem.cards[i].pair]:'🎴';
+          var bg=mem.matched[i]?'#064e3b':(up?'#1e3a8a':'#1e293b');
+          h+='<button '+((!mem.over&&!up&&!mem.busy)?('onclick="__memFlip('+i+')"'):'disabled')+' style="aspect-ratio:1;border:1px solid #334155;border-radius:8px;background:'+bg+';font-size:20px;'+((!mem.over&&!up&&!mem.busy)?'cursor:pointer;':'')+'">'+face+'</button>';
+        }
+        h+='</div>';
+        h+='<div style="text-align:center;margin-top:10px;font-weight:700;color:#fde68a;">本局已得：'+fmtN(mem.won)+' 金幣　｜　翻錯 '+mem.mistakes+'/5</div>';
+        h+='<div style="display:flex;gap:8px;margin-top:8px;">';
+        if(mem.over) h+='<button onclick="__newMem()" style="flex:1;background:linear-gradient(135deg,#7c3aed,#a855f7);border:none;color:#fff;font-weight:800;border-radius:10px;padding:10px;cursor:pointer;">再來一局（'+fmtN(MEM_COST)+'）</button>';
+        else h+='<button onclick="__memStop()" style="flex:1;background:#475569;border:none;color:#fff;font-weight:700;border-radius:10px;padding:10px;cursor:pointer;">✋ 收手（保留已得）</button>';
+        h+='</div>';
+        el.innerHTML=h;
+      }
+      window.__newMem=newMem;
+      window.__memStop=function(){ mem=null; renderTreasure(); tMsg('已收手，金幣已入袋。'); };
+
+      // ---------- 🧩 寶圖（獨立兌換介面）----------
+      window.openMapFragPanel=function(){
+        var old=document.getElementById('frag-overlay'); if(old) old.remove();
+        var ov=document.createElement('div'); ov.id='frag-overlay';
+        ov.style.cssText='position:fixed;inset:0;z-index:9001;background:rgba(2,6,23,.82);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:16px;';
+        ov.addEventListener('click',function(e){ if(e.target===ov) ov.remove(); });
+        var box=document.createElement('div'); box.id='frag-box';
+        box.style.cssText='width:100%;max-width:480px;background:linear-gradient(160deg,#1a160f,#0b0f1a);border:1px solid #b45309;border-radius:16px;box-shadow:0 0 30px rgba(180,83,9,.3);padding:16px;color:#e2e8f0;';
+        ov.appendChild(box); document.body.appendChild(ov);
+        renderFrag();
+      };
+      function fMsg(t,err){ var e=document.getElementById('frag-msg'); if(e){ e.innerHTML=t; e.style.color=err?'#fca5a5':'#fde68a'; } }
+      function fragRow(k){
+        var f=FRAG[k]; var have=cnt(f.id); var ok=have>=f.need;
+        var h='<div style="display:flex;align-items:center;justify-content:space-between;background:#0f172a;border:1px solid #334155;border-radius:10px;padding:10px;margin-bottom:8px;">';
+        h+='<div><div style="font-weight:800;color:'+f.c+';">'+f.n+'寶箱</div><div style="font-size:12px;color:#94a3b8;">'+f.n+'碎片 '+have+' / '+f.need+'</div></div>';
+        h+='<button '+(ok?('onclick="__openFragChest(\''+k+'\')"'):'disabled')+' style="background:'+(ok?'linear-gradient(135deg,#b45309,#f59e0b)':'#334155')+';border:none;color:#fff;font-weight:800;border-radius:8px;padding:8px 14px;'+(ok?'cursor:pointer;':'opacity:.6;')+'">開啟</button>';
+        h+='</div>';
+        return h;
+      }
+      function renderFrag(){
+        var box=document.getElementById('frag-box'); if(!box) return;
+        var h='';
+        h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+        h+='<div style="font-size:20px;font-weight:800;color:#fbbf24;">🧩 寶圖兌換</div>';
+        h+='<button onclick="document.getElementById(\'frag-overlay\').remove()" style="background:#334155;border:none;color:#e2e8f0;border-radius:8px;padding:4px 10px;cursor:pointer;">✕</button></div>';
+        h+=fragRow('hero'); h+=fragRow('legend'); h+=fragRow('myth');
+        h+='<div id="frag-msg" style="margin:6px 0;font-size:13px;min-height:18px;color:#fde68a;"></div>';
+        h+='<div style="background:#0f172a;border:1px solid #334155;border-radius:10px;padding:10px;font-size:12px;color:#cbd5e1;line-height:1.7;">';
+        h+='<div style="font-weight:800;color:#fbbf24;margin-bottom:4px;">📜 掉落說明</div>';
+        h+='寶圖碎片由<b>打怪掉落</b>，集滿可開對應寶箱（必出）：<br>';
+        h+='・<span style="color:#fca5a5;">英雄碎片</span>　全怪 <b>0.5%</b>　｜ 集滿 <b>10</b> → 高階符石<br>';
+        h+='・<span style="color:#d8b4fe;">傳說碎片</span>　Lv40+ 怪 <b>0.1%</b>　｜ 集滿 <b>6</b> → 靈魂石 T4<br>';
+        h+='・<span style="color:#fcd34d;">神話碎片</span>　Lv60+ 怪 <b>0.02%</b>　｜ 集滿 <b>3</b> → 靈魂石 T5 ＋ 潘朵拉卷×20';
+        h+='</div>';
+        box.innerHTML=h;
+      }
+      window.__openFragChest=function(k){
+        var f=FRAG[k]; var have=cnt(f.id);
+        if(have < f.need){ fMsg('碎片不足。',true); return; }
+        if(typeof consumeMaterialById==='function') consumeMaterialById(f.id, f.need);
+        var msg=''; var BT=window.SOULSTONE_BY_TIER||{};
+        if(k==='hero'){
+          var runes=['rune_aiodin','rune_gaia']; var rid=runes[Math.floor(Math.random()*runes.length)];
+          gainItem(rid,1,false); msg='英雄寶箱開出 <b style="color:#fca5a5;">'+((DB.items[rid]&&DB.items[rid].n)||rid)+'</b>！';
+        } else if(k==='legend'){
+          if(BT[4]&&BT[4].length&&typeof window.gainSoulStone==='function'){ var s4=BT[4][Math.floor(Math.random()*BT[4].length)]; window.gainSoulStone(s4,1,false); msg='傳說寶箱開出 <b style="color:#d8b4fe;">靈魂石 T4</b>！'; }
+          else { addGold(100000000); msg='傳說寶箱開出 <b>1億金幣</b>（暫無 T4 靈魂石可給）。'; }
+        } else {
+          if(BT[5]&&BT[5].length&&typeof window.gainSoulStone==='function'){ var s5=BT[5][Math.floor(Math.random()*BT[5].length)]; window.gainSoulStone(s5,1,false); }
+          gainItem('new_item_239',20,false);
+          msg='神話寶箱開出 <b style="color:#fcd34d;">靈魂石 T5 ＋ 潘朵拉抽獎卷 ×20</b>！';
+        }
+        if(typeof saveGame==='function'){ try{ saveGame(); }catch(e){} }
+        renderFrag(); fMsg('🎉 '+msg);
+        if(typeof renderTabs==='function'){ try{ renderTabs(); }catch(e){} }
+      };
+    })();
+
     // ===================== 爬塔守護 Guard TD =====================
 var TOWER_MAP = 'climb_td';     // sentinel 地圖：DB.maps 無此鍵 → spawnMob 自動 no-op（禁止自動重生）
 var TOWER_CAP = 100;            // 封頂 100 樓
