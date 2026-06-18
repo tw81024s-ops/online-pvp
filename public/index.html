@@ -449,6 +449,16 @@
 .fn-ic:active{transform:scale(.95);}
 .fn-ic .ic{font-size:20px;line-height:1.1;}
 .fn-ic .tx{font-size:11px;}
+/* 🎰 賭場按鈕：跑馬燈閃爍金邊 */
+@keyframes casinoRun{0%{background-position:0% 50%;}100%{background-position:250% 50%;}}
+@keyframes casinoFlash{0%,100%{box-shadow:0 0 4px rgba(251,191,36,.7),0 0 9px rgba(245,158,11,.5);}50%{box-shadow:0 0 11px rgba(253,224,71,.95),0 0 22px rgba(245,158,11,.8),0 0 34px rgba(180,83,9,.6);}}
+.fn-ic.casino-marquee{position:relative;z-index:0;border-color:transparent !important;animation:casinoFlash 1.05s ease-in-out infinite;}
+.fn-ic.casino-marquee::before{content:"";position:absolute;inset:-2px;border-radius:12px;padding:2px;
+  background:linear-gradient(90deg,#b45309,#fde047,#fffbe6,#fde047,#f59e0b,#fde047,#fffbe6,#fde047,#b45309);
+  background-size:250% 100%;animation:casinoRun 1.1s linear infinite;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;
+  z-index:-1;pointer-events:none;}
 /* ===== 套裝監視 ===== */
 .smv-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:14px;z-index:9970;}
 .smv-ov.on{display:flex;}
@@ -725,7 +735,7 @@
                 <button id="btn-trash-gear" class="btn text-base py-2 font-bold px-0" style="grid-column:1 / -1; background: linear-gradient(135deg,#5b3a10 0%,#b45309 28%,#4a2f0c 52%,#d97706 76%,#3a2509 100%); color:#fde68a; border-color:#d97706;" onclick="sellUnlockedGear()">🗑️ 一鍵賣裝（賣掉未上鎖裝備/武器換金幣）</button>
             </div>
 
-            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
+            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic casino-marquee" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
 
             <div class="panel flex-1 flex flex-col overflow-hidden relative">
                 <!-- 能力 -->
@@ -838,6 +848,7 @@ function _skillReqLv(sk){
 const DB = {
         items: {
         "gold_scroll": { n: "金幣捲軸", type: "scroll", req: "all", eff: "gold_scroll", c: "text-yellow-300", p: 1, gachaWeight: 0, noJunk: true, d: "深淵秘境的寶物，可交易。使用時開啟，隨機獲得 100萬~2000萬 金幣（金額越高越稀有）。" },
+        "jackpot_scroll": { n: "頭獎金幣捲", type: "scroll", req: "all", eff: "jackpot_scroll", val: 100000000, c: "text-amber-300", p: 1, gachaWeight: 0, noJunk: true, noUse: false, d: "全服頭獎兌換券，可交易。使用獲得 1 億金幣（超過金幣上限的部分不予發放，請先花掉部分金幣再開）。" },
         "rune_str": { n: "力量符石", type: "acc", slot: "rune", req: "all", str: 1, c: "text-sky-300", p: 50000, gachaWeight: 0, runeTier: 1, d: "刻有力量之印的符石。力量 +1。" },
         "rune_dex": { n: "敏捷符石", type: "acc", slot: "rune", req: "all", dex: 1, c: "text-sky-300", p: 50000, gachaWeight: 0, runeTier: 1, d: "敏捷 +1。" },
         "rune_int": { n: "智力符石", type: "acc", slot: "rune", req: "all", int: 1, c: "text-sky-300", p: 50000, gachaWeight: 0, runeTier: 1, d: "智力 +1。" },
@@ -3331,6 +3342,7 @@ window.__deskSkinApply = function(){
       background:linear-gradient(180deg,#2a1e13,#0d0805) !important; box-shadow:inset 0 1px 0 rgba(251,233,168,.18) !important; }
     body.ornate-desk .fn-ic:hover{ box-shadow:0 0 15px rgba(255,122,42,.55),inset 0 1px 0 rgba(251,233,168,.3) !important; border-color:#ffcf6a !important; }
     body.ornate-desk .fn-ic .tx{ color:#e7d6ab !important; }
+    body.ornate-desk .fn-ic.casino-marquee{ border-color:transparent !important; }
     body.ornate-desk .btn:hover{ box-shadow:0 0 12px rgba(255,150,50,.45) !important; }
     /* 狀態欄龍紋角飾 */
     body.ornate-desk #status-panel{ overflow:visible !important; }
@@ -7962,6 +7974,19 @@ function useItem(u, silent = false) {
         } else { _finishDelete(); }
         return;
     }
+    if (d.eff === 'jackpot_scroll') {
+        if (silent) return;   // 只能手動開啟
+        var __cap = (typeof PLAYER_GOLD_CAP !== 'undefined') ? PLAYER_GOLD_CAP : 100000000000;
+        if (player.gold >= __cap) { logSys(`金幣已達上限，無法開啟 ${d.n}。請先花掉部分金幣。`); return; }
+        var __room = __cap - player.gold;
+        var __add = Math.min(d.val || 0, __room);
+        consume(item);
+        player.gold += __add;
+        logSys(`開啟 ${d.n}，獲得 <span class="text-amber-300 font-bold">${Math.floor(__add).toLocaleString()}</span> 金幣${__add < (d.val||0) ? '（部分受上限限制未發放）' : ''}。`);
+        try{ if(typeof saveGame==='function') saveGame(); }catch(e){}
+        updateUI();
+        return;
+    }
     if (d.eff === 'gold_scroll') {
         if (silent) return;   // 金幣捲軸只能手動開啟
         consume(item);
@@ -8629,6 +8654,22 @@ function renderStatusEffects() {
 }
 
 const PLAYER_GOLD_CAP = 100000000000; // 玩家金幣上限 1000億
+// 🔒 後台設定（玩家不可見）：依下注額決定「抱走全服獎池」的機率。下注 <1000萬 固定 0.0001；≥1000萬 按倍數放大（上限 0.01）
+window.__jackpotChance = function(bet){
+    bet = Math.max(0, Math.floor(bet) || 0);
+    if (bet < 10000000) return 0.0001;
+    return Math.min(0.01, 0.0001 * (bet / 10000000));
+};
+// 🎰 頭獎發放：把整池換成「頭獎金幣捲」(每張1億)＋零頭金幣，避免直接加金幣爆上限而損失
+window.__payJackpot = function(won){
+    won = Math.floor(won) || 0; if (won <= 0) return { scrolls:0, gold:0 };
+    var SCROLL = 100000000;                       // 每張頭獎金幣捲 = 1 億
+    var scrolls = Math.floor(won / SCROLL);
+    var rest = won - scrolls * SCROLL;             // 不足 1 億的零頭
+    if (scrolls > 0 && typeof gainItem === 'function') gainItem('jackpot_scroll', scrolls, true);
+    if (rest > 0) { var cap = PLAYER_GOLD_CAP; player.gold = Math.min(cap, (player.gold||0) + rest); }
+    return { scrolls:scrolls, gold:rest };
+};
 function capGold() {
     if (typeof player === 'undefined' || !player) return;
     if (player.gold > PLAYER_GOLD_CAP) {
@@ -10428,8 +10469,8 @@ window.__adminGrantPoly = function(formName){
   var STEP_LABEL = ['1萬','10萬','100萬','1000萬','1億','10億'];
   var DICE = ['','⚀','⚁','⚂','⚃','⚄','⚅'];
   var cs = { bet:1000000, pick:7, d1:0, d2:0, last:null, game:'dice', pool:null, slot:null, bj:null };
-  var REEL = [['🍒',30],['🔔',25],['🍋',20],['⭐',15],['7️⃣',8],['💎',2]];   // 權重總和100
-  var REEL_PAY = { '🍒':4, '🔔':6, '🍋':12, '⭐':30, '7️⃣':120 };               // 三連賠率（💎=頭獎）
+  var REEL = [['🍒',44],['🔔',30],['🍋',15],['⭐',7],['7️⃣',3],['💎',1]];   // 權重總和100（提高中獎率：常見符號加重）
+  var REEL_PAY = { '🍒':4, '🔔':6, '🍋':12, '⭐':30, '7️⃣':120, '💎':200 };       // 三連賠率
   var POOL_CUT = 0.20;            // 每注撥 20% 進全服頭獎池
   var JACK_BASE = 100000000;      // 頭獎底值 1 億（離線/領取失敗時的保底）
 
@@ -10470,12 +10511,13 @@ window.__adminGrantPoly = function(formName){
     if(win>0) logSys('🎲 '+dface+' = '+sum+'（'+label+'）<span class="'+settleClass(true)+' font-bold">贏 '+fmt(win)+' 金幣</span>');
     else logSys('🎲 '+dface+' = '+sum+'（'+label+'）<span class="'+settleClass(false)+'">輸 '+fmt(bet)+' 金幣</span>'+(cs.last.special?'（7點通殺）':''));
     casinoNet(payout - bet);
-    // 全服頭獎：每注 0.0001% 中頭獎；否則撥 20% 進池
-    if(Math.random() < 0.000001){
+    // 全服頭獎：後台隱藏機率(__jackpotChance，依注額)；否則撥 20% 進池
+    if(Math.random() < window.__jackpotChance(bet)){   // 後台隱藏機率，依注額
       var jwon=JACK_BASE;
       if(typeof window.__claimJackpot==='function'){ var jr=await window.__claimJackpot(); if(jr&&typeof jr.won==='number') jwon=jr.won; }
-      player.gold += jwon; casinoNet(jwon); setPoolEl(JACK_BASE);
-      logSys('🎲 <span class="text-amber-300 font-extrabold">🎉🎉 全服累積頭獎！抱走 '+fmt(jwon)+' 金幣！</span>');
+      var __pjd=(typeof window.__payJackpot==='function')?window.__payJackpot(jwon):null; if(!__pjd){ player.gold += jwon; }
+      casinoNet(jwon); setPoolEl(JACK_BASE);
+      logSys('🎲 <span class="text-amber-300 font-extrabold">🎉🎉 全服累積頭獎！'+fmt(jwon)+' 金幣'+(__pjd&&__pjd.scrolls?'（'+__pjd.scrolls+' 張頭獎金幣捲）':'')+'！</span>');
     } else if(typeof window.__addJackpot==='function'){
       window.__addJackpot(Math.floor(bet*POOL_CUT)).then(function(rp){ if(rp&&typeof rp.pool==='number') setPoolEl(rp.pool); });
     }
@@ -10532,35 +10574,36 @@ window.__adminGrantPoly = function(formName){
   function casinoNet(delta){
     delta = Math.round(delta||0);
     if(!delta) return;
-    player.gambleNet = Math.round((player.gambleNet||0) + delta);
-    if(typeof window.__gambleSubmit==='function'){ clearTimeout(cs._netT); cs._netT=setTimeout(function(){ try{ window.__gambleSubmit(player.gambleNet); }catch(e){} }, 1500); }   // 1.5 秒防抖，避免每注都打 server
+    if(delta>0) player.gambleWon = Math.round((player.gambleWon||0) + delta);     // 該局淨贏 → 累積到贏錢榜
+    else player.gambleLost = Math.round((player.gambleLost||0) + (-delta));        // 該局淨輸 → 累積到輸錢榜
+    if(typeof window.__gambleSubmit==='function'){ clearTimeout(cs._netT); cs._netT=setTimeout(function(){ try{ window.__gambleSubmit(player.gambleWon||0, player.gambleLost||0); }catch(e){} }, 1500); }   // 1.5 秒防抖
   }
-  window.casinoTrackNet = casinoNet;   // 供刮刮卡共用同一筆淨輸贏
+  window.casinoTrackNet = casinoNet;   // 供刮刮卡共用
   window.casinoBoard = function(){
     var old=document.getElementById('cas-board-overlay'); if(old) old.remove();
     var ov=document.createElement('div'); ov.id='cas-board-overlay';
     ov.style.cssText='position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:16px;';
     var box=document.createElement('div');
     box.style.cssText='background:#1e293b;border:2px solid #a16207;border-radius:16px;max-width:460px;width:100%;max-height:86vh;overflow:auto;padding:18px;box-shadow:0 0 30px rgba(234,179,8,.3);';
-    var me = Math.round(player.gambleNet||0);
+    var won = Math.round(player.gambleWon||0), lost = Math.round(player.gambleLost||0);
     box.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><div style="font-size:19px;font-weight:800;color:#fbbf24;">🏆 賭場排行榜</div><button onclick="document.getElementById(\'cas-board-overlay\').remove()" style="background:#334155;color:#fff;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button></div>'
-      +'<div style="font-size:12px;color:#94a3b8;margin-bottom:12px;">你的累積淨輸贏：<b style="color:'+(me>=0?'#86efac':'#fca5a5')+'">'+(me>=0?'+':'')+Math.floor(me).toLocaleString()+'</b> 金幣</div>'
+      +'<div style="font-size:12px;color:#94a3b8;margin-bottom:12px;">你累積贏 <b style="color:#86efac;">'+won.toLocaleString()+'</b>　累積輸 <b style="color:#fca5a5;">'+lost.toLocaleString()+'</b> 金幣</div>'
       +'<div id="cas-board-body" style="font-size:13px;color:#cbd5e1;text-align:center;padding:20px;">載入中…</div>';
     ov.appendChild(box); document.body.appendChild(ov); ov.onclick=function(e){ if(e.target===ov) ov.remove(); };
     if(typeof window.__gambleBoard!=='function'){ document.getElementById('cas-board-body').innerHTML='需登入線上才能看全服排行榜。'; return; }
     window.__gambleBoard().then(function(r){
       var body=document.getElementById('cas-board-body'); if(!body) return;
       r=r||{}; var win=r.topWin||[], lose=r.topLoss||[];
-      function tbl(list, sign, col){
-        if(!list.length) return '<div style="color:#64748b;padding:10px;">—尚無紀錄—</div>';
+      function tbl(list, col, emptyMsg){
+        if(!list.length) return '<div style="color:#64748b;padding:10px;">'+(emptyMsg||'—尚無紀錄—')+'</div>';
         var s='<div style="display:flex;flex-direction:column;gap:3px;">';
-        for(var i=0;i<list.length;i++){ var e=list[i]; var amt=Math.abs(Math.floor(e.net||0)).toLocaleString();
-          s+='<div style="display:flex;justify-content:space-between;background:#0f172a;border-radius:7px;padding:6px 10px;"><span style="color:#e2e8f0;"><b style="color:#fbbf24;display:inline-block;width:22px;">'+(i+1)+'</b>'+(e.name||'???')+'</span><span style="color:'+col+';font-weight:bold;">'+sign+amt+'</span></div>'; }
+        for(var i=0;i<list.length;i++){ var e=list[i]; var amt=Math.abs(Math.floor(e.amt||0)).toLocaleString();
+          s+='<div style="display:flex;justify-content:space-between;background:#0f172a;border-radius:7px;padding:6px 10px;"><span style="color:#e2e8f0;"><b style="color:#fbbf24;display:inline-block;width:22px;">'+(i+1)+'</b>'+(e.name||'???')+'</span><span style="color:'+col+';font-weight:bold;">'+amt+'</span></div>'; }
         return s+'</div>';
       }
       body.style.textAlign='left'; body.style.padding='0';
-      body.innerHTML='<div style="font-size:14px;font-weight:800;color:#86efac;margin:4px 0 6px;">💰 贏錢榜 Top 20</div>'+tbl(win,'+','#86efac')
-        +'<div style="font-size:14px;font-weight:800;color:#fca5a5;margin:14px 0 6px;">💸 輸錢榜 Top 20</div>'+tbl(lose,'-','#fca5a5');
+      body.innerHTML='<div style="font-size:14px;font-weight:800;color:#86efac;margin:4px 0 6px;">💰 贏錢榜 Top 20（累積贏的金額）</div>'+tbl(win,'#86efac','還沒有人贏錢，快去開張！')
+        +'<div style="font-size:14px;font-weight:800;color:#fca5a5;margin:14px 0 6px;">💸 輸錢榜 Top 20（累積輸的金額）</div>'+tbl(lose,'#fca5a5','還沒有人輸錢。');
     }).catch(function(){ var body=document.getElementById('cas-board-body'); if(body) body.innerHTML='載入失敗。'; });
   };
 
@@ -10573,13 +10616,13 @@ window.__adminGrantPoly = function(formName){
     if(gold()<bet){ casinoMsg('金幣不足！目前 '+fmt(gold())+'，下注 '+fmt(bet), true); return; }
     player.gold -= bet;
     var s=[reelPick(),reelPick(),reelPick()];
-    if(s[0]===s[1] && s[1]===s[2] && s[0]==='💎'){
+    if(Math.random() < window.__jackpotChance(bet)){   // 後台隱藏機率，依注額抱走全服頭獎
       var won=JACK_BASE;
       if(typeof window.__claimJackpot==='function'){ var r=await window.__claimJackpot(); if(r&&typeof r.won==='number') won=r.won; }
-      player.gold += won;
+      var __pj=(typeof window.__payJackpot==='function')?window.__payJackpot(won):null; if(!__pj){ player.gold += won; }
       cs.slot={ s:s, jackpot:true, ret:won, delta:won-bet };
       setPoolEl(JACK_BASE);
-      logSys('🎰 '+s.join(' ')+' <span class="text-amber-300 font-extrabold">💎💎💎 全服頭獎！抱走 '+fmt(won)+' 金幣！</span>');
+      logSys('🎰 '+s.join(' ')+' <span class="text-amber-300 font-extrabold">🎉 全服頭獎！'+fmt(won)+' 金幣'+(__pj&&__pj.scrolls?'（'+__pj.scrolls+' 張頭獎金幣捲）':'')+'！</span>');
     } else {
       var payout=0;
       if(s[0]===s[1] && s[1]===s[2]) payout = bet*(REEL_PAY[s[0]]||0);
@@ -10595,8 +10638,31 @@ window.__adminGrantPoly = function(formName){
     refreshCasino();
   };
 
-  /* ===== 21點（4 副牌、莊家17停、BJ賠1:1、平手莊家贏）===== */
-  function newShoe(){ var d=[]; for(var k=0;k<4;k++) for(var su=0;su<4;su++) for(var v=1;v<=13;v++) d.push(v); for(var i=d.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=d[i]; d[i]=d[j]; d[j]=t; } return d; }
+  /* ===== 拚獎池（下 1 萬、撥 20% 進池、後台隱藏機率搏整池）===== */
+  var JACKPOT_BET = 10000;        // 一萬
+  window.casinoJackpotRoll = async function(){
+    var bet=JACKPOT_BET;
+    if(gold()<bet){ casinoMsg('金幣不足！拚獎池需 '+fmt(bet)+' 金幣', true); return; }
+    player.gold -= bet; casinoNet(-bet);
+    if(Math.random() < window.__jackpotChance(bet)){   // 後台隱藏機率
+      var won=JACK_BASE;
+      if(typeof window.__claimJackpot==='function'){ var r=await window.__claimJackpot(); if(r&&typeof r.won==='number') won=r.won; }
+      var __pjr=(typeof window.__payJackpot==='function')?window.__payJackpot(won):null; if(!__pjr){ player.gold += won; }
+      casinoNet(won); setPoolEl(JACK_BASE);
+      var __sc=(__pjr&&__pjr.scrolls?'（'+__pjr.scrolls+' 張頭獎金幣捲）':'');
+      logSys('🎯 <span class="text-amber-300 font-extrabold">🎉🎉 拚中全服頭獎！'+fmt(won)+' 金幣'+__sc+'！</span>');
+      casinoMsg('🎉 中了！'+fmt(won)+' 金幣'+__sc+'！');
+    } else {
+      if(typeof window.__addJackpot==='function') window.__addJackpot(Math.floor(bet*POOL_CUT)).then(function(r){ if(r&&typeof r.pool==='number') setPoolEl(r.pool); });
+      casinoMsg('沒中…再接再厲！', true);
+    }
+    try{ if(typeof updateUI==='function') updateUI(); }catch(e){}
+    try{ if(typeof saveGame==='function') saveGame(); }catch(e){}
+    refreshCasino();
+  };
+
+  /* ===== 21點（2 副牌、莊家17停、BJ賠1:1、平手莊家贏）===== */
+  function newShoe(){ var d=[]; for(var k=0;k<2;k++) for(var su=0;su<4;su++) for(var v=1;v<=13;v++) d.push(v); for(var i=d.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=d[i]; d[i]=d[j]; d[j]=t; } return d; }
   function cardVal(c){ return c>10?10:c; }
   function handVal(arr){ var s=0,ace=0,i; for(i=0;i<arr.length;i++){ if(arr[i]===1) ace++; s+=cardVal(arr[i]); } var soft=false; if(ace>0 && s+10<=21){ s+=10; soft=true; } return { v:s, soft:soft }; }
   function cardName(c){ return c===1?'A':(c===11?'J':(c===12?'Q':(c===13?'K':String(c)))); }
@@ -10678,7 +10744,7 @@ window.__adminGrantPoly = function(formName){
     h+='</div>';
     h+=betUI();
     h+='<button onclick="casinoSlot()" style="width:100%;background:linear-gradient(90deg,#b91c1c,#f59e0b);color:#fff;border:none;border-radius:10px;padding:14px;cursor:pointer;font-weight:800;font-size:16px;margin-bottom:8px;">🎰 拉一次</button>';
-    h+='<div style="font-size:11px;color:#94a3b8;line-height:1.8;margin-bottom:14px;">三連賠率：🍒×3=4倍　🔔×3=6倍　🍋×3=12倍　⭐×3=30倍　7️⃣×3=120倍<br><span style="color:#fde047;">💎×3 ＝ 🎉 抱走全服累積頭獎池！</span>　每拉撥 20% 進池</div>';
+    h+='<div style="font-size:11px;color:#94a3b8;line-height:1.8;margin-bottom:14px;">三連賠率：🍒×3=4倍　🔔×3=6倍　🍋×3=12倍　⭐×3=30倍　7️⃣×3=120倍　💎×3=200倍<br><span style="color:#fde047;">拉中即有機會抱走全服累積頭獎池！</span>　每拉撥 20% 進池</div>';
     return h;
   }
   function bjContent(){
@@ -10703,7 +10769,7 @@ window.__adminGrantPoly = function(formName){
         h+='<button onclick="casinoBjReset()" style="width:100%;background:#15803d;color:#fff;border:none;border-radius:10px;padding:13px;cursor:pointer;font-weight:bold;margin-bottom:8px;">再來一局</button>';
       }
     }
-    h+='<div style="font-size:11px;color:#94a3b8;line-height:1.8;margin-bottom:14px;">4 副牌 · 莊家 17 點停 · 21點(BlackJack)賠 1:1 · 平手算莊家贏 · 爆牌即輸</div>';
+    h+='<div style="font-size:11px;color:#94a3b8;line-height:1.8;margin-bottom:14px;">2 副牌 · 莊家 17 點停 · 21點(BlackJack)賠 1:1 · 平手算莊家贏 · 爆牌即輸</div>';
     return h;
   }
   function exchangeSection(){
@@ -10730,7 +10796,8 @@ window.__adminGrantPoly = function(formName){
     var h='';
     h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><div style="font-size:20px;font-weight:800;color:#e879f9;">🎲 賭場</div><div style="display:flex;gap:6px;"><button onclick="casinoBoard()" style="background:#a16207;color:#fff;border:none;border-radius:8px;padding:0 12px;height:32px;cursor:pointer;font-size:13px;font-weight:bold;">🏆 排行榜</button><button onclick="casinoRules()" style="background:#7e22ce;color:#fff;border:none;border-radius:8px;padding:0 12px;height:32px;cursor:pointer;font-size:13px;font-weight:bold;">📖 規則</button><button onclick="document.getElementById(\'casino-overlay\').remove()" style="background:#334155;color:#fff;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button></div></div>';
     h+='<div style="font-size:13px;color:#cbd5e1;margin-bottom:6px;">金幣：<b style="color:#fcd34d;">'+fmt(gold())+'</b></div>';
-    h+='<div id="cas-pool" style="font-size:13px;margin-bottom:10px;color:#cbd5e1;background:rgba(120,53,15,.25);border:1px solid #92400e;border-radius:8px;padding:6px 10px;">💰 全服累積頭獎池：<b style="color:#fde047;">'+fmtPool()+'</b> 金幣</div>';
+    h+='<div id="cas-pool" style="font-size:13px;margin-bottom:6px;color:#cbd5e1;background:rgba(120,53,15,.25);border:1px solid #92400e;border-radius:8px;padding:6px 10px;">💰 全服累積頭獎池：<b style="color:#fde047;">'+fmtPool()+'</b> 金幣</div>';
+    h+='<button onclick="casinoJackpotRoll()" style="width:100%;margin-bottom:10px;background:linear-gradient(90deg,#a16207,#ca8a04);color:#fff;border:none;border-radius:8px;padding:9px;cursor:pointer;font-weight:800;font-size:14px;">🎯 拚獎池（下 1 萬．搏全服頭獎）</button>';
     h+='<div id="cas-msg" style="display:none;font-size:13px;font-weight:bold;margin-bottom:10px;padding:8px 10px;background:rgba(127,29,29,.35);border:1px solid #7f1d1d;border-radius:8px;"></div>';
     // 分頁
     var tabs=[['dice','🎲 猜大小'],['slot','🎰 拉霸'],['bj','🃏 21點'],['scratch','🎟️ 刮刮卡']];
@@ -10763,13 +10830,13 @@ window.__adminGrantPoly = function(formName){
     h+='<div style="font-size:13px;line-height:1.7;color:#cbd5e1;">指定一個總和（2~12），押中該點數賠 <b style="color:#d8b4fe;">5 倍</b>（拿回 6 倍）。點數越偏門越難中、賠得越爽。</div></div>';
     // 拉霸
     h+='<div style="margin-bottom:12px;"><div style="font-weight:800;color:#fbbf24;margin-bottom:4px;">③ 拉霸 🎰</div>';
-    h+='<div style="font-size:13px;line-height:1.7;color:#cbd5e1;">3 轉輪，三連賠率：🍒×3=<b>4倍</b>、🔔×3=<b>6倍</b>、🍋×3=<b>12倍</b>、⭐×3=<b>30倍</b>、7️⃣×3=<b>120倍</b>。<br><span style="color:#fde047;font-weight:bold;">💎×3 ＝ 抱走全服累積頭獎池！</span></div></div>';
+    h+='<div style="font-size:13px;line-height:1.7;color:#cbd5e1;">3 轉輪，三連賠率：🍒×3=<b>4倍</b>、🔔×3=<b>6倍</b>、🍋×3=<b>12倍</b>、⭐×3=<b>30倍</b>、7️⃣×3=<b>120倍</b>、💎×3=<b>200倍</b>。<br><span style="color:#fde047;font-weight:bold;">每筆下注都有機會抱走全服累積頭獎池！</span></div></div>';
     // 21點
     h+='<div style="margin-bottom:12px;"><div style="font-weight:800;color:#86efac;margin-bottom:4px;">④ 21點 🃏　'+badge('1:1','#15803d')+'</div>';
-    h+='<div style="font-size:13px;line-height:1.7;color:#cbd5e1;">4 副牌，點數接近 21 點者勝。莊家 17 點停牌；21點賠 1:1；<b style="color:#fca5a5;">平手算莊家贏</b>；爆牌即輸。</div></div>';
+    h+='<div style="font-size:13px;line-height:1.7;color:#cbd5e1;">2 副牌，點數接近 21 點者勝。莊家 17 點停牌；21點賠 1:1；<b style="color:#fca5a5;">平手算莊家贏</b>；爆牌即輸。</div></div>';
     // 頭獎池
     h+='<div style="margin-bottom:12px;border:1px solid #92400e;background:rgba(120,53,15,.2);border-radius:10px;padding:8px 10px;"><div style="font-weight:800;color:#fde047;margin-bottom:2px;">🎉 全服累積頭獎池</div>';
-    h+='<div style="font-size:13px;line-height:1.7;color:#cbd5e1;">刮刮卡、拉霸、比大小<b>共用同一個全服頭獎池</b>，底值 1 億，每筆下注撥 20% 進池。<br>刮刮卡刮中頭獎、拉霸 💎×3、或比大小每注 0.0001% → <b style="color:#fde047;">抱走整池</b>，歸零重新累積。（21點不參與）</div></div>';
+    h+='<div style="font-size:13px;line-height:1.7;color:#cbd5e1;">刮刮卡、拉霸、比大小<b>共用同一個全服頭獎池</b>，底值 1 億，每筆下注撥 20% 進池。<br>刮刮卡、拉霸、比大小下注時，都有機會 <b style="color:#fde047;">抱走整池</b>，中獎後歸零重新累積。（21點不參與）<br>🎯 也可直接 <b style="color:#fde047;">拚獎池</b>：每注 1 萬，搏一把全服頭獎。</div></div>';
     // 上限
     h+='<div style="margin-bottom:12px;font-size:13px;color:#cbd5e1;">💰 籌碼＝<b>金幣</b>，單注上限 <b style="color:#fcd34d;">10 億</b>。</div>';
     // 兌換
@@ -10813,19 +10880,18 @@ window.__adminGrantPoly = function(formName){
   function refreshPool(){ if(typeof window.__getJackpot==='function'){ window.__getJackpot().then(function(r){ if(r&&typeof r.pool==='number') setPool(r.pool); }).catch(function(){}); } }
   function net(d){ if(typeof window.casinoTrackNet==='function') window.casinoTrackNet(d); }
 
-  // 抽獎：回傳獎項 key（稀有優先判定，最常見當 fallback）
+  // 抽獎：回傳獎項 key（稀有優先判定，最常見當 fallback）。提高好獎機率版
   function drawPrize(){
     var r=Math.random();
-    if(r < 0.000001) return 'jackpot';                 // 0.0001%
-    if(r < 0.000021) return 'soul_high';               // 0.002%
-    if(r < 0.002021) return 'rune_high';               // 0.2%
-    if(r < 0.007021) return 'gold_1e';                 // 0.5%  金幣1億
-    if(r < 0.017021) return 'mid_gear';                // 1%
-    if(r < 0.057021) return 'gold_1000w';              // 4%
-    if(r < 0.130021) return 'gold_100w';               // 7.3%
-    if(r < 0.230021) return 'pan_5_10';                // 10%
-    if(r < 0.480021) return 'gold_300w';               // 25%
-    return 'pan_1_3';                                   // 52%
+    if(r < 0.00011)  return 'soul_high';               // 0.01%
+    if(r < 0.00511)  return 'rune_high';               // 0.5%     （×2.5）
+    if(r < 0.01511)  return 'gold_1e';                 // 1%       金幣1億（×2）
+    if(r < 0.03511)  return 'mid_gear';                // 2%       中階裝備（×2）
+    if(r < 0.09511)  return 'gold_1000w';              // 6%       金幣1000萬
+    if(r < 0.16511)  return 'gold_100w';               // 7%       金幣100萬
+    if(r < 0.29511)  return 'pan_5_10';                // 13%      潘朵拉5~10張
+    if(r < 0.54511)  return 'gold_300w';               // 25%      金幣300萬
+    return 'pan_1_3';                                   // ~45.5%   潘朵拉1~3張
   }
 
   window.scratchOnce = async function(times){
@@ -10834,13 +10900,15 @@ window.__adminGrantPoly = function(formName){
     var results=[];
     for(var k=0;k<times;k++){
       player.gold -= COST; net(-COST);
-      var pz=drawPrize(), line='';
+      var pz = (Math.random() < window.__jackpotChance(COST)) ? 'jackpot' : drawPrize(), line='';
       if(pz==='jackpot'){
         var won=JACK_BASE;
         if(typeof window.__claimJackpot==='function'){ var jr=await window.__claimJackpot(); if(jr&&typeof jr.won==='number') won=jr.won; }
-        player.gold += won; net(won); setPool(JACK_BASE);
-        line='<span style="color:#fde047;font-weight:800;">🎉🎉 全服累積頭獎！抱走 '+fmt(won)+' 金幣！</span>';
-        logSys('🎟️ <span class="text-amber-300 font-extrabold">🎉 刮中全服頭獎！'+fmt(won)+' 金幣！</span>');
+        var __pjs=(typeof window.__payJackpot==='function')?window.__payJackpot(won):null; if(!__pjs){ player.gold += won; }
+        net(won); setPool(JACK_BASE);
+        var __scs=(__pjs&&__pjs.scrolls?'（'+__pjs.scrolls+' 張頭獎金幣捲）':'');
+        line='<span style="color:#fde047;font-weight:800;">🎉🎉 全服累積頭獎！'+fmt(won)+' 金幣'+__scs+'！</span>';
+        logSys('🎟️ <span class="text-amber-300 font-extrabold">🎉 刮中全服頭獎！'+fmt(won)+' 金幣'+__scs+'！</span>');
       } else {
         if(typeof window.__addJackpot==='function') window.__addJackpot(Math.floor(COST*POOL_CUT)).then(function(r){ if(r&&typeof r.pool==='number') setPool(r.pool); });
         if(pz==='soul_high'){ var id=pick(highSoul()); if(id&&typeof gainSoulStone==='function') gainSoulStone(id,1,true); line='<span style="color:#fb7185;font-weight:700;">💎 高階靈魂石：'+itemName(id)+'</span>'; }
@@ -10871,7 +10939,7 @@ window.__adminGrantPoly = function(formName){
     var ov=document.createElement('div'); ov.id='sc-rules-ov';
     ov.style.cssText='position:fixed;inset:0;z-index:100001;background:rgba(2,6,23,.85);display:flex;align-items:center;justify-content:center;padding:18px;';
     ov.onclick=function(e){ if(e.target===ov) ov.remove(); };
-    var rows=[['52%','潘朵拉抽獎卷 1~3 張'],['25%','金幣 300 萬'],['10%','潘朵拉抽獎卷 5~10 張'],['7.3%','金幣 100 萬'],['4%','金幣 1000 萬'],['1%','中階裝備（腿甲／符石／靈魂石，可交易）'],['0.5%','金幣 1 億'],['0.2%','高階符石（可交易）'],['0.002%','高階靈魂石（可交易）'],['0.0001%','🎉 全服累積頭獎']];
+    var rows=[['~45.5%','潘朵拉抽獎卷 1~3 張'],['25%','金幣 300 萬'],['13%','潘朵拉抽獎卷 5~10 張'],['7%','金幣 100 萬'],['6%','金幣 1000 萬'],['2%','中階裝備（腿甲／符石／靈魂石，可交易）'],['1%','金幣 1 億'],['0.5%','高階符石（可交易）'],['0.01%','高階靈魂石（可交易）']];
     var h='<div style="background:#1e293b;border:2px solid #a16207;border-radius:16px;max-width:440px;width:100%;max-height:86vh;overflow:auto;padding:18px;">';
     h+='<div style="font-size:18px;font-weight:800;color:#fbbf24;margin-bottom:8px;">🎟️ 刮刮卡規則</div>';
     h+='<div style="font-size:13px;color:#cbd5e1;margin-bottom:10px;">刮一次 <b style="color:#fde047;">1000 萬</b> 金幣，<b>必中一獎</b>，越高越稀有。獎勵皆<b>可交易</b>。每刮撥 20% 進全服頭獎池。</div>';
@@ -13343,8 +13411,8 @@ function saveGame() {
     // 死亡狀態不寫檔：避免把 player.dead=true 存進去，導致下次讀檔卡在死亡狀態而不出怪。
     // 死亡期間沒有可保存的進度，保留上一份「存活」存檔即可。
     if (player && player.dead) return;
-    // 收集目前的自動化設定 UI 狀態
-    player.config = {
+    // 收集目前的自動化設定 UI 狀態（先組到暫存，通過防呆才覆蓋）
+    var __newCfg = {
         setPot: document.getElementById('set-pot').value,
         setHpPot: document.getElementById('set-hp-pot').value,
         setAutoBuyPot: document.getElementById('set-auto-buy-pot').checked,
@@ -13379,11 +13447,32 @@ function saveGame() {
     // 收集所有法術 Buff 勾選框的狀態
     player.skills.forEach(sid => {
         let chk = document.getElementById(`auto-sk-${sid}`);
-        if (chk) player.config.autoBuffSkills[sid] = chk.checked;
+        if (chk) __newCfg.autoBuffSkills[sid] = chk.checked;
     });
 
-    try{ __persistSkillSel(); }catch(e){}   // 技能選擇額外存一份到該存檔位localStorage
-    try{ localStorage.setItem('lineage_idle_gamecfg_' + currentSlot, JSON.stringify(player.config)); }catch(e){}   // 整包設定(藥水/技能/被動buff)額外存一份，解決登入後 player.config 沒救回
+    // 🔧 重登設定不見的真正元兇：登入後「還原尚未完成」的瞬間，DOM 是全空白預設；
+    //    若此時自動存檔把這份空白寫回 gamecfg key，就會洗掉你存好的藥水/被動，造成惡性循環。
+    //    對策：只有當這份設定「有實質內容」(任一藥水/卷軸勾選、技能選擇、或被動buff開啟) 時才覆蓋；
+    //    若全空白且已有舊設定，保留舊的不動，讓延遲備援能把好設定救回來。
+    var __cfgHasContent = function(c){
+        if (!c) return false;
+        if (c.selAtkSkill || c.selAtkSkill2 || c.selAtkSkill3 || c.selAtkSkill4 || c.selHealSkill || c.selConvertSkill) return true;
+        var bk = ['setAutoBuyPot','setHaste','setAutoBuyHaste','setBrave','setAutoBuyBrave','setBlue','setAutoBuyBlue','setCautious','setAutoBuyCautious','setElfcookie','setAutoBuyElfcookie','setPoly','setAutoBuyPoly','setMagicbarrier','setTeleport','setAutoBuyTeleport','setAutoBuyArrow'];
+        for (var i=0;i<bk.length;i++){ if (c[bk[i]]) return true; }
+        if (c.autoBuffSkills){ for (var s in c.autoBuffSkills){ if (c.autoBuffSkills[s]) return true; } }
+        return false;
+    };
+    var __cfgMeaningful = __cfgHasContent(__newCfg);
+    var __hadCfg = __cfgHasContent(player.config) || __cfgHasContent(typeof __loadGameCfg==='function' ? __loadGameCfg() : null);   // 既有 player.config 或本機 gamecfg key 任一有內容，就視為「已有好設定」
+
+    try{ __persistSkillSel(); }catch(e){}   // 技能選擇額外存一份到該存檔位localStorage（其自有 all-empty 防呆）
+    if (__cfgMeaningful || !__hadCfg) {
+        player.config = __newCfg;
+        try{ localStorage.setItem('lineage_idle_gamecfg_' + currentSlot, JSON.stringify(player.config)); }catch(e){}   // 整包設定(藥水/技能/被動buff)額外存一份
+    } else {
+        // 全空白且已有舊設定 → 判定為「還原未完成的瞬間」，保留既有 player.config 與 gamecfg key，不覆蓋（避免洗掉好設定）
+        try{ if(typeof console!=='undefined') console.warn('[cfg] 跳過空白覆蓋，保留既有設定（避免重登洗掉）'); }catch(e){}
+    }
     localStorage.setItem('lineage_idle_save_' + currentSlot, JSON.stringify({ v: SAVE_VERSION, p: player, ms: mapState, ticks: state.ticks, t: Date.now() }));   // t：存檔時間戳，供跨裝置比新舊   // 🔧 架構#6：寫入存檔版本   // 🔧 一併保存 tick 計數：召喚物/迷魅的 endTick 為絕對 tick，不存會在重載後失準（迷魅重新計時 1 小時）
     // 🧸 娃娃帳號共用：鏡射到帳號快取，內容有變才推雲端
     try {
@@ -13602,8 +13691,8 @@ function loadGame() {
         
         updateClassPotionRows();
         try{ renderSkillSelects(); __persistSkillSel(); }catch(e){}   // 還原後再刷一次並把技能選擇種子寫入 localStorage
-        // 🔧 雲端登入備援：載入後稍待，待 currentSlot/DOM 都就緒，再用該存檔位 localStorage 整包重套一次（藥水/被動buff）
-        try{ setTimeout(function(){ try{ __applyCfgToDOM(__loadGameCfg() || (typeof player!=='undefined'&&player&&player.config)); }catch(e){} }, 600); }catch(e){}
+        // 🔧 雲端登入備援：載入後分多次重試重套整包設定（待 currentSlot/DOM 就緒）。因 gamecfg key 已有防呆不被空白洗掉，任一次重試讀到好的 key 就會把藥水/被動救回
+        [350, 900, 1800, 3200].forEach(function(ms){ try{ setTimeout(function(){ try{ var __c=__loadGameCfg() || (typeof player!=='undefined'&&player&&player.config); if(__c) __applyCfgToDOM(__c); }catch(e){} }, ms); }catch(e){} });
         
         state.running = true;
         // 自然恢復（每 16 秒）已由主迴圈 tick() 內的 state.ticks % 160 統一驅動，不再額外 setInterval。
