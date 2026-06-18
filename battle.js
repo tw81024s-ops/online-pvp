@@ -59,6 +59,12 @@ function physicalAttack(atk, def) {
     let inner = Math.floor((weaponRoll + dmgBonus) * critMult) + (atk.extraDmg || 0) - classRandomDR(def) - (def.dr || 0);
     inner = Math.max(1, inner);
     let dmg = graze ? Math.max(1, Math.floor(inner * 0.5)) : inner;
+    // 職業平衡：非法師物理職的物理乘法成分（鏡像客戶端 index.html，世界王＋競技場全對齊）
+    if (atk.cls !== 'mage') {
+        let _physCoef = 1 + 3 * dmgBonus / 16;                       // 對應法師 spCoef 的 (1+3×傷害加成/16)
+        let _physClassMult = (atk.cls === 'knight') ? 2.0 : 2.0;     // 物理職類倍率（與客戶端同步，目前皆 2.0）
+        dmg = Math.max(1, Math.floor(dmg * _physCoef * _physClassMult));
+    }
     return { type: 'hit', dmg, heavy, crit: isCrit, graze, ranged: isRanged };
 }
 
@@ -76,7 +82,8 @@ function magicAttack(atk, def, spell) {
     let spCoef = (1 + (3 * (atk.magicDmg || 0) / 16)) * (1 + tier / 3);
     let isCrit = rnd() * 100 < (atk.magicCrit || 0);
     let critMult = isCrit ? (1 + (atk.magicCritDmg || 50) / 100) : 1;
-    let mageMult = atk.cls === 'mage' ? (1.5 + tier / 20) : 1.0;
+    // 全對齊客戶端「實際打怪」法師倍率：一般 3.0 / 高階(tier>=8) 4.8（世界王＋競技場一致）
+    let mageMult = atk.cls === 'mage' ? (tier >= 8 ? 4.8 : 3.0) : 1.0;
 
     let diceArr = spell.multiDmg || [spell.dmgDice];
     let total = 0;
@@ -361,18 +368,35 @@ function simulateBossDps(profile, ticks, opts) {
     const RANGED_X = Math.max(0.1, isFinite(opts.rangedDmgMult) ? opts.rangedDmgMult : 1);
     const T = Math.max(1, Math.min(6000, ticks | 0));
     const me = initSide(clampProfile(profile));
-    const bossDef = { lv: 1, ac: 10, mr: 0, dr: 0, er: 0, cls: null };   // 固定靶
+    const bossDef = { lv: 1, ac: 0, mr: 0, dr: 0, er: 0, cls: null };   // 固定靶：防禦全 0（量滿輸出）
     let total = 0;
     for (let t = 1; t <= T; t++) {
-        // 攻擊技能（不耗 MP，照冷卻放）
-        if (me.p.spell && me.atkSkCd <= 0) {
-            me.atkSkCd = me.castInterval;
-            if (me.p.spell.phys) {
-                let hits = Math.max(1, me.p.spell.hits || 1);
-                for (let h = 0; h < hits; h++) { let r = physicalAttack(me.p, bossDef); if (r.type === 'hit') total += Math.max(1, Math.floor(r.dmg * DMG * (r.ranged ? RANGED_X : MELEE_X))); }
-            } else {
-                let r = magicAttack(me.p, bossDef, me.p.spell); total += Math.max(1, Math.floor(r.dmg * DMG * MAG * MAGE_X));
+        // 攻擊技能：🔮 4 槽輪替，每招獨立 5 秒(50tick) CD，全域節奏由 atkSkCd 控制（每間隔放 1 招）——與實際打怪一致；世界王不耗 MP
+        let _spList = (Array.isArray(me.p.spells) && me.p.spells.length) ? me.p.spells : (me.p.spell ? [me.p.spell] : []);
+        if (!me.spCd) me.spCd = _spList.map(() => 0);
+        if (me.atkSkCd <= 0) {
+            let cs = null, csIdx = -1;
+            for (let _i = 0; _i < _spList.length; _i++) { if ((me.spCd[_i] || 0) > 0) continue; cs = _spList[_i]; csIdx = _i; break; }
+            if (cs) {
+                me.atkSkCd = me.castInterval;
+                me.spCd[csIdx] = 50;
+                if (cs.phys) {
+                    let hits = Math.max(1, cs.hits || 1);
+                    for (let h = 0; h < hits; h++) { let r = physicalAttack(me.p, bossDef); if (r.type === 'hit') total += Math.max(1, Math.floor(r.dmg * DMG * (r.ranged ? RANGED_X : MELEE_X))); }
+                } else {
+                    let r = magicAttack(me.p, bossDef, cs); total += Math.max(1, Math.floor(r.dmg * DMG * MAG * MAGE_X));
+                }
             }
+        }
+        // 🔮 靈魂石：每 10 秒(100tick)自動施放，固定傷害 base×lv 吃假人魔防(=0→全額)；計入總傷害
+        if (me.p.soul) {
+            if (me.soulCd == null) me.soulCd = 0;
+            if (me.soulCd <= 0) {
+                me.soulCd = 100;
+                let _smr = bossDef.mr || 0;
+                let _mf = _smr <= 100 ? (100 - _smr / 2) / 100 : (50 - (_smr - 100) / 10) / 100; _mf = Math.max(0, _mf);
+                total += Math.max(1, Math.floor(me.p.soul.base * me.p.soul.lv * _mf * DMG * MAG));
+            } else { me.soulCd--; }
         }
         // 普通攻擊
         if (me.atkCd <= 0) {
@@ -381,6 +405,7 @@ function simulateBossDps(profile, ticks, opts) {
             if (r.type === 'hit') total += Math.max(1, Math.floor(r.dmg * DMG * (r.ranged ? RANGED_X : MELEE_X)));
         }
         me.atkCd--; me.atkSkCd--;
+        if (me.spCd) { for (let _i = 0; _i < me.spCd.length; _i++) if (me.spCd[_i] > 0) me.spCd[_i]--; }
     }
     return Math.floor(total);
 }
