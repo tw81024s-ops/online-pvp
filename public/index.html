@@ -725,7 +725,7 @@
                 <button id="btn-trash-gear" class="btn text-base py-2 font-bold px-0" style="grid-column:1 / -1; background: linear-gradient(135deg,#5b3a10 0%,#b45309 28%,#4a2f0c 52%,#d97706 76%,#3a2509 100%); color:#fde68a; border-color:#d97706;" onclick="sellUnlockedGear()">🗑️ 一鍵賣裝（賣掉未上鎖裝備/武器換金幣）</button>
             </div>
 
-            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openScratchPanel()"><span class="ic">🎟️</span><span class="tx">刮刮卡</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
+            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
 
             <div class="panel flex-1 flex flex-col overflow-hidden relative">
                 <!-- 能力 -->
@@ -9087,8 +9087,33 @@ function __persistSkillSel(){
 }
 function __loadSkillSel(){ try{ var r=localStorage.getItem(_skillSelKey()); return r?JSON.parse(r):null; }catch(e){ return null; } }
 function __loadGameCfg(){ try{ var r=localStorage.getItem('lineage_idle_gamecfg_' + ((typeof currentSlot!=='undefined'&&currentSlot)?currentSlot:1)); return r?JSON.parse(r):null; }catch(e){ return null; } }
+// 🔧 整包設定套用到 DOM（藥水/施法/被動buff）。供 loadGame 還原 + 雲端登入延遲備援共用，解決重登後藥水/被動沒回來
+function __applyCfgToDOM(c){
+    if(!c) return;
+    try{
+        function sv(id,v){ var e=document.getElementById(id); if(e&&v!==undefined&&v!==null&&v!=='') e.value=v; }
+        function sc(id,v){ var e=document.getElementById(id); if(e&&v!==undefined) e.checked=!!v; }
+        if(c.setPot){ var ps=document.getElementById('set-pot'); if(ps){ ps.value=c.setPot; ps.classList.remove('text-red-300','text-orange-300','text-white'); ps.classList.add(c.setPot==='potion_heal'?'text-red-300':(c.setPot==='potion_strong'?'text-orange-300':'text-white')); } }
+        sv('set-hp-pot',c.setHpPot); sc('set-auto-buy-pot',c.setAutoBuyPot);
+        sv('sel-atk-skill',c.selAtkSkill); sv('sel-atk-skill2',c.selAtkSkill2); sv('sel-atk-skill3',c.selAtkSkill3); sv('sel-atk-skill4',c.selAtkSkill4);
+        sv('set-mp-atk',c.setMpAtk); sv('sel-heal-skill',c.selHealSkill); sv('set-mp-heal',c.setMpHeal);
+        sv('sel-convert-skill',c.selConvertSkill); sv('set-hp-convert',c.setHpConvert);
+        sc('set-haste',c.setHaste); sc('set-auto-buy-haste',c.setAutoBuyHaste);
+        sc('set-brave',c.setBrave); sc('set-auto-buy-brave',c.setAutoBuyBrave);
+        sc('set-blue',c.setBlue); sc('set-auto-buy-blue',c.setAutoBuyBlue);
+        sc('set-cautious',c.setCautious); sc('set-auto-buy-cautious',c.setAutoBuyCautious);
+        sc('set-elfcookie',c.setElfcookie); sc('set-auto-buy-elfcookie',c.setAutoBuyElfcookie);
+        sc('set-poly',c.setPoly); sc('set-auto-buy-poly',c.setAutoBuyPoly);
+        sc('set-magicbarrier',c.setMagicbarrier); sc('set-teleport',c.setTeleport); sc('set-auto-buy-teleport',c.setAutoBuyTeleport);
+        sc('set-auto-buy-arrow',c.setAutoBuyArrow);
+        if(c.autoBuffSkills){ for(var sid in c.autoBuffSkills){ var chk=document.getElementById('auto-sk-'+sid); if(chk) chk.checked=!!c.autoBuffSkills[sid]; } }
+    }catch(e){}
+}
+window.__applyCfgToDOM = __applyCfgToDOM;
 
 function renderSkillSelects() {
+    // 🔧 被動buff種子：首次渲染（勾選框尚不存在）時，從該存檔位 localStorage 帶回被動技能勾選，解決重登後被動沒回來
+    var __cfgBuffSeed = null; try{ var __scfg = (typeof __loadGameCfg==='function'?__loadGameCfg():null) || (typeof player!=='undefined'&&player&&player.config); __cfgBuffSeed = __scfg && __scfg.autoBuffSkills; }catch(e){}
     // 先記住目前選擇，重建後還原（避免穿脫裝備/學技能等呼叫時被重設為「無」）
     let prevAtk = document.getElementById('sel-atk-skill') ? document.getElementById('sel-atk-skill').value : '';
     let prevAtk2 = document.getElementById('sel-atk-skill2') ? document.getElementById('sel-atk-skill2').value : '';
@@ -9124,7 +9149,8 @@ function renderSkillSelects() {
         if((sk.type === 'heal' && !sk.autoBuff && !['sk_antidote','sk_holy_light','sk_cancel'].includes(sid)) || (sk.type === 'atk' && sk.healSlot)) hHtml += `<option value="${sid}" ${dis}>${sk.n}</option>`;
         let __isPurify = (sid === 'sk_antidote' || sid === 'sk_holy_light' || sid === 'sk_cancel');
         if(sk.type === 'buff' || (sk.type === 'heal' && sk.autoBuff) || __isPurify) {
-            let checked = document.getElementById(`auto-sk-${sid}`)?.checked ? 'checked' : '';
+            let __exChk = document.getElementById(`auto-sk-${sid}`);
+            let checked = (__exChk ? __exChk.checked : (__cfgBuffSeed && __cfgBuffSeed[sid])) ? 'checked' : '';
             let sumAttr = sk.summon ? ` onchange="onSummonToggle('${sid}')" data-summon="1" data-unavail="${isAvail?'0':'1'}"` : '';
             // 魔法相消術涵蓋解毒術與聖潔之光：勾選相消時鎖定這兩者
             let __cancelOn = player.skills.includes('sk_cancel') && document.getElementById('auto-sk-sk_cancel')?.checked;
@@ -10707,14 +10733,15 @@ window.__adminGrantPoly = function(formName){
     h+='<div id="cas-pool" style="font-size:13px;margin-bottom:10px;color:#cbd5e1;background:rgba(120,53,15,.25);border:1px solid #92400e;border-radius:8px;padding:6px 10px;">💰 全服累積頭獎池：<b style="color:#fde047;">'+fmtPool()+'</b> 金幣</div>';
     h+='<div id="cas-msg" style="display:none;font-size:13px;font-weight:bold;margin-bottom:10px;padding:8px 10px;background:rgba(127,29,29,.35);border:1px solid #7f1d1d;border-radius:8px;"></div>';
     // 分頁
-    var tabs=[['dice','🎲 猜大小'],['slot','🎰 拉霸'],['bj','🃏 21點']];
-    h+='<div style="display:flex;gap:6px;margin-bottom:14px;">';
-    for(var t=0;t<tabs.length;t++){ var on=cs.game===tabs[t][0]; h+='<button onclick="casinoSelectGame(\''+tabs[t][0]+'\')" style="flex:1;background:'+(on?'#a21caf':'#1e293b')+';color:#fff;border:'+(on?'1px solid #e879f9':'1px solid #334155')+';border-radius:10px;padding:9px 4px;cursor:pointer;font-weight:bold;font-size:13px;">'+tabs[t][1]+'</button>'; }
+    var tabs=[['dice','🎲 猜大小'],['slot','🎰 拉霸'],['bj','🃏 21點'],['scratch','🎟️ 刮刮卡']];
+    h+='<div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">';
+    for(var t=0;t<tabs.length;t++){ var on=cs.game===tabs[t][0]; h+='<button onclick="casinoSelectGame(\''+tabs[t][0]+'\')" style="flex:1;min-width:72px;background:'+(on?'#a21caf':'#1e293b')+';color:#fff;border:'+(on?'1px solid #e879f9':'1px solid #334155')+';border-radius:10px;padding:9px 4px;cursor:pointer;font-weight:bold;font-size:13px;">'+tabs[t][1]+'</button>'; }
     h+='</div>';
     if(cs.game==='slot') h+=slotContent();
     else if(cs.game==='bj') h+=bjContent();
+    else if(cs.game==='scratch') h+=(typeof window.__scratchContent==='function'?window.__scratchContent():'');
     else h+=diceContent();
-    h+=exchangeSection();
+    if(cs.game!=='scratch') h+=exchangeSection();
     box.innerHTML=h;
   }
   window.refreshCasino = refreshCasino;
@@ -10779,6 +10806,7 @@ window.__adminGrantPoly = function(formName){
   function fmt(n){ return Math.floor(n||0).toLocaleString(); }
   function gold(){ return player.gold||0; }
   var pool=null;
+  var lastResults='';
 
   function scMsg(t,err){ var el=document.getElementById('sc-msg'); if(el){ el.innerHTML=t||''; el.style.color=err?'#fca5a5':'#86efac'; el.style.display=t?'block':'none'; } }
   function setPool(v){ pool=v; var el=document.getElementById('sc-pool'); if(el) el.innerHTML='💰 全服累積頭獎池：<b style="color:#fde047;">'+fmt(v)+'</b> 金幣'; }
@@ -10833,9 +10861,9 @@ window.__adminGrantPoly = function(formName){
     }
     try{ if(typeof updateUI==='function') updateUI(); }catch(e){}
     try{ if(typeof saveGame==='function') saveGame(); }catch(e){}
-    var box=document.getElementById('sc-result');
-    if(box) box.innerHTML='<div style="font-size:13px;font-weight:700;color:#94a3b8;margin-bottom:6px;">刮出結果（'+times+' 張）</div>'+results.map(function(l){ return '<div style="background:#0f172a;border-radius:8px;padding:8px 10px;margin-bottom:4px;">🎟️ '+l+'</div>'; }).join('');
-    scMsg('');
+    lastResults='<div style="font-size:13px;font-weight:700;color:#94a3b8;margin-bottom:6px;">刮出結果（'+times+' 張）</div>'+results.map(function(l){ return '<div style="background:#0f172a;border-radius:8px;padding:8px 10px;margin-bottom:4px;">🎟️ '+l+'</div>'; }).join('');
+    try{ if(typeof window.refreshCasino==='function') window.refreshCasino(); }catch(e){}        // 嵌在賭場分頁內：重繪並顯示結果
+    try{ if(typeof window.refreshCasinoPool==='function') window.refreshCasinoPool(); }catch(e){}  // 刷新賭場頭獎池顯示
   };
 
   window.scratchRules = function(){
@@ -10853,25 +10881,16 @@ window.__adminGrantPoly = function(formName){
     ov.appendChild(box); document.body.appendChild(ov);
   };
 
-  window.openScratchPanel = function(){
-    var old=document.getElementById('scratch-overlay'); if(old) old.remove();
-    var ov=document.createElement('div'); ov.id='scratch-overlay';
-    ov.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(2,6,23,.82);display:flex;align-items:center;justify-content:center;overflow:auto;padding:16px;';
-    ov.onclick=function(e){ if(e.target===ov) ov.remove(); };
-    var box=document.createElement('div');
-    box.style.cssText='background:#1e293b;border:2px solid #a16207;border-radius:16px;max-width:460px;width:100%;max-height:90vh;overflow:auto;padding:18px;box-shadow:0 0 30px rgba(234,179,8,.3);';
+  window.__scratchContent = function(){
     var h='';
-    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div style="font-size:20px;font-weight:800;color:#fbbf24;">🎟️ 刮刮卡</div><div style="display:flex;gap:6px;"><button onclick="casinoBoard()" style="background:#a16207;color:#fff;border:none;border-radius:8px;padding:0 12px;height:32px;cursor:pointer;font-size:13px;font-weight:bold;">🏆 排行榜</button><button onclick="scratchRules()" style="background:#7e22ce;color:#fff;border:none;border-radius:8px;padding:0 12px;height:32px;cursor:pointer;font-size:13px;font-weight:bold;">📖 規則</button><button onclick="document.getElementById(\'scratch-overlay\').remove()" style="background:#334155;color:#fff;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button></div></div>';
-    h+='<div id="sc-pool" style="text-align:center;background:linear-gradient(90deg,#78350f,#92400e);border:1px solid #b45309;border-radius:10px;padding:8px;margin-bottom:10px;font-size:14px;color:#fde68a;">💰 全服累積頭獎池：<b style="color:#fde047;">'+(pool!=null?fmt(pool):'—')+'</b> 金幣</div>';
-    h+='<div style="text-align:center;font-size:13px;color:#cbd5e1;margin-bottom:10px;">刮一次 <b style="color:#fde047;">1000 萬</b> · 必中一獎 · 獎勵可交易</div>';
-    h+='<div id="sc-result" style="margin-bottom:10px;"></div>';
+    h+='<div style="text-align:center;font-size:13px;color:#cbd5e1;margin-bottom:4px;">刮一次 <b style="color:#fde047;">1000 萬</b> · 必中一獎 · 獎勵可交易　<button onclick="scratchRules()" style="background:#7e22ce;color:#fff;border:none;border-radius:6px;padding:1px 8px;cursor:pointer;font-size:12px;font-weight:bold;">📖 機率</button></div>';
+    h+='<div id="sc-result" style="margin-bottom:10px;">'+(lastResults||'')+'</div>';
     h+='<div id="sc-msg" style="display:none;text-align:center;font-size:13px;margin-bottom:8px;"></div>';
-    h+='<div style="display:flex;gap:8px;">';
+    h+='<div style="display:flex;gap:8px;margin-bottom:6px;">';
     h+='<button onclick="scratchOnce(1)" style="flex:1;background:linear-gradient(90deg,#b45309,#f59e0b);color:#fff;border:none;border-radius:10px;padding:14px;cursor:pointer;font-weight:800;font-size:16px;">刮 1 張</button>';
-    h+='<button onclick="scratchOnce(10)" style="flex:1;background:linear-gradient(90deg,#92400e,#d97706);color:#fff;border:none;border-radius:10px;padding:14px;cursor:pointer;font-weight:800;font-size:16px;">刮 10 張</button>';
+    h+='<button onclick="scratchOnce(10)" style="flex:1;background:linear-gradient(90deg,#92400e,#d97706);color:#fff;border:none;border-radius:10px;padding:14px;cursor:pointer;font-weight:800;font-size:16px;">刮 10 張（1 億）</button>';
     h+='</div>';
-    box.innerHTML=h; ov.appendChild(box); document.body.appendChild(ov);
-    refreshPool();
+    return h;
   };
 })();
 
@@ -13583,6 +13602,8 @@ function loadGame() {
         
         updateClassPotionRows();
         try{ renderSkillSelects(); __persistSkillSel(); }catch(e){}   // 還原後再刷一次並把技能選擇種子寫入 localStorage
+        // 🔧 雲端登入備援：載入後稍待，待 currentSlot/DOM 都就緒，再用該存檔位 localStorage 整包重套一次（藥水/被動buff）
+        try{ setTimeout(function(){ try{ __applyCfgToDOM(__loadGameCfg() || (typeof player!=='undefined'&&player&&player.config)); }catch(e){} }, 600); }catch(e){}
         
         state.running = true;
         // 自然恢復（每 16 秒）已由主迴圈 tick() 內的 state.ticks % 160 統一驅動，不再額外 setInterval。
