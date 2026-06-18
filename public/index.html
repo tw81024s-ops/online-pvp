@@ -9086,6 +9086,7 @@ function __persistSkillSel(){
     }catch(e){}
 }
 function __loadSkillSel(){ try{ var r=localStorage.getItem(_skillSelKey()); return r?JSON.parse(r):null; }catch(e){ return null; } }
+function __loadGameCfg(){ try{ var r=localStorage.getItem('lineage_idle_gamecfg_' + ((typeof currentSlot!=='undefined'&&currentSlot)?currentSlot:1)); return r?JSON.parse(r):null; }catch(e){ return null; } }
 
 function renderSkillSelects() {
     // 先記住目前選擇，重建後還原（避免穿脫裝備/學技能等呼叫時被重設為「無」）
@@ -13061,6 +13062,7 @@ function saveGame() {
     });
 
     try{ __persistSkillSel(); }catch(e){}   // 技能選擇額外存一份到該存檔位localStorage
+    try{ localStorage.setItem('lineage_idle_gamecfg_' + currentSlot, JSON.stringify(player.config)); }catch(e){}   // 整包設定(藥水/技能/被動buff)額外存一份，解決登入後 player.config 沒救回
     localStorage.setItem('lineage_idle_save_' + currentSlot, JSON.stringify({ v: SAVE_VERSION, p: player, ms: mapState, ticks: state.ticks, t: Date.now() }));   // t：存檔時間戳，供跨裝置比新舊   // 🔧 架構#6：寫入存檔版本   // 🔧 一併保存 tick 計數：召喚物/迷魅的 endTick 為絕對 tick，不存會在重載後失準（迷魅重新計時 1 小時）
     // 🧸 娃娃帳號共用：鏡射到帳號快取，內容有變才推雲端
     try {
@@ -13219,8 +13221,9 @@ function loadGame() {
         renderMobs();
         
         // 載入自動化設定 (如果有存過的話)
-        if (player.config) {
-            let c = player.config;
+        let __cfgSrc = player.config || __loadGameCfg();   // 🔧 登入後 player.config 可能遺失：改用該存檔位 localStorage 的整包設定回填（藥水/技能/被動buff）
+        if (__cfgSrc) {
+            let c = __cfgSrc;
             
             // 藥水設定與顏色變更
             if (c.setPot) {
