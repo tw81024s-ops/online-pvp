@@ -2801,7 +2801,7 @@ function flushAwaySummary() {
 let player = {
     cls: null, name: null, lv: 1, exp: 0, gold: 1000, hp: 0, mhp: 0, mp: 0, mmp: 0, blessings: {},
     base: { str:0, dex:0, con:0, int:0, wis:0, cha:8 }, bonus: 0, alloc: { str:0, dex:0, con:0, int:0, wis:0, cha:0 }, panacea: { str:0, dex:0, con:0, int:0, wis:0, cha:0 }, panaceaUsed: 0, junkPrefs: {}, bloodPledge: null, magicShieldCd: 0, lastMapByCat: {}, tracking: null, ismaelAccUsed: false, sherineWorld: false, siege: { active:false, gateKilled:false, towerKilled:false, endTime:0, kills:0, result:null, cooldownUntil:0, rewardPending:false, victoryUntil:0, accCdUntil:0 },
-    inv: [], eq: { wpn: null, arrow: null, helm: null, armor: null, shield: null, cloak: null, tshirt: null, gloves: null, boots: null, ring1: null, ring2: null, amulet: null, belt: null, rune1: null, rune2: null, soul: null },
+    inv: [], eq: { wpn: null, arrow: null, helm: null, armor: null, shield: null, cloak: null, tshirt: null, gloves: null, boots: null, ring1: null, ring2: null, ring3: null, ring4: null, amulet: null, belt: null, rune1: null, rune2: null, soul: null },
     skills: [], buffs: { haste: 0, brave: 0, blue: 0, cautious: 0, elfcookie: 0, poly: 0, shield: 0, sk_magic_shield: 0 }, poly: null, allies: [],
     summon: null, charmed: null, manualCd: {}, elfEle: null, hot: null,
     cds: { pot: 0, atkSk: 0, healSk: 0, purifySk: 0 }, dead: false, statuses: { stun: 0, freeze: 0, stone: 0, poison: 0, poisonDmg: 0, poisonTick: 0, burn: 0, burnDmg: 0, burnTick: 0, scald: 0, scaldDmg: 0, scaldTick: 0, silence: 0, paralyze: 0, magicseal: 0, armorBreak: 0, slowAtk: 0, cleave: 0 },
@@ -4276,16 +4276,20 @@ function findPolyForm(name) {
 }
 function makePolyState(form, color) { return Object.assign({ c: color }, form); }
 
+// 💍 戒指欄位解鎖：Lv55→第三顆、Lv65→第四顆
+function maxRingSlots(){ var L=(player&&player.lv)||0; return L>=65?4:(L>=55?3:2); }
+function ringSlotKeys(){ return ['ring1','ring2','ring3','ring4'].slice(0, maxRingSlots()); }
+function __ringUnlockFilter(s){ var k=s&&s.k; if(k==='ring3') return ((player&&player.lv)||0)>=55; if(k==='ring4') return ((player&&player.lv)||0)>=65; return true; }
 // 是否持有「變形控制戒指」(acc_117)
 // 🔧 改為「背包攜帶即可觸發」：裝備中或背包內任一處有戒指都算持有，不需佔用戒指欄位
 function hasPolyRing() {
-    return [player.eq.ring1, player.eq.ring2].some(e => e && e.id === 'acc_117')
+    return ringSlotKeys().map(function(k){return player.eq[k];}).some(e => e && e.id === 'acc_117')
         || (player.inv && player.inv.some(i => i && i.id === 'acc_117' && (i.cnt || 0) > 0));
 }
 // 是否持有傳送控制戒指 (acc_116)
 // 🔧 改為「背包攜帶即可觸發」：裝備中或背包內任一處有戒指都算持有，不需佔用戒指欄位
 function hasTeleportRing() {
-    return [player.eq.ring1, player.eq.ring2].some(e => e && e.id === 'acc_116')
+    return ringSlotKeys().map(function(k){return player.eq[k];}).some(e => e && e.id === 'acc_116')
         || (player.inv && player.inv.some(i => i && i.id === 'acc_116' && (i.cnt || 0) > 0));
 }
 // 傳送：清空當前怪物並重置生怪排程；forceBoss=true 時讓下一次生怪必定為 BOSS
@@ -6782,8 +6786,11 @@ function allyAttackOnce(ally) {
         let critD = isRanged ? (d.rangedCritDmg||0) : (d.meleeCritDmg||0);
         let hv = Math.max(0, Math.min(20, (ally.lv||1) + hitB - t.lv + mobEffAC(t)));
         let r = roll(1,20);
-        if (!((r === 20) || (r !== 1 && hv >= r))) { logCombat(`<span class="text-sky-300 font-bold">【協力·${ally._allyName}】</span>的攻擊未命中。`, 'miss'); allyWeaponProcs(ally, t, { hit: false, dmg: 0 }); return; }   // 🔧 未命中也判定共鳴/魔擊/月光爆裂（與玩家一致）
-        let heavy = (r === 20);
+        let _crushHit = false;
+        let _miss = !((r === 20) || (r !== 1 && hv >= r));
+        if (_miss && r === 19 && wpn && wpn.eff === 'crush') { _miss = false; _crushHit = true; }   // 🔧 重擊(粉碎)武器：本應未命中(19)改為粉碎命中（與玩家一致）
+        if (_miss) { logCombat(`<span class="text-sky-300 font-bold">【協力·${ally._allyName}】</span>的攻擊未命中。`, 'miss'); allyWeaponProcs(ally, t, { hit: false, dmg: 0 }); return; }   // 🔧 未命中也判定共鳴/魔擊/月光爆裂（與玩家一致）
+        let heavy = (r === 20) || _crushHit;
         let isCrit = Math.random()*100 < critR;
         let critMult = isCrit ? (1 + critD/100) : 1;
         let wpnRoll = heavy ? dice : roll(1, dice);
@@ -6801,8 +6808,10 @@ function allyAttackOnce(ally) {
             else if (slay) { dmg *= 3; kp = '<span class="text-orange-400 font-bold">【殺戮】</span>'; }
         }
         dmg = Math.max(1, Math.floor(dmg * fragileMult(t)));   // 🔮 脆弱（白鳥5）
+        dmg = Math.max(1, Math.floor(dmg * (isRanged ? ((window.__GAME_CONFIG&&window.__GAME_CONFIG.rangedDmgMult)||1) : ((window.__GAME_CONFIG&&window.__GAME_CONFIG.meleeDmgMult)||1))));   // 🔧 對齊玩家：近/遠程平衡倍率
+        if (ally.cls !== 'mage') { var _aPhysCoef = 1 + 3 * dmgB / 16; dmg = Math.max(1, Math.floor(dmg * _aPhysCoef * 2.0)); }   // 🔧 修正傭兵傷害：補回玩家有、傭兵原本漏掉的「物理乘法成分」，使傭兵物理傷害與玩家對齊
         t.curHp -= dmg; t.justHit = getWpnEle(ally.eq ? ally.eq.wpn : null, wpn); mobWake(t);
-        let mark = (heavy && isCrit) ? '會心一擊' : (isCrit ? '爆擊' : (heavy ? '重擊' : ''));
+        let mark = _crushHit ? '粉碎' : ((heavy && isCrit) ? '會心一擊' : (isCrit ? '爆擊' : (heavy ? '重擊' : '')));
         logCombat(`${kp}<span class="text-sky-300 font-bold">【協力·${ally._allyName}】</span>攻擊 <span class="${getMobColor(t.lv)}">${t.n}</span>，造成 ${dmg} 點傷害${mark?'（'+mark+'!）':''}。`, 'player');
         allyOnHitEffects(ally, t, { dmg: dmg, heavy: heavy });        // 🔧 命中後特效：穿透/即死/出血/鈍擊/切割
         allyWeaponProcs(ally, t, { hit: true, dmg: dmg });            // 🔧 普攻判定特效：瑪那回魔/共鳴/魔擊/月光爆裂
@@ -6939,6 +6948,7 @@ function allyStrikeRoll(ally, t, opts) {
     let dmg = Math.max(1, Math.floor((wpnRoll + dmgB) * critMult) + (d.extraDmg||0) - (t.dr||0));
     if (opts.mult) dmg = Math.max(1, Math.floor(dmg * opts.mult));
     dmg = Math.max(1, Math.floor(dmg * fragileMult(t)));   // 🔮 脆弱（白鳥5）
+    if ((ally.cls||'') !== 'mage') { var _sPhysCoef = 1 + 3 * dmgB / 16; dmg = Math.max(1, Math.floor(dmg * _sPhysCoef * 2.0)); }   // 🔧 反擊/居合/魔擊也對齊玩家物理乘法成分
     return { hit: true, dmg: dmg, heavy: heavy, crit: isCrit };
 }
 // 共鳴光箭（傭兵版）：公式同玩家 procLightArrow；回魔（傷害/10、至少1）恢復到傭兵自身 MP
@@ -6972,7 +6982,23 @@ function allyProcMoonburst(ally, t) {
     logCombat(`<span class="font-bold" style="color:#67e8f9;text-shadow:0 0 6px #06b6d4;">【協力·${ally._allyName}·月光爆裂】</span>對 <span class="${getMobColor(t.lv)}">${t.n}</span> 造成 ${dmg} 點風屬性傷害！${counterTxt}`, 'player-crit');
     _allyDamageMob(ally, t, dmg, 'wind');
 }
-// 普攻後判定（命中與否皆判定，與玩家一致）：瑪那回魔(僅命中) / 共鳴 / 魔擊 / 月光爆裂
+// 龍的一擊（傭兵版·屠龍劍）：一般攻擊固定機率對全場敵人造成無視防禦的固定傷害（與玩家一致）
+function allyDragonStrikeProc(ally) {
+    let wpn = (ally.eq && ally.eq.wpn) ? DB.items[ally.eq.wpn.id] : null;
+    if (!wpn || !wpn.dragonStrike) return;
+    if (Math.random() * 100 >= wpn.dragonStrike) return;
+    let d = ally.d || {};
+    let targets = mapState.mobs.filter(m => m && m.curHp > 0 && !m._dead);
+    if (!targets.length) return;
+    logCombat(`<span class="font-bold" style="color:#fca5a5;text-shadow:0 0 6px #dc2626;">【協力·${ally._allyName}·龍的一擊】</span>龍魂咆哮，衝擊貫穿了所有敵人！`, 'player-crit');
+    targets.forEach(m => {
+        if (!m || m.curHp <= 0 || m._dead) return;
+        let dmg = roll(1, Math.max(1, Math.floor(d.str || 1))) + 25;
+        dmg = Math.max(1, Math.floor(dmg * fragileMult(m)));
+        _allyDamageMob(ally, m, dmg, true);
+    });
+}
+// 普攻後判定（命中與否皆判定，與玩家一致）：瑪那回魔(僅命中) / 共鳴 / 魔擊 / 月光爆裂 / 龍的一擊
 function allyWeaponProcs(ally, target, hitInfo) {
     let wpnInst = ally.eq && ally.eq.wpn;
     if (!wpnInst) return;
@@ -6997,6 +7023,7 @@ function allyWeaponProcs(ally, target, hitInfo) {
     if (wpn.eff === 'moonburst' && Math.random() < 0.08) {
         let t = _allyProcTarget(target); if (t) allyProcMoonburst(ally, t);
     }
+    allyDragonStrikeProc(ally);   // 🔧 屠龍劍·龍的一擊：傭兵也會觸發
 }
 // 命中後物理特效：穿透 / 骰子匕首即死 / 匕首·矛出血 / 單手鈍器鈍擊 / 雙手劍切割
 function allyOnHitEffects(ally, t, res) {
@@ -8222,9 +8249,9 @@ function equipItem(item) {
     }
     
     if (slot === 'ring') {
-        if(!player.eq.ring1) slot = 'ring1';
-        else if(!player.eq.ring2) slot = 'ring2';
-        else slot = 'ring1'; 
+        var __rk = ringSlotKeys();
+        var __free = __rk.find(function(k){ return !player.eq[k]; });
+        slot = __free || __rk[__rk.length-1];   // 無空欄則替換最後一個已解鎖的戒指欄
     }
     if (slot === 'rune') {
         if(!player.eq.rune1) slot = 'rune1';
@@ -8888,7 +8915,7 @@ function renderTabs(force) {
     ['tab-items','tab-weapons','tab-armors','tab-equip','tab-skill'].forEach(id => { let el = document.getElementById(id); if(el) _scroll[id] = el.scrollTop; });
 
     let eDiv = document.getElementById('tab-equip'); eDiv.innerHTML = '';
-    const slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'legs',n:'腿甲'},{k:'amulet',n:'項鍊'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'belt',n:'腰帶'},{k:'rune1',n:'符石'},{k:'rune2',n:'符石'},{k:'soul',n:'靈魂石'},{k:'arrow',n:'箭矢'}];
+    const slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'legs',n:'腿甲'},{k:'amulet',n:'項鍊'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'ring3',n:'戒指'},{k:'ring4',n:'戒指'},{k:'belt',n:'腰帶'},{k:'rune1',n:'符石'},{k:'rune2',n:'符石'},{k:'soul',n:'靈魂石'},{k:'arrow',n:'箭矢'}].filter(__ringUnlockFilter);
     
     let setCheck = {}, _setSeen = {};
     for (let k in player.eq) {
@@ -9525,9 +9552,9 @@ function openModal(item, isEq, slot) {
     // === 旁邊顯示「目前裝備中」對應欄位，方便比對（僅背包中的武器/防具/飾品，箭矢除外）===
     let _cmp = document.getElementById('modal-compare');
     if(_cmp) {
-        const SLOT_LABEL = { wpn:'武器', helm:'頭盔', armor:'盔甲', shield:'盾牌', cloak:'斗篷', tshirt:'內衣', gloves:'手套', boots:'鞋子', ring1:'戒指 1', ring2:'戒指 2', amulet:'項鍊', belt:'腰帶', legs:'腿甲', rune1:'符石 1', rune2:'符石 2', soul:'靈魂石' };
+        const SLOT_LABEL = { wpn:'武器', helm:'頭盔', armor:'盔甲', shield:'盾牌', cloak:'斗篷', tshirt:'內衣', gloves:'手套', boots:'鞋子', ring1:'戒指 1', ring2:'戒指 2', ring3:'戒指 3', ring4:'戒指 4', amulet:'項鍊', belt:'腰帶', legs:'腿甲', rune1:'符石 1', rune2:'符石 2', soul:'靈魂石' };
         if(!isEq && !d.isArrow && (d.type === 'wpn' || d.type === 'arm' || d.type === 'acc')) {
-            let slots = (d.type === 'wpn') ? ['wpn'] : (d.slot === 'ring' ? ['ring1','ring2'] : (d.slot === 'rune' ? ['rune1','rune2'] : [d.slot]));
+            let slots = (d.type === 'wpn') ? ['wpn'] : (d.slot === 'ring' ? ringSlotKeys() : (d.slot === 'rune' ? ['rune1','rune2'] : [d.slot]));
             let cards = slots.map(sl => {
                 let eq = player.eq[sl];
                 let label = SLOT_LABEL[sl] || sl;
@@ -11425,7 +11452,7 @@ function renderKristaExchange(el) {
 function doBianBless(slotKey) {
     let item = player.eq[slotKey];
     if (!item) { logSys('該欄位沒有裝備。'); return; }
-    let isAcc = (slotKey === 'ring1' || slotKey === 'ring2' || slotKey === 'amulet' || slotKey === 'belt');
+    let isAcc = (slotKey === 'ring1' || slotKey === 'ring2' || slotKey === 'ring3' || slotKey === 'ring4' || slotKey === 'amulet' || slotKey === 'belt');
     let scrollId = (slotKey === 'wpn') ? 'new_item_bless_wpn' : (isAcc ? 'new_item_bless_acc' : 'new_item_bless_arm');
     let scrollNm = { 'new_item_bless_wpn':'賦予武器祝福卷軸', 'new_item_bless_arm':'賦予盔甲祝福卷軸', 'new_item_bless_acc':'賦予飾品祝福卷軸' }[scrollId];
     let sc = player.inv.find(i => i.id === scrollId);
@@ -11473,7 +11500,7 @@ function doBianUncurse(slotKey) {
     let _e = document.getElementById('interaction-content'); if (_e) renderBianBless(_e);
 }
 function renderBianBless(el) {
-    let slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'legs',n:'腿甲'},{k:'amulet',n:'項鍊'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'belt',n:'腰帶'}];
+    let slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'legs',n:'腿甲'},{k:'amulet',n:'項鍊'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'ring3',n:'戒指'},{k:'ring4',n:'戒指'},{k:'belt',n:'腰帶'}].filter(__ringUnlockFilter);
     let cnt = id => pledgeCountItem(id);
     let rows = slots.map(sl => {
         let it = player.eq[sl.k];
@@ -13350,7 +13377,7 @@ function startGame() {
     let b = createBase[curCreate.cls];
     player.base = { str: b.str+curCreate.str, dex: b.dex+curCreate.dex, con: b.con+curCreate.con, int: b.int+curCreate.int, wis: b.wis+curCreate.wis, cha: b.cha+curCreate.cha };
     player.lv = 1; player.exp = 0; player.gold = 5000000;
-    player.inv = []; player.eq = { wpn: null, helm: null, armor: null, shield: null, cloak: null, tshirt: null, gloves: null, boots: null, ring1: null, ring2: null, amulet: null, belt: null, soul: null }; player.junkPrefs = {};
+    player.inv = []; player.eq = { wpn: null, helm: null, armor: null, shield: null, cloak: null, tshirt: null, gloves: null, boots: null, ring1: null, ring2: null, ring3: null, ring4: null, amulet: null, belt: null, soul: null }; player.junkPrefs = {};
     player.skills = [];
     player.summon = null; player.charmed = null; player.manualCd = {}; player.hot = null; player.elfEle = null; player.buffs = { haste: 0, brave: 0, blue: 0, cautious: 0, elfcookie: 0, poly: 0, shield: 0 };
     
