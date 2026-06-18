@@ -13221,7 +13221,7 @@ function loadGame() {
         renderMobs();
         
         // 載入自動化設定 (如果有存過的話)
-        let __cfgSrc = player.config || __loadGameCfg();   // 🔧 登入後 player.config 可能遺失：改用該存檔位 localStorage 的整包設定回填（藥水/技能/被動buff）
+        let __cfgSrc = __loadGameCfg() || player.config;   // 🔧 優先用該存檔位 localStorage 的整包設定（最新本機紀錄）；登入後 player.config 常遺失或為舊值，故不優先用它
         if (__cfgSrc) {
             let c = __cfgSrc;
             
