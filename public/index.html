@@ -10405,15 +10405,20 @@ window.__adminGrantPoly = function(formName){
   function fmt(n){ return Math.floor(n||0).toLocaleString(); }
   function gold(){ return player.gold||0; }
   function settleClass(win){ return win? 'text-emerald-300':'text-rose-300'; }
+  function casinoMsg(t, err){
+    var el=document.getElementById('cas-msg');
+    if(el){ el.innerHTML=t||''; el.style.color=err?'#fca5a5':'#86efac'; el.style.display=t?'block':'none'; }
+    if(t){ try{ if(typeof logSys==='function') logSys('<span style="color:'+(err?'#fca5a5':'#86efac')+'">🎲 '+t+'</span>'); }catch(e){} }
+  }
 
   function roll2(){ return [1+Math.floor(Math.random()*6), 1+Math.floor(Math.random()*6)]; }
 
   // 下注：type='small'|'big'|'point'
   window.casinoBet = function(type){
     var bet = Math.floor(cs.bet)||0;
-    if(bet<=0){ if(typeof toast==='function') toast('請先選擇下注金額','#7f1d1d'); return; }
-    if(bet>MAX_BET){ if(typeof toast==='function') toast('單注上限 10 億','#7f1d1d'); return; }
-    if(gold()<bet){ if(typeof toast==='function') toast('金幣不足','#7f1d1d'); return; }
+    if(bet<=0){ casinoMsg('請先選擇下注金額', true); return; }
+    if(bet>MAX_BET){ casinoMsg('單注上限 10 億', true); return; }
+    if(gold()<bet){ casinoMsg('金幣不足！目前 '+fmt(gold())+'，下注 '+fmt(bet), true); return; }
     player.gold -= bet;
     var r = roll2(); cs.d1=r[0]; cs.d2=r[1]; var sum=r[0]+r[1];
     var win=0, payout=0, label='';
@@ -10441,7 +10446,7 @@ window.__adminGrantPoly = function(formName){
   window.casinoExchangePandora = function(){
     var n = Math.max(1, parseInt(document.getElementById('cas-pan-qty') && document.getElementById('cas-pan-qty').value) || 1);
     var cost = n*PANDORA_COST;
-    if(gold()<cost){ if(typeof toast==='function') toast('金幣不足（需 '+fmt(cost)+'）','#7f1d1d'); return; }
+    if(gold()<cost){ casinoMsg('金幣不足！兌換需 '+fmt(cost)+'，目前 '+fmt(gold()), true); return; }
     player.gold -= cost;
     if(typeof gainItem==='function') gainItem('new_item_239', n, true);
     logSys('🎟️ 用 '+fmt(cost)+' 金幣兌換 <span class="text-fuchsia-300 font-bold">潘朵拉抽獎卷 ×'+n+'</span>。');
@@ -10451,9 +10456,9 @@ window.__adminGrantPoly = function(formName){
   };
 
   window.casinoExchangeStone = function(){
-    if(gold()<STONE_COST){ if(typeof toast==='function') toast('金幣不足（需 '+fmt(STONE_COST)+'）','#7f1d1d'); return; }
+    if(gold()<STONE_COST){ casinoMsg('金幣不足！兌換需 '+fmt(STONE_COST)+'，目前 '+fmt(gold()), true); return; }
     var t3 = (window.SOULSTONE_BY_TIER && window.SOULSTONE_BY_TIER[3]) || [];
-    if(!t3.length){ if(typeof toast==='function') toast('靈魂石資料未載入','#7f1d1d'); return; }
+    if(!t3.length){ casinoMsg('靈魂石資料未載入', true); return; }
     player.gold -= STONE_COST;
     var id = t3[Math.floor(Math.random()*t3.length)];
     if(typeof gainSoulStone==='function') gainSoulStone(id, 1, false);
@@ -10487,6 +10492,7 @@ window.__adminGrantPoly = function(formName){
     var h='';
     h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><div style="font-size:20px;font-weight:800;color:#e879f9;">🎲 賭場</div><div style="display:flex;gap:6px;"><button onclick="casinoRules()" style="background:#7e22ce;color:#fff;border:none;border-radius:8px;padding:0 12px;height:32px;cursor:pointer;font-size:13px;font-weight:bold;">📖 規則</button><button onclick="document.getElementById(\'casino-overlay\').remove()" style="background:#334155;color:#fff;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button></div></div>';
     h+='<div style="font-size:13px;color:#cbd5e1;margin-bottom:10px;">金幣：<b style="color:#fcd34d;">'+fmt(gold())+'</b></div>';
+    h+='<div id="cas-msg" style="display:none;font-size:13px;font-weight:bold;margin-bottom:10px;padding:8px 10px;background:rgba(127,29,29,.35);border:1px solid #7f1d1d;border-radius:8px;"></div>';
     // 結果區
     if(cs.last){
       var L=cs.last;
