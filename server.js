@@ -196,6 +196,53 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
     } });
 });
 
+// ====== 全服累積頭獎池（刮刮卡＋拉霸共用）======
+const JACKPOT_BASE = 100000000;   // 底值 1 億
+function getJackpot() {
+    const c = store.getConfig() || {};
+    return (typeof c.jackpotPool === 'number' && c.jackpotPool >= JACKPOT_BASE) ? c.jackpotPool : JACKPOT_BASE;
+}
+app.get('/api/jackpot', (req, res) => {
+    res.json({ pool: getJackpot(), base: JACKPOT_BASE });
+});
+app.post('/api/jackpot/add', auth, (req, res) => {
+    const amt = Math.max(0, Math.min(200000000, parseInt((req.body || {}).amount) || 0));   // 單次最多撥 2 億，防灌爆
+    const v = getJackpot() + amt;
+    store.setConfig({ jackpotPool: v });
+    res.json({ pool: v });
+});
+app.post('/api/jackpot/claim', auth, (req, res) => {
+    const won = getJackpot();                       // 原子取池並歸零回底值；同時兩人領，第二人只拿到底值
+    store.setConfig({ jackpotPool: JACKPOT_BASE });
+    res.json({ won: won, pool: JACKPOT_BASE });
+});
+
+// ====== 賭場淨輸贏排行榜（贏錢榜＋輸錢榜共用同一筆 net）======
+app.post('/api/gamble/submit', auth, (req, res) => {
+    const u = req.user;
+    let net = Math.floor(Number((req.body || {}).net));
+    if (!isFinite(net)) net = 0;
+    net = Math.max(-1e15, Math.min(1e15, net));     // 累積淨輸贏：+ 贏 / - 輸
+    const name = (req.body && req.body.name) ? String(req.body.name).slice(0, 20) : u.username;
+    const c = store.getConfig() || {};
+    const gb = c.gambleBoard || {};
+    gb[u.username] = { name, net, ts: Date.now() };
+    const all = Object.entries(gb);
+    const byWin = all.slice().sort((a, b) => (b[1].net || 0) - (a[1].net || 0)).slice(0, 100);
+    const byLoss = all.slice().sort((a, b) => (a[1].net || 0) - (b[1].net || 0)).slice(0, 100);
+    const keep = {}; byWin.concat(byLoss).forEach(([k, v]) => { keep[k] = v; });   // 各保留前 100，避免無限長
+    store.setConfig({ gambleBoard: keep });
+    res.json({ ok: true });
+});
+app.get('/api/gamble/board', auth, (req, res) => {
+    const c = store.getConfig() || {};
+    const gb = c.gambleBoard || {};
+    const vals = Object.values(gb);
+    const topWin = vals.filter(x => (x.net || 0) > 0).map(x => ({ name: x.name, net: x.net })).sort((a, b) => b.net - a.net).slice(0, 20);
+    const topLoss = vals.filter(x => (x.net || 0) < 0).map(x => ({ name: x.name, net: x.net })).sort((a, b) => a.net - b.net).slice(0, 20);
+    res.json({ topWin, topLoss });
+});
+
 app.post('/api/admin/sweep-saves', auth, adminOnly, (req, res) => {
     const cleaned = store.sweepSaves(sanitizeSaveStr);
     res.json({ ok: true, cleaned });

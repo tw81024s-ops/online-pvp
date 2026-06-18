@@ -77,6 +77,28 @@
     }
     window.__towerSubmit = towerSubmit;
     window.__towerBoard = towerBoard;
+    // ============ 全服累積頭獎池（刮刮卡＋拉霸共用）============
+    async function jackpotGet() {
+        try { return await api('/api/jackpot', 'GET'); } catch (e) { return null; }
+    }
+    async function jackpotAdd(amount) {
+        try { return await api('/api/jackpot/add', 'POST', { amount: Math.max(0, Math.floor(amount) || 0) }); } catch (e) { return null; }
+    }
+    async function jackpotClaim() {
+        try { return await api('/api/jackpot/claim', 'POST', {}); } catch (e) { return null; }
+    }
+    window.__getJackpot = jackpotGet;
+    window.__addJackpot = jackpotAdd;
+    window.__claimJackpot = jackpotClaim;
+    // ============ 賭場淨輸贏排行榜（贏錢榜＋輸錢榜）============
+    async function gambleSubmit(net) {
+        try { const p = getPlayer(); return await api('/api/gamble/submit', 'POST', { net: Math.floor(net) || 0, name: (p && p.name) || myName || '' }); } catch (e) { return null; }
+    }
+    async function gambleBoard() {
+        try { return await api('/api/gamble/board', 'GET'); } catch (e) { return { topWin: [], topLoss: [] }; }
+    }
+    window.__gambleSubmit = gambleSubmit;
+    window.__gambleBoard = gambleBoard;
     // ============ 全服設定（經驗倍率 / 攻速倍率）：所有玩家定期同步並套用 ============
     window.__GAME_CONFIG = window.__GAME_CONFIG || { expMult: 1, spdMult: 1, mobMagicMult: 0.25 };
     async function syncGameConfig() {

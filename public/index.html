@@ -725,7 +725,7 @@
                 <button id="btn-trash-gear" class="btn text-base py-2 font-bold px-0" style="grid-column:1 / -1; background: linear-gradient(135deg,#5b3a10 0%,#b45309 28%,#4a2f0c 52%,#d97706 76%,#3a2509 100%); color:#fde68a; border-color:#d97706;" onclick="sellUnlockedGear()">🗑️ 一鍵賣裝（賣掉未上鎖裝備/武器換金幣）</button>
             </div>
 
-            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
+            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openScratchPanel()"><span class="ic">🎟️</span><span class="tx">刮刮卡</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
 
             <div class="panel flex-1 flex flex-col overflow-hidden relative">
                 <!-- 能力 -->
@@ -10401,7 +10401,11 @@ window.__adminGrantPoly = function(formName){
   var STEPS = [10000,100000,1000000,10000000,100000000,1000000000];
   var STEP_LABEL = ['1萬','10萬','100萬','1000萬','1億','10億'];
   var DICE = ['','⚀','⚁','⚂','⚃','⚄','⚅'];
-  var cs = { bet:1000000, pick:7, d1:0, d2:0, last:null };
+  var cs = { bet:1000000, pick:7, d1:0, d2:0, last:null, game:'dice', pool:null, slot:null, bj:null };
+  var REEL = [['🍒',30],['🔔',25],['🍋',20],['⭐',15],['7️⃣',8],['💎',2]];   // 權重總和100
+  var REEL_PAY = { '🍒':4, '🔔':6, '🍋':12, '⭐':30, '7️⃣':120 };               // 三連賠率（💎=頭獎）
+  var POOL_CUT = 0.20;            // 每注撥 20% 進全服頭獎池
+  var JACK_BASE = 100000000;      // 頭獎底值 1 億（離線/領取失敗時的保底）
 
   function fmt(n){ return Math.floor(n||0).toLocaleString(); }
   function gold(){ return player.gold||0; }
@@ -10415,7 +10419,7 @@ window.__adminGrantPoly = function(formName){
   function roll2(){ return [1+Math.floor(Math.random()*6), 1+Math.floor(Math.random()*6)]; }
 
   // 下注：type='small'|'big'|'point'
-  window.casinoBet = function(type){
+  window.casinoBet = async function(type){
     var bet = Math.floor(cs.bet)||0;
     if(bet<=0){ casinoMsg('請先選擇下注金額', true); return; }
     if(bet>MAX_BET){ casinoMsg('單注上限 10 億', true); return; }
@@ -10439,6 +10443,16 @@ window.__adminGrantPoly = function(formName){
     var big = sum===7 ? '<span class="text-amber-300 font-bold">7 點 莊家通殺</span>' : (sum<=6?'小':(sum>=8?'大':'—'))+' '+sum;
     if(win>0) logSys('🎲 '+dface+' = '+sum+'（'+label+'）<span class="'+settleClass(true)+' font-bold">贏 '+fmt(win)+' 金幣</span>');
     else logSys('🎲 '+dface+' = '+sum+'（'+label+'）<span class="'+settleClass(false)+'">輸 '+fmt(bet)+' 金幣</span>'+(cs.last.special?'（7點通殺）':''));
+    casinoNet(payout - bet);
+    // 全服頭獎：每注 0.0001% 中頭獎；否則撥 20% 進池
+    if(Math.random() < 0.000001){
+      var jwon=JACK_BASE;
+      if(typeof window.__claimJackpot==='function'){ var jr=await window.__claimJackpot(); if(jr&&typeof jr.won==='number') jwon=jr.won; }
+      player.gold += jwon; casinoNet(jwon); setPoolEl(JACK_BASE);
+      logSys('🎲 <span class="text-amber-300 font-extrabold">🎉🎉 全服累積頭獎！抱走 '+fmt(jwon)+' 金幣！</span>');
+    } else if(typeof window.__addJackpot==='function'){
+      window.__addJackpot(Math.floor(bet*POOL_CUT)).then(function(rp){ if(rp&&typeof rp.pool==='number') setPoolEl(rp.pool); });
+    }
     try{ if(typeof updateUI==='function') updateUI(); }catch(e){}
     try{ if(typeof saveGame==='function') saveGame(); }catch(e){}
     refreshCasino();
@@ -10478,23 +10492,133 @@ window.__adminGrantPoly = function(formName){
   window.casinoBetInput = function(el){ cs.bet = Math.min(MAX_BET, Math.max(0, parseInt(el.value)||0)); var w=document.getElementById('cas-bet-warn'); if(w) w.style.display = (cs.bet>=MAX_BET?'inline':'none'); };
   window.casinoPick = function(el){ cs.pick = Math.max(2, Math.min(12, parseInt(el.value)||7)); };
 
-  window.openCasinoPanel = function(){
-    var old=document.getElementById('casino-overlay'); if(old) old.remove();
-    var ov=document.createElement('div'); ov.id='casino-overlay';
-    ov.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(2,6,23,.82);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:16px;';
-    ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
-    var box=document.createElement('div'); box.id='casino-box';
-    box.style.cssText='width:100%;max-width:520px;background:linear-gradient(160deg,#1a0f1f,#0b0f1a);border:1px solid #a21caf;border-radius:16px;box-shadow:0 0 30px rgba(217,70,239,.25);padding:16px;color:#e2e8f0;';
-    ov.appendChild(box); document.body.appendChild(ov); refreshCasino();
+  /* ===== 全服頭獎池 ===== */
+  function fmtPool(){ return cs.pool!=null ? fmt(cs.pool) : '—'; }
+  function setPoolEl(v){ cs.pool=v; var el=document.getElementById('cas-pool'); if(el) el.innerHTML='💰 全服累積頭獎池：<b style="color:#fde047;">'+fmt(v)+'</b> 金幣'; }
+  function refreshPool(){
+    if(typeof window.__getJackpot!=='function'){ return; }
+    window.__getJackpot().then(function(r){ if(r&&typeof r.pool==='number') setPoolEl(r.pool); }).catch(function(){});
+  }
+  window.refreshCasinoPool = refreshPool;
+  window.casinoSelectGame = function(g){ cs.game=g; refreshCasino(); refreshPool(); };
+
+  /* ===== 賭場淨輸贏追蹤（贏錢榜／輸錢榜）===== */
+  function casinoNet(delta){
+    delta = Math.round(delta||0);
+    if(!delta) return;
+    player.gambleNet = Math.round((player.gambleNet||0) + delta);
+    if(typeof window.__gambleSubmit==='function'){ clearTimeout(cs._netT); cs._netT=setTimeout(function(){ try{ window.__gambleSubmit(player.gambleNet); }catch(e){} }, 1500); }   // 1.5 秒防抖，避免每注都打 server
+  }
+  window.casinoTrackNet = casinoNet;   // 供刮刮卡共用同一筆淨輸贏
+  window.casinoBoard = function(){
+    var old=document.getElementById('cas-board-overlay'); if(old) old.remove();
+    var ov=document.createElement('div'); ov.id='cas-board-overlay';
+    ov.style.cssText='position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:16px;';
+    var box=document.createElement('div');
+    box.style.cssText='background:#1e293b;border:2px solid #a16207;border-radius:16px;max-width:460px;width:100%;max-height:86vh;overflow:auto;padding:18px;box-shadow:0 0 30px rgba(234,179,8,.3);';
+    var me = Math.round(player.gambleNet||0);
+    box.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><div style="font-size:19px;font-weight:800;color:#fbbf24;">🏆 賭場排行榜</div><button onclick="document.getElementById(\'cas-board-overlay\').remove()" style="background:#334155;color:#fff;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button></div>'
+      +'<div style="font-size:12px;color:#94a3b8;margin-bottom:12px;">你的累積淨輸贏：<b style="color:'+(me>=0?'#86efac':'#fca5a5')+'">'+(me>=0?'+':'')+Math.floor(me).toLocaleString()+'</b> 金幣</div>'
+      +'<div id="cas-board-body" style="font-size:13px;color:#cbd5e1;text-align:center;padding:20px;">載入中…</div>';
+    ov.appendChild(box); document.body.appendChild(ov); ov.onclick=function(e){ if(e.target===ov) ov.remove(); };
+    if(typeof window.__gambleBoard!=='function'){ document.getElementById('cas-board-body').innerHTML='需登入線上才能看全服排行榜。'; return; }
+    window.__gambleBoard().then(function(r){
+      var body=document.getElementById('cas-board-body'); if(!body) return;
+      r=r||{}; var win=r.topWin||[], lose=r.topLoss||[];
+      function tbl(list, sign, col){
+        if(!list.length) return '<div style="color:#64748b;padding:10px;">—尚無紀錄—</div>';
+        var s='<div style="display:flex;flex-direction:column;gap:3px;">';
+        for(var i=0;i<list.length;i++){ var e=list[i]; var amt=Math.abs(Math.floor(e.net||0)).toLocaleString();
+          s+='<div style="display:flex;justify-content:space-between;background:#0f172a;border-radius:7px;padding:6px 10px;"><span style="color:#e2e8f0;"><b style="color:#fbbf24;display:inline-block;width:22px;">'+(i+1)+'</b>'+(e.name||'???')+'</span><span style="color:'+col+';font-weight:bold;">'+sign+amt+'</span></div>'; }
+        return s+'</div>';
+      }
+      body.style.textAlign='left'; body.style.padding='0';
+      body.innerHTML='<div style="font-size:14px;font-weight:800;color:#86efac;margin:4px 0 6px;">💰 贏錢榜 Top 20</div>'+tbl(win,'+','#86efac')
+        +'<div style="font-size:14px;font-weight:800;color:#fca5a5;margin:14px 0 6px;">💸 輸錢榜 Top 20</div>'+tbl(lose,'-','#fca5a5');
+    }).catch(function(){ var body=document.getElementById('cas-board-body'); if(body) body.innerHTML='載入失敗。'; });
   };
 
-  function refreshCasino(){
-    var box=document.getElementById('casino-box'); if(!box) return;
+  /* ===== 拉霸（3 轉輪，RTP≈46%）===== */
+  function reelPick(){ var r=Math.random()*100, a=0; for(var i=0;i<REEL.length;i++){ a+=REEL[i][1]; if(r<a) return REEL[i][0]; } return REEL[REEL.length-1][0]; }
+  window.casinoSlot = async function(){
+    var bet=Math.floor(cs.bet)||0;
+    if(bet<=0){ casinoMsg('請先選擇下注金額', true); return; }
+    if(bet>MAX_BET){ casinoMsg('單注上限 10 億', true); return; }
+    if(gold()<bet){ casinoMsg('金幣不足！目前 '+fmt(gold())+'，下注 '+fmt(bet), true); return; }
+    player.gold -= bet;
+    var s=[reelPick(),reelPick(),reelPick()];
+    if(s[0]===s[1] && s[1]===s[2] && s[0]==='💎'){
+      var won=JACK_BASE;
+      if(typeof window.__claimJackpot==='function'){ var r=await window.__claimJackpot(); if(r&&typeof r.won==='number') won=r.won; }
+      player.gold += won;
+      cs.slot={ s:s, jackpot:true, ret:won, delta:won-bet };
+      setPoolEl(JACK_BASE);
+      logSys('🎰 '+s.join(' ')+' <span class="text-amber-300 font-extrabold">💎💎💎 全服頭獎！抱走 '+fmt(won)+' 金幣！</span>');
+    } else {
+      var payout=0;
+      if(s[0]===s[1] && s[1]===s[2]) payout = bet*(REEL_PAY[s[0]]||0);
+      if(payout>0) player.gold += payout;
+      cs.slot={ s:s, jackpot:false, ret:payout, delta:(payout>0?payout-bet:-bet) };
+      if(typeof window.__addJackpot==='function') window.__addJackpot(Math.floor(bet*POOL_CUT)).then(function(r){ if(r&&typeof r.pool==='number') setPoolEl(r.pool); });
+      if(payout>0) logSys('🎰 '+s.join(' ')+' <span class="'+settleClass(true)+' font-bold">贏 '+fmt(payout-bet)+' 金幣</span>');
+      else logSys('🎰 '+s.join(' ')+' <span class="'+settleClass(false)+'">輸 '+fmt(bet)+' 金幣</span>');
+    }
+    casinoNet(cs.slot.delta);
+    try{ if(typeof updateUI==='function') updateUI(); }catch(e){}
+    try{ if(typeof saveGame==='function') saveGame(); }catch(e){}
+    refreshCasino();
+  };
+
+  /* ===== 21點（4 副牌、莊家17停、BJ賠1:1、平手莊家贏）===== */
+  function newShoe(){ var d=[]; for(var k=0;k<4;k++) for(var su=0;su<4;su++) for(var v=1;v<=13;v++) d.push(v); for(var i=d.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=d[i]; d[i]=d[j]; d[j]=t; } return d; }
+  function cardVal(c){ return c>10?10:c; }
+  function handVal(arr){ var s=0,ace=0,i; for(i=0;i<arr.length;i++){ if(arr[i]===1) ace++; s+=cardVal(arr[i]); } var soft=false; if(ace>0 && s+10<=21){ s+=10; soft=true; } return { v:s, soft:soft }; }
+  function cardName(c){ return c===1?'A':(c===11?'J':(c===12?'Q':(c===13?'K':String(c)))); }
+  function handStr(arr,hide){ var o=[],i; for(i=0;i<arr.length;i++){ o.push(hide&&i===1?'🂠':cardName(arr[i])); } return o.join(' '); }
+  function bjSettle(bj){
+    var pv=handVal(bj.p).v, dv=handVal(bj.d).v, res;
+    if(pv>21) res='lose';
+    else if(dv>21) res='win';
+    else if(pv>dv) res='win';
+    else res='lose';                          // 平手算莊家贏
+    if(res==='win') player.gold += bj.bet*2;   // 賠 1:1（拿回 2 倍）
+    bj.stage='done'; bj.res=res;
+    if(res==='win') logSys('🃏 21點：你 '+pv+' vs 莊 '+dv+' <span class="'+settleClass(true)+' font-bold">贏 '+fmt(bj.bet)+' 金幣</span>');
+    else logSys('🃏 21點：你 '+pv+' vs 莊 '+dv+' <span class="'+settleClass(false)+'">輸 '+fmt(bj.bet)+' 金幣</span>'+(pv===dv&&pv<=21?'（平手莊家贏）':''));
+    casinoNet(res==='win'?bj.bet:-bj.bet);
+    try{ if(typeof updateUI==='function') updateUI(); }catch(e){}
+    try{ if(typeof saveGame==='function') saveGame(); }catch(e){}
+  }
+  window.casinoBjDeal = function(){
+    var bet=Math.floor(cs.bet)||0;
+    if(bet<=0){ casinoMsg('請先選擇下注金額', true); return; }
+    if(bet>MAX_BET){ casinoMsg('單注上限 10 億', true); return; }
+    if(gold()<bet){ casinoMsg('金幣不足！目前 '+fmt(gold())+'，下注 '+fmt(bet), true); return; }
+    player.gold -= bet;
+    var sh=newShoe();
+    var bj={ shoe:sh, bet:bet, p:[sh.pop(),sh.pop()], d:[sh.pop(),sh.pop()], stage:'play', res:'' };
+    if(handVal(bj.p).v===21 || handVal(bj.d).v===21) bjSettle(bj);
+    cs.bj=bj;
+    try{ if(typeof updateUI==='function') updateUI(); }catch(e){}
+    refreshCasino();
+  };
+  window.casinoBjHit = function(){ var bj=cs.bj; if(!bj||bj.stage!=='play') return; bj.p.push(bj.shoe.pop()); if(handVal(bj.p).v>21) bjSettle(bj); refreshCasino(); };
+  window.casinoBjStand = function(){ var bj=cs.bj; if(!bj||bj.stage!=='play') return; while(handVal(bj.d).v<17) bj.d.push(bj.shoe.pop()); bjSettle(bj); refreshCasino(); };
+  window.casinoBjReset = function(){ cs.bj=null; refreshCasino(); };
+
+  /* ===== 各分頁渲染 ===== */
+  function betUI(){
+    var h='', i;
+    h+='<div style="font-size:13px;font-weight:700;margin-bottom:6px;">下注額（上限 10 億）</div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;">';
+    for(i=0;i<STEPS.length;i++){ var on=cs.bet===STEPS[i]; h+='<button onclick="casinoSetBet('+STEPS[i]+')" style="flex:1;min-width:60px;background:'+(on?'#a21caf':'#1e293b')+';color:#fff;border:none;border-radius:8px;padding:7px 4px;cursor:pointer;font-size:12px;font-weight:bold;">'+STEP_LABEL[i]+'</button>'; }
+    h+='<button onclick="casinoSetBet(\'all\')" style="flex:1;min-width:60px;background:#7c2d12;color:#fff;border:none;border-radius:8px;padding:7px 4px;cursor:pointer;font-size:12px;font-weight:bold;">全押</button>';
+    h+='</div>';
+    h+='<div style="margin-bottom:12px;"><input id="cas-bet-input" type="number" value="'+cs.bet+'" oninput="casinoBetInput(this)" style="width:100%;box-sizing:border-box;background:#0f172a;border:1px solid #475569;border-radius:8px;color:#fde68a;font-weight:bold;padding:8px;text-align:right;"><span id="cas-bet-warn" style="display:'+(cs.bet>=MAX_BET?'inline':'none')+';color:#f59e0b;font-size:11px;">已達上限 10 億</span></div>';
+    return h;
+  }
+  function diceContent(){
     var h='';
-    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><div style="font-size:20px;font-weight:800;color:#e879f9;">🎲 賭場</div><div style="display:flex;gap:6px;"><button onclick="casinoRules()" style="background:#7e22ce;color:#fff;border:none;border-radius:8px;padding:0 12px;height:32px;cursor:pointer;font-size:13px;font-weight:bold;">📖 規則</button><button onclick="document.getElementById(\'casino-overlay\').remove()" style="background:#334155;color:#fff;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button></div></div>';
-    h+='<div style="font-size:13px;color:#cbd5e1;margin-bottom:10px;">金幣：<b style="color:#fcd34d;">'+fmt(gold())+'</b></div>';
-    h+='<div id="cas-msg" style="display:none;font-size:13px;font-weight:bold;margin-bottom:10px;padding:8px 10px;background:rgba(127,29,29,.35);border:1px solid #7f1d1d;border-radius:8px;"></div>';
-    // 結果區
     if(cs.last){
       var L=cs.last;
       h+='<div style="text-align:center;background:#0f172a;border:1px solid #334155;border-radius:12px;padding:10px;margin-bottom:12px;">';
@@ -10505,23 +10629,12 @@ window.__adminGrantPoly = function(formName){
     } else {
       h+='<div style="text-align:center;background:#0f172a;border:1px solid #334155;border-radius:12px;padding:14px;margin-bottom:12px;color:#64748b;font-size:34px;">🎲 🎲</div>';
     }
-    // 下注額
-    h+='<div style="font-size:13px;font-weight:700;margin-bottom:6px;">下注額（上限 10 億）</div>';
-    h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;">';
-    for(var i=0;i<STEPS.length;i++){
-      var on = cs.bet===STEPS[i];
-      h+='<button onclick="casinoSetBet('+STEPS[i]+')" style="flex:1;min-width:60px;background:'+(on?'#a21caf':'#1e293b')+';color:#fff;border:none;border-radius:8px;padding:7px 4px;cursor:pointer;font-size:12px;font-weight:bold;">'+STEP_LABEL[i]+'</button>';
-    }
-    h+='<button onclick="casinoSetBet(\'all\')" style="flex:1;min-width:60px;background:#7c2d12;color:#fff;border:none;border-radius:8px;padding:7px 4px;cursor:pointer;font-size:12px;font-weight:bold;">全押</button>';
-    h+='</div>';
-    h+='<div style="margin-bottom:12px;"><input id="cas-bet-input" type="number" value="'+cs.bet+'" oninput="casinoBetInput(this)" style="width:100%;box-sizing:border-box;background:#0f172a;border:1px solid #475569;border-radius:8px;color:#fde68a;font-weight:bold;padding:8px;text-align:right;"><span id="cas-bet-warn" style="display:'+(cs.bet>=MAX_BET?'inline':'none')+';color:#f59e0b;font-size:11px;">已達上限 10 億</span></div>';
-    // 比大小
+    h+=betUI();
     h+='<div style="font-size:13px;font-weight:700;margin-bottom:6px;">比大小 <span style="color:#94a3b8;font-weight:400;">1:1（7 點莊家通殺）</span></div>';
     h+='<div style="display:flex;gap:8px;margin-bottom:12px;">';
     h+='<button onclick="casinoBet(\'small\')" style="flex:1;background:#0e7490;color:#fff;border:none;border-radius:10px;padding:12px;cursor:pointer;font-weight:bold;">押小<br><span style="font-size:11px;opacity:.8;">2~6</span></button>';
     h+='<button onclick="casinoBet(\'big\')" style="flex:1;background:#b91c1c;color:#fff;border:none;border-radius:10px;padding:12px;cursor:pointer;font-weight:bold;">押大<br><span style="font-size:11px;opacity:.8;">8~12</span></button>';
     h+='</div>';
-    // 賭點數
     h+='<div style="font-size:13px;font-weight:700;margin-bottom:6px;">賭點數 <span style="color:#94a3b8;font-weight:400;">1:5（押中總和賠 5 倍）</span></div>';
     h+='<div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;">';
     h+='<select onchange="casinoPick(this)" style="background:#0f172a;border:1px solid #475569;border-radius:8px;color:#fde68a;padding:9px;font-weight:bold;">';
@@ -10529,11 +10642,79 @@ window.__adminGrantPoly = function(formName){
     h+='</select>';
     h+='<button onclick="casinoBet(\'point\')" style="flex:1;background:#7e22ce;color:#fff;border:none;border-radius:10px;padding:12px;cursor:pointer;font-weight:bold;">押點數</button>';
     h+='</div>';
-    // 兌換
+    return h;
+  }
+  function slotContent(){
+    var h='', sl=cs.slot;
+    h+='<div style="text-align:center;background:#0f172a;border:1px solid #334155;border-radius:12px;padding:14px;margin-bottom:12px;">';
+    h+='<div style="font-size:40px;letter-spacing:8px;line-height:1;">'+(sl?sl.s.join(' '):'🎰 🎰 🎰')+'</div>';
+    if(sl){ h+='<div style="font-size:15px;font-weight:bold;margin-top:8px;" class="'+(sl.delta>0?'text-emerald-300':'text-rose-300')+'">'+(sl.jackpot?'💎 全服頭獎！+'+fmt(sl.delta):(sl.delta>0?'贏 +'+fmt(sl.delta):'輸 '+fmt(-sl.delta)))+' 金幣</div>'; }
+    h+='</div>';
+    h+=betUI();
+    h+='<button onclick="casinoSlot()" style="width:100%;background:linear-gradient(90deg,#b91c1c,#f59e0b);color:#fff;border:none;border-radius:10px;padding:14px;cursor:pointer;font-weight:800;font-size:16px;margin-bottom:8px;">🎰 拉一次</button>';
+    h+='<div style="font-size:11px;color:#94a3b8;line-height:1.8;margin-bottom:14px;">三連賠率：🍒×3=4倍　🔔×3=6倍　🍋×3=12倍　⭐×3=30倍　7️⃣×3=120倍<br><span style="color:#fde047;">💎×3 ＝ 🎉 抱走全服累積頭獎池！</span>　每拉撥 20% 進池</div>';
+    return h;
+  }
+  function bjContent(){
+    var h='', bj=cs.bj;
+    if(!bj){
+      h+='<div style="text-align:center;background:#0f172a;border:1px solid #334155;border-radius:12px;padding:18px;margin-bottom:12px;color:#64748b;font-size:34px;">🃏</div>';
+      h+=betUI();
+      h+='<button onclick="casinoBjDeal()" style="width:100%;background:linear-gradient(90deg,#15803d,#16a34a);color:#fff;border:none;border-radius:10px;padding:14px;cursor:pointer;font-weight:800;font-size:16px;margin-bottom:8px;">🃏 發牌</button>';
+    } else {
+      var hide=bj.stage==='play', pv=handVal(bj.p), dv=handVal(bj.d);
+      h+='<div style="background:#0f172a;border:1px solid #334155;border-radius:12px;padding:12px;margin-bottom:12px;">';
+      h+='<div style="font-size:13px;color:#94a3b8;">莊家 '+(hide?'':'('+dv.v+')')+'</div><div style="font-size:26px;font-weight:bold;letter-spacing:4px;margin:2px 0 10px;">'+handStr(bj.d,hide)+'</div>';
+      h+='<div style="font-size:13px;color:#94a3b8;">你 ('+pv.v+(pv.soft?' 軟':'')+')</div><div style="font-size:26px;font-weight:bold;letter-spacing:4px;margin-top:2px;">'+handStr(bj.p,false)+'</div>';
+      if(bj.stage==='done'){ h+='<div style="text-align:center;font-size:16px;font-weight:bold;margin-top:10px;" class="'+(bj.res==='win'?'text-emerald-300':'text-rose-300')+'">'+(bj.res==='win'?'贏 +'+fmt(bj.bet):'輸 '+fmt(bj.bet)+(pv.v===dv.v&&pv.v<=21?'（平手莊家贏）':''))+' 金幣</div>'; }
+      h+='</div>';
+      if(bj.stage==='play'){
+        h+='<div style="display:flex;gap:8px;margin-bottom:8px;">';
+        h+='<button onclick="casinoBjHit()" style="flex:1;background:#0e7490;color:#fff;border:none;border-radius:10px;padding:13px;cursor:pointer;font-weight:bold;font-size:15px;">要牌</button>';
+        h+='<button onclick="casinoBjStand()" style="flex:1;background:#b91c1c;color:#fff;border:none;border-radius:10px;padding:13px;cursor:pointer;font-weight:bold;font-size:15px;">停牌</button>';
+        h+='</div>';
+      } else {
+        h+='<button onclick="casinoBjReset()" style="width:100%;background:#15803d;color:#fff;border:none;border-radius:10px;padding:13px;cursor:pointer;font-weight:bold;margin-bottom:8px;">再來一局</button>';
+      }
+    }
+    h+='<div style="font-size:11px;color:#94a3b8;line-height:1.8;margin-bottom:14px;">4 副牌 · 莊家 17 點停 · 21點(BlackJack)賠 1:1 · 平手算莊家贏 · 爆牌即輸</div>';
+    return h;
+  }
+  function exchangeSection(){
+    var h='';
     h+='<div style="border-top:1px solid #334155;padding-top:12px;"><div style="font-size:13px;font-weight:700;margin-bottom:8px;">💱 酬金兌換</div>';
     h+='<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;"><div style="flex:1;font-size:13px;">潘朵拉抽獎卷<br><span style="font-size:11px;color:#94a3b8;">200萬 / 張</span></div><input id="cas-pan-qty" type="number" value="1" min="1" style="width:64px;background:#0f172a;border:1px solid #475569;border-radius:8px;color:#fde68a;padding:7px;text-align:center;"><button onclick="casinoExchangePandora()" style="background:#a21caf;color:#fff;border:none;border-radius:8px;padding:9px 12px;cursor:pointer;font-weight:bold;">兌換</button></div>';
     h+='<div style="display:flex;gap:8px;align-items:center;"><div style="flex:1;font-size:13px;">紫色靈魂石（隨機 T3）<br><span style="font-size:11px;color:#94a3b8;">50億 / 顆</span></div><button onclick="casinoExchangeStone()" style="background:#7e22ce;color:#fff;border:none;border-radius:8px;padding:9px 14px;cursor:pointer;font-weight:bold;">兌換</button></div>';
     h+='</div>';
+    return h;
+  }
+
+  window.openCasinoPanel = function(){
+    var old=document.getElementById('casino-overlay'); if(old) old.remove();
+    var ov=document.createElement('div'); ov.id='casino-overlay';
+    ov.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(2,6,23,.82);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:16px;';
+    ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
+    var box=document.createElement('div'); box.id='casino-box';
+    box.style.cssText='width:100%;max-width:520px;background:linear-gradient(160deg,#1a0f1f,#0b0f1a);border:1px solid #a21caf;border-radius:16px;box-shadow:0 0 30px rgba(217,70,239,.25);padding:16px;color:#e2e8f0;';
+    ov.appendChild(box); document.body.appendChild(ov); refreshCasino(); refreshPool();
+  };
+
+  function refreshCasino(){
+    var box=document.getElementById('casino-box'); if(!box) return;
+    var h='';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><div style="font-size:20px;font-weight:800;color:#e879f9;">🎲 賭場</div><div style="display:flex;gap:6px;"><button onclick="casinoBoard()" style="background:#a16207;color:#fff;border:none;border-radius:8px;padding:0 12px;height:32px;cursor:pointer;font-size:13px;font-weight:bold;">🏆 排行榜</button><button onclick="casinoRules()" style="background:#7e22ce;color:#fff;border:none;border-radius:8px;padding:0 12px;height:32px;cursor:pointer;font-size:13px;font-weight:bold;">📖 規則</button><button onclick="document.getElementById(\'casino-overlay\').remove()" style="background:#334155;color:#fff;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button></div></div>';
+    h+='<div style="font-size:13px;color:#cbd5e1;margin-bottom:6px;">金幣：<b style="color:#fcd34d;">'+fmt(gold())+'</b></div>';
+    h+='<div id="cas-pool" style="font-size:13px;margin-bottom:10px;color:#cbd5e1;background:rgba(120,53,15,.25);border:1px solid #92400e;border-radius:8px;padding:6px 10px;">💰 全服累積頭獎池：<b style="color:#fde047;">'+fmtPool()+'</b> 金幣</div>';
+    h+='<div id="cas-msg" style="display:none;font-size:13px;font-weight:bold;margin-bottom:10px;padding:8px 10px;background:rgba(127,29,29,.35);border:1px solid #7f1d1d;border-radius:8px;"></div>';
+    // 分頁
+    var tabs=[['dice','🎲 猜大小'],['slot','🎰 拉霸'],['bj','🃏 21點']];
+    h+='<div style="display:flex;gap:6px;margin-bottom:14px;">';
+    for(var t=0;t<tabs.length;t++){ var on=cs.game===tabs[t][0]; h+='<button onclick="casinoSelectGame(\''+tabs[t][0]+'\')" style="flex:1;background:'+(on?'#a21caf':'#1e293b')+';color:#fff;border:'+(on?'1px solid #e879f9':'1px solid #334155')+';border-radius:10px;padding:9px 4px;cursor:pointer;font-weight:bold;font-size:13px;">'+tabs[t][1]+'</button>'; }
+    h+='</div>';
+    if(cs.game==='slot') h+=slotContent();
+    else if(cs.game==='bj') h+=bjContent();
+    else h+=diceContent();
+    h+=exchangeSection();
     box.innerHTML=h;
   }
   window.refreshCasino = refreshCasino;
@@ -10545,7 +10726,7 @@ window.__adminGrantPoly = function(formName){
     h+='<div style="border-radius:14px;overflow:hidden;border:1px solid #a21caf;box-shadow:0 0 24px rgba(217,70,239,.25);">';
     h+='<div style="background:linear-gradient(110deg,#7e22ce,#a21caf,#db2777);padding:14px 16px;text-align:center;">';
     h+='<div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:2px;text-shadow:0 2px 6px rgba(0,0,0,.4);">🎲 賭　場 🎲</div>';
-    h+='<div style="font-size:12px;color:#fbcfe8;margin-top:2px;">擲兩顆骰子 · 比大小 · 賭點數 · 娛樂為主，量力而為</div></div>';
+    h+='<div style="font-size:12px;color:#fbcfe8;margin-top:2px;">猜大小 · 賭點數 · 拉霸 · 21點 · 娛樂為主，量力而為</div></div>';
     h+='<div style="background:linear-gradient(160deg,#1a0f1f,#0b0f1a);padding:14px 16px;color:#e2e8f0;">';
     // 比大小
     h+='<div style="margin-bottom:12px;"><div style="font-weight:800;color:#67e8f9;margin-bottom:4px;">① 比大小　'+badge('1:1','#0e7490')+'</div>';
@@ -10553,6 +10734,15 @@ window.__adminGrantPoly = function(formName){
     // 賭點數
     h+='<div style="margin-bottom:12px;"><div style="font-weight:800;color:#d8b4fe;margin-bottom:4px;">② 賭點數　'+badge('1:5','#7e22ce')+'</div>';
     h+='<div style="font-size:13px;line-height:1.7;color:#cbd5e1;">指定一個總和（2~12），押中該點數賠 <b style="color:#d8b4fe;">5 倍</b>（拿回 6 倍）。點數越偏門越難中、賠得越爽。</div></div>';
+    // 拉霸
+    h+='<div style="margin-bottom:12px;"><div style="font-weight:800;color:#fbbf24;margin-bottom:4px;">③ 拉霸 🎰</div>';
+    h+='<div style="font-size:13px;line-height:1.7;color:#cbd5e1;">3 轉輪，三連賠率：🍒×3=<b>4倍</b>、🔔×3=<b>6倍</b>、🍋×3=<b>12倍</b>、⭐×3=<b>30倍</b>、7️⃣×3=<b>120倍</b>。<br><span style="color:#fde047;font-weight:bold;">💎×3 ＝ 抱走全服累積頭獎池！</span></div></div>';
+    // 21點
+    h+='<div style="margin-bottom:12px;"><div style="font-weight:800;color:#86efac;margin-bottom:4px;">④ 21點 🃏　'+badge('1:1','#15803d')+'</div>';
+    h+='<div style="font-size:13px;line-height:1.7;color:#cbd5e1;">4 副牌，點數接近 21 點者勝。莊家 17 點停牌；21點賠 1:1；<b style="color:#fca5a5;">平手算莊家贏</b>；爆牌即輸。</div></div>';
+    // 頭獎池
+    h+='<div style="margin-bottom:12px;border:1px solid #92400e;background:rgba(120,53,15,.2);border-radius:10px;padding:8px 10px;"><div style="font-weight:800;color:#fde047;margin-bottom:2px;">🎉 全服累積頭獎池</div>';
+    h+='<div style="font-size:13px;line-height:1.7;color:#cbd5e1;">刮刮卡、拉霸、比大小<b>共用同一個全服頭獎池</b>，底值 1 億，每筆下注撥 20% 進池。<br>刮刮卡刮中頭獎、拉霸 💎×3、或比大小每注 0.0001% → <b style="color:#fde047;">抱走整池</b>，歸零重新累積。（21點不參與）</div></div>';
     // 上限
     h+='<div style="margin-bottom:12px;font-size:13px;color:#cbd5e1;">💰 籌碼＝<b>金幣</b>，單注上限 <b style="color:#fcd34d;">10 億</b>。</div>';
     // 兌換
@@ -10570,6 +10760,118 @@ window.__adminGrantPoly = function(formName){
     var box=document.createElement('div'); box.style.cssText='width:100%;max-width:480px;';
     box.innerHTML = window.__casinoRulesHTML() + '<button onclick="document.getElementById(\'casino-rules-overlay\').remove()" style="width:100%;margin-top:10px;background:#334155;color:#fff;border:none;border-radius:10px;padding:12px;cursor:pointer;font-weight:bold;">關閉</button>';
     ov.appendChild(box); document.body.appendChild(ov);
+  };
+})();
+
+/* ===================== 🎟️ 刮刮卡（刮一次 1000萬，必中一獎，RTP≈74%）===================== */
+(function(){
+  var COST = 10000000;            // 刮一次 1000 萬
+  var POOL_CUT = 0.20;            // 撥 20% 進全服頭獎池
+  var JACK_BASE = 100000000;      // 頭獎底值 1 億
+  // 中/高階獎池（皆可交易）
+  var MID_LEGS = ['legs_irongate','legs_str','legs_int','legs_dex','legs_growth','legs_anubis','legs_magicdef'];
+  var MID_RUNE = ['rune_rage','rune_will','rune_dominate','rune_rule'];
+  var HIGH_RUNE = ['rune_aiodin','rune_gaia'];
+  function midSoul(){ var t=(window.SOULSTONE_BY_TIER||{}); return (t[2]||[]).concat(t[3]||[]); }
+  function highSoul(){ var t=(window.SOULSTONE_BY_TIER||{}); return (t[4]||[]).concat(t[5]||[]); }
+  function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+  function itemName(id){ try{ return (DB.items[id]||{}).n || id; }catch(e){ return id; } }
+  function fmt(n){ return Math.floor(n||0).toLocaleString(); }
+  function gold(){ return player.gold||0; }
+  var pool=null;
+
+  function scMsg(t,err){ var el=document.getElementById('sc-msg'); if(el){ el.innerHTML=t||''; el.style.color=err?'#fca5a5':'#86efac'; el.style.display=t?'block':'none'; } }
+  function setPool(v){ pool=v; var el=document.getElementById('sc-pool'); if(el) el.innerHTML='💰 全服累積頭獎池：<b style="color:#fde047;">'+fmt(v)+'</b> 金幣'; }
+  function refreshPool(){ if(typeof window.__getJackpot==='function'){ window.__getJackpot().then(function(r){ if(r&&typeof r.pool==='number') setPool(r.pool); }).catch(function(){}); } }
+  function net(d){ if(typeof window.casinoTrackNet==='function') window.casinoTrackNet(d); }
+
+  // 抽獎：回傳獎項 key（稀有優先判定，最常見當 fallback）
+  function drawPrize(){
+    var r=Math.random();
+    if(r < 0.000001) return 'jackpot';                 // 0.0001%
+    if(r < 0.000021) return 'soul_high';               // 0.002%
+    if(r < 0.002021) return 'rune_high';               // 0.2%
+    if(r < 0.007021) return 'gold_1e';                 // 0.5%  金幣1億
+    if(r < 0.017021) return 'mid_gear';                // 1%
+    if(r < 0.057021) return 'gold_1000w';              // 4%
+    if(r < 0.130021) return 'gold_100w';               // 7.3%
+    if(r < 0.230021) return 'pan_5_10';                // 10%
+    if(r < 0.480021) return 'gold_300w';               // 25%
+    return 'pan_1_3';                                   // 52%
+  }
+
+  window.scratchOnce = async function(times){
+    times = Math.max(1, Math.min(10, parseInt(times)||1));
+    if(gold() < COST*times){ scMsg('金幣不足！刮 '+times+' 次需 '+fmt(COST*times)+'，目前 '+fmt(gold()), true); return; }
+    var results=[];
+    for(var k=0;k<times;k++){
+      player.gold -= COST; net(-COST);
+      var pz=drawPrize(), line='';
+      if(pz==='jackpot'){
+        var won=JACK_BASE;
+        if(typeof window.__claimJackpot==='function'){ var jr=await window.__claimJackpot(); if(jr&&typeof jr.won==='number') won=jr.won; }
+        player.gold += won; net(won); setPool(JACK_BASE);
+        line='<span style="color:#fde047;font-weight:800;">🎉🎉 全服累積頭獎！抱走 '+fmt(won)+' 金幣！</span>';
+        logSys('🎟️ <span class="text-amber-300 font-extrabold">🎉 刮中全服頭獎！'+fmt(won)+' 金幣！</span>');
+      } else {
+        if(typeof window.__addJackpot==='function') window.__addJackpot(Math.floor(COST*POOL_CUT)).then(function(r){ if(r&&typeof r.pool==='number') setPool(r.pool); });
+        if(pz==='soul_high'){ var id=pick(highSoul()); if(id&&typeof gainSoulStone==='function') gainSoulStone(id,1,true); line='<span style="color:#fb7185;font-weight:700;">💎 高階靈魂石：'+itemName(id)+'</span>'; }
+        else if(pz==='rune_high'){ var id2=pick(HIGH_RUNE); if(typeof gainItem==='function') gainItem(id2,1,true); line='<span style="color:#fbbf24;font-weight:700;">🔮 高階符石：'+itemName(id2)+'</span>'; }
+        else if(pz==='gold_1e'){ player.gold += 100000000; net(100000000); line='<span style="color:#fde047;font-weight:700;">💰 金幣 1 億！</span>'; }
+        else if(pz==='mid_gear'){
+          var bag=[{t:'legs',a:MID_LEGS},{t:'rune',a:MID_RUNE},{t:'soul',a:midSoul()}]; var b=bag[Math.floor(Math.random()*3)]; var gid=pick(b.a);
+          if(b.t==='soul'){ if(typeof gainSoulStone==='function') gainSoulStone(gid,1,true); } else { if(typeof gainItem==='function') gainItem(gid,1,true); }
+          line='<span style="color:#a78bfa;font-weight:700;">🛡️ 中階裝備：'+itemName(gid)+'</span>';
+        }
+        else if(pz==='gold_1000w'){ player.gold += 10000000; net(10000000); line='<span style="color:#86efac;">💰 金幣 1000 萬</span>'; }
+        else if(pz==='gold_100w'){ player.gold += 1000000; net(1000000); line='💰 金幣 100 萬'; }
+        else if(pz==='pan_5_10'){ var n1=5+Math.floor(Math.random()*6); if(typeof gainItem==='function') gainItem('new_item_239',n1,true); line='<span style="color:#e879f9;font-weight:700;">🎫 潘朵拉抽獎卷 ×'+n1+'</span>'; }
+        else if(pz==='gold_300w'){ player.gold += 3000000; net(3000000); line='💰 金幣 300 萬'; }
+        else { var n2=1+Math.floor(Math.random()*3); if(typeof gainItem==='function') gainItem('new_item_239',n2,true); line='<span style="color:#e879f9;">🎫 潘朵拉抽獎卷 ×'+n2+'</span>'; }
+      }
+      results.push(line);
+    }
+    try{ if(typeof updateUI==='function') updateUI(); }catch(e){}
+    try{ if(typeof saveGame==='function') saveGame(); }catch(e){}
+    var box=document.getElementById('sc-result');
+    if(box) box.innerHTML='<div style="font-size:13px;font-weight:700;color:#94a3b8;margin-bottom:6px;">刮出結果（'+times+' 張）</div>'+results.map(function(l){ return '<div style="background:#0f172a;border-radius:8px;padding:8px 10px;margin-bottom:4px;">🎟️ '+l+'</div>'; }).join('');
+    scMsg('');
+  };
+
+  window.scratchRules = function(){
+    var old=document.getElementById('sc-rules-ov'); if(old){ old.remove(); return; }
+    var ov=document.createElement('div'); ov.id='sc-rules-ov';
+    ov.style.cssText='position:fixed;inset:0;z-index:100001;background:rgba(2,6,23,.85);display:flex;align-items:center;justify-content:center;padding:18px;';
+    ov.onclick=function(e){ if(e.target===ov) ov.remove(); };
+    var rows=[['52%','潘朵拉抽獎卷 1~3 張'],['25%','金幣 300 萬'],['10%','潘朵拉抽獎卷 5~10 張'],['7.3%','金幣 100 萬'],['4%','金幣 1000 萬'],['1%','中階裝備（腿甲／符石／靈魂石，可交易）'],['0.5%','金幣 1 億'],['0.2%','高階符石（可交易）'],['0.002%','高階靈魂石（可交易）'],['0.0001%','🎉 全服累積頭獎']];
+    var h='<div style="background:#1e293b;border:2px solid #a16207;border-radius:16px;max-width:440px;width:100%;max-height:86vh;overflow:auto;padding:18px;">';
+    h+='<div style="font-size:18px;font-weight:800;color:#fbbf24;margin-bottom:8px;">🎟️ 刮刮卡規則</div>';
+    h+='<div style="font-size:13px;color:#cbd5e1;margin-bottom:10px;">刮一次 <b style="color:#fde047;">1000 萬</b> 金幣，<b>必中一獎</b>，越高越稀有。獎勵皆<b>可交易</b>。每刮撥 20% 進全服頭獎池。</div>';
+    for(var i=0;i<rows.length;i++){ h+='<div style="display:flex;justify-content:space-between;background:#0f172a;border-radius:7px;padding:6px 10px;margin-bottom:3px;"><span style="color:#fbbf24;font-weight:bold;width:64px;">'+rows[i][0]+'</span><span style="color:#e2e8f0;flex:1;text-align:right;">'+rows[i][1]+'</span></div>'; }
+    h+='<button onclick="document.getElementById(\'sc-rules-ov\').remove()" style="width:100%;margin-top:10px;background:#334155;color:#fff;border:none;border-radius:10px;padding:12px;cursor:pointer;font-weight:bold;">關閉</button></div>';
+    var box=document.createElement('div'); box.style.cssText='width:100%;max-width:440px;'; box.innerHTML=h;
+    ov.appendChild(box); document.body.appendChild(ov);
+  };
+
+  window.openScratchPanel = function(){
+    var old=document.getElementById('scratch-overlay'); if(old) old.remove();
+    var ov=document.createElement('div'); ov.id='scratch-overlay';
+    ov.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(2,6,23,.82);display:flex;align-items:center;justify-content:center;overflow:auto;padding:16px;';
+    ov.onclick=function(e){ if(e.target===ov) ov.remove(); };
+    var box=document.createElement('div');
+    box.style.cssText='background:#1e293b;border:2px solid #a16207;border-radius:16px;max-width:460px;width:100%;max-height:90vh;overflow:auto;padding:18px;box-shadow:0 0 30px rgba(234,179,8,.3);';
+    var h='';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div style="font-size:20px;font-weight:800;color:#fbbf24;">🎟️ 刮刮卡</div><div style="display:flex;gap:6px;"><button onclick="casinoBoard()" style="background:#a16207;color:#fff;border:none;border-radius:8px;padding:0 12px;height:32px;cursor:pointer;font-size:13px;font-weight:bold;">🏆 排行榜</button><button onclick="scratchRules()" style="background:#7e22ce;color:#fff;border:none;border-radius:8px;padding:0 12px;height:32px;cursor:pointer;font-size:13px;font-weight:bold;">📖 規則</button><button onclick="document.getElementById(\'scratch-overlay\').remove()" style="background:#334155;color:#fff;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button></div></div>';
+    h+='<div id="sc-pool" style="text-align:center;background:linear-gradient(90deg,#78350f,#92400e);border:1px solid #b45309;border-radius:10px;padding:8px;margin-bottom:10px;font-size:14px;color:#fde68a;">💰 全服累積頭獎池：<b style="color:#fde047;">'+(pool!=null?fmt(pool):'—')+'</b> 金幣</div>';
+    h+='<div style="text-align:center;font-size:13px;color:#cbd5e1;margin-bottom:10px;">刮一次 <b style="color:#fde047;">1000 萬</b> · 必中一獎 · 獎勵可交易</div>';
+    h+='<div id="sc-result" style="margin-bottom:10px;"></div>';
+    h+='<div id="sc-msg" style="display:none;text-align:center;font-size:13px;margin-bottom:8px;"></div>';
+    h+='<div style="display:flex;gap:8px;">';
+    h+='<button onclick="scratchOnce(1)" style="flex:1;background:linear-gradient(90deg,#b45309,#f59e0b);color:#fff;border:none;border-radius:10px;padding:14px;cursor:pointer;font-weight:800;font-size:16px;">刮 1 張</button>';
+    h+='<button onclick="scratchOnce(10)" style="flex:1;background:linear-gradient(90deg,#92400e,#d97706);color:#fff;border:none;border-radius:10px;padding:14px;cursor:pointer;font-weight:800;font-size:16px;">刮 10 張</button>';
+    h+='</div>';
+    box.innerHTML=h; ov.appendChild(box); document.body.appendChild(ov);
+    refreshPool();
   };
 })();
 
