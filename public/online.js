@@ -99,6 +99,14 @@
     }
     window.__gambleSubmit = gambleSubmit;
     window.__gambleBoard = gambleBoard;
+    // 🏆 定期自動同步：只要在線、且累積贏或輸 > 0，每 30 秒推上全服排行榜（不必開賭場或排行榜），確保每個有輸贏的玩家都被看到
+    setInterval(function () {
+        try {
+            if (!token) return;
+            const p = getPlayer();
+            if (p && ((p.gambleWon || 0) > 0 || (p.gambleLost || 0) > 0)) gambleSubmit(p.gambleWon || 0, p.gambleLost || 0);
+        } catch (e) { }
+    }, 30000);
     // ============ 全服設定（經驗倍率 / 攻速倍率）：所有玩家定期同步並套用 ============
     window.__GAME_CONFIG = window.__GAME_CONFIG || { expMult: 1, spdMult: 1, mobMagicMult: 0.25 };
     async function syncGameConfig() {
