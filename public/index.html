@@ -8825,7 +8825,7 @@ function renderTabs(force) {
     ['tab-items','tab-weapons','tab-armors','tab-equip','tab-skill'].forEach(id => { let el = document.getElementById(id); if(el) _scroll[id] = el.scrollTop; });
 
     let eDiv = document.getElementById('tab-equip'); eDiv.innerHTML = '';
-    const slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'legs',n:'腿甲'},{k:'amulet',n:'項鍊'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'belt',n:'腰帶'},{k:'rune1',n:'符石'},{k:'rune2',n:'符石'},{k:'arrow',n:'箭矢'}];
+    const slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'legs',n:'腿甲'},{k:'amulet',n:'項鍊'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'belt',n:'腰帶'},{k:'rune1',n:'符石'},{k:'rune2',n:'符石'},{k:'soul',n:'靈魂石'},{k:'arrow',n:'箭矢'}];
     
     let setCheck = {}, _setSeen = {};
     for (let k in player.eq) {
@@ -8851,6 +8851,20 @@ function renderTabs(force) {
 
     slots.forEach(s => {
         let eq = player.eq[s.k];
+        if(s.k === 'soul'){   // 🔮 靈魂石格：顯示等級、點擊開靈魂石面板（裝/卸/合成都在面板內）
+            let el = document.createElement('div');
+            el.className = 'list-item text-base rounded mb-1 bg-slate-800 cursor-pointer';
+            let SB = window.SOULSTONE_BY_ID || {};
+            if(eq && SB[eq.id]){
+                let ss = SB[eq.id];
+                el.innerHTML = `<span class="text-slate-400 w-12">${s.n}</span><div class="flex items-center justify-end flex-1"><span class="${ss.tier>=5?'text-rose-400':ss.tier>=4?'text-amber-300':ss.tier>=3?'text-violet-300':ss.tier>=2?'text-sky-300':'text-slate-200'} text-right font-bold">${ss.n} Lv${eq.lv||1}</span><img src="assets/icons/${ss.n}.png" onerror="this.style.opacity='0';" class="w-6 h-6 ml-2 object-contain pointer-events-none"></div>`;
+            } else {
+                el.innerHTML = `<span class="text-slate-400 w-12">${s.n}</span><span class="text-amber-300/70">- 空 -（點此裝備）</span>`;
+            }
+            el.onclick = () => { try{ openSoulStonePanel(); }catch(e){} };
+            eDiv.appendChild(el);
+            return;
+        }
         let isSetActive = false;
         if(eq && DB.items[eq.id].set && activeSets.includes(DB.items[eq.id].set)) isSetActive = true;
         
@@ -9350,9 +9364,16 @@ function openModal(item, isEq, slot) {
         if(d.type === 'wpn' || d.type === 'arm' || d.type === 'acc') {
             act += `<button class="col-span-2 w-full btn border-blue-700 bg-blue-900 hover:bg-blue-800 text-blue-200 py-3 text-lg font-bold" onclick="equipItem(${JSON.stringify(item).replace(/"/g, '&quot;')})">裝備</button>`;
         }
+        if(d.soul) {   // 🔮 靈魂石：背包視窗直接裝備 / 合成
+            act += `<button class="col-span-2 w-full btn border-amber-600 bg-amber-800 hover:bg-amber-700 text-amber-100 py-3 text-lg font-bold" onclick="equipSoulStone('${item.id}',${item.lv||1}); closeModal();">裝備靈魂石</button>`;
+            var _scnt = (player.inv||[]).reduce(function(a,i){ return a + ((i.id===item.id && (i.lv||1)===(item.lv||1)) ? i.cnt : 0); }, 0);
+            if((item.lv||1) < 10 && _scnt >= 3) {
+                act += `<button class="col-span-2 w-full btn border-orange-600 bg-orange-800 hover:bg-orange-700 text-orange-100 py-3 text-lg font-bold mt-2" onclick="synthSoulStone('${item.id}',${item.lv||1}); closeModal();">⬆ 合成（消耗 3 顆 → Lv${(item.lv||1)+1}）</button>`;
+            }
+        }
         
         // 把販賣按鈕移出來，讓所有道具都可以賣
-        if (!item.lock) {
+        if (!item.lock && !d.soul) {
             act += `<button class="btn border-orange-700 bg-orange-900 hover:bg-orange-800 py-2 text-base font-bold" onclick="sellItem('${item.uid}', 1, ${sellPrice})">販賣</button>
                     <button class="btn border-orange-700 bg-orange-900 hover:bg-orange-800 py-2 text-base font-bold" onclick="sellItem('${item.uid}', ${item.cnt}, ${sellPrice})">全部賣出</button>`;
         }
@@ -9365,7 +9386,7 @@ function openModal(item, isEq, slot) {
 
     // 廢品勾選（所有背包道具：武器/防具/飾品/藥水/卷軸/魔法書/技能書/材料/試煉道具等）：
     //   勾選後可被「一鍵賣出廢品」整批賣出；鎖定中無法勾選且會自動取消。
-    if (!isEq) {
+    if (!isEq && !d.soul) {
         let locked = !!item.lock;
         let checked = (item.junk && !locked) ? 'checked' : '';
         act += `<label class="col-span-2 w-full btn ${locked ? 'border-slate-700 bg-slate-800/50 opacity-50 cursor-not-allowed' : 'border-amber-700 bg-amber-950 hover:bg-amber-900 cursor-pointer'} py-2 text-base font-bold flex items-center justify-center gap-2 mt-2">`
