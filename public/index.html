@@ -6083,7 +6083,8 @@ function applyMobMagic(mob, sk) {
         // 屬性抗性與魔防一律生效：有屬性者受該屬性抗性折減、所有魔法傷害受抗魔(MR)折減（alwaysHit 不再無視防禦）
         // 怪物技能傷害公式: (怪物技能傷害 × 屬抗係數) × 抗魔係數 - 傷害減免
         var _twMag = mob._towerMob ? 0.5 : 1;   // 爬塔王魔法傷害折減（×0.5，避免低魔防被秒；要再調改這個數）
-        let dmg = Math.floor(Math.floor((baseMagicDmg + extraMagicDmg) * resFactor * _twMag * 0.5) * mrFactor) - player.d.dr;   // 全怪物魔法攻擊×0.5（要調改 0.5）
+        let _mobMag = (window.__GAME_CONFIG && typeof window.__GAME_CONFIG.mobMagicMult === 'number') ? window.__GAME_CONFIG.mobMagicMult : 0.25;   // 全怪物魔法攻擊倍率（管理員面板可調，預設0.25＝在原本0.5基礎上再砍半）
+        let dmg = Math.floor(Math.floor((baseMagicDmg + extraMagicDmg) * resFactor * _twMag * _mobMag) * mrFactor) - player.d.dr;
         if (player.d.drPct > 0) dmg = Math.round(dmg * (1 - player.d.drPct / 100));   // 百分比減傷（強化）
         if(sk.ext_freeze && player.statuses.freeze > 0) dmg += sk.ext_freeze;
 
@@ -7686,9 +7687,14 @@ function autoCastSpells() {
     if(mpPct >= atkThr && atkTarget && player.cds.atkSk <= 0) {
         player.cds.spellCd = player.cds.spellCd || {};
         let _slots = ['sel-atk-skill','sel-atk-skill2','sel-atk-skill3','sel-atk-skill4'];
+        let _cfgKeys = ['selAtkSkill','selAtkSkill2','selAtkSkill3','selAtkSkill4'];
         for(let _si=0; _si<_slots.length; _si++) {
             let _el = document.getElementById(_slots[_si]);
             let _id = _el ? _el.value : '';
+            if(!_id && player.config && player.config[_cfgKeys[_si]]) {   // 還原失敗時回退讀存檔設定，並把值寫回下拉（自我修復顯示）
+                _id = player.config[_cfgKeys[_si]];
+                if(_el && _id) { _el.value = _id; if(_el.value !== _id) _id=''; }   // 該技能目前不可選則放棄
+            }
             if(!_id || (player.cds.spellCd[_id] || 0) > 0) continue;   // 未選 or 該招冷卻中
             let skDef = DB.skills[_id];
             let tagReq = (skDef && skDef.instakill && skDef.instakill.tag) || null;
@@ -7698,7 +7704,12 @@ function autoCastSpells() {
         }
     }
 
-    let healSk = document.getElementById('sel-heal-skill').value;
+    let _healEl = document.getElementById('sel-heal-skill');
+    let healSk = _healEl ? _healEl.value : '';
+    if(!healSk && player.config && player.config.selHealSkill) {   // 還原失敗時回退讀存檔設定
+        healSk = player.config.selHealSkill;
+        if(_healEl && healSk) { _healEl.value = healSk; if(_healEl.value !== healSk) healSk=''; }
+    }
     let healThr = parseInt(document.getElementById('set-mp-heal').value) || 0;
     // 治癒魔法改為「HP <= X%」觸發（與恢復生命藥水相同機制）；MP 是否足夠由 castSkill 內部判斷
     if(healSk && hpPct <= healThr) castSkill(healSk);
