@@ -725,7 +725,7 @@
                 <button id="btn-trash-gear" class="btn text-base py-2 font-bold px-0" style="grid-column:1 / -1; background: linear-gradient(135deg,#5b3a10 0%,#b45309 28%,#4a2f0c 52%,#d97706 76%,#3a2509 100%); color:#fde68a; border-color:#d97706;" onclick="sellUnlockedGear()">🗑️ 一鍵賣裝（賣掉未上鎖裝備/武器換金幣）</button>
             </div>
 
-            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
+            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
 
             <div class="panel flex-1 flex flex-col overflow-hidden relative">
                 <!-- 能力 -->
@@ -4127,6 +4127,17 @@ d.mr += (baseMr + bonusMr);
     }
     p.hp = Math.min(p.hp, p.mhp);
     p.mp = Math.min(p.mp, p.mmp);
+    // 🔧 偵測衍生屬性異常(NaN)：不自動修正（避免遮蔽 bug），改為跳出提示請玩家回報管理員，方便抓根因
+    (function(){
+        var _bad = [];
+        ['mr','ac','dr','er','meleeDmg','rangedDmg','magicDmg','aspd','meleeHit','rangedHit','meleeCrit','rangedCrit','magicCrit'].forEach(function(k){ if(!Number.isFinite(d[k])) _bad.push(k); });
+        if(_bad.length && !window.__statNaNAlerted){
+            window.__statNaNAlerted = true;
+            try{ console.error('[屬性異常 NaN]', _bad, 'eq=', JSON.parse(JSON.stringify(player.eq||{}))); }catch(e){}
+            try{ if(typeof logSys==='function') logSys('<span class="text-red-400 font-bold">⚠️ 偵測到角色屬性異常（NaN：'+_bad.join('、')+'），請截圖回報管理員！</span>'); }catch(e){}
+            try{ setTimeout(function(){ alert('偵測到角色屬性異常（NaN：'+_bad.join('、')+'）\n請截圖回報管理員，協助找出問題裝備/來源。'); }, 50); }catch(e){}
+        }
+    }());
 }
 
 function _takenMult() {   // 職業受傷倍率（套在 AC/MR/DR 抵抗之後）
@@ -10381,6 +10392,180 @@ window.__adminGrantPoly = function(formName){
   window.refreshSoulPanel=refreshSoulPanel;
 })();
 
+/* ===================== 🎲 賭場（2 骰：猜大小 1:1 ／ 賭點數 1:5）===================== */
+(function(){
+  var MAX_BET = 1000000000;       // 單注上限 10 億
+  var PANDORA_COST = 2000000;     // 200 萬 → 1 張潘朵拉抽獎卷
+  var STONE_COST = 5000000000;    // 50 億 → 1 顆紫色(T3)靈魂石
+  var STEPS = [10000,100000,1000000,10000000,100000000,1000000000];
+  var STEP_LABEL = ['1萬','10萬','100萬','1000萬','1億','10億'];
+  var DICE = ['','⚀','⚁','⚂','⚃','⚄','⚅'];
+  var cs = { bet:1000000, pick:7, d1:0, d2:0, last:null };
+
+  function fmt(n){ return Math.floor(n||0).toLocaleString(); }
+  function gold(){ return player.gold||0; }
+  function settleClass(win){ return win? 'text-emerald-300':'text-rose-300'; }
+
+  function roll2(){ return [1+Math.floor(Math.random()*6), 1+Math.floor(Math.random()*6)]; }
+
+  // 下注：type='small'|'big'|'point'
+  window.casinoBet = function(type){
+    var bet = Math.floor(cs.bet)||0;
+    if(bet<=0){ if(typeof toast==='function') toast('請先選擇下注金額','#7f1d1d'); return; }
+    if(bet>MAX_BET){ if(typeof toast==='function') toast('單注上限 10 億','#7f1d1d'); return; }
+    if(gold()<bet){ if(typeof toast==='function') toast('金幣不足','#7f1d1d'); return; }
+    player.gold -= bet;
+    var r = roll2(); cs.d1=r[0]; cs.d2=r[1]; var sum=r[0]+r[1];
+    var win=0, payout=0, label='';
+    if(type==='point'){
+      var pk = cs.pick;
+      label = '賭點數 '+pk;
+      if(sum===pk){ payout = bet*6; win = bet*5; }   // 1:5（押1賠5，拿回6倍）
+    } else {
+      label = (type==='small'?'押小(2~6)':'押大(8~12)');
+      if(sum===7){ /* 莊家通殺 */ }
+      else if(type==='small' && sum>=2 && sum<=6){ payout = bet*2; win = bet; }
+      else if(type==='big' && sum>=8 && sum<=12){ payout = bet*2; win = bet; }
+    }
+    if(payout>0) player.gold += payout;
+    cs.last = { sum:sum, win:win>0, delta:(win>0?win:-bet), label:label, special:(sum===7&&type!=='point') };
+    var dface = DICE[r[0]]+' '+DICE[r[1]];
+    var big = sum===7 ? '<span class="text-amber-300 font-bold">7 點 莊家通殺</span>' : (sum<=6?'小':(sum>=8?'大':'—'))+' '+sum;
+    if(win>0) logSys('🎲 '+dface+' = '+sum+'（'+label+'）<span class="'+settleClass(true)+' font-bold">贏 '+fmt(win)+' 金幣</span>');
+    else logSys('🎲 '+dface+' = '+sum+'（'+label+'）<span class="'+settleClass(false)+'">輸 '+fmt(bet)+' 金幣</span>'+(cs.last.special?'（7點通殺）':''));
+    try{ if(typeof updateUI==='function') updateUI(); }catch(e){}
+    try{ if(typeof saveGame==='function') saveGame(); }catch(e){}
+    refreshCasino();
+  };
+
+  window.casinoExchangePandora = function(){
+    var n = Math.max(1, parseInt(document.getElementById('cas-pan-qty') && document.getElementById('cas-pan-qty').value) || 1);
+    var cost = n*PANDORA_COST;
+    if(gold()<cost){ if(typeof toast==='function') toast('金幣不足（需 '+fmt(cost)+'）','#7f1d1d'); return; }
+    player.gold -= cost;
+    if(typeof gainItem==='function') gainItem('new_item_239', n, true);
+    logSys('🎟️ 用 '+fmt(cost)+' 金幣兌換 <span class="text-fuchsia-300 font-bold">潘朵拉抽獎卷 ×'+n+'</span>。');
+    try{ if(typeof updateUI==='function') updateUI(); }catch(e){}
+    try{ if(typeof saveGame==='function') saveGame(); }catch(e){}
+    refreshCasino();
+  };
+
+  window.casinoExchangeStone = function(){
+    if(gold()<STONE_COST){ if(typeof toast==='function') toast('金幣不足（需 '+fmt(STONE_COST)+'）','#7f1d1d'); return; }
+    var t3 = (window.SOULSTONE_BY_TIER && window.SOULSTONE_BY_TIER[3]) || [];
+    if(!t3.length){ if(typeof toast==='function') toast('靈魂石資料未載入','#7f1d1d'); return; }
+    player.gold -= STONE_COST;
+    var id = t3[Math.floor(Math.random()*t3.length)];
+    if(typeof gainSoulStone==='function') gainSoulStone(id, 1, false);
+    var nm = (window.SOULSTONE_BY_ID && window.SOULSTONE_BY_ID[id]) ? window.SOULSTONE_BY_ID[id].n : '紫色靈魂石';
+    logSys('💜 用 '+fmt(STONE_COST)+' 金幣兌換 <span class="text-violet-300 font-bold">紫色靈魂石：'+nm+'</span>！');
+    try{ if(typeof updateUI==='function') updateUI(); }catch(e){}
+    try{ if(typeof saveGame==='function') saveGame(); }catch(e){}
+    refreshCasino();
+  };
+
+  window.casinoSetBet = function(v){
+    if(v==='all') cs.bet = Math.min(MAX_BET, gold());
+    else cs.bet = Math.min(MAX_BET, Math.max(0, Math.floor(v)||0));
+    refreshCasino();
+  };
+  window.casinoBetInput = function(el){ cs.bet = Math.min(MAX_BET, Math.max(0, parseInt(el.value)||0)); var w=document.getElementById('cas-bet-warn'); if(w) w.style.display = (cs.bet>=MAX_BET?'inline':'none'); };
+  window.casinoPick = function(el){ cs.pick = Math.max(2, Math.min(12, parseInt(el.value)||7)); };
+
+  window.openCasinoPanel = function(){
+    var old=document.getElementById('casino-overlay'); if(old) old.remove();
+    var ov=document.createElement('div'); ov.id='casino-overlay';
+    ov.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(2,6,23,.82);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:16px;';
+    ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
+    var box=document.createElement('div'); box.id='casino-box';
+    box.style.cssText='width:100%;max-width:520px;background:linear-gradient(160deg,#1a0f1f,#0b0f1a);border:1px solid #a21caf;border-radius:16px;box-shadow:0 0 30px rgba(217,70,239,.25);padding:16px;color:#e2e8f0;';
+    ov.appendChild(box); document.body.appendChild(ov); refreshCasino();
+  };
+
+  function refreshCasino(){
+    var box=document.getElementById('casino-box'); if(!box) return;
+    var h='';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><div style="font-size:20px;font-weight:800;color:#e879f9;">🎲 賭場</div><div style="display:flex;gap:6px;"><button onclick="casinoRules()" style="background:#7e22ce;color:#fff;border:none;border-radius:8px;padding:0 12px;height:32px;cursor:pointer;font-size:13px;font-weight:bold;">📖 規則</button><button onclick="document.getElementById(\'casino-overlay\').remove()" style="background:#334155;color:#fff;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button></div></div>';
+    h+='<div style="font-size:13px;color:#cbd5e1;margin-bottom:10px;">金幣：<b style="color:#fcd34d;">'+fmt(gold())+'</b></div>';
+    // 結果區
+    if(cs.last){
+      var L=cs.last;
+      h+='<div style="text-align:center;background:#0f172a;border:1px solid #334155;border-radius:12px;padding:10px;margin-bottom:12px;">';
+      h+='<div style="font-size:34px;line-height:1;">'+DICE[cs.d1]+' '+DICE[cs.d2]+'</div>';
+      h+='<div style="font-size:15px;margin-top:4px;">總和 <b>'+(cs.d1+cs.d2)+'</b>'+(L.special?' <span style="color:#fcd34d;">· 7點通殺</span>':'')+'</div>';
+      h+='<div style="font-size:15px;font-weight:bold;margin-top:2px;" class="'+settleClass(L.win)+'">'+(L.win?'贏 +'+fmt(L.delta):'輸 '+fmt(-L.delta))+' 金幣</div>';
+      h+='</div>';
+    } else {
+      h+='<div style="text-align:center;background:#0f172a;border:1px solid #334155;border-radius:12px;padding:14px;margin-bottom:12px;color:#64748b;font-size:34px;">🎲 🎲</div>';
+    }
+    // 下注額
+    h+='<div style="font-size:13px;font-weight:700;margin-bottom:6px;">下注額（上限 10 億）</div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;">';
+    for(var i=0;i<STEPS.length;i++){
+      var on = cs.bet===STEPS[i];
+      h+='<button onclick="casinoSetBet('+STEPS[i]+')" style="flex:1;min-width:60px;background:'+(on?'#a21caf':'#1e293b')+';color:#fff;border:none;border-radius:8px;padding:7px 4px;cursor:pointer;font-size:12px;font-weight:bold;">'+STEP_LABEL[i]+'</button>';
+    }
+    h+='<button onclick="casinoSetBet(\'all\')" style="flex:1;min-width:60px;background:#7c2d12;color:#fff;border:none;border-radius:8px;padding:7px 4px;cursor:pointer;font-size:12px;font-weight:bold;">全押</button>';
+    h+='</div>';
+    h+='<div style="margin-bottom:12px;"><input id="cas-bet-input" type="number" value="'+cs.bet+'" oninput="casinoBetInput(this)" style="width:100%;box-sizing:border-box;background:#0f172a;border:1px solid #475569;border-radius:8px;color:#fde68a;font-weight:bold;padding:8px;text-align:right;"><span id="cas-bet-warn" style="display:'+(cs.bet>=MAX_BET?'inline':'none')+';color:#f59e0b;font-size:11px;">已達上限 10 億</span></div>';
+    // 比大小
+    h+='<div style="font-size:13px;font-weight:700;margin-bottom:6px;">比大小 <span style="color:#94a3b8;font-weight:400;">1:1（7 點莊家通殺）</span></div>';
+    h+='<div style="display:flex;gap:8px;margin-bottom:12px;">';
+    h+='<button onclick="casinoBet(\'small\')" style="flex:1;background:#0e7490;color:#fff;border:none;border-radius:10px;padding:12px;cursor:pointer;font-weight:bold;">押小<br><span style="font-size:11px;opacity:.8;">2~6</span></button>';
+    h+='<button onclick="casinoBet(\'big\')" style="flex:1;background:#b91c1c;color:#fff;border:none;border-radius:10px;padding:12px;cursor:pointer;font-weight:bold;">押大<br><span style="font-size:11px;opacity:.8;">8~12</span></button>';
+    h+='</div>';
+    // 賭點數
+    h+='<div style="font-size:13px;font-weight:700;margin-bottom:6px;">賭點數 <span style="color:#94a3b8;font-weight:400;">1:5（押中總和賠 5 倍）</span></div>';
+    h+='<div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;">';
+    h+='<select onchange="casinoPick(this)" style="background:#0f172a;border:1px solid #475569;border-radius:8px;color:#fde68a;padding:9px;font-weight:bold;">';
+    for(var p=2;p<=12;p++){ h+='<option value="'+p+'"'+(cs.pick===p?' selected':'')+'>'+p+' 點</option>'; }
+    h+='</select>';
+    h+='<button onclick="casinoBet(\'point\')" style="flex:1;background:#7e22ce;color:#fff;border:none;border-radius:10px;padding:12px;cursor:pointer;font-weight:bold;">押點數</button>';
+    h+='</div>';
+    // 兌換
+    h+='<div style="border-top:1px solid #334155;padding-top:12px;"><div style="font-size:13px;font-weight:700;margin-bottom:8px;">💱 酬金兌換</div>';
+    h+='<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;"><div style="flex:1;font-size:13px;">潘朵拉抽獎卷<br><span style="font-size:11px;color:#94a3b8;">200萬 / 張</span></div><input id="cas-pan-qty" type="number" value="1" min="1" style="width:64px;background:#0f172a;border:1px solid #475569;border-radius:8px;color:#fde68a;padding:7px;text-align:center;"><button onclick="casinoExchangePandora()" style="background:#a21caf;color:#fff;border:none;border-radius:8px;padding:9px 12px;cursor:pointer;font-weight:bold;">兌換</button></div>';
+    h+='<div style="display:flex;gap:8px;align-items:center;"><div style="flex:1;font-size:13px;">紫色靈魂石（隨機 T3）<br><span style="font-size:11px;color:#94a3b8;">50億 / 顆</span></div><button onclick="casinoExchangeStone()" style="background:#7e22ce;color:#fff;border:none;border-radius:8px;padding:9px 14px;cursor:pointer;font-weight:bold;">兌換</button></div>';
+    h+='</div>';
+    box.innerHTML=h;
+  }
+  window.refreshCasino = refreshCasino;
+
+  // 共用：華麗規則說明 HTML（公告與「規則」鈕共用）
+  window.__casinoRulesHTML = function(){
+    var badge = function(t,c){ return '<span style="display:inline-block;background:'+c+';color:#fff;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:bold;">'+t+'</span>'; };
+    var h='';
+    h+='<div style="border-radius:14px;overflow:hidden;border:1px solid #a21caf;box-shadow:0 0 24px rgba(217,70,239,.25);">';
+    h+='<div style="background:linear-gradient(110deg,#7e22ce,#a21caf,#db2777);padding:14px 16px;text-align:center;">';
+    h+='<div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:2px;text-shadow:0 2px 6px rgba(0,0,0,.4);">🎲 賭　場 🎲</div>';
+    h+='<div style="font-size:12px;color:#fbcfe8;margin-top:2px;">擲兩顆骰子 · 比大小 · 賭點數 · 娛樂為主，量力而為</div></div>';
+    h+='<div style="background:linear-gradient(160deg,#1a0f1f,#0b0f1a);padding:14px 16px;color:#e2e8f0;">';
+    // 比大小
+    h+='<div style="margin-bottom:12px;"><div style="font-weight:800;color:#67e8f9;margin-bottom:4px;">① 比大小　'+badge('1:1','#0e7490')+'</div>';
+    h+='<div style="font-size:13px;line-height:1.7;color:#cbd5e1;">擲 2 骰取總和：<b style="color:#67e8f9;">小 2~6</b> / <b style="color:#fca5a5;">大 8~12</b>，押中賠 1 倍（拿回 2 倍）。<br><span style="color:#fcd34d;font-weight:bold;">⚠ 7 點＝莊家通殺</span>（大小都輸）。</div></div>';
+    // 賭點數
+    h+='<div style="margin-bottom:12px;"><div style="font-weight:800;color:#d8b4fe;margin-bottom:4px;">② 賭點數　'+badge('1:5','#7e22ce')+'</div>';
+    h+='<div style="font-size:13px;line-height:1.7;color:#cbd5e1;">指定一個總和（2~12），押中該點數賠 <b style="color:#d8b4fe;">5 倍</b>（拿回 6 倍）。點數越偏門越難中、賠得越爽。</div></div>';
+    // 上限
+    h+='<div style="margin-bottom:12px;font-size:13px;color:#cbd5e1;">💰 籌碼＝<b>金幣</b>，單注上限 <b style="color:#fcd34d;">10 億</b>。</div>';
+    // 兌換
+    h+='<div style="border-top:1px solid #4c1d95;padding-top:10px;"><div style="font-weight:800;color:#f0abfc;margin-bottom:6px;">💱 酬金兌換</div>';
+    h+='<div style="font-size:13px;line-height:1.8;color:#cbd5e1;">🎟️ <b>200 萬</b> 金幣 → 1 張 <span style="color:#e879f9;font-weight:bold;">潘朵拉抽獎卷</span><br>💜 <b>50 億</b> 金幣 → 1 顆 <span style="color:#c4b5fd;font-weight:bold;">紫色靈魂石</span>（隨機 T3）</div></div>';
+    h+='</div></div>';
+    return h;
+  };
+
+  window.casinoRules = function(){
+    var old=document.getElementById('casino-rules-overlay'); if(old){ old.remove(); return; }
+    var ov=document.createElement('div'); ov.id='casino-rules-overlay';
+    ov.style.cssText='position:fixed;inset:0;z-index:9100;background:rgba(2,6,23,.85);display:flex;align-items:center;justify-content:center;overflow:auto;padding:18px;';
+    ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
+    var box=document.createElement('div'); box.style.cssText='width:100%;max-width:480px;';
+    box.innerHTML = window.__casinoRulesHTML() + '<button onclick="document.getElementById(\'casino-rules-overlay\').remove()" style="width:100%;margin-top:10px;background:#334155;color:#fff;border:none;border-radius:10px;padding:12px;cursor:pointer;font-weight:bold;">關閉</button>';
+    ov.appendChild(box); document.body.appendChild(ov);
+  };
+})();
+
 // ===== 帳號變身圖鑑：合併（取聯集，張數取大）=====
 window.__mergePolyDex = function(serverDex){
     if(typeof player==='undefined' || !player || !serverDex) return false;
@@ -10915,6 +11100,7 @@ function claimSiegeReward(faction) {
 }
 
 var PATCH_NOTES = [
+    { v:'賭場 1.0', date:'2026-06', title:'🎲 賭場開幕！', html:function(){ return window.__casinoRulesHTML ? window.__casinoRulesHTML() : ''; } },
     { v:'符石系統 1.0', date:'2026-06', title:'💠 符石系統上線！',
       lines:[
         '【符石孔】裝備欄新增 2 個「符石孔」，可鑲嵌符石強化六大屬性，立即生效。',
@@ -10954,9 +11140,10 @@ function showAnnouncements(){
     var ov=document.createElement('div'); ov.id='announce-overlay';
     ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;';
     var box=document.createElement('div');
-    box.style.cssText='background:#0f172a;border:1px solid #334155;border-radius:14px;max-width:560px;width:100%;max-height:80vh;overflow-y:auto;padding:18px 20px;color:#e2e8f0;box-shadow:0 10px 40px rgba(0,0,0,.5);';
-    var s='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-size:20px;font-weight:bold;color:#fbbf24;">📢 更新公告</div><button id="announce-close" style="background:#7f1d1d;color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-weight:bold;">關閉</button></div>';
+    box.style.cssText='background:linear-gradient(165deg,#1a1530,#0b1020);border:1px solid #d4af37;border-radius:16px;max-width:560px;width:100%;max-height:82vh;overflow-y:auto;padding:18px 20px;color:#e2e8f0;box-shadow:0 0 36px rgba(212,175,55,.22),0 10px 40px rgba(0,0,0,.55);';
+    var s='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><div style="font-size:22px;font-weight:900;background:linear-gradient(90deg,#fde68a,#fbbf24,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:1px;">📢 更新公告</div><button id="announce-close" style="background:#7f1d1d;color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-weight:bold;">關閉</button></div>';
     PATCH_NOTES.forEach(function(n){
+        if(n.html){ s+='<div style="margin-bottom:16px;">'+(typeof n.html==='function'?n.html():n.html)+'</div>'; return; }
         s+='<div style="margin-bottom:16px;border-left:3px solid #f59e0b;padding-left:12px;">';
         s+='<div style="font-size:16px;font-weight:bold;color:#fcd34d;">'+n.title+'</div>';
         s+='<div style="font-size:12px;color:#64748b;margin-bottom:6px;">'+(n.date||'')+(n.v?(' · '+n.v):'')+'</div>';
