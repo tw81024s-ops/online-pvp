@@ -3882,12 +3882,12 @@ function recomputeStats() {
     p._equipHaste = false;   // 裝備常駐加速（如伊娃之盾）：每次重算先清除，卸下即消失（同 _setPoly 模式）
     for (let k in p.eq) {
         let e = p.eq[k];
-        if (!e || k === 'wpn') continue;
+        if (!e || k === 'wpn' || k === 'soul') continue;   // 🔮 靈魂石無被動屬性，且其裝備物件{id,lv}無 en 欄位，必須跳過避免 mr 變 NaN
         let ed = DB.items[e.id];
         d.ac -= (ed.ac||0) + Math.min(e.en||0, ed.type==='arm'?30:20); 
         // 計算防具的基礎 MR 與強化的額外 MR 加成
 let baseMr = ed.mr || 0;
-let bonusMr = (ed.mrPerEn || 0) * e.en; 
+let bonusMr = (ed.mrPerEn || 0) * (e.en || 0); 
 d.mr += (baseMr + bonusMr);
         if(ed.extraDmg) d.extraDmg += ed.extraDmg;   // 裝備額外傷害（如腿甲）
         // ed.str/dex/int/con/wis 已於 Phase 1 計入屬性
