@@ -192,6 +192,7 @@
             extraHit: d.extraHit, extraDmg: d.extraDmg,
             magicDmg: d.magicDmg, magicCrit: d.magicCrit, magicCritDmg: d.magicCritDmg, extraMp: d.extraMp,
             hpR: d.hpR, mpR: d.mpR, spdMult: d.spdMult || 1,
+            soul: (function(){ try { var s = p.eq && p.eq.soul; if (s && window.SOULSTONE_BY_ID && window.SOULSTONE_BY_ID[s.id]) { var st = window.SOULSTONE_BY_ID[s.id]; return { base: st.base, lv: s.lv || 1, drain: !!st.drain, name: st.n }; } } catch (e) {} return null; })(),
             weapon, spell, spells, holyBarrier, heal
         };
     }
@@ -517,11 +518,11 @@
                 // 目前欄位有存檔，且正好是這次同步偵測到雲端更新的同一欄位 → 重載；但玩家已載入角色(正在玩)時不打斷
                 if (curChanged && curNow === cur && !hasActiveChar) { if (typeof loadGame === 'function') loadGame(); try { toast('☁️ 已拉取雲端最新存檔', '#1e3a5f'); } catch (e) { } }
             } else if (!hasActiveChar) {
-                // 只有在「還沒載入任何角色」(例如剛登入)時，才自動切到第一個有角色的欄位；避免把已選好的角色硬切走
-                const other = [1, 2, 3, 4, 5].find(x => localStorage.getItem('lineage_idle_save_' + x));
-                if (other) {
-                    if (typeof window.__cloudSwitchSlot === 'function') window.__cloudSwitchSlot(other, true);
-                    else { try { window.currentSlot = other; } catch (e) { } if (typeof loadGame === 'function') loadGame(); }
+                // 登入後不再自動跳到第一個角色；一律跳出「選擇存檔位」讓玩家自己選
+                const anySave = [1, 2, 3, 4].some(x => localStorage.getItem('lineage_idle_save_' + x));
+                if (anySave && !window.__slotPromptDone) {
+                    window.__slotPromptDone = true;   // 一次性：同一次登入只彈一次，避免週期同步重複彈窗
+                    try { if (typeof showSlots === 'function') showSlots(); } catch (e) { }
                 }
             }
             // 若「選擇存檔位」畫面正開著，重新整理清單讓新同步的欄位顯示
@@ -549,6 +550,7 @@
         btnLoginFab.textContent = '🌐 線上登入';
         btnSlots.style.display = 'none';
         localStorage.removeItem('de_active_slot');
+        try { window.__slotPromptDone = false; } catch (e) { }   // 重置：下次登入再次跳選存檔位
         statusEl.style.display = 'none';
         refreshAdminBtn();
         if (!silent) toast('已登出');

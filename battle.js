@@ -132,6 +132,23 @@ function simulate(profileA, profileB, opts) {
                 me.mp = Math.min(me.mmp, me.mp + (me.p.mpR || 0));
             }
 
+            // 🔮 靈魂石：每 10 秒(100tick)自動施放，固定傷害 base×lv 吃對方魔防；吸血鬼之吻吸血
+            if (me.p.soul) {
+                if (me.soulCd == null) me.soulCd = 0;
+                if (me.soulCd <= 0) {
+                    me.soulCd = 100;
+                    let _smr = foe.p.mr || 0;
+                    let _mf = _smr <= 100 ? (100 - _smr / 2) / 100 : (50 - (_smr - 100) / 10) / 100;
+                    _mf = Math.max(0, _mf);
+                    let sdmg = Math.max(1, Math.floor(me.p.soul.base * me.p.soul.lv * _mf * PVP_DMG * PVP_MAGIC));
+                    foe.hp -= sdmg;
+                    let _dt = '';
+                    if (me.p.soul.drain) { let _h = Math.min(sdmg, me.mhp - me.hp); if (_h > 0) { me.hp += _h; _dt = `，吸取 ${_h} HP`; } }
+                    push(t, side, 'soul', `${me.name} 的靈魂石 ${me.p.soul.name} 造成 ${sdmg} 點傷害${_dt}。`, sdmg);
+                    if (foe.hp <= 0) break;
+                } else { me.soulCd--; }
+            }
+
             // 治癒魔法：HP<50% 且有治癒術且 MP 夠（冷卻同攻擊魔法 20tick*spdMult）
             if (me.p.heal && me.hp > 0 && me.hp < me.mhp * 0.5 && me.healCd <= 0 && me.mp >= me.p.heal.mp) {
                 me.mp -= me.p.heal.mp;
@@ -254,7 +271,7 @@ function initSide(p) {
         castInterval: Math.max(1, Math.round(20 * spdMult)),
         atkCd: randInt(0, 5), atkSkCd: randInt(0, 5), healCd: 0,
         magicBarrier: !!p.magicBarrier, mShield: !!p.magicBarrier, mShieldCd: 0,
-        hbActive: 0, hbCd: 0, spCd: null
+        hbActive: 0, hbCd: 0, spCd: null, soulCd: randInt(0, 20)
     };
 }
 
@@ -322,6 +339,12 @@ function clampProfile(p) {
             name: sanitize(p.heal.name || '治癒'),
             dice: [n(p.heal.dice[0], 1, 50, 1), n(p.heal.dice[1], 1, 100, 8)],
             mp: n(p.heal.mp, 0, 999, 5)
+        } : null,
+        soul: p.soul ? {
+            base: n(p.soul.base, 0, 1000000, 0),
+            lv: n(p.soul.lv, 1, 10, 1),
+            drain: !!p.soul.drain,
+            name: sanitize(p.soul.name || '靈魂石')
         } : null
     };
 }

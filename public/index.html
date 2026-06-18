@@ -725,7 +725,7 @@
                 <button id="btn-trash-gear" class="btn text-base py-2 font-bold px-0" style="grid-column:1 / -1; background: linear-gradient(135deg,#5b3a10 0%,#b45309 28%,#4a2f0c 52%,#d97706 76%,#3a2509 100%); color:#fde68a; border-color:#d97706;" onclick="sellUnlockedGear()">🗑️ 一鍵賣裝（賣掉未上鎖裝備/武器換金幣）</button>
             </div>
 
-            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
+            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
 
             <div class="panel flex-1 flex flex-col overflow-hidden relative">
                 <!-- 能力 -->
@@ -820,6 +820,19 @@ function getExpGainMult(lv) {
 // 精靈專屬技能（精靈水晶）：reqE 有、reqM/reqK 皆無、且非黑妖專屬(darkOnly)。黑妖(cls='elf'+darkelf)不可學這類。
 function isElfOnlySkill(sk) {
     return !!(sk && !sk.darkOnly && sk.reqE !== undefined && sk.reqM === undefined && sk.reqK === undefined);
+}
+
+// 依職業取技能的「需求等級」；回傳 undefined 代表該職業無法學/用此技能。
+// 龍騎(player.dragon)：只認自己的龍騎技能(reqD)＋三職通用技能(reqK/reqM/reqE 三者皆有，如光箭/治癒/傳送)；
+//   騎士專屬技能(只有 reqK)一律不可學/用，避免龍騎誤學騎士技能。
+function _skillReqLv(sk){
+    if(!sk) return undefined;
+    if(typeof player !== 'undefined' && player && player.dragon){
+        if(sk.reqD !== undefined) return sk.reqD;
+        if(sk.reqK !== undefined && sk.reqM !== undefined && sk.reqE !== undefined) return sk.reqK;
+        return undefined;
+    }
+    return player.cls === 'mage' ? sk.reqM : (player.cls === 'knight' ? sk.reqK : sk.reqE);
 }
 
 const DB = {
@@ -2777,7 +2790,7 @@ function flushAwaySummary() {
 let player = {
     cls: null, name: null, lv: 1, exp: 0, gold: 1000, hp: 0, mhp: 0, mp: 0, mmp: 0, blessings: {},
     base: { str:0, dex:0, con:0, int:0, wis:0, cha:8 }, bonus: 0, alloc: { str:0, dex:0, con:0, int:0, wis:0, cha:0 }, panacea: { str:0, dex:0, con:0, int:0, wis:0, cha:0 }, panaceaUsed: 0, junkPrefs: {}, bloodPledge: null, magicShieldCd: 0, lastMapByCat: {}, tracking: null, ismaelAccUsed: false, sherineWorld: false, siege: { active:false, gateKilled:false, towerKilled:false, endTime:0, kills:0, result:null, cooldownUntil:0, rewardPending:false, victoryUntil:0, accCdUntil:0 },
-    inv: [], eq: { wpn: null, arrow: null, helm: null, armor: null, shield: null, cloak: null, tshirt: null, gloves: null, boots: null, ring1: null, ring2: null, amulet: null, belt: null, rune1: null, rune2: null },
+    inv: [], eq: { wpn: null, arrow: null, helm: null, armor: null, shield: null, cloak: null, tshirt: null, gloves: null, boots: null, ring1: null, ring2: null, amulet: null, belt: null, rune1: null, rune2: null, soul: null },
     skills: [], buffs: { haste: 0, brave: 0, blue: 0, cautious: 0, elfcookie: 0, poly: 0, shield: 0, sk_magic_shield: 0 }, poly: null, allies: [],
     summon: null, charmed: null, manualCd: {}, elfEle: null, hot: null,
     cds: { pot: 0, atkSk: 0, healSk: 0, purifySk: 0 }, dead: false, statuses: { stun: 0, freeze: 0, stone: 0, poison: 0, poisonDmg: 0, poisonTick: 0, burn: 0, burnDmg: 0, burnTick: 0, scald: 0, scaldDmg: 0, scaldTick: 0, silence: 0, paralyze: 0, magicseal: 0, armorBreak: 0, slowAtk: 0, cleave: 0 },
@@ -4677,6 +4690,7 @@ function tick() {
     if((player.cds.purifySk || 0) > 0) player.cds.purifySk--;
     if(player.cds.spellCd) { for(let _k in player.cds.spellCd) { if(player.cds.spellCd[_k] > 0) player.cds.spellCd[_k]--; } }   // 4攻擊技能槽各自5秒CD遞減   // 🔧 淨化技獨立冷卻
     if(canAct) autoCastSpells();   // 每 tick 嘗試自動施法，實際間隔由上方冷卻控制
+    if(typeof soulStoneTick === 'function') soulStoneTick();   // 🔮 靈魂石自動施放（10秒冷卻、不耗MP、固定傷害吃MR）
 
     if(state.ticks % 10 === 0) {
         if(player.cds.pot > 0) player.cds.pot--;   // 藥水冷卻維持每秒遞減
@@ -6336,6 +6350,12 @@ function killMob(idx) {
         if (Math.random() < 0.02 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1)) gainItem(_fkBooks[Math.floor(Math.random()*_fkBooks.length)], 1, false);
         var _fkChains = ['dragon_chain_alice','dragon_chain_chronos'];
         if (Math.random() < 0.002 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1)) gainItem(_fkChains[Math.floor(Math.random()*_fkChains.length)], 1, false);
+        // 🔮 靈魂石掉落（5轉怪）：T1 5% / T2 3% / T3 1%（各自獨立，隨機一顆）
+        if (typeof gainSoulStone === 'function') { var _sm = (window.__GAME_CONFIG && window.__GAME_CONFIG.stoneDropMult) || 1, _BT = window.SOULSTONE_BY_TIER || {};
+            if (_BT[1] && Math.random() < 0.05*_sm) gainSoulStone(_BT[1][Math.floor(Math.random()*_BT[1].length)], 1);
+            if (_BT[2] && Math.random() < 0.03*_sm) gainSoulStone(_BT[2][Math.floor(Math.random()*_BT[2].length)], 1);
+            if (_BT[3] && Math.random() < 0.01*_sm) gainSoulStone(_BT[3][Math.floor(Math.random()*_BT[3].length)], 1);
+        }
     }
     // ===== 夢幻之島（3轉）：萬能藥水掉落（6種各自獨立 2%）=====
     if (mapState.current === 'dream_island') {
@@ -6347,6 +6367,11 @@ function killMob(idx) {
     if (mapState.current === 'rebirth_abyss') {
         var _diSk = ['bk_dragon_slayer_ex','bk_dragon_guardbreak','bk_dragon_armorimpact'];
         if (Math.random() < 0.003 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1)) gainItem(_diSk[Math.floor(Math.random()*_diSk.length)], 1, false);
+        // 🔮 靈魂石掉落（8轉怪）：T4 0.2% / T5 0.2%（各自獨立）
+        if (typeof gainSoulStone === 'function') { var _sm2 = (window.__GAME_CONFIG && window.__GAME_CONFIG.stoneDropMult) || 1, _BT2 = window.SOULSTONE_BY_TIER || {};
+            if (_BT2[4] && Math.random() < 0.002*_sm2) gainSoulStone(_BT2[4][Math.floor(Math.random()*_BT2[4].length)], 1);
+            if (_BT2[5] && Math.random() < 0.002*_sm2) gainSoulStone(_BT2[5][Math.floor(Math.random()*_BT2[5].length)], 1);
+        }
     }
     // ===== 8轉深淵：腿甲掉落（10%，階級加權 T1:50/T2:25/T3:15/T4:7/T5:3；潘朵拉抽不到）=====
     if (mapState.current === 'rebirth_abyss') {
@@ -6428,6 +6453,7 @@ function checkLvUp() {
         logSys(`<span class="text-yellow-400 font-bold text-lg">★★★ 升級了！目前等級 ${player.lv} ★★★</span>`);
         calcStats();
         player.hp = player.mhp; player.mp = player.mmp;
+        try { renderSkillSelects(); } catch(e){}   // 升級後刷新技能下拉：原本反灰(等級不足)的高階法術，達標後立即可選
     }
 }
 
@@ -7189,7 +7215,7 @@ function manualCast(skId) {
         return;
     }
     let __granted = player.grantedSkills && player.grantedSkills.includes(skId);
-    let needLv = player.cls === 'mage' ? sk.reqM : (player.cls === 'knight' ? sk.reqK : sk.reqE);
+    let needLv = _skillReqLv(sk);
     if(!__granted && needLv === undefined) { logSys('你的職業無法使用此技能。'); return; }
     if(!__granted && player.lv < needLv) { logSys('等級不足，無法使用此技能。'); return; }
     if(!__granted && sk.reqReborn && (player.reborn || 0) < sk.reqReborn) { logSys('轉生次數不足，無法使用此技能。'); return; }
@@ -7249,7 +7275,7 @@ function castSkill(skId) {
     }
     
     let __granted = player.grantedSkills && player.grantedSkills.includes(skId);
-    let needLv = player.cls === 'mage' ? sk.reqM : (player.cls === 'knight' ? sk.reqK : sk.reqE);
+    let needLv = _skillReqLv(sk);
     if(!__granted && (needLv === undefined || player.lv < needLv)) return false;
     if(!__granted && sk.reqReborn && (player.reborn || 0) < sk.reqReborn) return false;
     if(!__granted && sk.reqEle && player.elfEle !== sk.reqEle) return false;      // 屬性不符
@@ -8057,7 +8083,7 @@ function useItem(u, silent = false) {
         openEnhanceModal(item);
     } else if (d.type === 'skillbk') {
         let sd = DB.skills[d.sk];
-        let reqLv = player.dragon ? (sd.reqD !== undefined ? sd.reqD : sd.reqK) : (player.cls === 'mage' ? sd.reqM : player.cls === 'knight' ? sd.reqK : sd.reqE);
+        let reqLv = _skillReqLv(sd);
         if(sd.reqD !== undefined && !player.dragon) { logSys(`「${sd.n}」是龍騎專屬技能，只有龍騎能學習。`); return; }
         if(sd.darkOnly && !player.darkelf) { logSys(`「${sd.n}」是黑妖專屬技能，只有黑妖能學習。`); return; }
         if(player.darkelf && sd.reqM !== undefined) { logSys(`黑妖是近戰刺客，無法學習法師魔法「${sd.n}」。`); return; }
@@ -8873,7 +8899,7 @@ player.inv.forEach(i => {
     if (d.type === 'skillbk') {
         let sk = DB.skills[d.sk];
         // 檢查該技能是否屬於該職業可學習範圍
-        let isClsPossible = (sk.reqD !== undefined ? !!player.dragon : ((player.cls === 'mage' ? sk.reqM : (player.cls === 'knight' ? sk.reqK : sk.reqE)) !== undefined)) && !(sk.darkOnly && !player.darkelf) && !(player.darkelf && sk.reqM !== undefined) && !(player.darkelf && isElfOnlySkill(sk));
+        let isClsPossible = (sk.reqD !== undefined ? !!player.dragon : ((_skillReqLv(sk)) !== undefined)) && !(sk.darkOnly && !player.darkelf) && !(player.darkelf && sk.reqM !== undefined) && !(player.darkelf && isElfOnlySkill(sk));
         
         if (player.skills.includes(d.sk)) {
             statusTag = '<span class="text-slate-500 text-[10px] font-bold">[已學習]</span>';
@@ -8946,7 +8972,7 @@ player.inv.forEach(i => {
             let sk = DB.skills[sid];
             let isAvail = true;
             let __granted = player.grantedSkills && player.grantedSkills.includes(sid);
-            let needLv = player.cls === 'mage' ? sk.reqM : (player.cls === 'knight' ? sk.reqK : sk.reqE);
+            let needLv = _skillReqLv(sk);
             if(!__granted && (needLv === undefined || player.lv < needLv)) isAvail = false;
             if(!__granted && sk.reqEle && player.elfEle !== sk.reqEle) isAvail = false;
             if(!__granted && sk.reqEleAny && !player.elfEle) isAvail = false;
@@ -9027,7 +9053,7 @@ function renderSkillSelects() {
         let sk = DB.skills[sid];
         let isAvail = true;
         let __granted = player.grantedSkills && player.grantedSkills.includes(sid);
-        let needLv = player.cls === 'mage' ? sk.reqM : (player.cls === 'knight' ? sk.reqK : sk.reqE);
+        let needLv = _skillReqLv(sk);
         if(!__granted && (needLv === undefined || player.lv < needLv)) isAvail = false;
         if(!__granted && sk.reqEle && player.elfEle !== sk.reqEle) isAvail = false;
         if(!__granted && sk.reqEleAny && !player.elfEle) isAvail = false;
@@ -9352,7 +9378,7 @@ function openModal(item, isEq, slot) {
     // === 旁邊顯示「目前裝備中」對應欄位，方便比對（僅背包中的武器/防具/飾品，箭矢除外）===
     let _cmp = document.getElementById('modal-compare');
     if(_cmp) {
-        const SLOT_LABEL = { wpn:'武器', helm:'頭盔', armor:'盔甲', shield:'盾牌', cloak:'斗篷', tshirt:'內衣', gloves:'手套', boots:'鞋子', ring1:'戒指 1', ring2:'戒指 2', amulet:'項鍊', belt:'腰帶', legs:'腿甲', rune1:'符石 1', rune2:'符石 2' };
+        const SLOT_LABEL = { wpn:'武器', helm:'頭盔', armor:'盔甲', shield:'盾牌', cloak:'斗篷', tshirt:'內衣', gloves:'手套', boots:'鞋子', ring1:'戒指 1', ring2:'戒指 2', amulet:'項鍊', belt:'腰帶', legs:'腿甲', rune1:'符石 1', rune2:'符石 2', soul:'靈魂石' };
         if(!isEq && !d.isArrow && (d.type === 'wpn' || d.type === 'arm' || d.type === 'acc')) {
             let slots = (d.type === 'wpn') ? ['wpn'] : (d.slot === 'ring' ? ['ring1','ring2'] : (d.slot === 'rune' ? ['rune1','rune2'] : [d.slot]));
             let cards = slots.map(sl => {
@@ -9558,7 +9584,7 @@ function sortInventory() {
         if (d.type === 'misc') return !!d.eff;                       // 有效果(回憶蠟燭等)才可使用
         if (d.type === 'skillbk') {
             let sk = DB.skills[d.sk]; if (!sk) return false;
-            let cls = (player.cls === 'mage' ? sk.reqM : (player.cls === 'knight' ? sk.reqK : sk.reqE));
+            let cls = (_skillReqLv(sk));
             if (cls === undefined) return false;
             if (sk.darkOnly && !player.darkelf) return false;                              // 黑妖專屬：僅黑妖
             if (player.darkelf && (sk.reqM !== undefined || isElfOnlySkill(sk))) return false; // 黑妖不可學法師/精靈專屬
@@ -10132,6 +10158,173 @@ window.__adminGrantPoly = function(formName){
         return true;
     }catch(e){ return false; }
 };
+
+/* ===================== 🔮 靈魂石系統 ===================== */
+(function(){
+  // 23 顆：固定傷害 = base × 級數(最高10)，自動施放 / 不耗MP / 冷卻10秒 / 吃目標MR；吸血鬼之吻額外吸血
+  var STONES = [
+    {id:'soul_01', n:'極光雷電', tier:1, base:1500,  ele:'wind'},
+    {id:'soul_02', n:'巨石之擊', tier:1, base:1500,  ele:'earth'},
+    {id:'soul_03', n:'水柱',     tier:1, base:1500,  ele:'water'},
+    {id:'soul_04', n:'爆炎的火球', tier:1, base:1500, ele:'fire'},
+    {id:'soul_05', n:'燃燒的火球', tier:1, base:1500, ele:'fire'},
+    {id:'soul_06', n:'光箭',     tier:1, base:1500,  ele:'none'},
+    {id:'soul_07', n:'火之矛',   tier:1, base:1500,  ele:'fire'},
+    {id:'soul_08', n:'龍捲風',   tier:2, base:3000,  ele:'wind'},
+    {id:'soul_09', n:'靈光箭',   tier:2, base:3000,  ele:'none'},
+    {id:'soul_10', n:'冰雪暴',   tier:2, base:3000,  ele:'water'},
+    {id:'soul_11', n:'火風暴',   tier:2, base:3000,  ele:'fire'},
+    {id:'soul_12', n:'極道落雷', tier:2, base:3000,  ele:'wind'},
+    {id:'soul_13', n:'吸血鬼之吻', tier:2, base:3000, ele:'none', drain:true},
+    {id:'soul_14', n:'光球',     tier:2, base:3000,  ele:'none'},
+    {id:'soul_15', n:'冰錐',     tier:3, base:6000,  ele:'water'},
+    {id:'soul_16', n:'震裂術',   tier:3, base:6000,  ele:'earth'},
+    {id:'soul_17', n:'流星雨',   tier:3, base:6000,  ele:'fire'},
+    {id:'soul_18', n:'地面震裂', tier:3, base:6000,  ele:'earth'},
+    {id:'soul_19', n:'地裂術',   tier:4, base:12000, ele:'earth'},
+    {id:'soul_20', n:'冰裂術',   tier:4, base:12000, ele:'water'},
+    {id:'soul_21', n:'巨水炮',   tier:4, base:12000, ele:'water'},
+    {id:'soul_22', n:'火焰噴吐', tier:4, base:12000, ele:'fire'},
+    {id:'soul_23', n:'大地怒吼', tier:5, base:20000, ele:'earth'}
+  ];
+  var BY_ID={}, BY_TIER={1:[],2:[],3:[],4:[],5:[]};
+  var TIER_CLS={1:'text-slate-200',2:'text-sky-300',3:'text-violet-300',4:'text-amber-300',5:'text-rose-400'};
+  STONES.forEach(function(s){
+    BY_ID[s.id]=s; BY_TIER[s.tier].push(s.id);
+    if(typeof DB!=='undefined' && DB.items){
+      DB.items[s.id]={ n:s.n, type:'soulstone', soul:true, tier:s.tier, base:s.base, ele:s.ele, drain:!!s.drain,
+        p:0, noUse:true, noJunk:true, gachaWeight:0, c:TIER_CLS[s.tier], img:'assets/icons/'+s.n+'.png',
+        d:'靈魂石 T'+s.tier+'：裝在靈魂石欄位，戰鬥自動施放、不耗MP、冷卻10秒，固定傷害（吃目標魔防）。基礎 '+s.base.toLocaleString()+' × 級數（最高10級）。'+(s.drain?'命中時吸取等量HP。':'')+' 3顆同石同級可合成升1級。' };
+    }
+  });
+  window.SOULSTONES=STONES; window.SOULSTONE_BY_ID=BY_ID; window.SOULSTONE_BY_TIER=BY_TIER;
+
+  function icon(s,sz){ sz=sz||40; return '<img src="assets/icons/'+s.n+'.png" style="width:'+sz+'px;height:'+sz+'px;object-fit:contain;" onerror="this.style.opacity=0">'; }
+  function countOf(id,lv){ var n=0; (player.inv||[]).forEach(function(i){ if(i.id===id&&(i.lv||1)===lv) n+=i.cnt; }); return n; }
+  function removeFromInv(id,lv,cnt){
+    for(var k=0;k<player.inv.length&&cnt>0;k++){ var i=player.inv[k]; if(i.id===id&&(i.lv||1)===lv){ var take=Math.min(i.cnt,cnt); i.cnt-=take; cnt-=take; } }
+    player.inv=player.inv.filter(function(i){ return i.cnt>0; });
+  }
+  window.gainSoulStone=function(id,lv,silent){
+    lv=Math.max(1,Math.min(10,lv||1)); if(!BY_ID[id]) return;
+    var ex=(player.inv||[]).find(function(i){ return i.id===id&&(i.lv||1)===lv&&!i.lock; });
+    if(ex) ex.cnt++;
+    else player.inv.push({ id:id, uid:(typeof uid==='function'?uid():('ss'+Date.now()+Math.floor(Math.random()*1e6))), cnt:1, lv:lv, en:0, lock:false, junk:false });
+    if(!silent&&typeof logSys==='function') logSys('💠 獲得靈魂石 <span class="'+TIER_CLS[BY_ID[id].tier]+' font-bold">'+BY_ID[id].n+' Lv'+lv+'</span>！');
+    try{ renderTabs(); }catch(e){} try{ refreshSoulPanel(); }catch(e){}
+  };
+  window.equipSoulStone=function(id,lv){
+    lv=lv||1; if(!BY_ID[id]) return;
+    if(countOf(id,lv)<=0){ if(typeof logSys==='function') logSys('背包中沒有這顆靈魂石。'); return; }
+    if(player.eq.soul) window.gainSoulStone(player.eq.soul.id,player.eq.soul.lv,true);
+    removeFromInv(id,lv,1);
+    player.eq.soul={ id:id, lv:lv }; player._soulCd=0;
+    if(typeof logSys==='function') logSys('🔮 裝備靈魂石 <span class="'+TIER_CLS[BY_ID[id].tier]+' font-bold">'+BY_ID[id].n+' Lv'+lv+'</span>。');
+    try{ renderTabs(); }catch(e){} try{ if(typeof saveGame==='function') saveGame(); }catch(e){} refreshSoulPanel();
+  };
+  window.unequipSoulStone=function(){
+    if(!player.eq.soul) return;
+    window.gainSoulStone(player.eq.soul.id,player.eq.soul.lv,true);
+    player.eq.soul=null;
+    if(typeof logSys==='function') logSys('卸下了靈魂石。');
+    try{ renderTabs(); }catch(e){} try{ if(typeof saveGame==='function') saveGame(); }catch(e){} refreshSoulPanel();
+  };
+  window.synthSoulStone=function(id,lv){
+    lv=lv||1; if(!BY_ID[id]) return;
+    if(lv>=10){ if(typeof logSys==='function') logSys('已達最高 10 級。'); return; }
+    if(countOf(id,lv)<3){ if(typeof logSys==='function') logSys('需要 3 顆「'+BY_ID[id].n+' Lv'+lv+'」才能合成。'); return; }
+    removeFromInv(id,lv,3); window.gainSoulStone(id,lv+1,true);
+    if(typeof logSys==='function') logSys('✨ 合成成功：<span class="'+TIER_CLS[BY_ID[id].tier]+' font-bold">'+BY_ID[id].n+' Lv'+(lv+1)+'</span>！');
+    try{ renderTabs(); }catch(e){} try{ if(typeof saveGame==='function') saveGame(); }catch(e){} refreshSoulPanel();
+  };
+  // 自動施放（在 tick 內每 100ms 呼叫）
+  window.soulStoneTick=function(){
+    if(!player||!player.eq||!player.eq.soul) return;
+    if(typeof state!=='undefined'&&(!state.running||player.dead)) return;
+    if(player._soulCd==null) player._soulCd=0;
+    if(player._soulCd>0){ player._soulCd--; return; }
+    var s=BY_ID[player.eq.soul.id]; if(!s) return;
+    var lv=player.eq.soul.lv||1;
+    var mobs=(typeof mapState!=='undefined'&&mapState.mobs)?mapState.mobs:null; if(!mobs) return;
+    var ti=mapState.targetIdx, t=(ti!=null&&mobs[ti]&&mobs[ti].curHp>0)?mobs[ti]:null, idx=ti;
+    if(!t){ for(var i=0;i<mobs.length;i++){ if(mobs[i]&&mobs[i].curHp>0){ t=mobs[i]; idx=i; break; } } }
+    if(!t) return;
+    var effMr=(t.st&&t.st.mrhalf>0)?(t.mr/2):(t.mr||0);
+    var mrFactor=effMr<=100?(100-(effMr/2))/100:(50-((effMr-100)/10))/100; mrFactor=Math.max(0,mrFactor);
+    var dmg=Math.max(1,Math.floor(s.base*lv*mrFactor));
+    t.curHp-=dmg; t.justHit=s.ele||'none';
+    try{ if(typeof mobWake==='function') mobWake(t); }catch(e){}
+    player._soulCd=100;   // 10 秒（tick=100ms）
+    var drainTxt='';
+    if(s.drain){ var heal=Math.min(dmg,(player.mhp||0)-(player.hp||0)); if(heal>0){ player.hp+=heal; drainTxt=' <span class="text-rose-300">(吸取 '+heal.toLocaleString()+' HP)</span>'; } }
+    try{ if(!state.ff&&typeof logCombat==='function') logCombat('🔮 靈魂石 <span class="'+TIER_CLS[s.tier]+' font-bold">'+s.n+'</span> 造成 <b>'+dmg.toLocaleString()+'</b> 點傷害'+drainTxt+'。','player'); }catch(e){}
+    if(t.curHp<=0){ try{ if(typeof killMob==='function') killMob(idx); }catch(e){} }
+    try{ if(!state.ff&&typeof updateUI==='function') updateUI(); }catch(e){}
+  };
+  // GM：發放靈魂石  __adminGrantStone('大地怒吼',10) 或 ('soul_23',10)
+  window.__adminGrantStone=function(nameOrId,lv){
+    if(!player) return false;
+    var id=BY_ID[nameOrId]?nameOrId:null;
+    if(!id){ for(var k in BY_ID){ if(BY_ID[k].n===nameOrId){ id=k; break; } } }
+    if(!id){ if(typeof logSys==='function') logSys('找不到靈魂石：'+nameOrId); return false; }
+    window.gainSoulStone(id,lv||1,false);
+    if(typeof logSys==='function') logSys('🎁 管理員贈予靈魂石：'+BY_ID[id].n+' Lv'+(lv||1));
+    try{ if(typeof saveGame==='function') saveGame(); }catch(e){} return true;
+  };
+  // UI 面板
+  window.openSoulStonePanel=function(){
+    var old=document.getElementById('soul-overlay'); if(old) old.remove();
+    var ov=document.createElement('div'); ov.id='soul-overlay';
+    ov.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(2,6,23,.78);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:18px;';
+    ov.addEventListener('click',function(e){ if(e.target===ov) ov.remove(); });
+    var box=document.createElement('div'); box.id='soul-box';
+    box.style.cssText='width:100%;max-width:520px;background:linear-gradient(160deg,#15110a,#0b0f1a);border:1px solid #b4880f;border-radius:16px;box-shadow:0 0 30px rgba(251,191,36,.25);padding:16px;color:#e2e8f0;';
+    ov.appendChild(box); document.body.appendChild(ov); refreshSoulPanel();
+  };
+  function refreshSoulPanel(){
+    var box=document.getElementById('soul-box'); if(!box) return;
+    var eq=(player.eq&&player.eq.soul)?BY_ID[player.eq.soul.id]:null;
+    var eqLv=(player.eq&&player.eq.soul)?player.eq.soul.lv:0;
+    var h='';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><div style="font-size:20px;font-weight:800;color:#fde68a;">⚜ 靈魂石</div><button onclick="document.getElementById(\'soul-overlay\').remove()" style="background:#334155;color:#fff;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button></div>';
+    h+='<div style="font-size:12px;color:#94a3b8;margin-bottom:12px;">裝備一顆 ‧ 戰鬥自動施放 ‧ 不耗MP ‧ 冷卻 10 秒 ‧ 固定傷害（吃魔防）</div>';
+    h+='<div style="border-radius:14px;padding:12px;margin-bottom:14px;background:linear-gradient(160deg,#241b08,#15110a);border:1px solid #b4880f;display:flex;align-items:center;gap:12px;">';
+    if(eq){
+      h+=icon(eq,52)+'<div style="flex:1;"><div style="font-weight:700;color:#fde68a;">'+eq.n+' <span style="color:#fcd34d;">Lv'+eqLv+'</span></div><div style="font-size:12px;color:#cbd5e1;margin-top:2px;">傷害 <b style="color:#fcd34d;">'+(eq.base*eqLv).toLocaleString()+'</b>'+(eq.drain?' ‧ 吸血':'')+'</div></div>';
+      h+='<button onclick="unequipSoulStone()" style="background:#7f1d1d;color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:bold;">卸下</button>';
+    } else {
+      h+='<div style="width:52px;height:52px;border:2px dashed #b4880f;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#b4880f;font-size:22px;">＋</div><div style="flex:1;color:#94a3b8;font-size:13px;">尚未裝備靈魂石，從下方選一顆裝備。</div>';
+    }
+    h+='</div>';
+    h+='<div style="font-size:14px;font-weight:700;margin-bottom:8px;">我的靈魂石</div>';
+    var groups={};
+    (player.inv||[]).forEach(function(i){ if(BY_ID[i.id]){ var key=i.id+'|'+(i.lv||1); groups[key]=(groups[key]||0)+i.cnt; } });
+    var keys=Object.keys(groups).sort(function(a,b){
+      var sa=BY_ID[a.split('|')[0]], sb=BY_ID[b.split('|')[0]];
+      if(sa.tier!==sb.tier) return sa.tier-sb.tier;
+      var la=+a.split('|')[1], lb=+b.split('|')[1]; if(la!==lb) return lb-la;
+      return STONES.indexOf(sa)-STONES.indexOf(sb);
+    });
+    if(!keys.length){ h+='<div style="color:#64748b;font-size:13px;padding:10px;">背包裡還沒有靈魂石。到墮落騎士團（5轉）或深淵·終焉之地（8轉）打怪掉落。</div>'; }
+    else {
+      h+='<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+      keys.forEach(function(key){
+        var id=key.split('|')[0], lv=+key.split('|')[1], cnt=groups[key], s=BY_ID[id], canSyn=cnt>=3&&lv<10;
+        h+='<div style="width:calc(50% - 4px);background:#0f172a;border:1px solid '+(canSyn?'#fbbf24':'#334155')+';border-radius:12px;padding:10px;box-sizing:border-box;">';
+        h+='<div style="display:flex;align-items:center;gap:8px;">'+icon(s,40)+'<div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:13px;" class="'+TIER_CLS[s.tier]+'">'+s.n+'</div><div style="font-size:11px;color:#cbd5e1;">T'+s.tier+' ‧ Lv'+lv+' ‧ ×'+cnt+'</div></div></div>';
+        h+='<div style="font-size:11px;color:#94a3b8;margin:6px 0 8px;">傷害 '+(s.base*lv).toLocaleString()+'</div><div style="display:flex;gap:6px;">';
+        h+='<button onclick="equipSoulStone(\''+id+'\','+lv+')" style="flex:1;background:#0f766e;color:#fff;border:none;border-radius:8px;padding:6px;cursor:pointer;font-weight:bold;font-size:12px;">裝備</button>';
+        if(canSyn) h+='<button onclick="synthSoulStone(\''+id+'\','+lv+')" style="flex:1;background:#b45309;color:#fff;border:none;border-radius:8px;padding:6px;cursor:pointer;font-weight:bold;font-size:12px;">⬆ 合成</button>';
+        else if(lv<10) h+='<button disabled style="flex:1;background:#1e293b;color:#64748b;border:none;border-radius:8px;padding:6px;font-size:12px;">合成(需3)</button>';
+        else h+='<button disabled style="flex:1;background:#1e293b;color:#64748b;border:none;border-radius:8px;padding:6px;font-size:12px;">已滿級</button>';
+        h+='</div></div>';
+      });
+      h+='</div>';
+    }
+    box.innerHTML=h;
+  }
+  window.refreshSoulPanel=refreshSoulPanel;
+})();
 
 // ===== 帳號變身圖鑑：合併（取聯集，張數取大）=====
 window.__mergePolyDex = function(serverDex){
@@ -12501,7 +12694,7 @@ function startGame() {
     let b = createBase[curCreate.cls];
     player.base = { str: b.str+curCreate.str, dex: b.dex+curCreate.dex, con: b.con+curCreate.con, int: b.int+curCreate.int, wis: b.wis+curCreate.wis, cha: b.cha+curCreate.cha };
     player.lv = 1; player.exp = 0; player.gold = 5000000;
-    player.inv = []; player.eq = { wpn: null, helm: null, armor: null, shield: null, cloak: null, tshirt: null, gloves: null, boots: null, ring1: null, ring2: null, amulet: null, belt: null }; player.junkPrefs = {};
+    player.inv = []; player.eq = { wpn: null, helm: null, armor: null, shield: null, cloak: null, tshirt: null, gloves: null, boots: null, ring1: null, ring2: null, amulet: null, belt: null, soul: null }; player.junkPrefs = {};
     player.skills = [];
     player.summon = null; player.charmed = null; player.manualCd = {}; player.hot = null; player.elfEle = null; player.buffs = { haste: 0, brave: 0, blue: 0, cautious: 0, elfcookie: 0, poly: 0, shield: 0 };
     
@@ -12670,6 +12863,16 @@ function loadGame() {
             ['sk_mg_undead','sk_mg_guardian'].forEach(function(s){ if (player.skills.indexOf(s) < 0) player.skills.push(s); });
         }
         if (player.skills) player.skills = player.skills.filter(function(s){ return DB.skills[s]; });
+        // 遷移：龍騎不再「沿用騎士技能」→ 清除已學的騎士專屬技能（保留龍騎技能 reqD 與三職通用技能）
+        if (player.dragon && player.skills) {
+            player.skills = player.skills.filter(function(s){
+                var sk = DB.skills[s]; if(!sk) return false;
+                if (sk.reqD !== undefined) return true;                                                   // 龍騎技能：保留
+                if (sk.reqK !== undefined && sk.reqM !== undefined && sk.reqE !== undefined) return true; // 三職通用（光箭/治癒/傳送等）：保留
+                if (sk.reqK !== undefined && sk.reqM === undefined && sk.reqE === undefined) return false; // 騎士專屬：清除
+                return true;
+            });
+        }
         state.ticks = d.ticks || 0;   // 🔧 還原 tick 計數：讓召喚物/迷魅以絕對 tick 記錄的 endTick 在重載後仍然有效
         // 修復：自動存檔可能在「死亡放置」期間把 player.dead=true 寫入存檔。
         // 讀檔一律以「在村莊甦醒、存活」載入，否則 tick() 會因 player.dead 提早 return，
