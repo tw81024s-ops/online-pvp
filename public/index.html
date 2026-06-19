@@ -948,6 +948,30 @@ const DB = {
         "dragon_chain_annihilator": { dragonOnly: true, chain: true, n: "殲滅者鎖鏈劍", type: "wpn", dmgS: 27, dmgL: 22, hit: 6, dmgBonus: 5, spd: 0.9, req: "knight", safe: 6, c: "text-purple-400", p: 500000, gachaWeight: 3, img: "assets/icons/weapons/dragon_chain_annihilator.png", d: "龍騎士專屬鎖鏈劍。" },
         "dragon_chain_osiris": { dragonOnly: true, chain: true, n: "歐西里斯鎖鏈劍", type: "wpn", dmgS: 29, dmgL: 25, hit: 6, dmgBonus: 5, spd: 0.9, req: "knight", safe: 6, c: "text-purple-400", p: 500000, gachaWeight: 3, img: "assets/icons/weapons/dragon_chain_osiris.png", d: "龍騎士專屬鎖鏈劍。" },
         "dragon_chain_aurakyria": { dragonOnly: true, chain: true, n: "奧拉奇里亞的鎖鏈劍", type: "wpn", dmgS: 31, dmgL: 26, hit: 6, dmgBonus: 5, spd: 0.9, req: "knight", safe: 6, c: "text-purple-400", p: 500000, gachaWeight: 3, img: "assets/icons/weapons/dragon_chain_aurakyria.png", d: "龍騎士專屬鎖鏈劍。" },
+        "tk_2h_aqua": { n: "蒼海聖劍", type: "wpn", dmgS: 44, dmgL: 48, hit: 10, dmgBonus: 28, con: 2, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_2h_aqua.png", procs: [{ name: "寒冰尖刺", rate: 0.08, min: 30, max: 58, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
+        "tk_2h_sun": { n: "烈陽聖劍", type: "wpn", dmgS: 48, dmgL: 52, hit: 8, dmgBonus: 34, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_2h_sun.png", procs: [{ name: "烈焰爆裂", rate: 0.08, min: 36, max: 70, ele: "fire", color: "#f97316" }], d: "提卡爾神廟的傳說武器・fire屬性。掉落即附帶祝福。" },
+        "tk_2h_sky": { n: "蒼穹聖劍", type: "wpn", dmgS: 46, dmgL: 46, hit: 14, dmgBonus: 26, dex: 2, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_2h_sky.png", procs: [{ name: "疾風斬", rate: 0.1, min: 26, max: 52, ele: "wind", color: "#4ade80" }], d: "提卡爾神廟的傳說武器・wind屬性。掉落即附帶祝福。" },
+        "tk_2h_gloom": { n: "幽冥聖劍", type: "wpn", dmgS: 42, dmgL: 50, hit: 10, dmgBonus: 38, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_2h_gloom.png", procs: [{ name: "闇蝕", rate: 0.08, min: 34, max: 68, ele: null, color: "#a78bfa" }], d: "提卡爾神廟的傳說武器・dark屬性。掉落即附帶祝福。" },
+        "tk_wand_aqua": { n: "碧波之杖", type: "wpn", dmgS: 34, dmgL: 18, hit: 14, dmgBonus: 5, mdmg: 7, mpR: 90, spd: 1.0, req: "mage", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_wand_aqua.png", procs: [{ name: "冰錐", rate: 0.08, min: 30, max: 58, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
+        "tk_wand_wind": { n: "流光之杖", type: "wpn", dmgS: 32, dmgL: 18, hit: 16, dmgBonus: 5, mdmg: 6, mpR: 100, dex: 2, spd: 1.0, req: "mage", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_wand_wind.png", procs: [{ name: "風刃", rate: 0.1, min: 26, max: 52, ele: "wind", color: "#4ade80" }], d: "提卡爾神廟的傳說武器・wind屬性。掉落即附帶祝福。" },
+        "tk_wand_ice": { n: "寒晶之杖", type: "wpn", dmgS: 36, dmgL: 22, hit: 13, dmgBonus: 6, mdmg: 9, mpR: 85, spd: 1.0, req: "mage", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_wand_ice.png", procs: [{ name: "暴風雪", rate: 0.08, min: 30, max: 58, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
+        "tk_wand_sun": { n: "日輪之杖", type: "wpn", dmgS: 38, dmgL: 20, hit: 13, dmgBonus: 6, mdmg: 10, mpR: 90, int: 2, spd: 1.0, req: "mage", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_wand_sun.png", procs: [{ name: "烈陽", rate: 0.08, min: 36, max: 70, ele: "fire", color: "#f97316" }], d: "提卡爾神廟的傳說武器・fire屬性。掉落即附帶祝福。" },
+        "tk_claw_sun": { n: "金鬃魔爪", type: "wpn", dmgS: 44, dmgL: 42, hit: 8, dmgBonus: 10, ignoreEva: 2, spd: 1.0, darkOnly: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_claw_sun.png", procs: [{ name: "烈焰爆裂", rate: 0.08, min: 36, max: 70, ele: "fire", color: "#f97316" }], d: "提卡爾神廟的傳說武器・fire屬性。掉落即附帶祝福。" },
+        "tk_claw_gloom": { n: "幽冥魔爪", type: "wpn", dmgS: 42, dmgL: 44, hit: 8, dmgBonus: 12, ignoreEva: 2, spd: 1.0, darkOnly: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_claw_gloom.png", procs: [{ name: "闇蝕", rate: 0.08, min: 34, max: 68, ele: null, color: "#a78bfa" }], d: "提卡爾神廟的傳說武器・dark屬性。掉落即附帶祝福。" },
+        "tk_claw_earth": { n: "翠裂魔爪", type: "wpn", dmgS: 46, dmgL: 40, hit: 8, dmgBonus: 8, str: 2, spd: 1.0, darkOnly: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_claw_earth.png", procs: [{ name: "大地撕裂", rate: 0.08, min: 34, max: 62, ele: "earth", color: "#ca8a04" }], d: "提卡爾神廟的傳說武器・earth屬性。掉落即附帶祝福。" },
+        "tk_claw_frost": { n: "霜白魔爪", type: "wpn", dmgS: 44, dmgL: 42, hit: 10, dmgBonus: 8, ignoreEva: 3, spd: 1.0, darkOnly: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_claw_frost.png", procs: [{ name: "寒冰尖刺", rate: 0.08, min: 30, max: 58, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
+        "tk_chain_aqua": { n: "碧波鎖鏈劍", type: "wpn", dmgS: 36, dmgL: 32, hit: 10, dmgBonus: 8, spd: 0.9, dragonOnly: true, chain: true, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_chain_aqua.png", procs: [{ name: "寒冰尖刺", rate: 0.08, min: 30, max: 58, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
+        "tk_chain_gloom": { n: "幽冥鎖鏈劍", type: "wpn", dmgS: 38, dmgL: 34, hit: 10, dmgBonus: 11, spd: 0.9, dragonOnly: true, chain: true, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_chain_gloom.png", procs: [{ name: "闇蝕", rate: 0.08, min: 34, max: 68, ele: null, color: "#a78bfa" }], d: "提卡爾神廟的傳說武器・dark屬性。掉落即附帶祝福。" },
+        "tk_chain_sun": { n: "金輝鎖鏈劍", type: "wpn", dmgS: 40, dmgL: 32, hit: 8, dmgBonus: 10, spd: 0.9, dragonOnly: true, chain: true, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_chain_sun.png", procs: [{ name: "烈焰爆裂", rate: 0.08, min: 36, max: 70, ele: "fire", color: "#f97316" }], d: "提卡爾神廟的傳說武器・fire屬性。掉落即附帶祝福。" },
+        "tk_chain_sky": { n: "蒼穹鎖鏈劍", type: "wpn", dmgS: 38, dmgL: 34, hit: 12, dmgBonus: 8, dex: 2, spd: 0.9, dragonOnly: true, chain: true, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_chain_sky.png", procs: [{ name: "疾風斬", rate: 0.1, min: 26, max: 52, ele: "wind", color: "#4ade80" }], d: "提卡爾神廟的傳說武器・wind屬性。掉落即附帶祝福。" },
+        "tk_bow_aqua": { n: "銀月之弓", type: "wpn", dmgS: 46, dmgL: 44, hit: 10, dmgBonus: 24, dex: 3, ignoreEva: 3, spd: 1.0, isBow: true, ranged: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_bow_aqua.png", procs: [{ name: "寒冰尖刺", rate: 0.08, min: 30, max: 58, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
+        "tk_bow_sun": { n: "金陽之弓", type: "wpn", dmgS: 50, dmgL: 44, hit: 8, dmgBonus: 30, dex: 2, spd: 1.0, isBow: true, ranged: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_bow_sun.png", procs: [{ name: "烈焰爆裂", rate: 0.08, min: 36, max: 70, ele: "fire", color: "#f97316" }], d: "提卡爾神廟的傳說武器・fire屬性。掉落即附帶祝福。" },
+        "tk_bow_gloom": { n: "幽棘之弓", type: "wpn", dmgS: 46, dmgL: 46, hit: 10, dmgBonus: 32, spd: 1.0, isBow: true, ranged: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_bow_gloom.png", procs: [{ name: "闇蝕", rate: 0.08, min: 34, max: 68, ele: null, color: "#a78bfa" }], d: "提卡爾神廟的傳說武器・dark屬性。掉落即附帶祝福。" },
+        "tk_bow_earth": { n: "翠藤之弓", type: "wpn", dmgS: 48, dmgL: 42, hit: 12, dmgBonus: 26, dex: 4, ignoreEva: 4, spd: 1.0, isBow: true, ranged: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_bow_earth.png", procs: [{ name: "大地撕裂", rate: 0.08, min: 34, max: 62, ele: "earth", color: "#ca8a04" }], d: "提卡爾神廟的傳說武器・earth屬性。掉落即附帶祝福。" },
+        "tk_sword_aqua": { n: "蒼藍聖劍", type: "wpn", dmgS: 42, dmgL: 46, hit: 10, dmgBonus: 28, con: 2, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_sword_aqua.png", procs: [{ name: "寒冰尖刺", rate: 0.08, min: 30, max: 58, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
+        "tk_sword_sun": { n: "聖陽之劍", type: "wpn", dmgS: 46, dmgL: 48, hit: 8, dmgBonus: 34, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_sword_sun.png", procs: [{ name: "烈焰爆裂", rate: 0.08, min: 36, max: 70, ele: "fire", color: "#f97316" }], d: "提卡爾神廟的傳說武器・fire屬性。掉落即附帶祝福。" },
+        "tk_sword_gloom": { n: "幽冥之劍", type: "wpn", dmgS: 42, dmgL: 48, hit: 10, dmgBonus: 38, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_sword_gloom.png", procs: [{ name: "闇蝕", rate: 0.08, min: 34, max: 68, ele: null, color: "#a78bfa" }], d: "提卡爾神廟的傳說武器・dark屬性。掉落即附帶祝福。" },
+        "tk_sword_earth": { n: "翠葉之劍", type: "wpn", dmgS: 44, dmgL: 46, hit: 12, dmgBonus: 30, str: 3, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_sword_earth.png", procs: [{ name: "大地撕裂", rate: 0.08, min: 34, max: 62, ele: "earth", color: "#ca8a04" }], d: "提卡爾神廟的傳說武器・earth屬性。掉落即附帶祝福。" },
         "dragon_chain_alice": { dragonOnly: true, chain: true, n: "艾莉絲(鎖鏈劍)", type: "wpn", dmgS: 32, dmgL: 28, hit: 8, dmgBonus: 7, spd: 0.9, req: "knight", safe: 7, c: "text-yellow-300", p: 0, gachaWeight: 0, noSell: true, img: "assets/icons/weapons/dragon_chain_alice.png", d: "龍騎士專屬鎖鏈劍。" },
         "dragon_chain_chronos": { dragonOnly: true, chain: true, n: "克洛諾斯之懼", type: "wpn", dmgS: 35, dmgL: 30, hit: 8, dmgBonus: 7, spd: 0.9, req: "knight", safe: 7, c: "text-yellow-300", p: 0, gachaWeight: 0, noSell: true, img: "assets/icons/weapons/dragon_chain_chronos.png", d: "龍騎士專屬鎖鏈劍。" },
         // ===== 黑妖裝備 + 法師魔杖（自動合併） =====
@@ -1570,18 +1594,31 @@ const DB = {
             
     mobs: {
         // ===== 深淵·終焉之地（8轉地圖）新增怪物 =====
-        "abyss_osiris":       { n: "深淵·歐西里斯", img: "assets/icons/monsters/thebes_osiris.png", lv: 100, s: "L", beh: "主動", race: "底比斯", boss: true, e: "dark",  hp: 2000000, ac: -120, mr: 260, exp: 800000, goldMin: 80000, goldMax: 400000, atkSpd: 1.6, dmg: [2, 600], db: 60, hit: 40 },
-        "abyss_anubis":       { n: "深淵·阿努比斯", img: "assets/icons/monsters/thebes_anubis.png", lv: 99, s: "L", beh: "主動", race: "底比斯", boss: true, e: "dark",  hp: 1500000, ac: -110, mr: 240, exp: 600000, goldMin: 60000, goldMax: 320000, atkSpd: 1.7, dmg: [2, 500], db: 50, hit: 38 },
-        "abyss_horus":        { n: "深淵·賀洛斯", img: "assets/icons/monsters/thebes_falcon.png", lv: 99, s: "L", beh: "主動", race: "底比斯", boss: true, e: "wind", hp: 1500000, ac: -110, mr: 240, exp: 600000, goldMin: 60000, goldMax: 320000, atkSpd: 1.7, dmg: [2, 500], db: 50, hit: 38 },
-        "abyss_fire_dragon":  { n: "深淵·炎龍", lv: 100, s: "L", beh: "主動", race: "龍", boss: true, e: "fire",  hp: 1800000, ac: -120, mr: 250, exp: 700000, goldMin: 70000, goldMax: 360000, atkSpd: 2.0, dmg: [3, 400], db: 600, hit: 60 },
-        "abyss_ice_dragon":   { n: "深淵·冰龍", lv: 100, s: "L", beh: "主動", race: "龍", boss: true, e: "water", hp: 1800000, ac: -120, mr: 250, exp: 700000, goldMin: 70000, goldMax: 360000, atkSpd: 2.0, dmg: [3, 400], db: 600, hit: 60 },
-        "abyss_earth_dragon": { n: "深淵·地龍", lv: 100, s: "L", beh: "主動", race: "龍", boss: true, e: "earth", hp: 1800000, ac: -120, mr: 250, exp: 700000, goldMin: 70000, goldMax: 360000, atkSpd: 2.0, dmg: [3, 400], db: 600, hit: 60 },
-        "fk_baphomet":    { n: "巴風特", lv: 86, s: "L", beh: "主動", race: "墮落騎士團", boss: true, e: "dark", hp: 420000, ac: -80, mr: 150, exp: 270000, goldMin: 30000, goldMax: 130000, atkSpd: 1.5, dmg: [2, 250], db: 180, hit: 32 },
-        "fk_balrog":      { n: "巴列斯", lv: 86, s: "L", beh: "主動", race: "墮落騎士團", boss: true, e: "dark", hp: 420000, ac: -80, mr: 150, exp: 270000, goldMin: 30000, goldMax: 130000, atkSpd: 1.5, dmg: [2, 250], db: 180, hit: 32, img: "assets/icons/monsters/巴列斯.png" },
-        "fk_kt":          { n: "克特", lv: 88, s: "L", beh: "主動", race: "墮落騎士團", boss: true, e: "dark", hp: 460000, ac: -84, mr: 160, exp: 300000, goldMin: 30000, goldMax: 150000, atkSpd: 1.4, dmg: [2, 280], db: 200, hit: 35 },
-        "fk_deathknight": { n: "死亡騎士", lv: 90, s: "L", beh: "主動", race: "墮落騎士團", boss: true, e: "dark", hp: 500000, ac: -88, mr: 170, exp: 330000, goldMin: 40000, goldMax: 180000, atkSpd: 1.3, dmg: [2, 310], db: 240, hit: 38 },
-        "fk_aris":        { n: "愛麗絲", lv: 92, s: "L", beh: "主動", race: "墮落騎士團", boss: true, e: "dark", hp: 540000, ac: -90, mr: 178, exp: 360000, goldMin: 40000, goldMax: 200000, atkSpd: 1.5, dmg: [2, 340], db: 280, hit: 41, img: "assets/icons/monsters/愛麗絲.png" },
-        "fk_vander":      { n: "騎士范德", lv: 94, s: "L", beh: "主動", race: "墮落騎士團", boss: true, e: "dark", hp: 580000, ac: -94, mr: 185, exp: 390000, goldMin: 50000, goldMax: 240000, atkSpd: 1.4, dmg: [3, 370], db: 320, hit: 44, img: "assets/icons/monsters/騎士范德.png" },
+        "abyss_osiris":       { n: "深淵·歐西里斯", img: "assets/icons/monsters/thebes_osiris.png", lv: 100, s: "L", beh: "主動", race: "底比斯", boss: true, e: "dark",  hp: 2000000, ac: -120, mr: 260, exp: 3200000, goldMin: 80000, goldMax: 400000, atkSpd: 1.6, dmg: [2, 600], db: 60, hit: 40 },
+        "abyss_anubis":       { n: "深淵·阿努比斯", img: "assets/icons/monsters/thebes_anubis.png", lv: 99, s: "L", beh: "主動", race: "底比斯", boss: true, e: "dark",  hp: 1500000, ac: -110, mr: 240, exp: 2400000, goldMin: 60000, goldMax: 320000, atkSpd: 1.7, dmg: [2, 500], db: 50, hit: 38 },
+        "abyss_horus":        { n: "深淵·賀洛斯", img: "assets/icons/monsters/thebes_falcon.png", lv: 99, s: "L", beh: "主動", race: "底比斯", boss: true, e: "wind", hp: 1500000, ac: -110, mr: 240, exp: 2400000, goldMin: 60000, goldMax: 320000, atkSpd: 1.7, dmg: [2, 500], db: 50, hit: 38 },
+        "abyss_fire_dragon":  { n: "深淵·炎龍", lv: 100, s: "L", beh: "主動", race: "龍", boss: true, e: "fire",  hp: 1800000, ac: -120, mr: 250, exp: 2800000, goldMin: 70000, goldMax: 360000, atkSpd: 2.0, dmg: [3, 400], db: 600, hit: 60 },
+        "abyss_ice_dragon":   { n: "深淵·冰龍", lv: 100, s: "L", beh: "主動", race: "龍", boss: true, e: "water", hp: 1800000, ac: -120, mr: 250, exp: 2800000, goldMin: 70000, goldMax: 360000, atkSpd: 2.0, dmg: [3, 400], db: 600, hit: 60 },
+        "abyss_earth_dragon": { n: "深淵·地龍", lv: 100, s: "L", beh: "主動", race: "龍", boss: true, e: "earth", hp: 1800000, ac: -120, mr: 250, exp: 2800000, goldMin: 70000, goldMax: 360000, atkSpd: 2.0, dmg: [3, 400], db: 600, hit: 60 },
+        "tk_snake": { n: "提卡爾·蛇", img: "assets/icons/monsters/tk_snake.png", lv: 99, s: "L", beh: "主動", race: "提卡爾", e: "none", hp: 1500000, ac: -110, mr: 240, exp: 3500000, goldMin: 60000, goldMax: 300000, atkSpd: 1.6, dmg: [2, 480], db: 50, hit: 38 },
+        "tk_monkey": { n: "提卡爾·猴子", img: "assets/icons/monsters/tk_monkey.png", lv: 99, s: "L", beh: "主動", race: "提卡爾", e: "none", hp: 1500000, ac: -110, mr: 240, exp: 3550000, goldMin: 60000, goldMax: 300000, atkSpd: 1.6, dmg: [2, 490], db: 52, hit: 38 },
+        "tk_aztec": { n: "提卡爾·艾庫阿茲特", img: "assets/icons/monsters/tk_aztec.png", lv: 99, s: "L", beh: "主動", race: "提卡爾", e: "earth", hp: 1550000, ac: -112, mr: 242, exp: 3650000, goldMin: 62000, goldMax: 310000, atkSpd: 1.7, dmg: [2, 500], db: 55, hit: 39 },
+        "tk_yuka": { n: "提卡爾·艾庫尤卡", img: "assets/icons/monsters/tk_yuka.png", lv: 99, s: "L", beh: "主動", race: "提卡爾", e: "none", hp: 1600000, ac: -112, mr: 244, exp: 3750000, goldMin: 64000, goldMax: 320000, atkSpd: 1.7, dmg: [2, 500], db: 58, hit: 39 },
+        "tk_kaila": { n: "提卡爾·艾庫卡伊拉", img: "assets/icons/monsters/tk_kaila.png", lv: 100, s: "L", beh: "主動", race: "提卡爾", e: "wind", hp: 1650000, ac: -114, mr: 246, exp: 3850000, goldMin: 66000, goldMax: 330000, atkSpd: 1.8, dmg: [2, 510], db: 62, hit: 40 },
+        "tk_bara": { n: "提卡爾·艾庫巴拉", img: "assets/icons/monsters/tk_bara.png", lv: 100, s: "L", beh: "主動", race: "提卡爾", e: "none", hp: 1700000, ac: -115, mr: 248, exp: 3950000, goldMin: 68000, goldMax: 340000, atkSpd: 1.8, dmg: [2, 520], db: 68, hit: 40 },
+        "tk_aeto": { n: "提卡爾·艾庫艾托", img: "assets/icons/monsters/tk_aeto.png", lv: 100, s: "L", beh: "主動", race: "提卡爾", e: "earth", hp: 1700000, ac: -116, mr: 250, exp: 4000000, goldMin: 69000, goldMax: 345000, atkSpd: 1.8, dmg: [2, 530], db: 72, hit: 41 },
+        "tk_aeto2": { n: "提卡爾·艾庫艾托(茂盛)", img: "assets/icons/monsters/tk_aeto2.png", lv: 100, s: "L", beh: "主動", race: "提卡爾", e: "earth", hp: 1750000, ac: -117, mr: 250, exp: 4100000, goldMin: 70000, goldMax: 350000, atkSpd: 1.9, dmg: [2, 540], db: 78, hit: 42 },
+        "tk_sadmud": { n: "提卡爾·薩德泥偶", img: "assets/icons/monsters/tk_sadmud.png", lv: 100, s: "L", beh: "主動", race: "提卡爾", e: "none", hp: 1800000, ac: -118, mr: 252, exp: 4200000, goldMin: 72000, goldMax: 360000, atkSpd: 1.9, dmg: [2, 550], db: 85, hit: 42 },
+        "tk_sadska": { n: "提卡爾·薩德司卡", img: "assets/icons/monsters/tk_sadska.png", lv: 100, s: "L", beh: "主動", race: "提卡爾", e: "dark", hp: 1850000, ac: -119, mr: 254, exp: 4350000, goldMin: 74000, goldMax: 370000, atkSpd: 1.9, dmg: [2, 560], db: 92, hit: 43 },
+        "tk_sadtio": { n: "提卡爾·薩德提歐", img: "assets/icons/monsters/tk_sadtio.png", lv: 100, s: "L", beh: "主動", race: "提卡爾", e: "dark", hp: 1900000, ac: -120, mr: 256, exp: 4500000, goldMin: 76000, goldMax: 380000, atkSpd: 2.0, dmg: [2, 580], db: 100, hit: 44 },
+        "tk_jefreku_f": { n: "提卡爾·杰弗雷庫(雌)", img: "assets/icons/monsters/tk_jefreku_f.png", lv: 101, s: "L", beh: "主動", race: "提卡爾", boss: true, e: "fire", hp: 2000000, ac: -122, mr: 260, exp: 5200000, goldMin: 85000, goldMax: 420000, atkSpd: 1.9, dmg: [3, 400], db: 600, hit: 55 },
+        "tk_jefreku_m": { n: "提卡爾·杰弗雷庫(雄)", img: "assets/icons/monsters/tk_jefreku_m.png", lv: 102, s: "L", beh: "主動", race: "提卡爾", boss: true, e: "water", hp: 2200000, ac: -124, mr: 262, exp: 5800000, goldMin: 90000, goldMax: 450000, atkSpd: 2.0, dmg: [3, 420], db: 620, hit: 56 },
+        "fk_baphomet":    { n: "巴風特", lv: 86, s: "L", beh: "主動", race: "墮落騎士團", boss: true, e: "dark", hp: 420000, ac: -80, mr: 150, exp: 1080000, goldMin: 30000, goldMax: 130000, atkSpd: 1.5, dmg: [2, 250], db: 180, hit: 32 },
+        "fk_balrog":      { n: "巴列斯", lv: 86, s: "L", beh: "主動", race: "墮落騎士團", boss: true, e: "dark", hp: 420000, ac: -80, mr: 150, exp: 1080000, goldMin: 30000, goldMax: 130000, atkSpd: 1.5, dmg: [2, 250], db: 180, hit: 32, img: "assets/icons/monsters/巴列斯.png" },
+        "fk_kt":          { n: "克特", lv: 88, s: "L", beh: "主動", race: "墮落騎士團", boss: true, e: "dark", hp: 460000, ac: -84, mr: 160, exp: 1200000, goldMin: 30000, goldMax: 150000, atkSpd: 1.4, dmg: [2, 280], db: 200, hit: 35 },
+        "fk_deathknight": { n: "死亡騎士", lv: 90, s: "L", beh: "主動", race: "墮落騎士團", boss: true, e: "dark", hp: 500000, ac: -88, mr: 170, exp: 1320000, goldMin: 40000, goldMax: 180000, atkSpd: 1.3, dmg: [2, 310], db: 240, hit: 38 },
+        "fk_aris":        { n: "愛麗絲", lv: 92, s: "L", beh: "主動", race: "墮落騎士團", boss: true, e: "dark", hp: 540000, ac: -90, mr: 178, exp: 1440000, goldMin: 40000, goldMax: 200000, atkSpd: 1.5, dmg: [2, 340], db: 280, hit: 41, img: "assets/icons/monsters/愛麗絲.png" },
+        "fk_vander":      { n: "騎士范德", lv: 94, s: "L", beh: "主動", race: "墮落騎士團", boss: true, e: "dark", hp: 580000, ac: -94, mr: 185, exp: 1560000, goldMin: 50000, goldMax: 240000, atkSpd: 1.4, dmg: [3, 370], db: 320, hit: 44, img: "assets/icons/monsters/騎士范德.png" },
         // ===== 底比斯（埃及神殿）新增怪物 =====
         "thebes_mandragora": { n: "底比斯曼陀羅草", img: "assets/icons/monsters/thebes_mandragora.png", lv: 76, s: "S", beh: "被動", race: "底比斯", e: "earth", hp: 5000, ac: -22, mr: 30, exp: 15000, goldMin: 600, goldMax: 1400, atkSpd: 1.8, dmg: [1, 130], db: 14, hit: 10 },
         "thebes_falcon": { n: "神隼", img: "assets/icons/monsters/thebes_falcon.png", lv: 78, s: "M", beh: "主動", race: "底比斯", e: "wind", hp: 4200, ac: -26, mr: 28, exp: 16000, goldMin: 700, goldMax: 1500, atkSpd: 1.3, dmg: [1, 120], db: 12, hit: 16 },
@@ -1988,8 +2025,8 @@ const DB = {
         "succubus": { n: "思克巴", lv: 37, s: "S", beh: "主動", race: "思克巴", e: "earth", hp: 400, ac: -25, mr: 50, exp: 1370, goldMin: 153, goldMax: 244, atkSpd: 1.8, dmg: [2, 30], db: 37, hit: 26, mag: { skn: "吸血鬼之吻", cd: 80, dmg: [2, 10], db: 37, ele: "none", vamp: [1, 37] } },
         "salamander": { n: "火蜥蜴", lv: 38, s: "S", beh: "主動", race: "元素", elem: true, e: "fire", hp: 383, ac: -23, mr: 11, exp: 1450, goldMin: 165, goldMax: 284, atkSpd: 1.5, dmg: [4, 10], db: 44, hit: 28 },
         "fire_egg": { n: "火炎蛋", lv: 39, s: "S", beh: "主動", race: "元素", elem: true, e: "fire", hp: 500, ac: -36, mr: 40, exp: 1520, goldMin: 153, goldMax: 244, atkSpd: 2, dmg: [4, 15], db: 14, hit: 26 },
-        "nm_023": { n: "夢幻之島閃電球", lv: 39, s: "S", beh: "主動", race: "元素", elem: true, e: "wind", hp: 340, ac: -40, mr: 40, exp: 1520, goldMin: 153, goldMax: 244, atkSpd: 1, dmg: [2, 15], db: 14, hit: 26 },
-        "nm_024": { n: "夢幻之島鎧甲守衛", lv: 39, s: "L", beh: "主動", race: "元素", elem: true, e: "earth", hp: 400, ac: -40, mr: 0, exp: 1520, goldMin: 153, goldMax: 244, atkSpd: 4, dmg: [4, 28], db: 48, hit: 23 },
+        "nm_023": { n: "夢幻之島閃電球", lv: 39, s: "S", beh: "主動", race: "元素", elem: true, e: "wind", hp: 340, ac: -40, mr: 40, exp: 38000, goldMin: 153, goldMax: 244, atkSpd: 1, dmg: [2, 15], db: 14, hit: 26 },
+        "nm_024": { n: "夢幻之島鎧甲守衛", lv: 39, s: "L", beh: "主動", race: "元素", elem: true, e: "earth", hp: 400, ac: -40, mr: 0, exp: 38000, goldMin: 153, goldMax: 244, atkSpd: 4, dmg: [4, 28], db: 48, hit: 23 },
         "cyclops": { n: "獨眼巨人", lv: 40, s: "L", beh: "主動", race: "巨人", e: "wind", hp: 800, ac: -23, mr: 30, exp: 1601, goldMin: 265, goldMax: 429, atkSpd: 2, dmg: [4, 20], db: 40, hit: 30 },
         "succubus_queen": { n: "思克巴女皇", lv: 41, s: "S", beh: "主動", race: "思克巴", e: "earth", hp: 500, ac: -32, mr: 80, exp: 1682, goldMin: 162, goldMax: 256, atkSpd: 1.8, dmg: [2, 41], db: 41, hit: 33, mag: { skn: "吸血鬼之吻", cd: 80, dmg: [2, 11], db: 41, ele: "none", vamp: [1, 41] } },
         "nm_025": { n: "影魔", lv: 41, s: "S", beh: "主動", race: "不死", un: true, e: "earth", hp: 832, ac: -43, mr: 30, exp: 1682, goldMin: 362, goldMax: 656, atkSpd: 1.5, dmg: [2, 42], db: 35, hit: 33 },
@@ -1997,20 +2034,20 @@ const DB = {
         "necromancer": { n: "巫師", lv: 42, s: "S", beh: "主動", race: "長老", e: "none", hp: 800, ac: -32, mr: 80, exp: 1765, goldMin: 350, goldMax: 500, atkSpd: 2, dmg: [2, 31], db: 42, hit: 35, mag: { skn: "極光雷電", cd: 80, dmg: [1, 80], db: 82, ele: "wind" } },
         "lava_golem": { n: "熔岩高崙", lv: 43, s: "L", beh: "主動", race: "高崙", e: "fire", hp: 700, ac: -18, mr: 50, exp: 1850, goldMin: 350, goldMax: 500, atkSpd: 3, dmg: [1, 21], db: 86, hit: 30, mag: { skn: "燃燒的火球", cd: 80, dmg: [1, 20], db: 43, ele: "fire" } },
         "nm_027": { n: "紅鬼魂", lv: 43, s: "S", beh: "主動", race: "不死", un: true, e: "earth", hp: 666, ac: -33, mr: 5, exp: 1850, goldMin: 150, goldMax: 700, atkSpd: 2, dmg: [3, 33], db: 0, hit: 36 },
-        "nm_028": { n: "火精靈王", lv: 43, s: "L", beh: "主動", race: "元素", elem: true, boss: true, e: "fire", hp: 1500, ac: -53, mr: 45, exp: 3601, goldMin: 450, goldMax: 790, atkSpd: 2, dmg: [3, 41], db: 43, hit: 40, mag: { skn: "爆炎的火球", cd: 50, dmg: [1, 50], db: 53, ele: "fire", alwaysHit: true } },
-        "nm_029": { n: "水精靈王", lv: 43, s: "L", beh: "主動", race: "元素", elem: true, boss: true, e: "water", hp: 2500, ac: -53, mr: 45, exp: 3601, goldMin: 450, goldMax: 790, atkSpd: 2, dmg: [3, 21], db: 33, hit: 40, mag: { skn: "水柱", cd: 50, dmg: [3, 30], db: 43, ele: "water", alwaysHit: true } },
-        "nm_030": { n: "風精靈王", lv: 43, s: "L", beh: "主動", race: "元素", elem: true, boss: true, e: "wind", hp: 1500, ac: -53, mr: 45, exp: 3601, goldMin: 450, goldMax: 790, atkSpd: 1, dmg: [3, 41], db: 10, hit: 43, mag: { skn: "龍捲風", cd: 50, dmg: [4, 30], db: 30, ele: "wind", alwaysHit: true } },
-        "nm_031": { n: "地精靈王", lv: 43, s: "L", beh: "主動", race: "元素", elem: true, boss: true, e: "earth", hp: 2000, ac: -53, mr: 45, exp: 3601, goldMin: 450, goldMax: 790, atkSpd: 3, dmg: [2, 61], db: 80, hit: 49, mag: { skn: "巨石之擊", cd: 50, dmg: [2, 60], db: 23, ele: "earth", alwaysHit: true } },
-        "nm_032": { n: "獨角獸", lv: 43, s: "L", beh: "主動", race: "獨角獸", boss: true, e: "earth", hp: 3000, ac: -48, mr: 45, exp: 3601, goldMin: 450, goldMax: 790, atkSpd: 1.5, dmg: [2, 31], db: 60, hit: 43 },
-        "nm_037": { n: "夢魘", lv: 40, s: "L", beh: "主動", race: "惡魔", boss: true, e: "none", hp: 1500, ac: -42, mr: 80, exp: 1601, goldMin: 161, goldMax: 264, atkSpd: 1.5, dmg: [1, 100], db: 20, hit: 40 },
-        "nm_038": { n: "夢幻之島蘑菇", lv: 30, s: "S", beh: "主動", race: "蘑菇", e: "earth", hp: 250, ac: -27, mr: 0, exp: 901, goldMin: 165, goldMax: 215, atkSpd: 1, dmg: [1, 47], db: 15, hit: 23, mag: { skn: "中毒", cd: 100, type: "poison", pbase: 100, d: 30, tick: 5, dur: 20 } },
-        "nm_039": { n: "夢幻之島鬼火", lv: 30, s: "S", beh: "主動", race: "鬼火", e: "earth", hp: 360, ac: -33, mr: 35, exp: 901, goldMin: 165, goldMax: 215, atkSpd: 2, dmg: [2, 37], db: 25, hit: 24 },
-        "nm_040": { n: "夢幻之島火蜥蜴", lv: 38, s: "S", beh: "主動", race: "元素", elem: true, e: "fire", hp: 383, ac: -28, mr: 11, exp: 1450, goldMin: 165, goldMax: 284, atkSpd: 1.5, dmg: [4, 15], db: 34, hit: 28 },
-        "nm_041": { n: "夢幻之島殺人蜂", lv: 38, s: "S", beh: "被動", race: "昆蟲", e: "none", hp: 200, ac: -36, mr: 10, exp: 1450, goldMin: 43, goldMax: 444, atkSpd: 0.5, dmg: [1, 36], db: 1, hit: 35 },
-        "nm_042": { n: "夢幻之島暴走兔", lv: 38, s: "S", beh: "被動", race: "動物", e: "none", hp: 250, ac: -26, mr: 30, exp: 1450, goldMin: 343, goldMax: 444, atkSpd: 1, dmg: [2, 16], db: 15, hit: 33, mag: { skn: "冰錐", cd: 30, dmg: [1, 30], db: 23, ele: "water", alwaysHit: true } },
-        "nm_043": { n: "夢幻之島火炎蛋", lv: 39, s: "S", beh: "主動", race: "元素", elem: true, e: "fire", hp: 500, ac: -36, mr: 40, exp: 1520, goldMin: 153, goldMax: 244, atkSpd: 2, dmg: [4, 15], db: 14, hit: 26 },
-        "nm_044": { n: "夢幻之島冰石高崙", lv: 39, s: "L", beh: "被動", race: "高崙", e: "water", hp: 573, ac: -31, mr: 7, exp: 1520, goldMin: 153, goldMax: 244, atkSpd: 2.5, dmg: [5, 15], db: 24, hit: 24 },
-        "nm_045": { n: "夢幻之島大鬼火", lv: 40, s: "S", beh: "主動", race: "鬼火", e: "earth", hp: 360, ac: -33, mr: 35, exp: 1520, goldMin: 153, goldMax: 244, atkSpd: 2, dmg: [2, 50], db: 25, hit: 28 },
+        "nm_028": { n: "火精靈王", lv: 43, s: "L", beh: "主動", race: "元素", elem: true, boss: true, e: "fire", hp: 1500, ac: -53, mr: 45, exp: 90025, goldMin: 450, goldMax: 790, atkSpd: 2, dmg: [3, 41], db: 43, hit: 40, mag: { skn: "爆炎的火球", cd: 50, dmg: [1, 50], db: 53, ele: "fire", alwaysHit: true } },
+        "nm_029": { n: "水精靈王", lv: 43, s: "L", beh: "主動", race: "元素", elem: true, boss: true, e: "water", hp: 2500, ac: -53, mr: 45, exp: 90025, goldMin: 450, goldMax: 790, atkSpd: 2, dmg: [3, 21], db: 33, hit: 40, mag: { skn: "水柱", cd: 50, dmg: [3, 30], db: 43, ele: "water", alwaysHit: true } },
+        "nm_030": { n: "風精靈王", lv: 43, s: "L", beh: "主動", race: "元素", elem: true, boss: true, e: "wind", hp: 1500, ac: -53, mr: 45, exp: 90025, goldMin: 450, goldMax: 790, atkSpd: 1, dmg: [3, 41], db: 10, hit: 43, mag: { skn: "龍捲風", cd: 50, dmg: [4, 30], db: 30, ele: "wind", alwaysHit: true } },
+        "nm_031": { n: "地精靈王", lv: 43, s: "L", beh: "主動", race: "元素", elem: true, boss: true, e: "earth", hp: 2000, ac: -53, mr: 45, exp: 90025, goldMin: 450, goldMax: 790, atkSpd: 3, dmg: [2, 61], db: 80, hit: 49, mag: { skn: "巨石之擊", cd: 50, dmg: [2, 60], db: 23, ele: "earth", alwaysHit: true } },
+        "nm_032": { n: "獨角獸", lv: 43, s: "L", beh: "主動", race: "獨角獸", boss: true, e: "earth", hp: 3000, ac: -48, mr: 45, exp: 90025, goldMin: 450, goldMax: 790, atkSpd: 1.5, dmg: [2, 31], db: 60, hit: 43 },
+        "nm_037": { n: "夢魘", lv: 40, s: "L", beh: "主動", race: "惡魔", boss: true, e: "none", hp: 1500, ac: -42, mr: 80, exp: 40025, goldMin: 161, goldMax: 264, atkSpd: 1.5, dmg: [1, 100], db: 20, hit: 40 },
+        "nm_038": { n: "夢幻之島蘑菇", lv: 30, s: "S", beh: "主動", race: "蘑菇", e: "earth", hp: 250, ac: -27, mr: 0, exp: 22525, goldMin: 165, goldMax: 215, atkSpd: 1, dmg: [1, 47], db: 15, hit: 23, mag: { skn: "中毒", cd: 100, type: "poison", pbase: 100, d: 30, tick: 5, dur: 20 } },
+        "nm_039": { n: "夢幻之島鬼火", lv: 30, s: "S", beh: "主動", race: "鬼火", e: "earth", hp: 360, ac: -33, mr: 35, exp: 22525, goldMin: 165, goldMax: 215, atkSpd: 2, dmg: [2, 37], db: 25, hit: 24 },
+        "nm_040": { n: "夢幻之島火蜥蜴", lv: 38, s: "S", beh: "主動", race: "元素", elem: true, e: "fire", hp: 383, ac: -28, mr: 11, exp: 36250, goldMin: 165, goldMax: 284, atkSpd: 1.5, dmg: [4, 15], db: 34, hit: 28 },
+        "nm_041": { n: "夢幻之島殺人蜂", lv: 38, s: "S", beh: "被動", race: "昆蟲", e: "none", hp: 200, ac: -36, mr: 10, exp: 36250, goldMin: 43, goldMax: 444, atkSpd: 0.5, dmg: [1, 36], db: 1, hit: 35 },
+        "nm_042": { n: "夢幻之島暴走兔", lv: 38, s: "S", beh: "被動", race: "動物", e: "none", hp: 250, ac: -26, mr: 30, exp: 36250, goldMin: 343, goldMax: 444, atkSpd: 1, dmg: [2, 16], db: 15, hit: 33, mag: { skn: "冰錐", cd: 30, dmg: [1, 30], db: 23, ele: "water", alwaysHit: true } },
+        "nm_043": { n: "夢幻之島火炎蛋", lv: 39, s: "S", beh: "主動", race: "元素", elem: true, e: "fire", hp: 500, ac: -36, mr: 40, exp: 38000, goldMin: 153, goldMax: 244, atkSpd: 2, dmg: [4, 15], db: 14, hit: 26 },
+        "nm_044": { n: "夢幻之島冰石高崙", lv: 39, s: "L", beh: "被動", race: "高崙", e: "water", hp: 573, ac: -31, mr: 7, exp: 38000, goldMin: 153, goldMax: 244, atkSpd: 2.5, dmg: [5, 15], db: 24, hit: 24 },
+        "nm_045": { n: "夢幻之島大鬼火", lv: 40, s: "S", beh: "主動", race: "鬼火", e: "earth", hp: 360, ac: -33, mr: 35, exp: 38000, goldMin: 153, goldMax: 244, atkSpd: 2, dmg: [2, 50], db: 25, hit: 28 },
         "nm_046": { n: "冰人", lv: 30, s: "L", beh: "被動", race: "元素", elem: true, e: "water", hp: 300, ac: -20, mr: 21, exp: 901, goldMin: 143, goldMax: 324, atkSpd: 2, dmg: [2, 40], db: 21, hit: 15 },
         "ice_maid": { n: "冰之女王侍女", lv: 10, s: "S", beh: "主動", race: "元素", elem: true, e: "water", hp: 1000, ac: -35, mr: 60, exp: 0, goldMin: 0, goldMax: 0, atkSpd: 2, dmg: [1, 100], db: 10, hit: 29 },
         "ice_queen": { n: "冰之女王", lv: 56, s: "S", beh: "主動", race: "元素", elem: true, boss: true, e: "water", hp: 13500, ac: -60, mr: 60, exp: 31370, goldMin: 10000, goldMax: 20000, atkSpd: 2, dmg: [1, 200], db: 105, hit: 69, mag: { skn: "冰雪暴", cd: 80, chance: 0.3, dmg: [5, 150], db: 99, ele: "water", sec: { type: "freeze", pbase: 200 } }, mag2: { skn: "寒冰吐息", cd: 130, type: "frost_breath", pbase: 200, dur: 8 }, mag3: { skn: "冰錐", cd: 50, dmg: [1, 300], db: 99, ele: "water" } },
@@ -2034,7 +2071,7 @@ const DB = {
         "fafurion": { n: "法利昂", lv: 93, s: "L", beh: "主動", race: "龍", boss: true, e: "water", hp: 120000, ac: -80, mr: 150, exp: 94000, goldMin: 18236, goldMax: 185248, atkSpd: 2, dmg: [2, 350], db: 265, hit: 95, mag: { skn: "巨水炮", cd: 50, dmg: [3, 100], db: 250, ele: "water" }, mag2: { skn: "寒冰噴吐", cd: 70, chance: 0.3, dmg: [4, 100], db: 399, ele: "water", sec: { type: "freeze", pbase: 200 } }, mag3: { skn: "冰裂術", cd: 70, dmg: [1, 100], db: 200, ele: "water", ext_freeze: 666 } },
         "valakas": { n: "巴拉卡斯", lv: 95, s: "L", beh: "主動", race: "龍", boss: true, e: "fire", hp: 150000, ac: -99, mr: 200, exp: 100000, goldMin: 20236, goldMax: 365248, atkSpd: 4, dmg: [3, 350], db: 565, hit: 99, mag: { skn: "火牢", cd: 50, chance: 0.1, type: "burn", d: 200, tick: 3, dur: 21 }, mag2: { skn: "流星雨", cd: 100, dmg: [5, 100], db: 560, ele: "fire", sec: { type: "scald", tick: 3, d: 100, dur: 15, pbase: 200 } }, mag3: { skn: "火焰噴吐", cd: 170, dmg: [2, 100], db: 1200, ele: "fire" } },
         "nm_035": { n: "牧羊犬", lv: 5, s: "S", beh: "被動", race: "動物", e: "earth", hp: 30, ac: 10, mr: 30, exp: 26, goldMin: 13, goldMax: 36, atkSpd: 2, dmg: [1, 5], db: 0, hit: 0 },
-        "nm_036": { n: "夢幻之島冰人", lv: 38, s: "L", beh: "被動", race: "元素", elem: true, e: "water", hp: 350, ac: -30, mr: 21, exp: 1450, goldMin: 243, goldMax: 364, atkSpd: 2, dmg: [2, 40], db: 40, hit: 29 },
+        "nm_036": { n: "夢幻之島冰人", lv: 38, s: "L", beh: "被動", race: "元素", elem: true, e: "water", hp: 350, ac: -30, mr: 21, exp: 36250, goldMin: 243, goldMax: 364, atkSpd: 2, dmg: [2, 40], db: 40, hit: 29 },
         "sema": { n: "西瑪", lv: 42, s: "S", boss: true, race: "四色", e: "none", hp: 8000, ac: -32, mr: 80, exp: 17650, goldMin: 1500, goldMax: 3000, atkSpd: 2.0, dmg: [4, 31], db: 62, hit: 55, mag: { skn: "極光雷電", sk: 'thunder', cd: 50, dmg: [2, 80], db: 182, ele: 'wind' } },
     },
 	
@@ -2380,6 +2417,7 @@ const DB = {
         "thebes_3": ["thebes_golem","thebes_priest","thebes_sphinx"],
         "thebes_altar": ["thebes_anubis","thebes_horus","thebes_osiris","thebes_golem"],
         "rebirth_abyss": ["abyss_osiris","abyss_anubis","abyss_horus","abyss_fire_dragon","abyss_ice_dragon","abyss_earth_dragon"],
+        "tikal_temple":["tk_snake","tk_monkey","tk_aztec","tk_yuka","tk_kaila","tk_bara","tk_aeto","tk_aeto2","tk_sadmud","tk_sadska","tk_sadtio","tk_jefreku_f","tk_jefreku_m"],
         "fallen_knights": ["fk_baphomet","fk_balrog","fk_kt","fk_deathknight","fk_aris","fk_vander"],
         "graveyard": ["nw_038", "nw_051", "nw_052", "nw_053", "nw_064", "nw_117", "nw_119", "nw_181", "nw_043", "nw_044", "nw_045", "nw_046", "nw_088"],  // 骷髏墓地
         "demon_realm": ["nw_148", "nw_149", "nw_150", "nw_152", "nw_153", "nw_154", "nw_155", "nw_156", "nw_158", "nw_050", "nw_065", "nw_160"],  // 魔界
@@ -6425,6 +6463,17 @@ function killMob(idx) {
     }
 
     // ===== 墮落騎士團（5轉）：擊殺掉落新技能書（此地圖限定，潘朵拉抽不到）=====
+    if (mapState.current === 'tikal_temple') {
+        var _tkW = ['tk_2h_aqua','tk_2h_sun','tk_2h_sky','tk_2h_gloom','tk_wand_aqua','tk_wand_wind','tk_wand_ice','tk_wand_sun','tk_claw_sun','tk_claw_gloom','tk_claw_earth','tk_claw_frost','tk_chain_aqua','tk_chain_gloom','tk_chain_sun','tk_chain_sky','tk_bow_aqua','tk_bow_sun','tk_bow_gloom','tk_bow_earth','tk_sword_aqua','tk_sword_sun','tk_sword_gloom','tk_sword_earth'];
+        var _tkM = (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult) || 1;
+        for (var _ti = 0; _ti < _tkW.length; _ti++) {
+            if (Math.random() < 0.008 * _tkM) {
+                var _bz = player.inv.length;
+                gainItem(_tkW[_ti], 1, false, true);
+                if (player.inv.length > _bz) { var _ni = player.inv[player.inv.length - 1]; if (_ni && _ni.id === _tkW[_ti]) { _ni.bless = true; } }
+            }
+        }
+    }
     if (mapState.current === 'fallen_knights') {
         var _fkBooks = ['bk_mg_master','bk_mg_master_ex','bk_mg_master_gm','bk_kn_shockstun_ex','bk_kn_shockstun_gm','bk_ef_steeldef','bk_ef_truesight','bk_ef_elearrow','bk_mg_icespike','bk_de_armorbreak','bk_de_armorbreak_ex','bk_de_armorbreak_gm','bk_mg_undead','bk_mg_guardian'];
         if (Math.random() < 0.02 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1)) gainItem(_fkBooks[Math.floor(Math.random()*_fkBooks.length)], 1, false);
@@ -11122,6 +11171,7 @@ const MAP_CATEGORIES = {
         {v:'thebes_3',t:'底比斯③祭壇',c:'#fbbf24'},
         {v:'thebes_altar',t:'底比斯·神壇',c:'#f59e0b'},
         {v:'rebirth_abyss',t:'深淵·終焉之地（8轉）',c:'#a855f7'},
+        {v:'tikal_temple',t:'提卡爾神廟（10轉）',c:'#22d3ee'},
         {v:'dream_island',t:'夢幻之島（3轉）',c:'#22c55e'},
         {v:'fallen_knights',t:'墮落騎士團（5轉）',c:'#dc2626'},
     ],
@@ -11604,6 +11654,14 @@ function claimSiegeReward(faction) {
 }
 
 var PATCH_NOTES = [
+    { v:'提卡爾神廟', date:'2026-06', title:'🏛️ 提卡爾神廟（10轉）開放！',
+      lines:[
+        '【新地圖】提卡爾神廟，需轉生 10 轉以上進入。瑪雅金字塔遺跡，雷光壟罩。',
+        '【新怪物】13 種提卡爾怪物（含杰弗雷庫雌雄雙王），能力與血量比照 8 轉，經驗為全地圖之冠。',
+        '【傳說武器】神廟掉落 24 把 10 轉傳說武器（大劍/法杖/爪/鎖鏈劍/弓/劍 × 水火風地闇），',
+        '　每把屬性互有落差，安定值 6、各 0.8% 掉落、且掉落即附帶「祝福」。',
+        '【經驗大調整】轉生地圖經驗全面提升：夢幻之島 ×25、墮落騎士團 ×4、終焉之地 ×4，',
+        '　形成 底比斯 < 3轉 < 5轉 < 8轉 < 10轉 的階梯，解決「轉生地圖經驗比底比斯低」的問題。' ] },
     { v:'龍騎覺醒', date:'2026-06', title:'🐉 龍騎士新技能・覺醒系統上線！',
       lines:[
         '【新技能】龍騎士新增三級共 13 個專屬技能（屠宰者/護衛毀滅維持現狀）。',
@@ -12395,6 +12453,10 @@ function changeMap(force) {
       } }
     { if (!force && document.getElementById('map-select').value === 'rebirth_abyss' && (player.reborn||0) < 8) {
           logSys('🔒 此地圖為「深淵·終焉之地」，需轉生 8 轉以上才能進入。');
+          syncMapSelectors(); return;
+      } }
+    { if (!force && document.getElementById('map-select').value === 'tikal_temple' && (player.reborn||0) < 10) {
+          logSys('🔒 此地圖為「提卡爾神廟」，需轉生 10 轉以上才能進入。');
           syncMapSelectors(); return;
       } }
     { if (!force && document.getElementById('map-select').value === 'fallen_knights' && (player.reborn||0) < 5) { logSys('🔒 此地圖為「墮落騎士團」，需轉生 5 轉以上才能進入。'); syncMapSelectors(); return; } }
@@ -13312,6 +13374,7 @@ const SPECIAL_AREA_BG = {   // 特殊地圖：逐張對應背景
     fafurion_lair: "Fafurion's Lair.png",
     valakas_lair: "Valakas' Lair.png",
     rebirth_abyss: "Valakas' Lair.png",
+    tikal_temple: 'tikal_temple.png',
     demon_realm: "Valakas' Lair.png",
     aden: "castle.png",
     lindvior_lair: "Fafurion's Lair.png",
@@ -15232,4 +15295,4 @@ window.onload = () => {
 </script>
 <script src="online.js"></script>
 </body>
-</html>                                                                       
+</html>
