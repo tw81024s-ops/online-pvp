@@ -2967,7 +2967,7 @@ function lookupFlat(val, table, def) {   // 舊行為：超過表尾回固定預
     }
     return def;
 }
-function lookupStep(val, table, def) {
+function lookupStep(val, table, def, cap) {
     for (let i = 0; i < table.length; i++) {
         if (val <= table[i][0]) return table[i][1];
     }
@@ -2976,7 +2976,8 @@ function lookupStep(val, table, def) {
     let prev = table[Math.max(0, table.length - 4)];
     let span = (last[0] - prev[0]) || 1;
     let slope = ((last[1] - prev[1]) / span) * 0.5;
-    let v = val > 200 ? 200 : val;
+    let _cap = cap || 200;
+    let v = val > _cap ? _cap : val;
     return Math.round(def + (v - (last[0] + 1)) * slope);
 }
 
@@ -3051,7 +3052,7 @@ function getDexER(dex) {
 function getIntMagicDmg(int) {
     return lookupStep(int, [
         [14,0],[19,1],[24,2],[29,4],[34,5],[39,7],[44,8],[49,12],[54,13],[59,14]
-    ], 15); // 60 = +15
+    ], 15, 250); // 60=+15、延伸到250=+53
 }
 function getIntMagicHit(int) {
     return lookupStep(int, [
@@ -3069,21 +3070,25 @@ function getIntMagicCrit(int) {
     if (int <= 99) return 7;
     if (int <= 139) return 8;
     if (int <= 179) return 9;
-    return 10;
+    if (int <= 219) return 10;
+    if (int <= 249) return 11;
+    return 12;
 }
 function getIntExtraMp(int) {
     return lookupStep(int, [
         [11,2],[15,3],[19,4],[23,5],[27,6],[31,7],[35,8],[39,9],[43,10],[47,11],
         [51,12],[55,13],[59,14]
-    ], 15); // 60 = +15
+    ], 15, 250); // 60=+15、延伸到250=+39
 }
 function getIntMpReduce(int) {
-    // MP消耗減少 %
-    return lookupFlat(int, [
+    // MP消耗減少 %（45 起緩升，250 達 60% 上限）
+    var _t = [
         [8,5],[10,6],[11,7],[13,8],[14,9],[16,10],[17,11],[19,12],[20,13],[22,14],
         [23,15],[25,16],[26,17],[28,18],[29,19],[31,20],[32,21],[34,22],[35,23],[37,24],
         [38,25],[40,26],[41,27],[43,28],[44,29]
-    ], 30); // 45~60 = 30%
+    ];
+    for (var _i = 0; _i < _t.length; _i++) { if (int <= _t[_i][0]) return _t[_i][1]; }
+    return Math.min(60, Math.round(30 + (int - 44) * 0.1456));
 }
 
 // ---------- 體質 CON：HP成長 / HP自然恢復量上限 / 藥水額外恢復% ----------
@@ -11672,7 +11677,17 @@ function claimSiegeReward(faction) {
     updateUI();
 }
 
-var PATCH_NOTES = [
+const PATCH_NOTES = [
+    { v:'智力250', date:'2026-06', title:'🔮 智力成長規劃到 250！',
+      lines:[
+        '【法師智力】智力效果全面延伸到 250，不再卡在 60。',
+        '・魔法傷害：智力60→+15（法師×2=30）；智力250→+53（法師×2=+106）。',
+        '・額外魔力：智力60→+15；智力250→+39。',
+        '・魔法爆擊：智力180→10、220→11、250→12。',
+        '・減少耗魔：解除「45 即封頂30%」的硬上限，改從30%緩升，智力250達 60% 上限。',
+        '（智力斷點：60=32% / 100=38% / 150=45% / 200=53% / 250=60%）',
+      ] },
+
     { v:'提卡爾神廟', date:'2026-06', title:'🏛️ 提卡爾神廟（10轉）開放！',
       lines:[
         '【新地圖】提卡爾神廟，需轉生 10 轉以上進入。瑪雅金字塔遺跡，雷光壟罩。',
