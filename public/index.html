@@ -6373,9 +6373,9 @@ function killMob(idx) {
     // ===== 寶圖碎片掉落（打怪掉落；高階碎片需較高等級怪）：英雄 0.5%／傳說 0.1%(Lv40+)／神話 0.02%(Lv60+) =====
     {
         var _fdm = (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult) || 1;
-        if (Math.random() < 0.005 * _fdm) gainItem('map_frag_hero', 1, false);
-        if ((mob.lv || 1) >= 40 && Math.random() < 0.001 * _fdm) gainItem('map_frag_legend', 1, false);
-        if ((mob.lv || 1) >= 60 && Math.random() < 0.0002 * _fdm) gainItem('map_frag_myth', 1, false);
+        if (Math.random() < 0.01 * _fdm) gainItem('map_frag_hero', 1, false);
+        if ((mob.lv || 1) >= 40 && Math.random() < 0.0025 * _fdm) gainItem('map_frag_legend', 1, false);
+        if ((mob.lv || 1) >= 60 && Math.random() < 0.0005 * _fdm) gainItem('map_frag_myth', 1, false);
     }
     // ===== 轉生秘境：擊殺掉落「席琳附加捲軸」（一般 5%／頭目 10%）=====
     if (typeof _rbM !== 'undefined' && _rbM) {
@@ -11557,9 +11557,9 @@ var PATCH_NOTES = [
         '・⛏️ 挖寶：每局 500 萬金幣，5×5 共 25 格藏 3 顆炸彈，自由翻格挖金幣（100～1億），翻到炸彈該局結束、已得保留，見好就收。',
         '・🎴 翻牌：每局 300 萬金幣，4×4＝8 對，配對成功拿金幣，翻錯 5 次該局結束，全配對有額外獎。',
         '【🧩 寶圖】功能列新增「寶圖」獨立兌換介面。寶圖碎片由「打怪掉落」，集滿可開寶箱（必出）：',
-        '・英雄碎片（全怪 0.5%）集滿 10 → 高階符石',
-        '・傳說碎片（Lv40+ 怪 0.1%）集滿 6 → 靈魂石 T4',
-        '・神話碎片（Lv60+ 怪 0.02%）集滿 3 → 靈魂石 T5 ＋ 潘朵拉抽獎卷×20',
+        '・英雄碎片（全怪 1%）集滿 10 → 高階符石',
+        '・傳說碎片（Lv40+ 怪 0.25%）集滿 6 → 靈魂石 T4',
+        '・神話碎片（Lv60+ 怪 0.05%）集滿 3 → 靈魂石 T5 ＋ 潘朵拉抽獎卷×20',
       ] },
     { v:'賭場 1.0', date:'2026-06', title:'🎲 賭場開幕！', html:function(){ return window.__casinoRulesHTML ? window.__casinoRulesHTML() : ''; } },
     { v:'符石系統 1.0', date:'2026-06', title:'💠 符石系統上線！',
@@ -11996,9 +11996,9 @@ window.openSherinePanel = function (tab) {
         h+='<div style="background:#0f172a;border:1px solid #334155;border-radius:10px;padding:10px;font-size:12px;color:#cbd5e1;line-height:1.7;">';
         h+='<div style="font-weight:800;color:#fbbf24;margin-bottom:4px;">📜 掉落說明</div>';
         h+='寶圖碎片由<b>打怪掉落</b>，集滿可開對應寶箱（必出）：<br>';
-        h+='・<span style="color:#fca5a5;">英雄碎片</span>　全怪 <b>0.5%</b>　｜ 集滿 <b>10</b> → 高階符石<br>';
-        h+='・<span style="color:#d8b4fe;">傳說碎片</span>　Lv40+ 怪 <b>0.1%</b>　｜ 集滿 <b>6</b> → 靈魂石 T4<br>';
-        h+='・<span style="color:#fcd34d;">神話碎片</span>　Lv60+ 怪 <b>0.02%</b>　｜ 集滿 <b>3</b> → 靈魂石 T5 ＋ 潘朵拉卷×20';
+        h+='・<span style="color:#fca5a5;">英雄碎片</span>　全怪 <b>1%</b>　｜ 集滿 <b>10</b> → 高階符石<br>';
+        h+='・<span style="color:#d8b4fe;">傳說碎片</span>　Lv40+ 怪 <b>0.25%</b>　｜ 集滿 <b>6</b> → 靈魂石 T4<br>';
+        h+='・<span style="color:#fcd34d;">神話碎片</span>　Lv60+ 怪 <b>0.05%</b>　｜ 集滿 <b>3</b> → 靈魂石 T5 ＋ 潘朵拉卷×20';
         h+='</div>';
         box.innerHTML=h;
       }
