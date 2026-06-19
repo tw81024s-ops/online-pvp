@@ -2219,7 +2219,7 @@ const DB = {
         "sk_dragon_scalearmor": { n: "龍之鱗鎧", type: "buff", tier: 1, reqD: 20, mp: 12, dur: 1800, d: { dr: 5, ac: 6 }, c: "text-white", msg: "龍之鱗鎧覆身，傷害抵抗提升。", img: "assets/icons/skills/龍之鱗鎧.png" },
         "sk_dragon_burnslash": { n: "燃燒擊砍", type: "atk", tier: 1, reqD: 22, mp: 6, dmgType: "physical", dmgMul: 2.0, status: { kind: "poison", dmg: [30, 60], tick: 1, dur: 3 }, c: "text-orange-400", img: "assets/icons/skills/燃燒擊砍.png" },
         "sk_dragon_magmaspit": { n: "岩漿噴吐", type: "atk", tier: 1, reqD: 24, mp: 15, dmgType: "physical", dmgMul: 2.4, target: "all", awakenOnly: true, c: "text-orange-500", img: "assets/icons/skills/岩漿噴吐.png" },
-        "sk_dragon_awaken_antares": { n: "覺醒·安塔瑞斯", type: "buff", awaken: "antares", awakenHp: 35, awakenSpd: { wpn: "w2h", pct: 10 }, tier: 1, reqD: 25, mp: 1, drain: 3, dur: 3600, d: { ac: -8 }, c: "text-red-400", msg: "你覺醒為安塔瑞斯之力！", img: "assets/icons/skills/覺醒安塔瑞斯.png" },
+        "sk_dragon_awaken_antares": { n: "覺醒·安塔瑞斯", type: "buff", awaken: "antares", awakenHpPct: 0.03, awakenSpd: { wpn: "any", pct: 10 }, tier: 1, reqD: 25, mp: 1, drain: 3, dur: 3600, d: { ac: -8, dr: 8 }, c: "text-red-400", msg: "你覺醒為安塔瑞斯之力！", img: "assets/icons/skills/覺醒安塔瑞斯.png" },
         "sk_dragon_bloodthirst": { n: "血之渴望", type: "buff", tier: 2, reqD: 30, mp: 30, dur: 300, spdBuff: 15, c: "text-red-300", msg: "龍之血沸騰，攻速與移動速度提升。", img: "assets/icons/skills/血之渴望.png" },
         "sk_dragon_fearhowl": { n: "恐響無助", type: "atk", tier: 2, reqD: 32, mp: 12, dmgType: "physical", dmgMul: 1.0, status: { kind: "blind", hit: 8, dur: 16 }, c: "text-fuchsia-300", img: "assets/icons/skills/恐響無助.png" },
         "sk_dragon_shockanxiety": { n: "衝擊之慮", type: "atk", tier: 2, reqD: 34, mp: 18, dmgType: "physical", dmgMul: 3.0, target: "all", awakenOnly: true, c: "text-yellow-300", img: "assets/icons/skills/衝擊之慮.png" },
@@ -2228,7 +2228,7 @@ const DB = {
         "sk_dragon_deaththunder": { n: "奪命之雷", type: "atk", tier: 3, reqD: 52, mp: 35, dmgType: "physical", dmgMul: 2.6, stun: 200, c: "text-purple-300", img: "assets/icons/skills/奪命之雷.png" },
         "sk_dragon_reaper": { n: "鷥憐死神", type: "atk", tier: 3, reqD: 54, mp: 20, dmgType: "physical", dmgMul: 1.0, status: { kind: "weaken", dur: 32 }, c: "text-purple-300", img: "assets/icons/skills/鷥憐死神.png" },
         "sk_dragon_frostspit": { n: "寒冰噴吐", type: "atk", tier: 3, reqD: 56, mp: 16, dmgType: "physical", dmgMul: 3.2, freeze: 200, target: "all", awakenOnly: true, c: "text-cyan-300", img: "assets/icons/skills/寒冰噴吐.png" },
-        "sk_dragon_awaken_balakas": { n: "覺醒·巴拉卡斯", type: "buff", awaken: "balakas", awakenSpd: { wpn: "axe", pct: 10 }, tier: 3, reqD: 60, mp: 1, drain: 3, dur: 3600, d: { str: 3, dex: 3, con: 3, int: 3, wis: 3 }, c: "text-yellow-400", msg: "你覺醒為巴拉卡斯之力！", img: "assets/icons/skills/覺醒巴拉卡斯.png" },
+        "sk_dragon_awaken_balakas": { n: "覺醒·巴拉卡斯", type: "buff", awaken: "balakas", awakenSpd: { wpn: "any", pct: 10 }, tier: 3, reqD: 60, mp: 1, drain: 3, dur: 3600, d: { str: 3, dex: 3, con: 3, int: 3, wis: 3, meleeDmg: 25, extraDmg: 12 }, c: "text-yellow-400", msg: "你覺醒為巴拉卡斯之力！", img: "assets/icons/skills/覺醒巴拉卡斯.png" },
         // ===== 三職業新技能（騎士/法師/妖精） =====
         // ===== 自訂新增技能（玩家設計）=====
         "sk_mg_master": { n: "魔法大師", type: "buff", tier: 9, reqM: 50, mp: 110, dur: 600, d: { mpR: 30 }, msg: "你領悟魔法大師奧義，回魔大幅提升。" , img: "assets/icons/skills/魔法大師.png" },
@@ -4150,12 +4150,12 @@ d.mr += (baseMr + bonusMr);
         // 龍騎覺醒：條件攻速+10%（移出變身區塊，未變身也生效）；血之渴望=攻速+15%
         { let _aw=(p.buffs.sk_dragon_awaken_antares>0)?'antares':(p.buffs.sk_dragon_awaken_farion>0)?'farion':(p.buffs.sk_dragon_awaken_balakas>0)?'balakas':null;
           if(_aw){ let _wp=p.eq.wpn?DB.items[p.eq.wpn.id]:null;
-            let _ok=(_aw==='farion')||(_aw==='antares'&&_wp&&_wp.w2h)||(_aw==='balakas'&&_wp&&((_wp.n||'').indexOf('斧')>=0));
+            let _ok=true; // 龍騎只用鎖鏈劍：三覺醒攻速一律生效
             if(_ok) spdMult *= 0.90; }
           if(p.buffs.sk_dragon_bloodthirst>0) spdMult *= 0.87; }
     
     if(p.buffs.sk_soul_up > 0) { p.mhp = Math.floor(p.mhp * 1.2); p.mmp = Math.floor(p.mmp * 1.2); }
-    if(p.buffs.sk_dragon_awaken_antares > 0) p.mhp += 35;   // 覺醒·安塔瑞斯：HP+35
+    if(p.buffs.sk_dragon_awaken_antares > 0) p.mhp = Math.floor(p.mhp * 1.03);   // 覺醒·安塔瑞斯：HP+3%
     // 盟主的祝福（8 小時，存檔保留、死亡清空）：依到期時間判斷是否生效
     if(p.blessings) {
         let _now = Date.now();
@@ -11689,9 +11689,9 @@ var PATCH_NOTES = [
         '・第3級：致命身軀、奪命之雷、鷥憐死神、寒冰噴吐、覺醒·巴拉卡斯。',
         '【⚡覺醒系統】三型態分別學習、開關式、每秒耗魔，魔力歸0自動解除，同時只能開一個；',
         '　覺醒中才能施放「岩漿噴吐／衝擊之慮／寒冰噴吐」。可在自動化設定勾「自動維持覺醒」。',
-        '・安塔瑞斯：HP+35、防-8、雙手劍時攻速+10%。',
-        '・法利昂：魔防+15、四屬+15、攻速+10%(不限武器)。',
-        '・巴拉卡斯：全能力+3(除魅力)、斧頭時攻速+10%。',
+        '・安塔瑞斯：HP+3%、防-8、減傷+8%、攻速+10%。',
+        '・法利昂：魔防+15、四屬+15、攻速+10%。',
+        '・巴拉卡斯：全能力+3(除魅力)、近戰傷害+25、額外傷害+12、攻速+10%。',
         '【取得】第1、2級 → 潘朵拉抽；第3級 → 5轉(墮落騎士團)掉落 0.3%。',
         '【調整】3轉(夢幻之島)怪物魔法傷害再削弱至三成。',
       ] },
