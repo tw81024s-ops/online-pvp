@@ -652,6 +652,7 @@
                         <div class="col-span-2 flex justify-between items-center border-t border-slate-700 pt-2 mt-1"><label class="cursor-pointer flex items-center gap-2"><input type="checkbox" id="set-poly" class="w-4 h-4"> <span class="text-gray-300">變形卷軸</span></label><label class="cursor-pointer flex items-center gap-1 text-xs text-slate-400"><input type="checkbox" id="set-auto-buy-poly" class="w-3 h-3"> <span>自動購買</span></label></div>
                         <div class="col-span-2 flex justify-between items-center border-t border-slate-700 pt-2 mt-1"><label class="cursor-pointer flex items-center gap-2"><input type="checkbox" id="set-magicbarrier" class="w-4 h-4"> <span class="text-cyan-300">魔法卷軸(魔法屏障)</span></label><span class="text-xs text-slate-500">無自動購買</span></div>
                         <div class="col-span-2 flex justify-between items-center border-t border-slate-700 pt-2 mt-1"><label class="cursor-pointer flex items-center gap-2"><input type="checkbox" id="set-teleport" class="w-4 h-4"> <span class="text-sky-300">瞬間移動卷軸(遇BOSS)</span></label><label class="cursor-pointer flex items-center gap-1 text-xs text-slate-400"><input type="checkbox" id="set-auto-buy-teleport" class="w-3 h-3"> <span>自動購買</span></label></div>
+                        <div class="col-span-2 flex justify-between items-center border-t border-slate-700 pt-2 mt-1"><label class="cursor-pointer flex items-center gap-2"><input type="checkbox" id="set-awaken" class="w-4 h-4"> <span class="text-amber-300">自動維持覺醒(龍騎)</span></label><span class="text-xs text-slate-500">魔力&gt;60%自動施放</span></div>
                         <div class="col-span-2 flex justify-between items-center border-t border-slate-700 pt-2 mt-1"><label class="cursor-pointer flex items-center gap-2"><input type="checkbox" id="set-auto-buy-arrow" class="w-4 h-4" checked> <span class="text-orange-300">弓箭耗盡時自動購買 1000 銀箭</span></label></div>
 						<div id="auto-buff-skills" class="col-span-2 grid grid-cols-2 gap-1 mt-1 border-t border-slate-600 pt-2"></div>
                     </div>
@@ -897,6 +898,19 @@ const DB = {
         "bk_dragon_slayer_ex": { type: "skillbk", n: "龍騎技能書(屠宰者強化)", p: 0, sk: "sk_dragon_slayer_ex", gachaWeight: 0, noSell: true, img: "assets/icons/skills/屠宰者強化.png" },
         "bk_dragon_guardbreak": { type: "skillbk", n: "龍騎技能書(護衛毀滅)", p: 0, sk: "sk_dragon_guardbreak", gachaWeight: 0, noSell: true, img: "assets/icons/skills/護衛毀滅強化.png" },
         "bk_dragon_armorimpact": { type: "skillbk", n: "龍騎技能書(龍之鎧甲衝擊)", p: 0, sk: "sk_dragon_armorimpact", gachaWeight: 0, noSell: true, img: "assets/icons/skills/龍之鎧甲衝擊.png" },
+        "bk_dragon_scalearmor": { type: "skillbk", n: "龍騎士技能（龍之鱗鎧）", p: 0, sk: "sk_dragon_scalearmor", gachaWeight: 8, noSell: true, img: "assets/icons/skills/龍之鱗鎧.png" },
+        "bk_dragon_burnslash": { type: "skillbk", n: "龍騎士技能（燃燒擊砍）", p: 0, sk: "sk_dragon_burnslash", gachaWeight: 8, noSell: true, img: "assets/icons/skills/燃燒擊砍.png" },
+        "bk_dragon_magmaspit": { type: "skillbk", n: "龍騎士技能（岩漿噴吐）", p: 0, sk: "sk_dragon_magmaspit", gachaWeight: 7, noSell: true, img: "assets/icons/skills/岩漿噴吐.png" },
+        "bk_dragon_awaken_antares": { type: "skillbk", n: "龍騎士技能（覺醒安塔瑞斯）", p: 0, sk: "sk_dragon_awaken_antares", gachaWeight: 6, noSell: true, img: "assets/icons/skills/覺醒安塔瑞斯.png" },
+        "bk_dragon_bloodthirst": { type: "skillbk", n: "龍騎士技能（血之渴望）", p: 0, sk: "sk_dragon_bloodthirst", gachaWeight: 6, noSell: true, img: "assets/icons/skills/血之渴望.png" },
+        "bk_dragon_fearhowl": { type: "skillbk", n: "龍騎士技能（恐響無助）", p: 0, sk: "sk_dragon_fearhowl", gachaWeight: 6, noSell: true, img: "assets/icons/skills/恐響無助.png" },
+        "bk_dragon_shockanxiety": { type: "skillbk", n: "龍騎士技能（衝擊之慮）", p: 0, sk: "sk_dragon_shockanxiety", gachaWeight: 5, noSell: true, img: "assets/icons/skills/衝擊之慮.png" },
+        "bk_dragon_awaken_farion": { type: "skillbk", n: "龍騎士技能（覺醒法利昂）", p: 0, sk: "sk_dragon_awaken_farion", gachaWeight: 5, noSell: true, img: "assets/icons/skills/覺醒法利昂.png" },
+        "bk_dragon_deadlybody": { type: "skillbk", n: "龍騎士技能（致命身軀）", p: 0, sk: "sk_dragon_deadlybody", gachaWeight: 0, noSell: true, img: "assets/icons/skills/致命身軀.png" },
+        "bk_dragon_deaththunder": { type: "skillbk", n: "龍騎士技能（奪命之雷）", p: 0, sk: "sk_dragon_deaththunder", gachaWeight: 0, noSell: true, img: "assets/icons/skills/奪命之雷.png" },
+        "bk_dragon_reaper": { type: "skillbk", n: "龍騎士技能（鷥憐死神）", p: 0, sk: "sk_dragon_reaper", gachaWeight: 0, noSell: true, img: "assets/icons/skills/鷥憐死神.png" },
+        "bk_dragon_frostspit": { type: "skillbk", n: "龍騎士技能（寒冰噴吐）", p: 0, sk: "sk_dragon_frostspit", gachaWeight: 0, noSell: true, img: "assets/icons/skills/寒冰噴吐.png" },
+        "bk_dragon_awaken_balakas": { type: "skillbk", n: "龍騎士技能（覺醒巴拉卡斯）", p: 0, sk: "sk_dragon_awaken_balakas", gachaWeight: 0, noSell: true, img: "assets/icons/skills/覺醒巴拉卡斯.png" },
         "bk_mg_master_ex": { type: "skillbk", n: "法師技能書(魔法大師·專家)", p: 0, sk: "sk_mg_master_ex", gachaWeight: 0, img: "assets/icons/skills/魔法大師.png" },
         "bk_mg_master_gm": { type: "skillbk", n: "法師技能書(魔法大師·大師)", p: 0, sk: "sk_mg_master_gm", gachaWeight: 0, img: "assets/icons/skills/魔法大師.png" },
         "bk_ef_steeldef": { type: "skillbk", n: "妖精技能書(鋼鐵防禦)", p: 0, sk: "sk_ef_steeldef", gachaWeight: 0, img: "assets/icons/skills/鋼鐵防禦.png" },
@@ -2164,6 +2178,20 @@ const DB = {
         "sk_dragon_slayer_ex": { n: "屠宰者(強化)", type: "atk", tier: 6, reqD: 60, reqReborn: 8, mp: 14, dmgType: "physical", reqWpn: "chain", dmgMul: 3.8, c: "text-purple-400", img: "assets/icons/skills/屠宰者強化.png" },
         "sk_dragon_guardbreak": { n: "護衛毀滅(強化)", type: "atk", tier: 7, reqD: 65, reqReborn: 8, mp: 16, dmgType: "physical", reqWpn: "chain", dmgMul: 4.2, c: "text-purple-400", img: "assets/icons/skills/護衛毀滅強化.png" },
         "sk_dragon_armorimpact": { n: "龍之鎧甲(衝擊)", type: "atk", tier: 8, reqD: 70, reqReborn: 8, mp: 18, dmgType: "physical", reqWpn: "chain", dmgMul: 4.8, c: "text-purple-400", img: "assets/icons/skills/龍之鎧甲衝擊.png" },
+        // ===== 龍騎士新技能（第1-3級專屬；1/2級潘朵拉抽、3級5轉掉落）=====
+        "sk_dragon_scalearmor": { n: "龍之鱗鎧", type: "buff", tier: 1, reqD: 20, mp: 12, dur: 1800, d: { dr: 5, ac: 6 }, c: "text-white", msg: "龍之鱗鎧覆身，傷害抵抗提升。", img: "assets/icons/skills/龍之鱗鎧.png" },
+        "sk_dragon_burnslash": { n: "燃燒擊砍", type: "atk", tier: 1, reqD: 22, mp: 6, dmgType: "physical", dmgMul: 2.0, status: { kind: "poison", dmg: [30, 60], tick: 1, dur: 3 }, c: "text-orange-400", img: "assets/icons/skills/燃燒擊砍.png" },
+        "sk_dragon_magmaspit": { n: "岩漿噴吐", type: "atk", tier: 1, reqD: 24, mp: 15, dmgType: "physical", dmgMul: 2.4, target: "all", awakenOnly: true, c: "text-orange-500", img: "assets/icons/skills/岩漿噴吐.png" },
+        "sk_dragon_awaken_antares": { n: "覺醒·安塔瑞斯", type: "buff", awaken: "antares", awakenHp: 35, awakenSpd: { wpn: "w2h", pct: 10 }, tier: 1, reqD: 25, mp: 1, drain: 3, dur: 3600, d: { ac: -8 }, c: "text-red-400", msg: "你覺醒為安塔瑞斯之力！", img: "assets/icons/skills/覺醒安塔瑞斯.png" },
+        "sk_dragon_bloodthirst": { n: "血之渴望", type: "buff", tier: 2, reqD: 30, mp: 30, dur: 300, spdBuff: 15, c: "text-red-300", msg: "龍之血沸騰，攻速與移動速度提升。", img: "assets/icons/skills/血之渴望.png" },
+        "sk_dragon_fearhowl": { n: "恐響無助", type: "atk", tier: 2, reqD: 32, mp: 12, dmgType: "physical", dmgMul: 1.0, status: { kind: "blind", hit: 8, dur: 16 }, c: "text-fuchsia-300", img: "assets/icons/skills/恐響無助.png" },
+        "sk_dragon_shockanxiety": { n: "衝擊之慮", type: "atk", tier: 2, reqD: 34, mp: 18, dmgType: "physical", dmgMul: 3.0, target: "all", awakenOnly: true, c: "text-yellow-300", img: "assets/icons/skills/衝擊之慮.png" },
+        "sk_dragon_awaken_farion": { n: "覺醒·法利昂", type: "buff", awaken: "farion", awakenSpd: { wpn: "any", pct: 10 }, tier: 2, reqD: 35, mp: 1, drain: 3, dur: 3600, d: { mr: 15, resFire: 15, resWater: 15, resWind: 15, resEarth: 15 }, c: "text-sky-400", msg: "你覺醒為法利昂之力！", img: "assets/icons/skills/覺醒法利昂.png" },
+        "sk_dragon_deadlybody": { n: "致命身軀", type: "buff", tier: 3, reqD: 50, mp: 50, dur: 300, deadlyProc: 0.3, c: "text-purple-400", msg: "致命身軀，命中時可能追加傷害。", img: "assets/icons/skills/致命身軀.png" },
+        "sk_dragon_deaththunder": { n: "奪命之雷", type: "atk", tier: 3, reqD: 52, mp: 35, dmgType: "physical", dmgMul: 2.6, stun: 200, c: "text-purple-300", img: "assets/icons/skills/奪命之雷.png" },
+        "sk_dragon_reaper": { n: "鷥憐死神", type: "atk", tier: 3, reqD: 54, mp: 20, dmgType: "physical", dmgMul: 1.0, status: { kind: "weaken", dur: 32 }, c: "text-purple-300", img: "assets/icons/skills/鷥憐死神.png" },
+        "sk_dragon_frostspit": { n: "寒冰噴吐", type: "atk", tier: 3, reqD: 56, mp: 16, dmgType: "physical", dmgMul: 3.2, freeze: 200, target: "all", awakenOnly: true, c: "text-cyan-300", img: "assets/icons/skills/寒冰噴吐.png" },
+        "sk_dragon_awaken_balakas": { n: "覺醒·巴拉卡斯", type: "buff", awaken: "balakas", awakenSpd: { wpn: "axe", pct: 10 }, tier: 3, reqD: 60, mp: 1, drain: 3, dur: 3600, d: { str: 3, dex: 3, con: 3, int: 3, wis: 3 }, c: "text-yellow-400", msg: "你覺醒為巴拉卡斯之力！", img: "assets/icons/skills/覺醒巴拉卡斯.png" },
         // ===== 三職業新技能（騎士/法師/妖精） =====
         // ===== 自訂新增技能（玩家設計）=====
         "sk_mg_master": { n: "魔法大師", type: "buff", tier: 9, reqM: 50, mp: 110, dur: 600, d: { mpR: 30 }, msg: "你領悟魔法大師奧義，回魔大幅提升。" , img: "assets/icons/skills/魔法大師.png" },
@@ -4078,9 +4106,16 @@ d.mr += (baseMr + bonusMr);
         d.mr        += (pf.mr  || 0);                                // MR
         d.dr        += (pf.dr  || 0);                                // 傷害減免%（唯一階等）
         if(pf.spd) spdMult *= (1 - pf.spd/100);                      // 攻速加快%（與藥水/餅乾相乘疊加）
+        // 龍騎覺醒：條件攻速+10%（安塔瑞斯=雙手劍/法利昂=不限/巴拉卡斯=斧頭）；血之渴望=攻速+15%
+        { let _aw=(p.buffs.sk_dragon_awaken_antares>0)?'antares':(p.buffs.sk_dragon_awaken_farion>0)?'farion':(p.buffs.sk_dragon_awaken_balakas>0)?'balakas':null;
+          if(_aw){ let _wp=p.eq.wpn?DB.items[p.eq.wpn.id]:null;
+            let _ok=(_aw==='farion')||(_aw==='antares'&&_wp&&_wp.w2h)||(_aw==='balakas'&&_wp&&((_wp.n||'').indexOf('斧')>=0));
+            if(_ok) spdMult *= 0.90; }
+          if(p.buffs.sk_dragon_bloodthirst>0) spdMult *= 0.87; }
     }
     
     if(p.buffs.sk_soul_up > 0) { p.mhp = Math.floor(p.mhp * 1.2); p.mmp = Math.floor(p.mmp * 1.2); }
+    if(p.buffs.sk_dragon_awaken_antares > 0) p.mhp += 35;   // 覺醒·安塔瑞斯：HP+35
     // 盟主的祝福（8 小時，存檔保留、死亡清空）：依到期時間判斷是否生效
     if(p.blessings) {
         let _now = Date.now();
@@ -4743,6 +4778,11 @@ function tick() {
             }
         }
         if(_buffEnded) calcStats();   // 到期重算（變身還原、技能加成移除等）
+        // 龍騎覺醒：每秒耗魔，魔力不足自動解除（同時只會有一個覺醒生效）
+        { let _awB=['sk_dragon_awaken_antares','sk_dragon_awaken_farion','sk_dragon_awaken_balakas'], _awEnd=false;
+          for(let _a of _awB){ if(player.buffs[_a]>0){ let _dr=(DB.skills[_a]&&DB.skills[_a].drain)||3;
+            if(player.mp>=_dr){ player.mp-=_dr; } else { player.mp=0; player.buffs[_a]=0; _awEnd=true; let _n=DB.skills[_a]?DB.skills[_a].n:_a; logSys(`魔力耗盡，[${_n}] 解除了。`); } } }
+          if(_awEnd) calcStats(); }
         if(canAct) autoActions();
     }
 
@@ -5279,6 +5319,7 @@ function getPhysicalDmg(diceStr, target, wpn, arrowData, forceHeavy, forceHit, f
     let nearFar = weaponRoll + dmgBonus;
     let inner = Math.floor(nearFar * critMult) + player.d.extraDmg - ((target.dr || 0) + ((target._siegeDrEnd > state.ticks) ? (target._siegeDrVal || 0) : 0));   // 堅固防護：怪物傷害減免
     inner = Math.max(1, inner);
+    if(player.buffs.sk_dragon_deadlybody > 0 && Math.random() < 0.3) inner = Math.floor(inner * 1.3);   // 致命身軀：命中30%追加傷害
 
     // 固定傷害（屬性/特效，於最低1之後加上）
     let fixed = 0;
@@ -6113,7 +6154,8 @@ function applyMobMagic(mob, sk) {
         // 屬性抗性與魔防一律生效：有屬性者受該屬性抗性折減、所有魔法傷害受抗魔(MR)折減（alwaysHit 不再無視防禦）
         // 怪物技能傷害公式: (怪物技能傷害 × 屬抗係數) × 抗魔係數 - 傷害減免
         var _twMag = mob._towerMob ? 0.5 : 1;   // 爬塔王魔法傷害折減（×0.5，避免低魔防被秒；要再調改這個數）
-        let _mobMag = (window.__GAME_CONFIG && typeof window.__GAME_CONFIG.mobMagicMult === 'number') ? window.__GAME_CONFIG.mobMagicMult : 0.25;   // 全怪物魔法攻擊倍率（管理員面板可調，預設0.25＝在原本0.5基礎上再砍半）
+        let _mobMag = (window.__GAME_CONFIG && typeof window.__GAME_CONFIG.mobMagicMult === 'number') ? window.__GAME_CONFIG.mobMagicMult : 0.25;
+        if (mapState.current === 'dream_island') _mobMag *= 0.3;   // 3轉地圖：怪物魔法再削弱至三成   // 全怪物魔法攻擊倍率（管理員面板可調，預設0.25＝在原本0.5基礎上再砍半）
         let dmg = Math.floor(Math.floor((baseMagicDmg + extraMagicDmg) * resFactor * _twMag * _mobMag) * mrFactor) - player.d.dr;
         if (player.d.drPct > 0) dmg = Math.round(dmg * (1 - player.d.drPct / 100));   // 百分比減傷（強化）
         if(sk.ext_freeze && player.statuses.freeze > 0) dmg += sk.ext_freeze;
@@ -6386,6 +6428,8 @@ function killMob(idx) {
     if (mapState.current === 'fallen_knights') {
         var _fkBooks = ['bk_mg_master','bk_mg_master_ex','bk_mg_master_gm','bk_kn_shockstun_ex','bk_kn_shockstun_gm','bk_ef_steeldef','bk_ef_truesight','bk_ef_elearrow','bk_mg_icespike','bk_de_armorbreak','bk_de_armorbreak_ex','bk_de_armorbreak_gm','bk_mg_undead','bk_mg_guardian'];
         if (Math.random() < 0.02 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1)) gainItem(_fkBooks[Math.floor(Math.random()*_fkBooks.length)], 1, false);
+        var _dgT3 = ['bk_dragon_deadlybody','bk_dragon_deaththunder','bk_dragon_reaper','bk_dragon_frostspit','bk_dragon_awaken_balakas'];
+        if (Math.random() < 0.003 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1)) gainItem(_dgT3[Math.floor(Math.random()*_dgT3.length)], 1, false);
         var _fkChains = ['dragon_chain_alice','dragon_chain_chronos'];
         if (Math.random() < 0.002 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1)) gainItem(_fkChains[Math.floor(Math.random()*_fkChains.length)], 1, false);
         // 🔮 靈魂石掉落（5轉怪）：T1 5% / T2 3% / T3 1%（各自獨立，隨機一顆）
@@ -6590,6 +6634,7 @@ function abnormalMagicHit(m) {
     let r = roll(1, 20);
     return (r === 20) || (r !== 1 && hv >= r);
 }
+function dragonAwaken(){ if(player.buffs.sk_dragon_awaken_antares>0)return 'antares'; if(player.buffs.sk_dragon_awaken_farion>0)return 'farion'; if(player.buffs.sk_dragon_awaken_balakas>0)return 'balakas'; return null; }
 function applyMobStatus(m, st, skillName) {
     if(!m.st) m.st = newMobStatus();
     if(BOSS_IMMUNE.includes(st.kind) && m.boss) return;
@@ -7420,6 +7465,7 @@ function castSkill(skId) {
     }
     
     if(sk.type === 'atk' && player.cds.atkSk <= 0) {
+        if(sk.awakenOnly && !dragonAwaken()) return false;   // 覺醒專屬：未覺醒不可用
         if(sk.dmgType === 'physical') {
             let t = getTarget();
             if(!t) return false;
@@ -7607,6 +7653,7 @@ function castSkill(skId) {
         } else if(skId === 'sk_holy_light') {
             player.statuses.stone = 0; player.statuses.paralyze = 0;
         } else {
+            if(sk.awaken){ ['sk_dragon_awaken_antares','sk_dragon_awaken_farion','sk_dragon_awaken_balakas'].forEach(function(x){ if(x!==skId) player.buffs[x]=0; }); }
             player.buffs[skId] = sk.dur;
             if(skId === 'sk_holy_barrier') player.holyBarrierCd = 45;   // 聖結界 CD 45 秒（>持續32）
         }
@@ -7673,6 +7720,12 @@ function autoActions() {
             }
         }
     });
+
+    // 龍騎自動維持覺醒：勾選後，未覺醒且魔力>60%時自動施放已學的最高階覺醒（同時只一個）
+    try { let _awChk=document.getElementById('set-awaken');
+      if(_awChk && _awChk.checked && player.dragon && !dragonAwaken() && player.mmp>0 && player.mp >= player.mmp*0.6){
+        let _order=['sk_dragon_awaken_balakas','sk_dragon_awaken_farion','sk_dragon_awaken_antares'];
+        for(let _s of _order){ if(player.skills.includes(_s)){ castSkill(_s); break; } } } } catch(e){}
 
     // 瞬間移動卷軸：戰鬥中出現 BOSS 時自動使用（自動使用必定為未裝備傳送控制戒指的傳送術效果）
     {
@@ -11551,6 +11604,20 @@ function claimSiegeReward(faction) {
 }
 
 var PATCH_NOTES = [
+    { v:'龍騎覺醒', date:'2026-06', title:'🐉 龍騎士新技能・覺醒系統上線！',
+      lines:[
+        '【新技能】龍騎士新增三級共 13 個專屬技能（屠宰者/護衛毀滅維持現狀）。',
+        '・第1級：龍之鱗鎧、燃燒擊砍、岩漿噴吐、覺醒·安塔瑞斯。',
+        '・第2級：血之渴望、恐響無助、衝擊之慮、覺醒·法利昂。',
+        '・第3級：致命身軀、奪命之雷、鷥憐死神、寒冰噴吐、覺醒·巴拉卡斯。',
+        '【⚡覺醒系統】三型態分別學習、開關式、每秒耗魔，魔力歸0自動解除，同時只能開一個；',
+        '　覺醒中才能施放「岩漿噴吐／衝擊之慮／寒冰噴吐」。可在自動化設定勾「自動維持覺醒」。',
+        '・安塔瑞斯：HP+35、防-8、雙手劍時攻速+10%。',
+        '・法利昂：魔防+15、四屬+15、攻速+10%(不限武器)。',
+        '・巴拉卡斯：全能力+3(除魅力)、斧頭時攻速+10%。',
+        '【取得】第1、2級 → 潘朵拉抽；第3級 → 5轉(墮落騎士團)掉落 0.3%。',
+        '【調整】3轉(夢幻之島)怪物魔法傷害再削弱至三成。',
+      ] },
     { v:'奪寶 1.0', date:'2026-06', title:'🗺️ 奪寶玩法上線！',
       lines:[
         '【🗺️ 奪寶】功能列新增「奪寶」，內含兩款小遊戲：',
@@ -14733,7 +14800,7 @@ function getWeightedGachaResult() {
     let pool = [];
 
     // 建立抽獎池並計算總權重（改版：所有裝備/道具/卷軸皆可由潘朵拉抽獎取得；原權重 0 者給預設權重 10）
-    const PANDORA_POOL = window.__PANDORA_POOL || (window.__PANDORA_POOL = new Set(["gold_scroll","char_delete_scroll","sherine_scroll","sherine_carrier_helm","sherine_carrier_armor","sherine_carrier_gloves","sherine_carrier_boots","sherine_carrier_cloak","sherine_carrier_amulet","wpn_dragonslayer","wpn_baless","wpn_powerless_baless","bot_baless","sherine_crystal","item_crystal_ball","item_mastery_proof","item_soul_orb","item_dragon_claw","item_lizard_horn","item_orc_amulet","mat_fire_breath","mat_water_breath","mat_wind_breath","mat_earth_breath","mat_griffon_feather","mat_unicorn_horn","bk_mg_master","bk_mg_master_ex","bk_mg_master_gm","bk_ef_steeldef","bk_ef_truesight","bk_ef_elearrow","bk_mg_icespike","bk_kn_shockstun_ex","bk_kn_shockstun_gm","bk_de_armorbreak","bk_de_armorbreak_ex","bk_de_armorbreak_gm","bk_mg_undead","bk_mg_guardian","bk_kn_berserk","bk_kn_rage","bk_kn_warcry","bk_kn_wpnmastery","bk_kn_ironbody","bk_kn_counterbarrier","bk_mg_timewarp","bk_mg_archward","bk_ef_kingarrow","bk_ef_naturewrath","de_claw_demon","de_claw_steel","de_claw_spirit","de_blade_silver","de_gauntlet","de_blade_gloom","de_blade_lindr","de_blade_demonlord","mw_holycrystal","mw_aris","mw_giran","kn_blade_giltas","kn_blade_emperor","kn_dagger_oricalcum","ef_bow_earthgoddess","ef_bow_deicide","ef_bow_siren","mw_leah","mw_demonking","mw_icequeen","nwp_001","nwp_002","nwp_003","nwp_004","nwp_005","nwp_006","nwp_007","nwp_008","nwp_009","nwp_010","nwp_011","nwp_012","nwp_013","nwp_014","nwp_015","nwp_016","nwp_017","nwp_018","nwp_019","nwp_020","nwp_021","nwp_022","nwp_023","nwp_024","nwp_025","nwp_026","nwp_027","nwp_028","nwp_029","nwp_030","nwp_031","nwp_032","nwp_033","nwp_034","nwp_035","nwp_036","nwp_037","nwp_038","nwp_039","nwp_040","nwp_041","nwp_042","nwp_043","nwp_044","nwp_045","nwp_046","nwp_047","nwp_048","nwp_049","nwp_050","nwp_051","nwp_052","nwp_053","nwp_054","nwp_055","nwp_056","nwp_057","nwp_058","nwp_059","nwp_060","nwp_061","nwp_062","nwp_063","nwp_064","nwp_065","nwp_066","nwp_067","nwp_068","nwp_069","nwp_070","nwp_071","nwp_072","nwp_073","nwp_074","nwp_075","nwp_076","nwp_077","nwp_078","nwp_079","nwp_080","nwp_081","mw_baphomet","mw_steelmana","de_helm_shadow","de_helm_dark","de_body_chiyou","de_bracer","de_cloak_dark","de_boots_dark","de_tshirt_str","de_ring_dark","de_amulet_shadow","bk_de_str","bk_de_shield","bk_de_dex","bk_de_will","bk_de_double","bk_de_evasion","wpn_alien","wpn_katana","wpn_longsword","wpn_1","wpn_2hsword","wpn_2","wpn_3","wpn_4","wpn_battleaxe","wpn_5","wpn_6","wpn_7","wpn_elfbow","wpn_8","wpn_9","wpn_10","wpn_dagger2","wpn_dagger1","wpn_11","wpn_12","wpn_halberd","wpn_13","wpn_14","wpn_15","wpn_16","wpn_17","wpn_18","wpn_19","wpn_20","wpn_21","wpn_scimitar","wpn_22","wpn_23","wpn_24","wpn_25","wpn_26","wpn_elfsword","wpn_27","wpn_shortsword","wpn_28","wpn_siruge","wpn_29","wpn_shortbow","wpn_30","wpn_31","wpn_32","wpn_flaming_angel","wpn_redknight","wpn_invader","wpn_33","wpn_damascus","wpn_34","wpn_35","wpn_36","wpn_rapier","wpn_mailbreaker","wpn_silversword","wpn_37","wpn_oakwand","wpn_38","wpn_witchwand","wpn_strwand","wpn_manawand","wpn_crystalwand","wpn_39","wpn_40","wpn_41","wpn_giantaxe","wpn_berserker","wpn_silveraxe","hlm_elf","hlm_oasis","hlm_gnome","arm_42","arm_43","hlm_mr","arm_44","arm_45","arm_46","arm_47","arm_48","hlm_silver","arm_49","hlm_bone","hlm_steel","hlm_mage","hlm_dk","arm_50","arm_51","arm_52","arm_53","arm_54","arm_55","arm_56","arm_57","hlm_kurt","arm_58","amr_plate","arm_59","arm_60","arm_61","arm_62","arm_63","arm_64","arm_65","arm_66","arm_67","amr_oasis","arm_68","amr_jacket","arm_69","amr_robe","arm_70","arm_71","arm_72","arm_73","arm_74","arm_75","arm_76","arm_77","arm_78","amr_bone","arm_79","amr_magerobe","arm_80","arm_81","arm_82","arm_83","amr_dk","arm_84","amr_kurt","tsh_tshirt","arm_85","clk_elf","clk_oasis","arm_86","arm_87","arm_88","clk_mr","arm_89","bot_short","arm_90","arm_91","arm_92","arm_93","arm_94","arm_95","bot_dk","arm_96","arm_97","glv_glove","glv_crystal","arm_98","arm_99","arm_100","glv_dk","arm_101","arm_102","arm_103","shd_elf","arm_104","arm_105","shd_gnome","arm_106","arm_107","arm_108","arm_109","arm_110","arm_111","arm_112","shd_bone","shd_redknight","arm_113","arm_114","arm_115","acc_116","acc_117","rng_mr","acc_118","acc_119","amu_str","acc_120","acc_121","amu_int","acc_122","acc_123","acc_124","acc_125","acc_126","acc_127","acc_128","acc_129","blt_body","acc_130","acc_131","acc_132","acc_133","acc_134","acc_135","acc_136","acc_137","acc_138","blt_mr","potion_heal","potion_strong","potion_ult","potion_haste","potion_blue","potion_brave","new_item_139","new_item_140","new_item_141","scroll_poly","scroll_magicbarrier","scroll_teleport","scroll_revive","item_blueflute","item_ancientkey","item_nightvision","candle","panacea_str","panacea_dex","panacea_con","panacea_int","panacea_wis","panacea_white","panacea_cha","new_item_142","scroll_weapon","scroll_armor","scroll_weapon_b","scroll_armor_b","scroll_acc","new_item_bless_wpn","new_item_bless_arm","new_item_bless_acc","new_item_uncurse","new_item_143","new_item_144","new_item_145","new_item_146","new_item_147","new_item_148","new_item_149","new_item_150","new_item_151","new_item_152","new_item_153","new_item_154","new_item_155","new_item_156","new_item_157","new_item_158","new_item_159","new_item_160","new_item_161","new_item_162","new_item_163","new_item_164","new_item_165","new_item_166","new_item_167","new_item_168","new_item_169","new_item_170","new_item_171","new_item_172","new_item_173","new_item_174","new_item_175","new_item_176","new_item_177","new_item_178","new_item_179","new_item_180","new_item_181","new_item_182","new_item_183","new_item_186","new_item_187","new_item_188","new_item_189","new_item_190","new_item_191","new_item_192","new_item_193","new_item_194","new_item_195","new_item_196","new_item_197","new_item_198","new_item_199","new_item_200","new_item_201","new_item_202","new_item_203","new_item_204","new_item_205","new_item_206","new_item_207","new_item_208","new_item_209","new_item_210","new_item_211","new_item_212","new_item_213","new_item_214","new_item_215","new_item_216","new_item_217","new_item_218","new_item_219","new_item_220","new_item_221","new_item_222","new_item_223","new_item_224","new_item_225","new_item_226","new_item_227","new_item_228","new_item_229","new_item_230","new_item_231","new_item_232","new_item_233","new_item_234","new_item_235","new_item_236","new_item_237","new_item_elfwing","new_item_mermaid_scale","potion_reborn","new_item_240","bk_heal1","bk_sunlight","bk_shield","bk_lightarrow","bk_teleport","bk_icearrow","bk_windblade","bk_holy_wpn","bk_antidote","bk_cold_shiver","bk_poison_curse","bk_ench_wpn","bk_reveal","bk_load_up","bk_firearrow","bk_hell_fang","bk_aurora","bk_undead_bane","bk_heal_mid","bk_dark_blind","bk_shield2","bk_chill","bk_energy_sense","bk_fireball","bk_dex_up","bk_break","bk_vampire","bk_slow","bk_rock_prison","bk_magic_shield","bk_meditation","bk_mummy_curse","bk_charm","bk_thunder","bk_heal2","bk_holy_light","bk_ice_spike","bk_mana_drain","bk_dark_shadow","bk_zombie","bk_haste_spell","bk_cancel","bk_earthquake","bk_str_up","bk_bless_wpn","bk_weaken","bk_regen","bk_greater_haste","bk_ice_lance","bk_tornado","bk_berserk","bk_summon","bk_holy_dash","bk_disease","bk_full_heal","bk_blizzard","bk_quake","bk_invisible","bk_resurrection","bk_seal","bk_holy_barrier","bk_sleep_mist","bk_thunder_storm","bk_fire_storm","bk_blaze","bk_meteor","bk_soul_up","bk_disintegrate","bk_solid_shield","bk_reduction_armor","bk_shock_stun","bk_spike_armor","bk_elf_mr","bk_elf_mind","bk_elf_worldtree","bk_elf_triple","bk_elf_purify","bk_elf_eleres","bk_elf_release","bk_elf_soul","bk_elf_singleres","bk_elf_firewpn","bk_elf_windshot","bk_elf_winddash","bk_elf_earthguard","bk_elf_groundtrap","bk_elf_magicerase","bk_elf_summon","bk_elf_dancefire","bk_elf_stormeye","bk_elf_earthshield","bk_elf_lifespring","bk_elf_earthbless","bk_elf_summon2","bk_elf_lifebless","bk_elf_seal","bk_elf_blazewpn","bk_elf_stormshot","bk_elf_steelguard","dragon_chain_steel","dragon_chain_dragoon","dragon_chain_destroyer","dragon_chain_thebes","dragon_chain_ruin","dragon_chain_resonance","dragon_chain_demonrace","dragon_chain_bloodlust","dragon_chain_demonking","dragon_chain_frost","dragon_chain_annihilator","dragon_chain_osiris","dragon_chain_aurakyria","bk_dragon_special","bk_dragon_slayer","bk_dragon_heartpierce"]));
+    const PANDORA_POOL = window.__PANDORA_POOL || (window.__PANDORA_POOL = new Set(["gold_scroll","char_delete_scroll","sherine_scroll","sherine_carrier_helm","sherine_carrier_armor","sherine_carrier_gloves","sherine_carrier_boots","sherine_carrier_cloak","sherine_carrier_amulet","wpn_dragonslayer","wpn_baless","wpn_powerless_baless","bot_baless","sherine_crystal","item_crystal_ball","item_mastery_proof","item_soul_orb","item_dragon_claw","item_lizard_horn","item_orc_amulet","mat_fire_breath","mat_water_breath","mat_wind_breath","mat_earth_breath","mat_griffon_feather","mat_unicorn_horn","bk_mg_master","bk_mg_master_ex","bk_mg_master_gm","bk_ef_steeldef","bk_ef_truesight","bk_ef_elearrow","bk_mg_icespike","bk_kn_shockstun_ex","bk_kn_shockstun_gm","bk_de_armorbreak","bk_de_armorbreak_ex","bk_de_armorbreak_gm","bk_mg_undead","bk_mg_guardian","bk_kn_berserk","bk_kn_rage","bk_kn_warcry","bk_kn_wpnmastery","bk_kn_ironbody","bk_kn_counterbarrier","bk_mg_timewarp","bk_mg_archward","bk_ef_kingarrow","bk_ef_naturewrath","de_claw_demon","de_claw_steel","de_claw_spirit","de_blade_silver","de_gauntlet","de_blade_gloom","de_blade_lindr","de_blade_demonlord","mw_holycrystal","mw_aris","mw_giran","kn_blade_giltas","kn_blade_emperor","kn_dagger_oricalcum","ef_bow_earthgoddess","ef_bow_deicide","ef_bow_siren","mw_leah","mw_demonking","mw_icequeen","nwp_001","nwp_002","nwp_003","nwp_004","nwp_005","nwp_006","nwp_007","nwp_008","nwp_009","nwp_010","nwp_011","nwp_012","nwp_013","nwp_014","nwp_015","nwp_016","nwp_017","nwp_018","nwp_019","nwp_020","nwp_021","nwp_022","nwp_023","nwp_024","nwp_025","nwp_026","nwp_027","nwp_028","nwp_029","nwp_030","nwp_031","nwp_032","nwp_033","nwp_034","nwp_035","nwp_036","nwp_037","nwp_038","nwp_039","nwp_040","nwp_041","nwp_042","nwp_043","nwp_044","nwp_045","nwp_046","nwp_047","nwp_048","nwp_049","nwp_050","nwp_051","nwp_052","nwp_053","nwp_054","nwp_055","nwp_056","nwp_057","nwp_058","nwp_059","nwp_060","nwp_061","nwp_062","nwp_063","nwp_064","nwp_065","nwp_066","nwp_067","nwp_068","nwp_069","nwp_070","nwp_071","nwp_072","nwp_073","nwp_074","nwp_075","nwp_076","nwp_077","nwp_078","nwp_079","nwp_080","nwp_081","mw_baphomet","mw_steelmana","de_helm_shadow","de_helm_dark","de_body_chiyou","de_bracer","de_cloak_dark","de_boots_dark","de_tshirt_str","de_ring_dark","de_amulet_shadow","bk_de_str","bk_de_shield","bk_de_dex","bk_de_will","bk_de_double","bk_de_evasion","wpn_alien","wpn_katana","wpn_longsword","wpn_1","wpn_2hsword","wpn_2","wpn_3","wpn_4","wpn_battleaxe","wpn_5","wpn_6","wpn_7","wpn_elfbow","wpn_8","wpn_9","wpn_10","wpn_dagger2","wpn_dagger1","wpn_11","wpn_12","wpn_halberd","wpn_13","wpn_14","wpn_15","wpn_16","wpn_17","wpn_18","wpn_19","wpn_20","wpn_21","wpn_scimitar","wpn_22","wpn_23","wpn_24","wpn_25","wpn_26","wpn_elfsword","wpn_27","wpn_shortsword","wpn_28","wpn_siruge","wpn_29","wpn_shortbow","wpn_30","wpn_31","wpn_32","wpn_flaming_angel","wpn_redknight","wpn_invader","wpn_33","wpn_damascus","wpn_34","wpn_35","wpn_36","wpn_rapier","wpn_mailbreaker","wpn_silversword","wpn_37","wpn_oakwand","wpn_38","wpn_witchwand","wpn_strwand","wpn_manawand","wpn_crystalwand","wpn_39","wpn_40","wpn_41","wpn_giantaxe","wpn_berserker","wpn_silveraxe","hlm_elf","hlm_oasis","hlm_gnome","arm_42","arm_43","hlm_mr","arm_44","arm_45","arm_46","arm_47","arm_48","hlm_silver","arm_49","hlm_bone","hlm_steel","hlm_mage","hlm_dk","arm_50","arm_51","arm_52","arm_53","arm_54","arm_55","arm_56","arm_57","hlm_kurt","arm_58","amr_plate","arm_59","arm_60","arm_61","arm_62","arm_63","arm_64","arm_65","arm_66","arm_67","amr_oasis","arm_68","amr_jacket","arm_69","amr_robe","arm_70","arm_71","arm_72","arm_73","arm_74","arm_75","arm_76","arm_77","arm_78","amr_bone","arm_79","amr_magerobe","arm_80","arm_81","arm_82","arm_83","amr_dk","arm_84","amr_kurt","tsh_tshirt","arm_85","clk_elf","clk_oasis","arm_86","arm_87","arm_88","clk_mr","arm_89","bot_short","arm_90","arm_91","arm_92","arm_93","arm_94","arm_95","bot_dk","arm_96","arm_97","glv_glove","glv_crystal","arm_98","arm_99","arm_100","glv_dk","arm_101","arm_102","arm_103","shd_elf","arm_104","arm_105","shd_gnome","arm_106","arm_107","arm_108","arm_109","arm_110","arm_111","arm_112","shd_bone","shd_redknight","arm_113","arm_114","arm_115","acc_116","acc_117","rng_mr","acc_118","acc_119","amu_str","acc_120","acc_121","amu_int","acc_122","acc_123","acc_124","acc_125","acc_126","acc_127","acc_128","acc_129","blt_body","acc_130","acc_131","acc_132","acc_133","acc_134","acc_135","acc_136","acc_137","acc_138","blt_mr","potion_heal","potion_strong","potion_ult","potion_haste","potion_blue","potion_brave","new_item_139","new_item_140","new_item_141","scroll_poly","scroll_magicbarrier","scroll_teleport","scroll_revive","item_blueflute","item_ancientkey","item_nightvision","candle","panacea_str","panacea_dex","panacea_con","panacea_int","panacea_wis","panacea_white","panacea_cha","new_item_142","scroll_weapon","scroll_armor","scroll_weapon_b","scroll_armor_b","scroll_acc","new_item_bless_wpn","new_item_bless_arm","new_item_bless_acc","new_item_uncurse","new_item_143","new_item_144","new_item_145","new_item_146","new_item_147","new_item_148","new_item_149","new_item_150","new_item_151","new_item_152","new_item_153","new_item_154","new_item_155","new_item_156","new_item_157","new_item_158","new_item_159","new_item_160","new_item_161","new_item_162","new_item_163","new_item_164","new_item_165","new_item_166","new_item_167","new_item_168","new_item_169","new_item_170","new_item_171","new_item_172","new_item_173","new_item_174","new_item_175","new_item_176","new_item_177","new_item_178","new_item_179","new_item_180","new_item_181","new_item_182","new_item_183","new_item_186","new_item_187","new_item_188","new_item_189","new_item_190","new_item_191","new_item_192","new_item_193","new_item_194","new_item_195","new_item_196","new_item_197","new_item_198","new_item_199","new_item_200","new_item_201","new_item_202","new_item_203","new_item_204","new_item_205","new_item_206","new_item_207","new_item_208","new_item_209","new_item_210","new_item_211","new_item_212","new_item_213","new_item_214","new_item_215","new_item_216","new_item_217","new_item_218","new_item_219","new_item_220","new_item_221","new_item_222","new_item_223","new_item_224","new_item_225","new_item_226","new_item_227","new_item_228","new_item_229","new_item_230","new_item_231","new_item_232","new_item_233","new_item_234","new_item_235","new_item_236","new_item_237","new_item_elfwing","new_item_mermaid_scale","potion_reborn","new_item_240","bk_heal1","bk_sunlight","bk_shield","bk_lightarrow","bk_teleport","bk_icearrow","bk_windblade","bk_holy_wpn","bk_antidote","bk_cold_shiver","bk_poison_curse","bk_ench_wpn","bk_reveal","bk_load_up","bk_firearrow","bk_hell_fang","bk_aurora","bk_undead_bane","bk_heal_mid","bk_dark_blind","bk_shield2","bk_chill","bk_energy_sense","bk_fireball","bk_dex_up","bk_break","bk_vampire","bk_slow","bk_rock_prison","bk_magic_shield","bk_meditation","bk_mummy_curse","bk_charm","bk_thunder","bk_heal2","bk_holy_light","bk_ice_spike","bk_mana_drain","bk_dark_shadow","bk_zombie","bk_haste_spell","bk_cancel","bk_earthquake","bk_str_up","bk_bless_wpn","bk_weaken","bk_regen","bk_greater_haste","bk_ice_lance","bk_tornado","bk_berserk","bk_summon","bk_holy_dash","bk_disease","bk_full_heal","bk_blizzard","bk_quake","bk_invisible","bk_resurrection","bk_seal","bk_holy_barrier","bk_sleep_mist","bk_thunder_storm","bk_fire_storm","bk_blaze","bk_meteor","bk_soul_up","bk_disintegrate","bk_solid_shield","bk_reduction_armor","bk_shock_stun","bk_spike_armor","bk_elf_mr","bk_elf_mind","bk_elf_worldtree","bk_elf_triple","bk_elf_purify","bk_elf_eleres","bk_elf_release","bk_elf_soul","bk_elf_singleres","bk_elf_firewpn","bk_elf_windshot","bk_elf_winddash","bk_elf_earthguard","bk_elf_groundtrap","bk_elf_magicerase","bk_elf_summon","bk_elf_dancefire","bk_elf_stormeye","bk_elf_earthshield","bk_elf_lifespring","bk_elf_earthbless","bk_elf_summon2","bk_elf_lifebless","bk_elf_seal","bk_elf_blazewpn","bk_elf_stormshot","bk_elf_steelguard","dragon_chain_steel","dragon_chain_dragoon","dragon_chain_destroyer","dragon_chain_thebes","dragon_chain_ruin","dragon_chain_resonance","dragon_chain_demonrace","dragon_chain_bloodlust","dragon_chain_demonking","dragon_chain_frost","dragon_chain_annihilator","dragon_chain_osiris","dragon_chain_aurakyria","bk_dragon_special","bk_dragon_slayer","bk_dragon_heartpierce","bk_dragon_scalearmor","bk_dragon_burnslash","bk_dragon_magmaspit","bk_dragon_awaken_antares","bk_dragon_bloodthirst","bk_dragon_fearhowl","bk_dragon_shockanxiety","bk_dragon_awaken_farion"]));
     const _gachaBlock = ['new_item_239','zongzi_south','zongzi_north','new_item_241','new_item_collar_husky','new_item_238','new_item_184','new_item_185'];
     for (let id in DB.items) {
         if (!PANDORA_POOL.has(id)) continue;   // 🔒 潘朵拉固定池：只抽凍結當下的物品；之後新增的道具/裝備/武器不進潘朵拉（改走怪物掉落）
