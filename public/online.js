@@ -1236,6 +1236,7 @@
         row(null, '＋屬性點', v => { const n = parseInt(v) || 10; player.bonus = (player.bonus || 0) + n; refreshGame(); toast(`可分配屬性點 +${n}`); }, true, '點數（預設 10）');
         row('補滿 HP / MP', '執行', () => { player.hp = player.mhp; player.mp = player.mmp; refreshGame(); toast('已補滿'); });
         row(null, '攻速加快', v => { const n = Math.max(1, parseFloat(v) || 5); player.adminSpdMult = n; refreshGame(); toast(n > 1 ? `攻速 ×${n}（加速中）` : '攻速已恢復正常', n > 1 ? '#14532d' : '#1e3a5f'); }, true, '倍數（預設 5，輸入 1 取消）');
+        row(null, '＋娃娃（輸入名稱或id發放給自己）', v => { var nm=(v||'').trim(); if(!nm){ toast('請輸入娃娃名稱或id（例 哈爾巴斯）','#7f1d1d'); return; } if(typeof window.__adminGrantDoll==='function' && window.__adminGrantDoll(nm)){ try{ if(typeof window.__pushDolls==='function') window.__pushDolls(); }catch(e){} refreshGame(); } else { toast('找不到娃娃：'+nm,'#7f1d1d'); } }, true, '娃娃名稱（哈爾巴斯 / 貝希摩斯 / 吉爾塔斯 / 飛龍…）');
         section('🌍 全服設定（所有玩家生效，立即同步）');
         const cfgStatus = el('div', { style: 'font-size:12px;color:#94a3b8;margin:-2px 0 8px;line-height:1.7;' }, '目前全服設定：讀取中…');
         _secBody.append(cfgStatus);
