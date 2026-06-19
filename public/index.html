@@ -3309,7 +3309,7 @@ const DOLLS = [
   { id: 'd_harbas', n: '哈爾巴斯', r: 8, e: 'dmgPct', img: 'assets/icons/dolls/d_harbas.png', emo: '🐲' },
   { id: 'd_behemoth', n: '貝希摩斯', r: 8, e: 'hpPct', img: 'assets/icons/dolls/d_behemoth.png', emo: '🦖' },
 ];
-const DOLL_MAP = {}; DOLLS.forEach(d => DOLL_MAP[d.id] = d);
+const DOLL_MAP = {}; DOLLS.forEach(d => DOLL_MAP[d.id] = d); try{ window.__DOLL_LIST = DOLLS; window.__DOLL_RNAME = DOLL_RNAME; }catch(e){}
 
 const DOLL_MILESTONES = [
   { need: 5, b: { hpPct: 0.03 }, t: '擁有5隻：最大HP +3%' },
