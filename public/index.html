@@ -736,7 +736,7 @@
                 <button id="btn-trash-gear" class="btn text-base py-2 font-bold px-0" style="grid-column:1 / -1; background: linear-gradient(135deg,#5b3a10 0%,#b45309 28%,#4a2f0c 52%,#d97706 76%,#3a2509 100%); color:#fde68a; border-color:#d97706;" onclick="sellUnlockedGear()">🗑️ 一鍵賣裝（賣掉未上鎖裝備/武器換金幣）</button>
             </div>
 
-            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic casino-marquee" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openTreasurePanel()"><span class="ic">🗺️</span><span class="tx">奪寶</span></button><button class="fn-ic" onclick="openMapFragPanel()"><span class="ic">🧩</span><span class="tx">寶圖</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
+            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic casino-marquee" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openTreasurePanel()"><span class="ic">🗺️</span><span class="tx">奪寶</span></button><button class="fn-ic" onclick="openMapFragPanel()"><span class="ic">🧩</span><span class="tx">寶圖</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="openDomTpPanel()"><span class="ic">🔑</span><span class="tx">傳送石</span></button><button class="fn-ic" onclick="openSigilPanel()"><span class="ic">🔯</span><span class="tx">紋樣</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
 
             <div class="panel flex-1 flex flex-col overflow-hidden relative">
                 <!-- 能力 -->
@@ -1903,6 +1903,31 @@ const DB = {
         "tw_mummy2": { n: "木乃伊王", img: "assets/icons/monsters/木乃伊.png", lv: 77, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 2156, ac: -25, mr: 38, exp: 8301, goldMin: 385, goldMax: 924, atkSpd: 1.8, dmg: [1, 116], db: 15, hit: 9 },
         "tw_aris2": { n: "艾莉絲", img: "assets/icons/monsters/aris.png", lv: 77, s: "S", beh: "主動", race: "傲慢之塔", e: "none", hp: 2156, ac: -25, mr: 38, exp: 8301, goldMin: 385, goldMax: 924, atkSpd: 1.8, dmg: [1, 116], db: 15, hit: 9 },
         "tw_reaper": { n: "鐮刀死神", img: "assets/icons/monsters/死神.png", lv: 78, s: "L", beh: "主動", race: "傲慢之塔", boss: true, e: "none", hp: 23400, ac: -39, mr: 49, exp: 60840, goldMin: 1560, goldMax: 4680, atkSpd: 1.5, dmg: [1, 195], db: 19, hit: 13 },
+        // ===== 支配者之塔（15轉）怪物：提卡爾×3 =====
+        "dom_t1": { n: "支配·提卡爾蛇", img: "assets/icons/monsters/tk_snake.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", e: "none", hp: 4500000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [6, 1440], db: 60, hit: 40 },
+        "dom_t2": { n: "支配·提卡爾猴", img: "assets/icons/monsters/tk_monkey.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", e: "none", hp: 4710000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [6, 1470], db: 60, hit: 40 },
+        "dom_t3": { n: "支配·艾庫阿茲特", img: "assets/icons/monsters/tk_aztec.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", e: "none", hp: 4920000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [6, 1500], db: 60, hit: 40 },
+        "dom_t4": { n: "支配·艾庫尤卡", img: "assets/icons/monsters/tk_yuka.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", e: "none", hp: 5130000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [6, 1530], db: 60, hit: 40 },
+        "dom_t5": { n: "支配·艾庫卡伊拉", img: "assets/icons/monsters/tk_kaila.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", e: "none", hp: 5340000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [6, 1560], db: 60, hit: 40 },
+        "dom_t6": { n: "支配·艾庫巴拉", img: "assets/icons/monsters/tk_bara.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", e: "none", hp: 5550000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [6, 1590], db: 60, hit: 40 },
+        "dom_t7": { n: "支配·艾庫艾托", img: "assets/icons/monsters/tk_aeto.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", e: "none", hp: 5760000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [6, 1620], db: 60, hit: 40 },
+        "dom_t8": { n: "支配·薩德泥偶", img: "assets/icons/monsters/tk_sadmud.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", e: "none", hp: 5970000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [6, 1650], db: 60, hit: 40 },
+        "dom_t9": { n: "支配·薩德司卡", img: "assets/icons/monsters/tk_sadska.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", e: "none", hp: 6180000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [6, 1680], db: 60, hit: 40 },
+        "dom_t10": { n: "支配·薩德提歐", img: "assets/icons/monsters/tk_sadtio.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", e: "none", hp: 6390000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [6, 1710], db: 60, hit: 40 },
+        "dom_t11": { n: "支配·杰弗雷庫", img: "assets/icons/monsters/tk_jefreku_m.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", e: "none", hp: 6600000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [6, 1740], db: 60, hit: 40 },
+        "dom_zenis": { n: "支配·扭曲的潔尼斯女王", img: "assets/icons/monsters/dom_zenis.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", boss: true, domBoss: true, domFloor: 1, e: "none", hp: 6600000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [10, 1300], db: 68, hit: 43 },
+        "dom_eye": { n: "支配·不幸的幻象眼魔", img: "assets/icons/monsters/dom_eye.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", boss: true, domBoss: true, domFloor: 2, e: "none", hp: 7000000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [10, 1330], db: 68, hit: 43 },
+        "dom_vampire": { n: "支配·恐怖的吸血鬼", img: "assets/icons/monsters/dom_vampire.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", boss: true, domBoss: true, domFloor: 3, e: "none", hp: 7500000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [10, 1360], db: 68, hit: 43 },
+        "dom_zombieking": { n: "支配·死亡的殭屍王", img: "assets/icons/monsters/dom_zombieking.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", boss: true, domBoss: true, domFloor: 4, e: "none", hp: 8000000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [10, 1390], db: 68, hit: 43 },
+        "dom_panther": { n: "支配·地獄的黑豹", img: "assets/icons/monsters/dom_panther.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", boss: true, domBoss: true, domFloor: 5, e: "none", hp: 8500000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [10, 1420], db: 68, hit: 43 },
+        "dom_mummyking": { n: "支配·不死的木乃伊王", img: "assets/icons/monsters/dom_mummyking.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", boss: true, domBoss: true, domFloor: 6, e: "none", hp: 9000000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [10, 1450], db: 68, hit: 43 },
+        "dom_aris": { n: "支配·殘忍的艾莉絲", img: "assets/icons/monsters/dom_aris.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", boss: true, domBoss: true, domFloor: 7, e: "none", hp: 9500000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [10, 1480], db: 68, hit: 43 },
+        "dom_vander": { n: "支配·闇黑的騎士范德", img: "assets/icons/monsters/dom_vander.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", boss: true, domBoss: true, domFloor: 8, e: "none", hp: 10000000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [10, 1510], db: 68, hit: 43 },
+        "dom_lich": { n: "支配·不滅的巫妖", img: "assets/icons/monsters/dom_lich.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", boss: true, domBoss: true, domFloor: 9, e: "none", hp: 10500000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [10, 1540], db: 68, hit: 43 },
+        "dom_ugnus": { n: "支配·傲慢的烏格奴斯", img: "assets/icons/monsters/dom_ugnus.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", boss: true, domBoss: true, domFloor: 10, e: "none", hp: 11000000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [10, 1570], db: 68, hit: 43 },
+        "dom_tantalos": { n: "支配·坦塔洛斯", img: "assets/icons/monsters/dom_tantalos.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", boss: true, domBoss: true, domFloor: 11, e: "none", hp: 12000000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [10, 1620], db: 68, hit: 43 },
+        "dom_sisyphus": { n: "支配·薛西弗斯", img: "assets/icons/monsters/dom_sisyphus.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", boss: true, domBoss: true, domFloor: 11, e: "none", hp: 12000000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [10, 1620], db: 68, hit: 43 },
+        "dom_reaper": { n: "支配·邪惡的鐮刀死神", img: "assets/icons/monsters/dom_reaper.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", boss: true, domBoss: true, domFloor: 11, e: "none", hp: 15000000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [10, 1700], db: 68, hit: 43 },
         "orc": { n: "妖魔", lv: 2, s: "S", beh: "被動", race: "妖魔", e: "fire", hp: 6, ac: 10, mr: 0, exp: 5, goldMin: 10, goldMax: 30, atkSpd: 2, dmg: [1, 2], db: 0, hit: 0 },
         "goblin": { n: "哥布林", lv: 2, s: "S", beh: "被動", race: "哥布林", e: "earth", hp: 3, ac: 10, mr: 2, exp: 5, goldMin: 10, goldMax: 30, atkSpd: 2, dmg: [1, 2], db: 0, hit: 0 },
         "esti_enemy": { n: "依詩蒂", img: "assets/icons/monsters/依詩蒂.png", lv: 1, s: "S", beh: "主動", race: "血盟", wild: true, e: "none", pledgeEnemy: true, excludeAvatar: "女騎士", seeInsight: true, hp: 20, ac: -10, mr: 0, exp: 100, goldMin: 1136, goldMax: 1136, atkSpd: 0.67, dmg: [1, 10], db: 0, hit: 2, regenHp: 15, scale: { hpC: 20, acBase: -10, acDiv: 3, mrBase: 0, mrDiv: 5, dmgSides: 10, dbDiv: 2, hitBase: 2, hitDiv: 3, atkSpd: 0.67 }, mag: { skn: "衝擊之暈", cd: 50, chance: 0.2, type: "extra_attack", stunChance: 10 } },
@@ -2444,6 +2469,18 @@ const DB = {
         "tower_8f": ["tw_bknight", "tw_firewarrior", "tw_succq2", "tw_vander"],
         "tower_9f": ["tw_fireelf", "tw_windelf", "tw_lich"],
         "tower_10f": ["tw_zenis2", "tw_zking2", "tw_mummy2", "tw_aris2", "tw_reaper", "nw_006", "nw_040", "nw_184"],
+        // ===== 支配者之塔 11層 =====
+        "dom_1f": ["dom_t1", "dom_zenis"],
+        "dom_2f": ["dom_t2", "dom_eye"],
+        "dom_3f": ["dom_t3", "dom_vampire"],
+        "dom_4f": ["dom_t4", "dom_zombieking"],
+        "dom_5f": ["dom_t5", "dom_panther"],
+        "dom_6f": ["dom_t6", "dom_mummyking"],
+        "dom_7f": ["dom_t7", "dom_aris"],
+        "dom_8f": ["dom_t8", "dom_vander"],
+        "dom_9f": ["dom_t9", "dom_lich"],
+        "dom_10f": ["dom_t10", "dom_ugnus"],
+        "dom_top": ["dom_t11", "dom_tantalos", "dom_sisyphus", "dom_reaper"],
         "training": ["orc", "goblin", "orc_archer", "gremlin", "nw_023", "nw_024"],
         "dream_island": ["nm_038", "nm_039", "nm_040", "nm_036", "nm_041", "nm_042", "nm_043", "nm_044", "nm_023", "nm_024", "nm_045", "nm_028", "nm_029", "nm_030", "nm_031", "nm_032", "nm_037"],
         "kent_outer": ["siege_aton", "siege_julian", "siege_ovi", "siege_joe", "siege_senis", "siege_tros", "siege_esti", "siege_grit", "siege_gate"],
@@ -2870,7 +2907,7 @@ function flushAwaySummary() {
 let player = {
     cls: null, name: null, lv: 1, exp: 0, gold: 1000, hp: 0, mhp: 0, mp: 0, mmp: 0, blessings: {},
     base: { str:0, dex:0, con:0, int:0, wis:0, cha:8 }, bonus: 0, alloc: { str:0, dex:0, con:0, int:0, wis:0, cha:0 }, panacea: { str:0, dex:0, con:0, int:0, wis:0, cha:0 }, panaceaUsed: 0, junkPrefs: {}, bloodPledge: null, magicShieldCd: 0, lastMapByCat: {}, tracking: null, ismaelAccUsed: false, sherineWorld: false, siege: { active:false, gateKilled:false, towerKilled:false, endTime:0, kills:0, result:null, cooldownUntil:0, rewardPending:false, victoryUntil:0, accCdUntil:0 },
-    inv: [], eq: { wpn: null, arrow: null, helm: null, armor: null, shield: null, cloak: null, tshirt: null, gloves: null, boots: null, ring1: null, ring2: null, ring3: null, ring4: null, amulet: null, belt: null, rune1: null, rune2: null, soul: null },
+    inv: [], eq: { wpn: null, arrow: null, helm: null, armor: null, shield: null, cloak: null, tshirt: null, gloves: null, boots: null, ring1: null, ring2: null, ring3: null, ring4: null, amulet: null, belt: null, earring1: null, earring2: null, earring3: null, earring4: null, rune1: null, rune2: null, soul: null },
     skills: [], buffs: { haste: 0, brave: 0, blue: 0, cautious: 0, elfcookie: 0, poly: 0, shield: 0, sk_magic_shield: 0 }, poly: null, allies: [],
     summon: null, charmed: null, manualCd: {}, elfEle: null, hot: null,
     cds: { pot: 0, atkSk: 0, healSk: 0, purifySk: 0 }, dead: false, statuses: { stun: 0, freeze: 0, stone: 0, poison: 0, poisonDmg: 0, poisonTick: 0, burn: 0, burnDmg: 0, burnTick: 0, scald: 0, scaldDmg: 0, scaldTick: 0, silence: 0, paralyze: 0, magicseal: 0, armorBreak: 0, slowAtk: 0, cleave: 0 },
@@ -3527,7 +3564,7 @@ function applyDollStats() {
   if (b.evaFlat) d.er += b.evaFlat;
   if (b.critFlat) { d.meleeCrit += b.critFlat; d.rangedCrit += b.critFlat; d.magicCrit += b.critFlat; }
   if (b.drFlat) d.dr += b.drFlat;
-  if (b.aspdPct) d.aspd = Math.max(0.2, d.aspd * (1 - b.aspdPct));
+  if (b.aspdPct) d.aspd = Math.max(((window.__GAME_CONFIG&&window.__GAME_CONFIG.aspdFloor)||0.1), d.aspd * (1 - b.aspdPct));
 }
 let _dollCd = { regen: 0, assistD: 0, assistH: 0 };
 function dollTick() {
@@ -3868,6 +3905,7 @@ function recomputeStats() {
 
     // 🔮 席琳套裝：全套 6 件 → 全屬性 +5（在 Phase 2 換算前加入，確保傳導到 HP/傷害等衍生值）
     { let _shN6 = 0; for (let _sk in p.eq) { let _se = p.eq[_sk]; if (_se && DB.items[_se.id] && DB.items[_se.id].set === 'sherine') _shN6++; } if (_shN6 >= 6) { d.str += 5; d.dex += 5; d.int += 5; d.con += 5; d.wis += 5; d.cha += 5; } }
+    { if(p.sigils && typeof sigilBonus==='function'){ for(var _sk2 in p.sigils){ var _sb2=sigilBonus(_sk2,p.sigils[_sk2]||0); if(_sb2&&_sb2.allStat){ d.str+=_sb2.allStat; d.dex+=_sb2.allStat; d.int+=_sb2.allStat; d.con+=_sb2.allStat; d.wis+=_sb2.allStat; } } } }
 
     // ===== Phase 2：依「最終屬性」一次性換算所有衍生戰鬥數值 =====
     // 職業基礎 MR 與 等級成長
@@ -3970,7 +4008,7 @@ function recomputeStats() {
     p._equipHaste = false;   // 裝備常駐加速（如伊娃之盾）：每次重算先清除，卸下即消失（同 _setPoly 模式）
     for (let k in p.eq) {
         let e = p.eq[k];
-        if (!e || k === 'wpn' || k === 'soul') continue;   // 🔮 靈魂石無被動屬性，且其裝備物件{id,lv}無 en 欄位，必須跳過避免 mr 變 NaN
+        if (!e || k === 'wpn' || k === 'soul' || k.indexOf('earring')===0) continue;   // 🔮 靈魂石/耳環無被動屬性（耳環另算），且其裝備物件{id,lv}無 en 欄位，必須跳過避免 mr 變 NaN
         let ed = DB.items[e.id];
         d.ac -= (ed.ac||0) + Math.min(e.en||0, ed.type==='arm'?30:20); 
         // 計算防具的基礎 MR 與強化的額外 MR 加成
@@ -4059,7 +4097,7 @@ d.mr += (baseMr + bonusMr);
     // 🔮 席琳套裝（載體本體）：3/5/6 件加成（全屬+5 已於 Phase 1 處理）
     if(setCheck['sherine'] >= 3) { d.ac -= 10; d.mr += 20; }
     if(setCheck['sherine'] >= 5) { d.extraDmg += 10; d.extraMp += 10; p.mhp = Math.round(p.mhp * 1.05); }
-    if(setCheck['sherine'] >= 6) { d.dr += 5; d.aspd = Math.max(0.2, d.aspd * 0.9); }
+    if(setCheck['sherine'] >= 6) { d.dr += 5; d.aspd = Math.max(((window.__GAME_CONFIG&&window.__GAME_CONFIG.aspdFloor)||0.1), d.aspd * 0.9); }
 
     // ===== 🔮 席琳套裝效果：以「不重複效果」計件（同效果多件僅計 1；5/5 同時擁有 2/5、3/5 加成）=====
     // 同步寫入傭兵快照：buildAlly 換身重算時 p=ally，旗標自然存於傭兵物件上
@@ -4215,10 +4253,39 @@ d.mr += (baseMr + bonusMr);
         var _allDrPct = _eDrPct + (_eP._setIron3 ? 20 : 0);                         // 合併：裝備(飾品強化)+套裝(鐵衛20%)+天生/技能(預留)
         _eD.drPct = Math.min(70, _allDrPct);                                        // 總減傷% 上限 70%（單一來源亦適用，未達上限照全額）
     } catch (e) { }
+    try {
+        var _earP=0,_earM=0;
+        for (var _erk in p.eq) {
+            if (_erk.indexOf('earring')!==0) continue;
+            var _eri=p.eq[_erk]; if(!_eri) continue;
+            var _erd=DB.items[_eri.id]; if(!_erd||!_erd.earring) continue;
+            var _eren=Math.min(_eri.en||0,20), _erv=(_erd.earBase||0)+_eren*(_erd.earPer||0);
+            if(_erd.earKind==='phys') _earP+=_erv;
+            else if(_erd.earKind==='magic') _earM+=_erv;
+            else if(_erd.earKind==='ac') d.ac-=_erv;
+            else if(_erd.earKind==='dr') d.dr=(d.dr||0)+_erv;
+        }
+        if(_earP) d.dollDmgMult=(d.dollDmgMult||1)*(1+_earP);
+        if(_earM) d.magicDmg=Math.round((d.magicDmg||0)*(1+_earM));
+    } catch(e){}
+    try {
+        if(p.sigils && typeof sigilBonus==='function'){ var _sgP=0,_sgA=0,_sgHp=0;
+            for(var _sk in p.sigils){ var _sL=p.sigils[_sk]||0; if(_sL<=0) continue; var _sb=sigilBonus(_sk,_sL); if(!_sb) continue;
+                d.meleeDmg+=_sb.meleeDmg; d.rangedDmg+=_sb.rangedDmg; d.extraDmg+=_sb.extraDmg; d.magicDmg+=_sb.magicDmg; d.extraMp+=_sb.extraMp;
+                if(_sb.hit){ d.meleeHit+=_sb.hit; d.rangedHit+=_sb.hit; d.magicHit+=_sb.hit; }
+                d.meleeCrit+=_sb.meleeCrit; d.rangedCrit+=_sb.rangedCrit; d.magicCrit+=_sb.magicCrit;
+                d.ac+=_sb.ac; d.dr=(d.dr||0)+_sb.dr;
+                _sgP+=_sb.physPct; _sgA+=_sb.aspdPct; _sgHp+=_sb.hpPct;
+            }
+            if(_sgP) d.dollDmgMult=(d.dollDmgMult||1)*(1+_sgP);
+            if(_sgHp) p.mhp=Math.round(p.mhp*(1+_sgHp));
+            if(_sgA) d.aspd=Math.max(((window.__GAME_CONFIG&&window.__GAME_CONFIG.aspdFloor)||0.1), d.aspd*(1-_sgA));
+        }
+    } catch(e){}
     if (player.dragon) {
         d.dr = (d.dr||0) + 20;
         d.meleeCrit = (d.meleeCrit||0) + 5; d.rangedCrit = (d.rangedCrit||0) + 5; d.magicCrit = (d.magicCrit||0) + 5;
-        d.aspd = Math.max(0.2, (d.aspd||1.0) * 0.9); // 攻速+10%
+        d.aspd = Math.max(((window.__GAME_CONFIG&&window.__GAME_CONFIG.aspdFloor)||0.1), (d.aspd||1.0) * 0.9); // 攻速+10%
     }
     p.hp = Math.min(p.hp, p.mhp);
     p.mp = Math.min(p.mp, p.mmp);
@@ -5171,6 +5238,10 @@ function spawnMob(idx) {
     let siegeArea = isSiegeArea(mapState.current);
     let wantBoss = !bossInBattle && bossPool.length > 0 && (mapState.forceBoss || (siegeArea ? (!mapState.suppressSiegeBoss && Math.random() < 0.10) : (Math.random() < 0.03)));
     if(mapState.forceBoss) mapState.forceBoss = false;   // 強制旗標只作用於下一次生怪
+    if (mapState.current.indexOf('dom_')===0) {
+        if (Date.now() < ((player.domBossCd && player.domBossCd[mapState.current])||0)) { wantBoss = false; }
+        else if (!bossInBattle && bossPool.length>0 && Math.random()<0.12) { wantBoss = true; }
+    }
     if(wantBoss) {
         mobId = bossPool[Math.floor(Math.random() * bossPool.length)];
     } else {
@@ -6390,7 +6461,75 @@ setInterval(() => { try { renderAuditTab(); } catch(e) {} }, 2000);   // 開著�
 function isTowerMap(m){ return typeof m==="string" && m.indexOf("tower_")===0; }
 // 新地圖獎勵倍率（拉高 CP 讓玩家不只擠傲慢塔）：經驗與金幣同乘。塔的 ×2 另計、不重疊。
 var MAP_REWARD_MULT = { jp_field:5, aden:2, rasta:3, rasta_1:3, rasta_2:3, rasta_3:3, rasta_4:3, demon_realm:4, demon_temple:4, forgotten_island:10, thebes_1:8, thebes_2:10, thebes_3:13, thebes_altar:16 };
-function mapRewardMult(m){ return MAP_REWARD_MULT[m] || 1; }
+/* ===== 🔯 紋樣系統 ===== */
+(function(){
+  if(typeof DB==='undefined') return;
+  var SIG=[
+   {k:'balakas', n:'巴拉卡斯', th:'物理攻擊', col:'#f97316', img:'assets/icons/sigil_balakas.png'},
+   {k:'falion',  n:'法利昂',  th:'魔法',     col:'#38bdf8', img:'assets/icons/sigil_falion.png'},
+   {k:'antaras', n:'安塔瑞斯', th:'防禦‧坦', col:'#cbd5e1', img:'assets/icons/sigil_antaras.png'},
+   {k:'tikal',   n:'提卡爾',  th:'命中‧爆擊',col:'#22d3ee', img:'assets/icons/sigil_tikal.png'},
+   {k:'reaper',  n:'鐮刀死神', th:'攻速‧爆發',col:'#ef4444', img:'assets/icons/sigil_reaper.png'},
+   {k:'sherine', n:'席林',    th:'全能',     col:'#c084fc', img:'assets/icons/sigil_sherine.png'}
+  ];
+  window.SIGILS=SIG; var SIGBYK={}; SIG.forEach(function(s){SIGBYK[s.k]=s;});
+  function mil(L,a,b,c){ return L>=30?c:(L>=20?b:(L>=10?a:0)); }
+  window.sigilBonus=function(k,L){ L=L||0; var o={meleeDmg:0,rangedDmg:0,extraDmg:0,magicDmg:0,extraMp:0,hit:0,meleeCrit:0,rangedCrit:0,magicCrit:0,ac:0,dr:0,hpPct:0,physPct:0,aspdPct:0,allStat:0}; if(L<=0) return o;
+    if(k==='balakas'){ o.meleeDmg=Math.ceil(L*4/3); o.rangedDmg=Math.ceil(L*4/3); o.extraDmg=L; o.physPct=mil(L,0.05,0.10,0.15); }
+    else if(k==='falion'){ o.magicDmg=L*2; o.extraMp=Math.ceil(L*4/3); o.magicCrit=mil(L,4,8,12); }
+    else if(k==='antaras'){ o.ac=-Math.ceil(L*4/3); o.dr=Math.floor(L/2); o.hpPct=mil(L,0.07,0.14,0.20); }
+    else if(k==='tikal'){ o.hit=Math.ceil(L*4/3); o.meleeCrit=Math.floor(L*2/3); o.rangedCrit=Math.floor(L*2/3); }
+    else if(k==='reaper'){ o.extraDmg=Math.ceil(L*7/6); o.meleeDmg=Math.ceil(L*5/6); o.aspdPct=mil(L,0.05,0.10,0.15); }
+    else if(k==='sherine'){ o.allStat=Math.floor(L*2/3); o.aspdPct=(L>=30?0.08:0); o.dr=(L>=30?8:(L>=15?4:0)); }
+    var _sp=(window.__GAME_CONFIG&&window.__GAME_CONFIG.sigilPower)||1;
+    if(_sp!==1){ ['meleeDmg','rangedDmg','extraDmg','magicDmg','extraMp','hit','meleeCrit','rangedCrit','magicCrit','ac','dr','allStat'].forEach(function(f){ if(o[f]) o[f]=Math.round(o[f]*_sp); }); }
+    return o; };
+  window.sigilCost=function(L){ return Math.round((100 + (L)*30) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.sigilCostMult)||1)); };
+  window.sigilLv=function(k){ var s=player.sigils||{}; return s[k]||0; };
+  function refCnt(){ var n=0; (player.inv||[]).forEach(function(i){ if(i.id==='dom_refine_stone') n+=i.cnt; }); return n; }
+  function refRm(c){ for(var k=0;k<player.inv.length&&c>0;k++){ var i=player.inv[k]; if(i.id==='dom_refine_stone'){ var t=Math.min(i.cnt,c); i.cnt-=t; c-=t; } } player.inv=player.inv.filter(function(i){return i.cnt>0;}); }
+  window.refineSigil=function(k){ if(!SIGBYK[k]) return; if(!player.sigils) player.sigils={}; var L=player.sigils[k]||0; if(L>=30){ if(typeof logSys==='function') logSys('該紋樣已達最高 30 級。'); return; } var cost=window.sigilCost(L); if(refCnt()<cost){ if(typeof logSys==='function') logSys('紋樣精煉石不足（需 '+cost+'，現有 '+refCnt()+'）。'); return; } refRm(cost); if(Math.random()<((window.__GAME_CONFIG&&window.__GAME_CONFIG.sigilSuccess)||0.30)){ var r=Math.random(), jump=(r<0.90?1:(r<0.98?2:3)); var nl=Math.min(30,L+jump); player.sigils[k]=nl; if(typeof logSys==='function') logSys('✨ '+SIGBYK[k].n+'紋樣精煉成功：Lv'+L+' → <b style="color:'+SIGBYK[k].col+'">Lv'+nl+'</b>（+'+(nl-L)+'）！'); } else { if(typeof logSys==='function') logSys('<span class="text-rose-300">'+SIGBYK[k].n+'紋樣精煉失敗…</span>（消耗 '+cost+' 顆精煉石，等級不退）'); } try{ calcStats(); }catch(e){} try{ if(typeof saveGame==='function') saveGame(); }catch(e){} try{ refreshSigilPanel(); }catch(e){} };
+  var _sigCur='balakas';
+  window._sigSel=function(k){ _sigCur=k; refreshSigilPanel(); };
+  window.openSigilPanel=function(){ var old=document.getElementById('sig-ov'); if(old) old.remove(); var ov=document.createElement('div'); ov.id='sig-ov'; ov.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(2,6,23,.82);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:16px;'; ov.addEventListener('click',function(e){ if(e.target===ov) ov.remove(); }); var box=document.createElement('div'); box.id='sig-box'; box.style.cssText='width:100%;max-width:560px;background:linear-gradient(160deg,#15110a,#0a0c12);border:1px solid #6b5316;border-radius:18px;box-shadow:0 0 40px rgba(212,170,40,.18);padding:14px;color:#e8e0cc;'; ov.appendChild(box); document.body.appendChild(ov); refreshSigilPanel(); };
+  function bText(k,L){ var b=window.sigilBonus(k,L); var a=[]; if(b.meleeDmg)a.push('近距+'+b.meleeDmg); if(b.rangedDmg)a.push('遠距+'+b.rangedDmg); if(b.extraDmg)a.push('額外傷害+'+b.extraDmg); if(b.magicDmg)a.push('魔法傷害+'+b.magicDmg); if(b.extraMp)a.push('額外魔力+'+b.extraMp); if(b.hit)a.push('命中+'+b.hit); if(b.meleeCrit)a.push('物爆+'+b.meleeCrit+'%'); if(b.rangedCrit)a.push('遠爆+'+b.rangedCrit+'%'); if(b.magicCrit)a.push('魔爆+'+b.magicCrit+'%'); if(b.ac)a.push('AC'+b.ac); if(b.dr)a.push('減傷+'+b.dr); if(b.hpPct)a.push('最大HP+'+Math.round(b.hpPct*100)+'%'); if(b.physPct)a.push('物理總傷+'+Math.round(b.physPct*100)+'%'); if(b.aspdPct)a.push('攻速+'+Math.round(b.aspdPct*100)+'%'); if(b.allStat)a.push('全屬性+'+b.allStat); return a.join('、')||'—'; }
+  window.refreshSigilPanel=function(){ var box=document.getElementById('sig-box'); if(!box) return; if(!player.sigils) player.sigils={}; var cur=SIGBYK[_sigCur], L=player.sigils[_sigCur]||0, cost=window.sigilCost(L), have=refCnt(), canR=L<30&&have>=cost;
+    var tabs=SIG.map(function(s){ var on=s.k===_sigCur, lv=player.sigils[s.k]||0; return '<div onclick="_sigSel(\''+s.k+'\')" style="flex:0 0 auto;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;width:78px;padding:5px 3px;border-radius:9px;opacity:'+(on?1:0.55)+';'+(on?'background:linear-gradient(180deg,#2a200a,transparent);box-shadow:0 2px 0 '+s.col+';':'')+'"><img src="'+s.img+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1px solid #6b5316" onerror="this.style.opacity=0"><span style="font-size:11px;color:'+(on?s.col:'#bda35a')+'">'+s.n+'</span><span style="font-size:10px;color:#caa64a">Lv'+lv+'</span></div>'; }).join('');
+    var nodes=''; for(var i=0;i<30;i++){ var a=(-90+i*12)*Math.PI/180, cx=130,cy=130,rr=98, x=cx+rr*Math.cos(a), y=cy+rr*Math.sin(a), on=i<L; nodes+='<rect x="'+(x-5).toFixed(1)+'" y="'+(y-5).toFixed(1)+'" width="10" height="10" rx="2" transform="rotate(45 '+x.toFixed(1)+' '+y.toFixed(1)+')" fill="'+(on?cur.col:'#2a2212')+'" stroke="'+(on?'#fff3cc':'#4a3a12')+'" stroke-width="1"/>'; }
+    var list=''; for(var lv=1;lv<=30;lv++){ var cl=(lv===L)?'color:#fff1c0;background:linear-gradient(90deg,#2a200a,transparent);':((lv<L)?'color:#9a8a55;':'color:#5a5340;'); list+='<div style="font-size:11px;padding:1px 6px;border-radius:4px;'+cl+'"><b style="color:#caa64a;margin-right:4px">Lv'+lv+'</b>'+bText(_sigCur,lv)+((lv===L)?' ◄':'')+'</div>'; }
+    var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div style="font-size:20px;font-weight:800;color:#ffd24a;">🔯 紋樣</div><button onclick="document.getElementById(\'sig-ov\').remove()" style="background:#334155;color:#fff;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button></div>';
+    h+='<div style="display:flex;gap:5px;overflow:auto;border-bottom:1px solid #3a2e10;padding-bottom:8px;margin-bottom:10px;">'+tabs+'</div>';
+    h+='<div style="display:grid;grid-template-columns:260px 1fr;gap:12px;"><div style="position:relative;"><svg viewBox="0 0 260 260" style="width:260px;height:260px;"><circle cx="130" cy="130" r="98" fill="rgba(58,44,10,.3)" stroke="#4a3a12" stroke-width="1"/><circle cx="130" cy="130" r="72" fill="none" stroke="#6b5316" stroke-width="1" stroke-dasharray="2 4" opacity="0.6"/>'+nodes+'</svg><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;"><div style="width:108px;height:108px;border-radius:50%;overflow:hidden;border:2px solid #6b5316;box-shadow:0 0 24px '+cur.col+'"><img src="'+cur.img+'" style="width:100%;height:100%;object-fit:cover" onerror="this.style.opacity=0"></div><div style="margin-top:5px;font-size:15px;font-weight:800;color:'+cur.col+';text-shadow:0 0 8px rgba(0,0,0,.8)">'+cur.n+'紋樣</div><div style="font-size:11px;color:#caa64a">Lv '+L+' / 30</div></div></div>';
+    h+='<div style="background:#0d1016;border:1px solid #232634;border-radius:10px;padding:8px;max-height:300px;overflow:auto;">'+list+'</div></div>';
+    h+='<div style="margin-top:6px;font-size:12px;color:#cbd5e1;background:#0d1016;border:1px solid #232634;border-radius:8px;padding:8px;">目前生效：<span style="color:'+cur.col+'">'+bText(_sigCur,L)+'</span></div>';
+    h+='<div style="display:flex;align-items:center;gap:10px;margin-top:10px;border-top:1px solid #3a2e10;padding-top:10px;"><div style="font-size:12px;color:#94a3b8;">精煉成功 <b style="color:#ffd24a">30%</b>（+1~3：90/8/2 · 失敗不退級）</div><div style="flex:1"></div><div style="font-size:12px;color:#cbd5e1;">🔹精煉石 <b style="color:'+(have>=cost?'#5eead4':'#f87171')+'">'+have+'</b>/'+cost+'</div><button onclick="refineSigil(\''+_sigCur+'\')" '+(canR?'':'disabled')+' style="background:'+(canR?'linear-gradient(180deg,#caa033,#8a6a18)':'#334155')+';color:'+(canR?'#1a1405':'#94a3b8')+';border:'+(canR?'1px solid #f0c040':'none')+';padding:9px 18px;border-radius:10px;font-weight:800;cursor:'+(canR?'pointer':'not-allowed')+';'+(canR?'':'opacity:.6;')+'">'+(L>=30?'已滿級':'紋樣精煉')+'</button></div>';
+    box.innerHTML=h; };
+})();
+
+/* ===== 🗼 支配者之塔：道具註冊 + 傳送石系統 ===== */
+(function(){
+  if(typeof DB==='undefined'||!DB.items) return;
+  DB.items['dom_tpstone']={ n:'支配者之塔傳送石', type:'misc', tpstone:true, p:0, noUse:true, noJunk:true, gachaWeight:0, c:'text-cyan-300', img:'assets/icons/dom_tp_stone.png', d:'支配者之塔各層通行石（依樓層分級，不消耗）。持有對應樓層石才能上樓。王 0.02 掉下一層石；3 顆同層 →(30%) 上一層，失敗消耗材料。' };
+  DB.items['dom_refine_stone']={ n:'紋樣精煉石', type:'misc', p:0, c:'text-teal-300', gachaWeight:0, img:'assets/icons/dom_refine_stone.png', d:'紋樣精煉的材料。精煉系統即將開放。' };
+  var EAR=[
+    {id:'dom_ear_blue',  n:'麥斯特的藍光耳環', kind:'magic', base:0.02, per:0.005, c:'text-sky-300',    img:'assets/icons/dom_ear_blue.png',   ed:'魔法耳環。魔法傷害 +2%（每強化+1 約 +0.5%，+20 達 +12%）。'},
+    {id:'dom_ear_red',   n:'麥斯特的紅光耳環', kind:'phys',  base:0.02, per:0.005, c:'text-rose-300',   img:'assets/icons/dom_ear_red.png',    ed:'物理耳環。物理總傷害 +2%（每強化+1 約 +0.5%，+20 達 +12%）。'},
+    {id:'dom_ear_black', n:'麥斯特的黑光耳環', kind:'ac',    base:20,   per:2,     c:'text-slate-200',  img:'assets/icons/dom_ear_black.png',  ed:'防禦耳環。AC −20（每強化+1 −2，+20 達 −60）。'},
+    {id:'dom_ear_purple',n:'麥斯特的紫光耳環', kind:'dr',    base:3,    per:0.5,   c:'text-violet-300', img:'assets/icons/dom_ear_purple.png', ed:'減傷耳環。傷害減免 +3%（每強化+1 +0.5%，+20 達 +13%）。'},
+  ];
+  EAR.forEach(function(e){ DB.items[e.id]={ n:e.n, type:'acc', slot:'earring', earring:true, earKind:e.kind, earBase:e.base, earPer:e.per, req:'all', safe:0, p:0, gachaWeight:0, c:e.c, img:e.img, d:e.ed }; });
+
+  function dfn(lv){ return lv>=11?'頂樓':(lv+'樓'); }
+  window.domFloorName=dfn;
+  window.domTpCount=function(lv){ var n=0; (player.inv||[]).forEach(function(i){ if(i.id==='dom_tpstone'&&(i.lv||2)===lv) n+=i.cnt; }); return n; };
+  window.hasDomTp=function(lv){ return window.domTpCount(lv)>0; };
+  window.gainDomTp=function(lv,silent){ lv=Math.max(2,Math.min(11,lv||2)); var ex=(player.inv||[]).find(function(i){ return i.id==='dom_tpstone'&&(i.lv||2)===lv&&!i.lock; }); if(ex) ex.cnt++; else player.inv.push({ id:'dom_tpstone', uid:(typeof uid==='function'?uid():('tp'+Date.now()+Math.floor(Math.random()*1e6))), cnt:1, lv:lv, en:0, lock:false, junk:false }); if(!silent&&typeof logSys==='function') logSys('🔑 獲得 <span class="text-cyan-300 font-bold">支配者之塔傳送石（'+dfn(lv)+'）</span>！'); try{ renderTabs(); }catch(e){} try{ refreshDomTpPanel(); }catch(e){} };
+  function tpRemove(lv,cnt){ for(var k=0;k<player.inv.length&&cnt>0;k++){ var i=player.inv[k]; if(i.id==='dom_tpstone'&&(i.lv||2)===lv&&!i.lock){ var t=Math.min(i.cnt,cnt); i.cnt-=t; cnt-=t; } } player.inv=player.inv.filter(function(i){ return i.cnt>0; }); }
+  window.synthDomTp=function(lv){ lv=lv||2; if(lv>=11){ if(typeof logSys==='function') logSys('已是最高樓層（頂樓）傳送石。'); return; } if(window.domTpCount(lv)<3){ if(typeof logSys==='function') logSys('需要 3 顆「'+dfn(lv)+'傳送石」才能合成。'); return; } tpRemove(lv,3); if(Math.random()<0.30){ window.gainDomTp(lv+1,true); if(typeof logSys==='function') logSys('✨ 合成成功：<span class="text-cyan-300 font-bold">'+dfn(lv+1)+'傳送石</span>！（消耗 3 顆'+dfn(lv)+'）'); } else { if(typeof logSys==='function') logSys('<span class="text-rose-300">合成失敗…</span> 3 顆「'+dfn(lv)+'傳送石」已消耗。'); } try{ renderTabs(); }catch(e){} try{ if(typeof saveGame==='function') saveGame(); }catch(e){} try{ refreshDomTpPanel(); }catch(e){} };
+  window.openDomTpPanel=function(){ var old=document.getElementById('domtp-ov'); if(old) old.remove(); var ov=document.createElement('div'); ov.id='domtp-ov'; ov.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(2,6,23,.78);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:18px;'; ov.addEventListener('click',function(e){ if(e.target===ov) ov.remove(); }); var box=document.createElement('div'); box.id='domtp-box'; box.style.cssText='width:100%;max-width:480px;background:linear-gradient(160deg,#08171a,#0b0f1a);border:1px solid #0e7490;border-radius:16px;box-shadow:0 0 30px rgba(34,211,238,.22);padding:16px;color:#e2e8f0;'; ov.appendChild(box); document.body.appendChild(ov); refreshDomTpPanel(); };
+  window.refreshDomTpPanel=function(){ var box=document.getElementById('domtp-box'); if(!box) return; var h=''; h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><div style="font-size:20px;font-weight:800;color:#67e8f9;">🔑 支配者之塔傳送石</div><button onclick="document.getElementById(\'domtp-ov\').remove()" style="background:#334155;color:#fff;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button></div>'; h+='<div style="font-size:12px;color:#94a3b8;margin-bottom:12px;">持有對應樓層石才能上樓（不消耗）· 王 0.02 掉下一層 · 3 顆同層 →(30%) 上一層（失敗吃材料）</div>'; for(var lv=2;lv<=11;lv++){ var cnt=window.domTpCount(lv); var can=cnt>=3&&lv<11; h+='<div style="display:flex;align-items:center;gap:10px;background:#0d1622;border:1px solid #15324a;border-radius:10px;padding:8px 10px;margin-bottom:6px;"><img src="assets/icons/dom_tp_stone.png" style="width:34px;height:34px;object-fit:contain" onerror="this.style.opacity=0"><div style="flex:1;"><div style="font-weight:700;color:#67e8f9;">'+dfn(lv)+'傳送石</div><div style="font-size:12px;color:#cbd5e1;">持有 <b style="color:#67e8f9;">'+cnt+'</b> 顆'+(cnt>0?' · 可進入 '+dfn(lv):' · <span style=\"color:#f87171\">尚不可進入'+dfn(lv)+'</span>')+'</div></div>'+(lv<11?('<button onclick="synthDomTp('+lv+')" '+(can?'':'disabled')+' style="background:'+(can?'#0e7490':'#334155')+';color:#fff;border:none;border-radius:8px;padding:8px 10px;cursor:'+(can?'pointer':'not-allowed')+';font-weight:bold;font-size:12px;'+(can?'':'opacity:.5;')+'">合成→'+dfn(lv+1)+'</button>'):'<span style="font-size:11px;color:#94a3b8;">最高層</span>')+'</div>'; } box.innerHTML=h; };
+})();
+function mapRewardMult(m){ if(typeof m==='string' && m.indexOf('dom_')===0) return ((window.__GAME_CONFIG&&window.__GAME_CONFIG.domRewardMult)||5); return MAP_REWARD_MULT[m] || 1; }
 function killMob(idx) {
     let mob = mapState.mobs[idx];
     if (!mob || mob._dead) return;        // 冪等保護：同一隻怪只結算一次獎勵
@@ -6470,6 +6609,19 @@ function killMob(idx) {
     }
 
     // ===== 墮落騎士團（5轉）：擊殺掉落新技能書（此地圖限定，潘朵拉抽不到）=====
+    if (mapState.current.indexOf('dom_')===0) {
+        var _dm=(window.__GAME_CONFIG&&window.__GAME_CONFIG.domDropMult)||1;
+        if (mob.domBoss) {
+            if(!player.domBossCd) player.domBossCd={};
+            player.domBossCd[mapState.current]=Date.now()+(((window.__GAME_CONFIG&&window.__GAME_CONFIG.domBossRespawn)||600)*1000);
+            if (Math.random() < 0.20*_dm) { var _eL=['dom_ear_blue','dom_ear_red','dom_ear_black','dom_ear_purple']; gainItem(_eL[Math.floor(Math.random()*_eL.length)],1,false); }
+            if (mob.domFloor && mob.domFloor<=10 && Math.random() < 0.02*_dm && typeof gainDomTp==='function') gainDomTp(mob.domFloor+1);
+        } else {
+            if (Math.random() < 0.02*_dm) gainItem('dom_refine_stone',1,false);
+            var _tkW2=['tk_2h_aqua','tk_2h_sun','tk_2h_sky','tk_2h_gloom','tk_wand_aqua','tk_wand_wind','tk_wand_ice','tk_wand_sun','tk_claw_sun','tk_claw_gloom','tk_claw_earth','tk_claw_frost','tk_chain_aqua','tk_chain_gloom','tk_chain_sun','tk_chain_sky','tk_bow_aqua','tk_bow_sun','tk_bow_gloom','tk_bow_earth','tk_sword_aqua','tk_sword_sun','tk_sword_gloom','tk_sword_earth'];
+            for(var _wi=0;_wi<_tkW2.length;_wi++){ if(Math.random()<0.004*_dm){ var _bz2=player.inv.length; gainItem(_tkW2[_wi],1,false,true); if(player.inv.length>_bz2){var _ni2=player.inv[player.inv.length-1]; if(_ni2&&_ni2.id===_tkW2[_wi]) _ni2.bless=true;} } }
+        }
+    }
     if (mapState.current === 'tikal_temple') {
         var _tkW = ['tk_2h_aqua','tk_2h_sun','tk_2h_sky','tk_2h_gloom','tk_wand_aqua','tk_wand_wind','tk_wand_ice','tk_wand_sun','tk_claw_sun','tk_claw_gloom','tk_claw_earth','tk_claw_frost','tk_chain_aqua','tk_chain_gloom','tk_chain_sun','tk_chain_sky','tk_bow_aqua','tk_bow_sun','tk_bow_gloom','tk_bow_earth','tk_sword_aqua','tk_sword_sun','tk_sword_gloom','tk_sword_earth'];
         var _tkM = (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult) || 1;
@@ -8367,6 +8519,13 @@ function equipItem(item) {
         return;
     }
     
+    if (slot === 'earring') {
+        var __ek=['earring1','earring2','earring3','earring4'];
+        var __same=__ek.filter(function(k){ return player.eq[k] && player.eq[k].id===item.id; }).length;
+        if (__same>=2){ logSys('同一種耳環最多只能裝備 2 個。'); return; }
+        var __ef=__ek.find(function(k){ return !player.eq[k]; });
+        slot = __ef || __ek[__ek.length-1];
+    }
     if (slot === 'ring') {
         var __rk = ringSlotKeys();
         var __free = __rk.find(function(k){ return !player.eq[k]; });
@@ -9034,7 +9193,7 @@ function renderTabs(force) {
     ['tab-items','tab-weapons','tab-armors','tab-equip','tab-skill'].forEach(id => { let el = document.getElementById(id); if(el) _scroll[id] = el.scrollTop; });
 
     let eDiv = document.getElementById('tab-equip'); eDiv.innerHTML = '';
-    const slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'legs',n:'腿甲'},{k:'amulet',n:'項鍊'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'ring3',n:'戒指'},{k:'ring4',n:'戒指'},{k:'belt',n:'腰帶'},{k:'rune1',n:'符石'},{k:'rune2',n:'符石'},{k:'soul',n:'靈魂石'},{k:'arrow',n:'箭矢'}].filter(__ringUnlockFilter);
+    const slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'legs',n:'腿甲'},{k:'amulet',n:'項鍊'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'ring3',n:'戒指'},{k:'ring4',n:'戒指'},{k:'belt',n:'腰帶'},{k:'earring1',n:'耳環'},{k:'earring2',n:'耳環'},{k:'earring3',n:'耳環'},{k:'earring4',n:'耳環'},{k:'rune1',n:'符石'},{k:'rune2',n:'符石'},{k:'soul',n:'靈魂石'},{k:'arrow',n:'箭矢'}].filter(__ringUnlockFilter);
     
     let setCheck = {}, _setSeen = {};
     for (let k in player.eq) {
@@ -9671,7 +9830,7 @@ function openModal(item, isEq, slot) {
     // === 旁邊顯示「目前裝備中」對應欄位，方便比對（僅背包中的武器/防具/飾品，箭矢除外）===
     let _cmp = document.getElementById('modal-compare');
     if(_cmp) {
-        const SLOT_LABEL = { wpn:'武器', helm:'頭盔', armor:'盔甲', shield:'盾牌', cloak:'斗篷', tshirt:'內衣', gloves:'手套', boots:'鞋子', ring1:'戒指 1', ring2:'戒指 2', ring3:'戒指 3', ring4:'戒指 4', amulet:'項鍊', belt:'腰帶', legs:'腿甲', rune1:'符石 1', rune2:'符石 2', soul:'靈魂石' };
+        const SLOT_LABEL = { wpn:'武器', helm:'頭盔', armor:'盔甲', shield:'盾牌', cloak:'斗篷', tshirt:'內衣', gloves:'手套', boots:'鞋子', ring1:'戒指 1', ring2:'戒指 2', ring3:'戒指 3', ring4:'戒指 4', amulet:'項鍊', belt:'腰帶', legs:'腿甲', rune1:'符石 1', rune2:'符石 2', soul:'靈魂石', earring1:'耳環 1', earring2:'耳環 2', earring3:'耳環 3', earring4:'耳環 4' };
         if(!isEq && !d.isArrow && (d.type === 'wpn' || d.type === 'arm' || d.type === 'acc')) {
             let slots = (d.type === 'wpn') ? ['wpn'] : (d.slot === 'ring' ? ringSlotKeys() : (d.slot === 'rune' ? ['rune1','rune2'] : [d.slot]));
             let cards = slots.map(sl => {
@@ -11211,6 +11370,19 @@ const MAP_CATEGORIES = {
             {v:'tower_9f',t:'傲慢塔 9樓'},
             {v:'tower_10f',t:'傲慢塔 10樓'},
     ],
+    dom: [
+        {v:'dom_1f',t:'支配者之塔 1樓',c:'#22d3ee'},
+        {v:'dom_2f',t:'支配者之塔 2樓',c:'#22d3ee'},
+        {v:'dom_3f',t:'支配者之塔 3樓',c:'#22d3ee'},
+        {v:'dom_4f',t:'支配者之塔 4樓',c:'#22d3ee'},
+        {v:'dom_5f',t:'支配者之塔 5樓',c:'#22d3ee'},
+        {v:'dom_6f',t:'支配者之塔 6樓',c:'#22d3ee'},
+        {v:'dom_7f',t:'支配者之塔 7樓',c:'#22d3ee'},
+        {v:'dom_8f',t:'支配者之塔 8樓',c:'#22d3ee'},
+        {v:'dom_9f',t:'支配者之塔 9樓',c:'#22d3ee'},
+        {v:'dom_10f',t:'支配者之塔 10樓',c:'#22d3ee'},
+        {v:'dom_top',t:'支配者之塔 頂樓',c:'#f472b6'},
+    ],
     village: [
         {v:'town_silver_knight',t:'銀騎士村'}, {v:'town_elf',t:'妖精森林'}, {v:'town_talking',t:'說話之島'},
         {v:'town_gludio',t:'燃柳村'}, {v:'town_giran',t:'奇岩'}, {v:'town_heine',t:'海音'},
@@ -11257,7 +11429,7 @@ function getSiegeAreas() {
 }
 function rebuildMapCategoryOptions() {
     let catSel = document.getElementById('map-category'); if (!catSel) return;
-    let opts = [['village','村莊'],['wild','野外'],['dungeon','地監'],['special','特殊'],['tower','傲慢塔'],['rebirth','轉生秘境']];
+    let opts = [['village','村莊'],['wild','野外'],['dungeon','地監'],['special','特殊'],['tower','傲慢塔'],['dom','支配者之塔'],['rebirth','轉生秘境']];
     if (player.siege && player.siege.active) opts.push(['siege','攻城']);
     if (siegeVictoryActive()) opts.push(['castle','城堡']);
     catSel.innerHTML = opts.map(o => `<option value="${o[0]}">${o[1]}</option>`).join('');
@@ -11589,7 +11761,7 @@ function renderKristaExchange(el) {
 function doBianBless(slotKey) {
     let item = player.eq[slotKey];
     if (!item) { logSys('該欄位沒有裝備。'); return; }
-    let isAcc = (slotKey === 'ring1' || slotKey === 'ring2' || slotKey === 'ring3' || slotKey === 'ring4' || slotKey === 'amulet' || slotKey === 'belt');
+    let isAcc = (slotKey === 'ring1' || slotKey === 'ring2' || slotKey === 'ring3' || slotKey === 'ring4' || slotKey === 'amulet' || slotKey === 'belt' || (slotKey && slotKey.indexOf('earring')===0));
     let scrollId = (slotKey === 'wpn') ? 'new_item_bless_wpn' : (isAcc ? 'new_item_bless_acc' : 'new_item_bless_arm');
     let scrollNm = { 'new_item_bless_wpn':'賦予武器祝福卷軸', 'new_item_bless_arm':'賦予盔甲祝福卷軸', 'new_item_bless_acc':'賦予飾品祝福卷軸' }[scrollId];
     let sc = player.inv.find(i => i.id === scrollId);
@@ -11637,7 +11809,7 @@ function doBianUncurse(slotKey) {
     let _e = document.getElementById('interaction-content'); if (_e) renderBianBless(_e);
 }
 function renderBianBless(el) {
-    let slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'legs',n:'腿甲'},{k:'amulet',n:'項鍊'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'ring3',n:'戒指'},{k:'ring4',n:'戒指'},{k:'belt',n:'腰帶'}].filter(__ringUnlockFilter);
+    let slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'legs',n:'腿甲'},{k:'amulet',n:'項鍊'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'ring3',n:'戒指'},{k:'ring4',n:'戒指'},{k:'belt',n:'腰帶'},{k:'earring1',n:'耳環'},{k:'earring2',n:'耳環'},{k:'earring3',n:'耳環'},{k:'earring4',n:'耳環'}].filter(__ringUnlockFilter);
     let cnt = id => pledgeCountItem(id);
     let rows = slots.map(sl => {
         let it = player.eq[sl.k];
@@ -12501,6 +12673,12 @@ function changeMap(force) {
           syncMapSelectors(); return;
       } }
     { if (!force && document.getElementById('map-select').value === 'fallen_knights' && (player.reborn||0) < 5) { logSys('🔒 此地圖為「墮落騎士團」，需轉生 5 轉以上才能進入。'); syncMapSelectors(); return; } }
+    { var _dt = document.getElementById('map-select').value;
+      if (!force && _dt.indexOf('dom_')===0) {
+          if ((player.reborn||0) < 15) { logSys('🔒 此地圖為「支配者之塔」，需轉生 15 轉以上才能進入。'); syncMapSelectors(); return; }
+          var _df = (_dt==='dom_top')?11:parseInt(_dt.slice(4),10);
+          if (_df>=2) { if(!window.hasDomTp || !window.hasDomTp(_df)){ logSys('🔒 沒有「'+ (window.domFloorName?window.domFloorName(_df):(_df+'樓')) +'傳送石」，無法前往。請擊殺前一層的王取得，或用 3 顆同層傳送石合成。'); syncMapSelectors(); return; } }
+      } }
     mapState.current = document.getElementById('map-select').value;
     { let _c = mapCategoryOf(mapState.current); if(_c) { if(!player.lastMapByCat) player.lastMapByCat = {}; player.lastMapByCat[_c] = mapState.current; } }   // 記住各分類最後到過的地圖
     mapState.mobs = [null, null, null];
@@ -13787,7 +13965,7 @@ function startGame() {
     let b = createBase[curCreate.cls];
     player.base = { str: b.str+curCreate.str, dex: b.dex+curCreate.dex, con: b.con+curCreate.con, int: b.int+curCreate.int, wis: b.wis+curCreate.wis, cha: b.cha+curCreate.cha };
     player.lv = 1; player.exp = 0; player.gold = 5000000;
-    player.inv = []; player.eq = { wpn: null, helm: null, armor: null, shield: null, cloak: null, tshirt: null, gloves: null, boots: null, ring1: null, ring2: null, ring3: null, ring4: null, amulet: null, belt: null, soul: null }; player.junkPrefs = {};
+    player.inv = []; player.eq = { wpn: null, helm: null, armor: null, shield: null, cloak: null, tshirt: null, gloves: null, boots: null, ring1: null, ring2: null, ring3: null, ring4: null, amulet: null, belt: null, earring1: null, earring2: null, earring3: null, earring4: null, soul: null }; player.junkPrefs = {};
     player.skills = [];
     player.summon = null; player.charmed = null; player.manualCd = {}; player.hot = null; player.elfEle = null; player.buffs = { haste: 0, brave: 0, blue: 0, cautious: 0, elfcookie: 0, poly: 0, shield: 0 };
     

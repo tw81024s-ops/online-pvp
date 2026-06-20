@@ -157,6 +157,8 @@ app.get('/api/config', (req, res) => {
         pandoraLuckMult: c.pandoraLuckMult != null ? c.pandoraLuckMult : 1,
         towerDiff: c.towerDiff != null ? c.towerDiff : 1.5,
         mobMagicMult: c.mobMagicMult != null ? c.mobMagicMult : 0.25,
+        sigilSuccess: c.sigilSuccess != null ? c.sigilSuccess : 0.30, sigilPower: c.sigilPower != null ? c.sigilPower : 1, sigilCostMult: c.sigilCostMult != null ? c.sigilCostMult : 1,
+        domBossRespawn: c.domBossRespawn != null ? c.domBossRespawn : 600, domDropMult: c.domDropMult != null ? c.domDropMult : 1, domRewardMult: c.domRewardMult != null ? c.domRewardMult : 5, aspdFloor: c.aspdFloor != null ? c.aspdFloor : 0.1,
         synthGao: c.synthGao!=null?c.synthGao:null, synthRare: c.synthRare!=null?c.synthRare:null, synthHero: c.synthHero!=null?c.synthHero:null, synthLegend: c.synthLegend!=null?c.synthLegend:null, synthMyth: c.synthMyth!=null?c.synthMyth:null, synthUniq: c.synthUniq!=null?c.synthUniq:null, dollT5: c.dollT5!=null?c.dollT5:null, dollT6: c.dollT6!=null?c.dollT6:null, dollT7: c.dollT7!=null?c.dollT7:null, dollT8: c.dollT8!=null?c.dollT8:null, mageDmgMult: c.mageDmgMult!=null?c.mageDmgMult:1, meleeDmgMult: c.meleeDmgMult!=null?c.meleeDmgMult:1, rangedDmgMult: c.rangedDmgMult!=null?c.rangedDmgMult:1,
         eventZongzi: c.eventZongzi ? 1 : 0
     });
@@ -176,6 +178,13 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
     if (b.pandoraLuckMult !== undefined) cfg.pandoraLuckMult = Math.max(0, Math.min(100, parseFloat(b.pandoraLuckMult) || 1));
     if (b.towerDiff !== undefined) cfg.towerDiff = Math.max(0.5, Math.min(50, parseFloat(b.towerDiff) || 1.5));
     if (b.mobMagicMult !== undefined) cfg.mobMagicMult = Math.max(0, Math.min(5, parseFloat(b.mobMagicMult) || 0.25));
+    if (b.sigilSuccess !== undefined) cfg.sigilSuccess = Math.max(0.01, Math.min(1, parseFloat(b.sigilSuccess) || 0.30));
+    if (b.sigilPower !== undefined) cfg.sigilPower = Math.max(0.1, Math.min(10, parseFloat(b.sigilPower) || 1));
+    if (b.sigilCostMult !== undefined) cfg.sigilCostMult = Math.max(0.1, Math.min(20, parseFloat(b.sigilCostMult) || 1));
+    if (b.domBossRespawn !== undefined) cfg.domBossRespawn = Math.max(0, Math.min(7200, parseInt(b.domBossRespawn) || 600));
+    if (b.domDropMult !== undefined) cfg.domDropMult = Math.max(0, Math.min(100, parseFloat(b.domDropMult) || 1));
+    if (b.domRewardMult !== undefined) cfg.domRewardMult = Math.max(1, Math.min(100, parseFloat(b.domRewardMult) || 5));
+    if (b.aspdFloor !== undefined) cfg.aspdFloor = Math.max(0.05, Math.min(1, parseFloat(b.aspdFloor) || 0.1));
     ['synthGao','synthRare','synthHero','synthLegend','synthMyth','synthUniq'].forEach(k => { if (b[k] !== undefined) cfg[k] = Math.max(0, Math.min(100, parseFloat(b[k]) || 0)); });
     ['dollT5','dollT6','dollT7','dollT8'].forEach(k => { if (b[k] !== undefined) cfg[k] = Math.max(0, Math.min(100, parseFloat(b[k]) || 0)); });
     ['mageDmgMult','meleeDmgMult','rangedDmgMult'].forEach(k => { if (b[k] !== undefined) cfg[k] = Math.max(0.1, Math.min(10, parseFloat(b[k]) || 1)); });
@@ -191,6 +200,8 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
         pandoraLuckMult: out.pandoraLuckMult != null ? out.pandoraLuckMult : 1,
         towerDiff: out.towerDiff != null ? out.towerDiff : 1.5,
         mobMagicMult: out.mobMagicMult != null ? out.mobMagicMult : 0.25,
+        sigilSuccess: out.sigilSuccess != null ? out.sigilSuccess : 0.30, sigilPower: out.sigilPower != null ? out.sigilPower : 1, sigilCostMult: out.sigilCostMult != null ? out.sigilCostMult : 1,
+        domBossRespawn: out.domBossRespawn != null ? out.domBossRespawn : 600, domDropMult: out.domDropMult != null ? out.domDropMult : 1, domRewardMult: out.domRewardMult != null ? out.domRewardMult : 5, aspdFloor: out.aspdFloor != null ? out.aspdFloor : 0.1,
         synthGao: out.synthGao!=null?out.synthGao:null, synthRare: out.synthRare!=null?out.synthRare:null, synthHero: out.synthHero!=null?out.synthHero:null, synthLegend: out.synthLegend!=null?out.synthLegend:null, synthMyth: out.synthMyth!=null?out.synthMyth:null, synthUniq: out.synthUniq!=null?out.synthUniq:null, dollT5: out.dollT5!=null?out.dollT5:null, dollT6: out.dollT6!=null?out.dollT6:null, dollT7: out.dollT7!=null?out.dollT7:null, dollT8: out.dollT8!=null?out.dollT8:null, mageDmgMult: out.mageDmgMult!=null?out.mageDmgMult:1, meleeDmgMult: out.meleeDmgMult!=null?out.meleeDmgMult:1, rangedDmgMult: out.rangedDmgMult!=null?out.rangedDmgMult:1,
         eventZongzi: out.eventZongzi ? 1 : 0
     } });
