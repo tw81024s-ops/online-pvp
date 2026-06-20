@@ -217,7 +217,7 @@
             magicBarrier = _on && (_hasSkill || _hasScroll);
         } catch (e) { }
         return {
-            name: p.name || myName, cls: p.cls, lv: p.lv, avatar: p.avatar || null, darkelf: !!p.darkelf, magicEvade: !!(p.darkelf || p._setMoon5), magicBarrier,
+            name: p.name || myName, cls: p.cls, lv: p.lv, avatar: p.avatar || null, dragon: !!p.dragon, darkelf: !!p.darkelf, magicEvade: !!(p.darkelf || p._setMoon5), magicBarrier,
             mhp: p.mhp, mmp: p.mmp,
             ac: d.ac, mr: d.mr, er: d.er, dr: d.dr || 0,
             meleeHit: d.meleeHit, meleeDmg: d.meleeDmg, meleeCrit: d.meleeCrit, meleeCritDmg: d.meleeCritDmg,
@@ -1027,6 +1027,9 @@
         document.head.appendChild(s);
     }
 
+    // 統一職業中文名/emoji：含龍騎(dragon)、黑妖(darkelf)
+    function clsZhName(o){ if(!o) return '?'; if(o.dragon) return '龍騎'; if(o.darkelf) return '黑妖'; return ({knight:'騎士',mage:'法師',elf:'妖精'})[o.cls] || o.cls || '?'; }
+    function clsEmoji(o){ if(!o) return '⚔️'; if(o.dragon) return '🐉'; if(o.darkelf) return '🗡️'; return ({knight:'⚔️',mage:'🪄',elf:'🏹'})[o.cls] || '⚔️'; }
     function playBattle(m) {
         injectBattleCSS();
         const BATTLE_SPEED = 3; // 回放加速倍率（3＝三倍速；越大越快）
@@ -1040,12 +1043,12 @@
             const av = el('div', { style: `width:64px;height:64px;border-radius:50%;margin:0 auto 6px;overflow:hidden;border:2px solid ${color};display:flex;align-items:center;justify-content:center;font-size:30px;background:#1e293b;` });
             if (s.avatar) {
                 const img = el('img', { src: 'assets/character/' + encodeURIComponent(s.avatar) + '.jpg', style: 'width:100%;height:100%;object-fit:cover;object-position:top;' });
-                img.onerror = () => { av.innerHTML = ''; av.textContent = emoji[s.cls] || '⚔️'; };
+                img.onerror = () => { av.innerHTML = ''; av.textContent = clsEmoji(s); };
                 av.append(img);
-            } else av.textContent = emoji[s.cls] || '⚔️';
+            } else av.textContent = clsEmoji(s);
             box.append(av);
             box.append(el('div', { style: `font-weight:bold;color:${color};font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;` }, s.name));
-            box.append(el('div', { style: 'font-size:11px;color:#94a3b8;margin-bottom:6px;' }, `Lv.${s.lv}・${s.darkelf ? '黑妖' : (clsZh[s.cls] || '')}`));
+            box.append(el('div', { style: 'font-size:11px;color:#94a3b8;margin-bottom:6px;' }, `Lv.${s.lv}・${clsZhName(s)}`));
             const hpOut = el('div', { style: 'background:#1e293b;border-radius:6px;height:14px;overflow:hidden;border:1px solid #334155;' });
             const hpIn = el('div', { style: 'background:linear-gradient(90deg,#dc2626,#f87171);height:100%;width:100%;transition:width .25s;' });
             hpOut.append(hpIn);
@@ -1133,7 +1136,7 @@
         catch (e) { return toast('存檔解析失敗', '#7f1d1d'); }
         const p = save.p || (save.p = {});
         const wrap = el('div');
-        const clsName = (p.darkelf ? '黑妖' : { knight: '騎士', mage: '法師', elf: '妖精' }[p.cls]) || p.cls || '?';
+        const clsName = clsZhName(p);
         wrap.append(el('div', { style: 'color:#cbd5e1;font-size:13px;margin-bottom:10px;line-height:1.7;' },
             `帳號：<b style="color:#fbbf24">${username}</b>　職業：${clsName}　等級：${p.lv || 1}<br>金幣：${(p.gold || 0).toLocaleString()}　HP：${p.mhp || 0}　MP：${p.mmp || 0}`));
         // 🛡️ 目前裝備（管理員檢視）
