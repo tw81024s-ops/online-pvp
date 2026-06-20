@@ -3521,7 +3521,7 @@ function applyDollStats() {
   const b = dollBonus(), d = player.d, p = player;
   if (b.hpPct) p.mhp = Math.round(p.mhp * (1 + b.hpPct));
   if (b.mpPct) p.mmp = Math.round(p.mmp * (1 + b.mpPct));
-  if (b.dmgPct) { d.meleeDmg = Math.round(d.meleeDmg * (1 + b.dmgPct)); d.rangedDmg = Math.round(d.rangedDmg * (1 + b.dmgPct)); d.magicDmg = Math.round(d.magicDmg * (1 + b.dmgPct)); }
+  if (b.dmgPct) { d.dollDmgMult = (d.dollDmgMult || 1) * (1 + b.dmgPct); d.magicDmg = Math.round(d.magicDmg * (1 + b.dmgPct)); }   // 物理:真·總傷倍率；魔法:經 spCoef 放大
   if (b.magicDmg) d.magicDmg = Math.round(d.magicDmg * (1 + b.magicDmg));
   if (b.hitFlat) { d.meleeHit += b.hitFlat; d.rangedHit += b.hitFlat; d.magicHit += b.hitFlat; }
   if (b.evaFlat) d.er += b.evaFlat;
@@ -3831,7 +3831,7 @@ function recomputeStats() {
     d.cha = Math.min(200, (b.cha || 0) + (a.cha || 0) + (pn.cha||0));   // 魅力：第六屬性，上限60+轉生*20
 
     d.ac = 10; d.er = 0; d.dr = 0;
-    d.meleeDmg = 0; d.meleeHit = 0; d.meleeCrit = 0;
+    d.meleeDmg = 0; d.meleeHit = 0; d.meleeCrit = 0; d.dollDmgMult = 1;
     d.rangedDmg = 0; d.rangedHit = 0; d.rangedCrit = 0;
     d.extraDmg = 0; d.extraHit = 0;
     d.magicDmg = 0; d.magicHit = 0; d.magicCrit = 0; d.extraMp = 0; d.mpReduce = 0;
@@ -5362,7 +5362,7 @@ function getPhysicalDmg(diceStr, target, wpn, arrowData, forceHeavy, forceHit, f
 
     // [（遠/近距離傷害 x 爆擊係數） + 額外傷害 - 敵人傷害減免]，計算過程最低為1
     let nearFar = weaponRoll + dmgBonus;
-    let inner = Math.floor(nearFar * critMult) + player.d.extraDmg - ((target.dr || 0) + ((target._siegeDrEnd > state.ticks) ? (target._siegeDrVal || 0) : 0));   // 堅固防護：怪物傷害減免
+    let inner = Math.floor((Math.floor(nearFar * critMult) + player.d.extraDmg) * (player.d.dollDmgMult || 1)) - ((target.dr || 0) + ((target._siegeDrEnd > state.ticks) ? (target._siegeDrVal || 0) : 0));   // 娃娃全傷害%：真·總傷倍率   // 堅固防護：怪物傷害減免
     inner = Math.max(1, inner);
     if(player.buffs.sk_dragon_deadlybody > 0 && Math.random() < 0.3) inner = Math.floor(inner * 1.3);   // 致命身軀：命中30%追加傷害
 
@@ -11678,6 +11678,13 @@ function claimSiegeReward(faction) {
 }
 
 const PATCH_NOTES = [
+    { v:'娃娃傷害修正', date:'2026-06', title:'🧸 娃娃「全傷害%」修正生效！',
+      lines:[
+        '【修正】娃娃的「全傷害+X%」過去只乘到傷害加成分項，沒乘到武器傷害，導致高裝幾乎無感。',
+        '・現已改為「真·總傷害倍率」：物理近戰／遠距離攻擊，整體傷害確實 +X%（唯一娃娃 ★1 = +18%）。',
+        '・爆擊類娃娃本就有效（面板爆擊%會反映），記得把娃娃「裝備」到娃娃格才生效。',
+      ] },
+
     { v:'智力250', date:'2026-06', title:'🔮 智力成長規劃到 250！',
       lines:[
         '【法師智力】智力效果全面延伸到 250，不再卡在 60。',
