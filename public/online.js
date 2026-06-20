@@ -1533,6 +1533,245 @@
             setTimeout(function () { try { syncCloudSaves(); } catch (e) { } }, 1500);
         }
     }
+    /* ===================== 🏟️ 無界擂台 Infinite Arena（vs AI 完整版） ===================== */
+    const INF_CLS = ['騎士', '龍騎', '法師', '妖精', '黑妖'];
+    const INF_STATS = {
+        '騎士': { hp: 12000, atk: 538, def: 40, spd: 1.0, crit: 8, critDmg: 50, evade: 0, emo: '🛡️', col: '#fbbf24', desc: '坦克' },
+        '龍騎': { hp: 8600, atk: 507, def: 25, spd: 0.7, crit: 15, critDmg: 60, evade: 0, emo: '🐉', col: '#f87171', desc: '近戰高速' },
+        '法師': { hp: 7700, atk: 964, def: 20, spd: 1.2, crit: 12, critDmg: 80, evade: 0, emo: '🪄', col: '#a78bfa', desc: '高爆脆皮' },
+        '妖精': { hp: 8924, atk: 517, def: 30, spd: 0.8, crit: 15, critDmg: 55, evade: 8, emo: '🏹', col: '#34d399', desc: '穩定遠程' },
+        '黑妖': { hp: 7200, atk: 451, def: 20, spd: 0.7, crit: 24, critDmg: 75, evade: 20, emo: '🗡️', col: '#22d3ee', desc: '高爆高閃' },
+    };
+    const INF_COUNTER = { '法師': '騎士', '騎士': '黑妖', '黑妖': '龍騎', '龍騎': '妖精', '妖精': '法師' }; // key 剋 value
+    const INF_CUP = 1.10, INF_BASE_GOLD = 10000000, INF_BASE_REF = 100, INF_CAP = 10, INF_AI_MULT = 0.3, INF_HEAL = 0.10;
+    function infCM(att, def) { return INF_COUNTER[att] === def ? INF_CUP : 1.0; }
+    function infState() { const p = getPlayer(); if (!p) return null; if (!p.infArena) p.infArena = { streak: 0, wins: 0, best: 0 }; return p.infArena; }
+
+    // 單挑模擬：回傳 {winner, aHp, bHp}
+    function infDuel(aCls, bCls, aHp0, bHp0, aLast, bLast) {
+        const SA = INF_STATS[aCls], SB = INF_STATS[bCls];
+        let a = { hp: aHp0 }, b = { hp: bHp0 };
+        function spec(S, last) { let atk = S.atk, crit = S.crit, iv = Math.max(1, Math.round(S.spd * 10)); if (last) { atk *= 1.4; crit += 20; iv = Math.max(1, Math.round(iv / 1.15)); } return { atk, crit, critDmg: S.critDmg, iv }; }
+        let sa = spec(SA, aLast), sb = spec(SB, bLast);
+        let cmA = infCM(aCls, bCls), cmB = infCM(bCls, aCls);
+        let aCd = 1 + Math.floor(Math.random() * sa.iv), bCd = 1 + Math.floor(Math.random() * sb.iv);
+        function swing(me, foe, sm, foeS, cm) {
+            if (Math.random() * 100 < foeS.evade) return;
+            let base = sm.atk * (0.9 + Math.random() * 0.2) - foeS.def;
+            if (Math.random() * 100 < sm.crit) base *= (1 + sm.critDmg / 100);
+            base *= cm; foe.hp -= Math.max(1, Math.round(base));
+        }
+        for (let t = 1; t <= 2000 && a.hp > 0 && b.hp > 0; t++) {
+            aCd--; if (aCd <= 0) { swing(a, b, sa, SB, cmA); aCd = sa.iv; if (b.hp <= 0) break; }
+            bCd--; if (bCd <= 0) { swing(b, a, sb, SA, cmB); bCd = sb.iv; if (a.hp <= 0) break; }
+        }
+        let winner = (a.hp > 0 && b.hp <= 0) ? 'A' : (b.hp > 0 && a.hp <= 0) ? 'B' : (a.hp >= b.hp ? 'A' : 'B');
+        return { winner, aHp: Math.max(0, a.hp), bHp: Math.max(0, b.hp) };
+    }
+
+    // 車輪保血：回傳 {win, rounds:[{aCls,bCls,aLast,bLast,aStart,bStart,winner,aEnd,bEnd,carry}]}
+    function infRunMatch(myOrder, foeOrder) {
+        let mi = 0, fi = 0;
+        let myHp = INF_STATS[myOrder[0]].hp, foeHp = INF_STATS[foeOrder[0]].hp;
+        let rounds = [], guard = 0;
+        while (mi < 5 && fi < 5 && guard++ < 30) {
+            let aCls = myOrder[mi], bCls = foeOrder[fi], aLast = (mi === 4), bLast = (fi === 4);
+            let aStart = myHp, bStart = foeHp;
+            let r = infDuel(aCls, bCls, myHp, foeHp, aLast, bLast);
+            let rec = { aCls, bCls, aLast, bLast, aStart, bStart, winner: r.winner, aEnd: r.aHp, bEnd: r.bHp };
+            if (r.winner === 'A') { myHp = Math.min(INF_STATS[aCls].hp, r.aHp + Math.round(INF_STATS[aCls].hp * INF_HEAL)); fi++; if (fi < 5) foeHp = INF_STATS[foeOrder[fi]].hp; rec.carry = myHp; }
+            else { foeHp = Math.min(INF_STATS[bCls].hp, r.bHp + Math.round(INF_STATS[bCls].hp * INF_HEAL)); mi++; if (mi < 5) myHp = INF_STATS[myOrder[mi]].hp; rec.carry = foeHp; }
+            rounds.push(rec);
+        }
+        return { win: fi >= 5, rounds };
+    }
+
+    // 發獎（翻倍/封頂/歸零；vs AI ×0.3）
+    function infReward(win, vsAI) {
+        const p = getPlayer(), st = infState(); if (!p || !st) return null;
+        if (win) {
+            let mult = Math.pow(2, Math.min(st.streak, INF_CAP - 1));
+            let gold = Math.round(INF_BASE_GOLD * mult * (vsAI ? INF_AI_MULT : 1));
+            let ref = Math.round(INF_BASE_REF * mult * (vsAI ? INF_AI_MULT : 1));
+            p.gold = (p.gold || 0) + gold;
+            if (window.gainItem) window.gainItem('dom_refine_stone', ref, true);
+            st.streak++; st.wins = (st.wins || 0) + 1; if (st.streak > (st.best || 0)) st.best = st.streak;
+            infSave(); return { gold, ref, streak: st.streak, mult };
+        } else { st.streak = 0; infSave(); return { gold: 0, ref: 0, streak: 0, mult: 0 }; }
+    }
+    function infSave() { try { if (window.saveGame) window.saveGame(); } catch (e) { } try { if (window.updateUI) window.updateUI(); } catch (e) { } }
+
+    // ====== UI：主視窗 ======
+    function openInfiniteArena() {
+        const p = getPlayer(); if (!p || !p.cls) { toast('請先建立或載入角色再進入無界擂台', '#7f1d1d'); return; }
+        const st = infState();
+        const wrap = el('div');
+        wrap.append(el('div', { style: 'font-size:12px;color:#94a3b8;line-height:1.7;margin-bottom:10px;' },
+            '等級裝備全固定、純拚<b style="color:#22d3ee">職業克制＋出戰順序</b>。各持 5 職業排序，車輪戰保血對決：贏的留台帶剩血、每勝回 10% 血，一方全滅即勝。'));
+        const stat = el('div', { style: 'display:flex;gap:8px;margin-bottom:12px;' });
+        const cell = (lab, val, col) => el('div', { style: `flex:1;background:#0f172a;border:1px solid #334155;border-radius:10px;padding:8px;text-align:center;` },
+            `<div style="font-size:11px;color:#64748b;">${lab}</div><div style="font-size:20px;font-weight:900;color:${col};">${val}</div>`);
+        stat.append(cell('目前連勝', st.streak, '#fbbf24'), cell('最高連勝', st.best || 0, '#22d3ee'), cell('總勝場', st.wins || 0, '#34d399'));
+        wrap.append(stat);
+        // 克制環圖示
+        wrap.append(el('div', { style: 'font-size:11px;color:#cbd5e1;background:#0b1220;border:1px solid #1e293b;border-radius:8px;padding:7px 9px;margin-bottom:12px;text-align:center;' },
+            '克制環：法師→騎士→黑妖→龍騎→妖精→法師（剋者強優勢，約 78% 勝、可翻盤）'));
+        const start = bigBtn('⚔️ 排兵布陣 · 挑戰 AI', 'linear-gradient(180deg,#0891b2,#0e7490)');
+        start.onclick = () => { ov.remove(); infOrderUI(); };
+        wrap.append(start);
+        const ov = modal('🏟️ 無界擂台', wrap, { w: '460px' });
+    }
+
+    // ====== UI：排兵布陣（點選出戰順序）======
+    function infOrderUI() {
+        const wrap = el('div');
+        wrap.append(el('div', { style: 'font-size:12px;color:#94a3b8;margin-bottom:10px;' }, '依序點選 5 個職業，決定<b style="color:#22d3ee">出戰順序</b>（先點的先上場）：'));
+        let order = [];
+        const slotBox = el('div', { style: 'display:flex;gap:6px;margin-bottom:10px;justify-content:center;' });
+        const pickBox = el('div', { style: 'display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px;' });
+        function chip(cls, idx) {
+            const S = INF_STATS[cls];
+            return el('div', { style: `background:#0f172a;border:2px solid ${S.col};border-radius:10px;padding:8px 4px;text-align:center;` },
+                `<div style="font-size:22px;">${S.emo}</div><div style="font-weight:800;font-size:12px;color:${S.col};">${idx != null ? (idx + 1) + '. ' : ''}${cls}</div>`);
+        }
+        function render() {
+            slotBox.innerHTML = ''; pickBox.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                if (order[i]) { let c = chip(order[i], i); c.style.cursor = 'pointer'; c.style.minWidth = '58px'; c.onclick = () => { order.splice(i, 1); render(); }; slotBox.append(c); }
+                else slotBox.append(el('div', { style: 'min-width:58px;background:#0b1220;border:2px dashed #334155;border-radius:10px;padding:8px 4px;text-align:center;color:#475569;font-size:12px;' }, `<div style="font-size:22px;">＿</div><div>${i + 1}</div>`));
+            }
+            INF_CLS.forEach(cls => {
+                const used = order.indexOf(cls) >= 0;
+                const S = INF_STATS[cls];
+                const b = el('div', { style: `background:${used ? '#0b1220' : '#0f172a'};border:2px solid ${used ? '#1e293b' : S.col};border-radius:10px;padding:8px 4px;text-align:center;cursor:${used ? 'default' : 'pointer'};opacity:${used ? .35 : 1};` },
+                    `<div style="font-size:22px;">${S.emo}</div><div style="font-weight:800;font-size:12px;color:${used ? '#475569' : S.col};">${cls}</div><div style="font-size:9px;color:#64748b;">${S.desc}</div>`);
+                if (!used) b.onclick = () => { order.push(cls); render(); };
+                pickBox.append(b);
+            });
+            fight.disabled = order.length < 5;
+            fight.style.opacity = order.length < 5 ? .5 : 1;
+            fight.style.cursor = order.length < 5 ? 'not-allowed' : 'pointer';
+        }
+        wrap.append(slotBox, pickBox);
+        const fight = bigBtn('🔥 開戰', 'linear-gradient(180deg,#dc2626,#991b1b)');
+        const reset = el('button', { style: 'width:100%;background:#475569;color:#fff;border:none;border-radius:8px;padding:9px;font-weight:bold;cursor:pointer;font-size:13px;' }, '↺ 重排');
+        reset.onclick = () => { order = []; render(); };
+        fight.onclick = () => { if (order.length < 5) return; ov.remove(); infBattle(order.slice()); };
+        wrap.append(fight, reset);
+        const ov = modal('🛡️ 排兵布陣', wrap, { w: '460px' });
+        render();
+    }
+
+    // ====== 對戰：產生 AI 順序 → 跑車輪 → 演示 ======
+    function infBattle(myOrder) {
+        let aiOrder = INF_CLS.slice().sort(() => Math.random() - 0.5); // AI 隨機排序
+        const result = infRunMatch(myOrder, aiOrder);
+        infReplay(myOrder, aiOrder, result);
+    }
+
+    // ====== 演示（逐輪動畫）======
+    function infReplay(myOrder, aiOrder, result) {
+        const wrap = el('div');
+        const head = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12px;' });
+        head.append(el('div', { style: 'color:#34d399;font-weight:800;' }, '我方'), el('div', { style: 'color:#94a3b8;' }, '車輪戰'), el('div', { style: 'color:#f87171;font-weight:800;' }, 'AI'));
+        wrap.append(head);
+        // 雙方剩餘陣容
+        const teamBox = el('div', { style: 'display:flex;justify-content:space-between;margin-bottom:10px;' });
+        const myTeam = el('div', { style: 'display:flex;gap:3px;' }), aiTeam = el('div', { style: 'display:flex;gap:3px;flex-direction:row-reverse;' });
+        function teamDots(order, deadCount, mine) {
+            return order.map((c, i) => el('span', { style: `font-size:18px;filter:${i < deadCount ? 'grayscale(1) opacity(.3)' : 'none'};` }, INF_STATS[c].emo));
+        }
+        teamBox.append(myTeam, aiTeam); wrap.append(teamBox);
+        // 對戰台
+        const stage = el('div', { style: 'background:#0b1220;border:1px solid #1e293b;border-radius:12px;padding:14px 10px;margin-bottom:10px;' });
+        wrap.append(stage);
+        const log = el('div', { style: 'font-size:12px;color:#cbd5e1;text-align:center;min-height:20px;margin-bottom:8px;' });
+        wrap.append(log);
+        const skip = el('button', { style: 'width:100%;background:#475569;color:#fff;border:none;border-radius:8px;padding:9px;font-weight:bold;cursor:pointer;font-size:13px;' }, '⏩ 跳過');
+        wrap.append(skip);
+        const ov = modal('⚔️ 無界擂台對戰', wrap, { w: '460px', noClose: true });
+
+        let myDead = 0, aiDead = 0;
+        function drawTeams() { myTeam.innerHTML = ''; aiTeam.innerHTML = ''; teamDots(myOrder, myDead).forEach(d => myTeam.append(d)); teamDots(aiOrder, aiDead).forEach(d => aiTeam.append(d)); }
+        drawTeams();
+
+        function fighterCard(cls, side, last) {
+            const S = INF_STATS[cls];
+            const box = el('div', { style: 'flex:1;text-align:center;' });
+            box.append(el('div', { style: `font-size:34px;` }, S.emo + (last ? '🔥' : '')));
+            box.append(el('div', { style: `font-weight:800;font-size:13px;color:${S.col};` }, cls + (last ? '（背水）' : '')));
+            const barOut = el('div', { style: 'background:#1e293b;border-radius:6px;height:13px;overflow:hidden;margin-top:5px;border:1px solid #334155;' });
+            const barIn = el('div', { style: `height:100%;width:100%;background:linear-gradient(90deg,${side === 'A' ? '#16a34a,#4ade80' : '#dc2626,#f87171'});transition:width .12s;` });
+            barOut.append(barIn);
+            const txt = el('div', { style: 'font-size:10px;color:#94a3b8;margin-top:2px;' }, '');
+            box.append(barOut, txt);
+            return { box, barIn, txt, mhp: S.hp };
+        }
+
+        let idx = 0, done = false;
+        function finish() { if (done) return; done = true; try { ov.remove(); } catch (e) { } infResult(result.win, myOrder, aiOrder); }
+        skip.onclick = finish;
+
+        function playRound() {
+            if (idx >= result.rounds.length) { setTimeout(finish, 350); return; }
+            const r = result.rounds[idx];
+            stage.innerHTML = '';
+            const row = el('div', { style: 'display:flex;align-items:center;gap:8px;' });
+            const ca = fighterCard(r.aCls, 'A', r.aLast), cb = fighterCard(r.bCls, 'B', r.bLast);
+            const vs = el('div', { style: 'font-weight:900;color:#64748b;font-size:13px;' }, 'VS');
+            row.append(ca.box, vs, cb.box); stage.append(row);
+            // 克制提示
+            let cTxt = '';
+            if (INF_COUNTER[r.aCls] === r.bCls) cTxt = `<span style="color:#34d399;">▲ ${r.aCls} 剋 ${r.bCls}</span>`;
+            else if (INF_COUNTER[r.bCls] === r.aCls) cTxt = `<span style="color:#f87171;">▼ ${r.bCls} 剋 ${r.aCls}</span>`;
+            log.innerHTML = cTxt || `${r.aCls} vs ${r.bCls}`;
+            // HP 動畫：從 start tween 到 end
+            const steps = 16; let s = 0;
+            const aFrom = r.aStart / ca.mhp, aTo = r.aEnd / ca.mhp, bFrom = r.bStart / cb.mhp, bTo = r.bEnd / cb.mhp;
+            ca.barIn.style.width = (aFrom * 100) + '%'; cb.barIn.style.width = (bFrom * 100) + '%';
+            ca.txt.textContent = Math.round(r.aStart); cb.txt.textContent = Math.round(r.bStart);
+            const tw = setInterval(() => {
+                s++; let k = s / steps;
+                let aw = (aFrom + (aTo - aFrom) * k), bw = (bFrom + (bTo - bFrom) * k);
+                ca.barIn.style.width = Math.max(0, aw * 100) + '%'; cb.barIn.style.width = Math.max(0, bw * 100) + '%';
+                ca.txt.textContent = Math.round(ca.mhp * Math.max(0, aw)); cb.txt.textContent = Math.round(cb.mhp * Math.max(0, bw));
+                if (s >= steps) {
+                    clearInterval(tw);
+                    // 結算本輪
+                    if (r.winner === 'A') { aiDead++; log.innerHTML = `🟢 ${r.aCls} 獲勝！留台（回血至 ${Math.round(r.carry)}）`; }
+                    else { myDead++; log.innerHTML = `🔴 ${r.bCls} 獲勝！我方 ${r.aCls} 倒下`; }
+                    drawTeams();
+                    idx++; setTimeout(playRound, 750);
+                }
+            }, 70);
+        }
+        setTimeout(playRound, 400);
+    }
+
+    // ====== 結果＋發獎 ======
+    function infResult(win, myOrder, aiOrder) {
+        const reward = infReward(win, true); // vs AI
+        const st = infState();
+        const wrap = el('div', { style: 'text-align:center;' });
+        wrap.append(el('div', { style: `font-size:30px;font-weight:900;color:${win ? '#fbbf24' : '#94a3b8'};margin-bottom:6px;` }, win ? '🏆 擂台勝利！' : '🛡️ 擂台落敗'));
+        if (win) {
+            wrap.append(el('div', { style: 'font-size:14px;color:#22d3ee;font-weight:800;margin-bottom:10px;' }, `${reward.streak} 連勝${reward.mult > 1 ? `　獎勵 ×${reward.mult}` : ''}`));
+            wrap.append(el('div', { style: 'background:#0f172a;border:1px solid #334155;border-radius:10px;padding:10px;margin-bottom:12px;font-size:14px;color:#cbd5e1;' },
+                `💰 金幣 <b style="color:#fbbf24">+${reward.gold.toLocaleString()}</b><br>🔹 紋樣精煉石 <b style="color:#5eead4">+${reward.ref.toLocaleString()}</b><div style="font-size:10px;color:#64748b;margin-top:4px;">（對 AI 獎勵 ×0.3）</div>`));
+        } else {
+            wrap.append(el('div', { style: 'font-size:13px;color:#94a3b8;margin-bottom:12px;' }, '連勝歸零，重新挑戰吧！'));
+        }
+        const again = bigBtn('⚔️ 再戰一場', 'linear-gradient(180deg,#0891b2,#0e7490)');
+        again.onclick = () => { ov.remove(); infOrderUI(); };
+        const close = el('button', { style: 'width:100%;background:#475569;color:#fff;border:none;border-radius:8px;padding:9px;font-weight:bold;cursor:pointer;font-size:13px;' }, '離開');
+        close.onclick = () => ov.remove();
+        wrap.append(again, close);
+        const ov = modal(win ? '🏆 勝利' : '🛡️ 敗北', wrap, { w: '420px', noClose: true });
+    }
+    window.openInfiniteArena = openInfiniteArena;
+    /* ===================== 無界擂台 END ===================== */
+
+
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();
 })();
