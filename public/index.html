@@ -3491,7 +3491,7 @@ window.__dollSyncBtn = function () {
 };
 function dollVal(rarity, eff, star) {
   const base = (DOLL_VAL[eff] || [])[rarity - 1] || 0;
-  return base * (1 + 0.25 * (Math.max(1, star) - 1));
+  return base * (1 + 0.5 * (Math.max(1, star) - 1)) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.dollPower)||1);
 }
 function dollOwnedCount() { _dollInit(); return Object.keys(player.dolls).length; }
 function dollDrawCost() {
