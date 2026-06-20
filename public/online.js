@@ -279,6 +279,15 @@
             setStatus('☁️ 已同步（角色' + activeSlot() + '）');
         } catch (e) { setStatus('☁️ 同步失敗', true); }
     }
+    // 青支配轉換專用：確保把含「轉換結果」的存檔先上傳雲端，成功後才登出（只有轉換會呼叫；避免登出造成資料未上傳）
+    window.__cloudForceUploadThenLogout = async function () {
+        if (!token) return false;
+        try { clearTimeout(saveTimer); } catch (e) { }
+        try { if (typeof window.saveGame === 'function') window.saveGame(); } catch (e) { }
+        try { await uploadSave(); } catch (e) { }
+        try { logout(); } catch (e) { }
+        return true;
+    };
     async function downloadSave() {
         const j = await api('/api/save?slot=' + activeSlot());
         if (j.data) {
@@ -297,7 +306,7 @@
     let _pdTimer = null;
     function pushPolyDexNow() {
         if (!token) return;
-        try { const _p = getPlayer(); if (!_p || !_p.polyDex) return; api('/api/polydex', 'POST', { dex: _p.polyDex }).catch(() => { }); } catch (e) { }
+        try { const _p = getPlayer(); if (!_p || !_p.polyDex) return; var _d = _p.polyDex, _f = {}; for (var _k in _d) { if (typeof window._isCyanDomForm === 'function' && window._isCyanDomForm(_k)) continue; _f[_k] = _d[_k]; } api('/api/polydex', 'POST', { dex: _f }).catch(() => { }); } catch (e) { }
     }
     async function pullMergePolyDex() {
         if (!token) return;

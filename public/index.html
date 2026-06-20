@@ -4611,11 +4611,20 @@ const RARITY_POLY = {
         {n:'復刻公主',img:'assets/icons/poly/復刻公主_變身.png',md:35,rd:35,mgd:35,mh:20,rh:20,ed:15,eh:12,sp:80,mpr:12,ac:-20,mr:30,dr:15,spd:38},{n:'席琳守護者',img:'assets/icons/poly/席琳守護者_變身.png',md:35,rd:35,mgd:35,mh:20,rh:20,ed:15,eh:12,sp:80,mpr:12,ac:-20,mr:30,dr:15,spd:38},{n:'MR.摩格斯',img:'assets/icons/poly/MR.摩格斯_變身.png',md:35,rd:35,mgd:35,mh:20,rh:20,ed:15,eh:12,sp:80,mpr:12,ac:-20,mr:30,dr:15,spd:38},
         {n:'女僕安娜',img:'assets/icons/poly/女僕安娜_變身.png',md:35,rd:35,mgd:35,mh:20,rh:20,ed:15,eh:12,sp:80,mpr:12,ac:-20,mr:30,dr:15,spd:38},{n:'黑悟空',img:'assets/icons/poly/黑悟空_變身.png',md:35,rd:35,mgd:35,mh:20,rh:20,ed:15,eh:12,sp:80,mpr:12,ac:-20,mr:30,dr:15,spd:38},
     ]},
+    '青支配': { color:'text-cyan-300', rate:0, synthRate:1, synthFrom:'唯一', forms:[
+        {n:'支配青騎士',imgM:'assets/icons/poly/支配青騎士_變身_m.png',imgF:'assets/icons/poly/支配青騎士_變身_f.png',cls:'knight', md:52,mh:30,rd:38,rh:22,mgd:38,ed:20,eh:14,sp:90,mpr:13,ac:-32,mr:50,dr:28,spd:42},
+        {n:'支配青龍騎士',imgM:'assets/icons/poly/支配青龍騎士_變身_m.png',imgF:'assets/icons/poly/支配青龍騎士_變身_f.png',cls:'dragon', md:58,mh:30,rd:38,rh:22,mgd:38,ed:28,eh:18,sp:90,mpr:13,ac:-26,mr:36,dr:20,spd:44},
+        {n:'支配青法師',imgM:'assets/icons/poly/支配青法師_變身_m.png',imgF:'assets/icons/poly/支配青法師_變身_f.png',cls:'mage',   mgd:60,md:38,rd:38,mh:22,rh:22,ed:20,eh:14,sp:140,mpr:20,ac:-24,mr:44,dr:18,spd:46},
+        {n:'支配青妖精',imgM:'assets/icons/poly/支配青妖精_變身_m.png',imgF:'assets/icons/poly/支配青妖精_變身_f.png',cls:'elf',    rd:58,rh:36,md:38,mh:22,mgd:38,ed:24,eh:22,sp:95,mpr:13,ac:-26,mr:36,dr:18,spd:54},
+        {n:'支配青黑暗妖精',imgM:'assets/icons/poly/支配青黑暗妖精_變身_m.png',imgF:'assets/icons/poly/支配青黑暗妖精_變身_f.png',cls:'darkelf',md:50,rd:50,mh:26,rh:26,mgd:38,ed:32,eh:16,sp:95,mpr:13,ac:-22,er:22,mr:42,dr:18,spd:50},
+    ]},
 };
-const POLY_RARITY_ORDER = ['一般','高級','稀有','英雄','傳說','神話','唯一'];
+const POLY_RARITY_ORDER = ['一般','高級','稀有','英雄','傳說','神話','唯一','青支配'];
+window._isCyanDomForm=function(n){ try{ var fs=RARITY_POLY['青支配']&&RARITY_POLY['青支配'].forms; if(fs){ for(var i=0;i<fs.length;i++) if(fs[i].n===n) return true; } }catch(e){} return false; };
+window._playerIsFemale=function(){ var a=''; try{ a=(player&&player.avatar)||''; }catch(e){} return a.indexOf('女')>=0 || a.indexOf('_f')>=0; };
 const POLY_GACHA_COST = 2000;
 function polyFindForm(name){ for(const r of POLY_RARITY_ORDER){ let f=RARITY_POLY[r].forms.find(x=>x.n===name); if(f) return {form:f,rarity:r,color:RARITY_POLY[r].color}; } return null; }
-function _polyAvatarImg(name){ try{ var _ff=polyFindForm(name); if(_ff&&_ff.form&&_ff.form.img) return _ff.form.img; }catch(e){} var _img='assets/icons/monsters/'+name+'.png'; for(var _k in DB.mobs){ if(DB.mobs[_k].n===name){ _img=DB.mobs[_k].img||_img; break; } } return _img; }
+function _polyAvatarImg(name){ try{ var _ff=polyFindForm(name); if(_ff&&_ff.form){ var _f=_ff.form; if(_f.imgM||_f.imgF){ return (window._playerIsFemale&&window._playerIsFemale())?(_f.imgF||_f.imgM):(_f.imgM||_f.imgF); } if(_f.img) return _f.img; } }catch(e){} var _img='assets/icons/monsters/'+name+'.png'; for(var _k in DB.mobs){ if(DB.mobs[_k].n===name){ _img=DB.mobs[_k].img||_img; break; } } return _img; }
 function polyDexObj(){ if(!player.polyDex) player.polyDex={}; return player.polyDex; }
 function polyCountByRarity(rarity){ let dex=polyDexObj(),c=0; for(let n in dex){ let i=polyFindForm(n); if(i&&i.rarity===rarity) c+=dex[n]; } return c; }
 function polyGachaPull(){
@@ -4677,6 +4686,40 @@ function polyActivate(name){
     logSys('變身為 <span class="'+i.color+'">'+name+'</span>。'); calcStats(); updateUI();
 }
 function polyDeactivate(){ player.polyLock=false; player.poly=null; if(player.buffs) player.buffs.poly=0; calcStats(); updateUI(); logSys('已解除變身。'); }
+// ===== 青支配「轉換(洗)」：消耗1換1 → 存檔 → 強制上傳雲端 → 登出（只有轉換才登出，確保同步乾淨不爆量）=====
+window._polyOpenConvert=function(fromName){
+    if(!window._isCyanDomForm(fromName)) return;
+    var fs=(RARITY_POLY['青支配']&&RARITY_POLY['青支配'].forms)||[];
+    var myCls=(player.dragon?'dragon':player.darkelf?'darkelf':(player.cls==='mage'?'mage':(player.cls==='elf'?'elf':'knight')));
+    var btns=fs.map(function(f){ var me=(f.cls===myCls)?' ★':''; return '<button class="btn !py-1 !px-2" style="font-size:11px" onclick="_polyConfirmConvert(\''+fromName+'\',\''+f.n+'\')"'+(f.n===fromName?' disabled style="opacity:.4"':'')+'><span class="text-cyan-300">'+f.n+me+'</span></button>'; }).join('');
+    var box=document.getElementById('poly-gacha-result');
+    if(box) box.innerHTML='<div class="text-cyan-200" style="font-size:12px;margin-bottom:4px">把「'+fromName+'」洗成（消耗1換1，★=你的職業，<b class="text-rose-300">轉換後會自動登出</b>）：</div><div class="flex flex-wrap gap-1 justify-center">'+btns+'</div>';
+};
+window._polyConfirmConvert=function(fromName,toName){
+    if(fromName===toName||!window._isCyanDomForm(fromName)||!window._isCyanDomForm(toName)) return;
+    if(!confirm('確定將「'+fromName+'」轉換為「'+toName+'」？\n轉換後會自動登出（確保雲端同步、避免重複），需重新登入。')) return;
+    window.polyConvertCyan(fromName,toName);
+};
+window.polyConvertCyan=function(fromName,toName){
+    var dex=polyDexObj();
+    if(!(dex[fromName]>0)){ logSys('你沒有「'+fromName+'」可轉換。'); return; }
+    if(!window._isCyanDomForm(fromName)||!window._isCyanDomForm(toName)||fromName===toName){ return; }
+    dex[fromName]--; if(dex[fromName]<=0) delete dex[fromName];
+    dex[toName]=(dex[toName]||0)+1;
+    try{ if(player.polyLock&&player.poly&&player.poly.n===fromName&&!(dex[fromName]>0)) polyDeactivate(); }catch(e){}
+    try{ saveGame(); }catch(e){}
+    logSys('🔄 已將 <span class="text-cyan-300">'+fromName+'</span> 洗成 <span class="text-cyan-300">'+toName+'</span>。');
+    (async function(){
+        try{
+            if(typeof window.__cloudForceUploadThenLogout==='function'){
+                var did=await window.__cloudForceUploadThenLogout();
+                if(did){ try{ alert('青支配轉換完成，已上傳並自動登出以確保同步。請重新登入繼續。'); }catch(e){} return; }
+            }
+        }catch(e){}
+        try{ if(document.getElementById('poly-gacha-modal')) _polyGachaRender('已洗成：'+toName); }catch(e){}
+        try{ updateUI(); }catch(e){}
+    })();
+};
 function _polyGachaRender(msg){
     let m=document.getElementById('poly-gacha-modal'); if(!m) return;
     let dex=polyDexObj();
@@ -4685,7 +4728,7 @@ function _polyGachaRender(msg){
     let countRows=POLY_RARITY_ORDER.map(r=>'<span class="'+RARITY_POLY[r].color+'">'+r+':'+polyCountByRarity(r)+'</span>').join('　');
     let coll=POLY_RARITY_ORDER.map(r=>{
         let fs=RARITY_POLY[r].forms.filter(f=>dex[f.n]>0); if(!fs.length) return '';
-        let cards=fs.map(f=>'<button class="btn !py-1 !px-2 text-left" style="font-size:11px" onclick="polyActivate(\''+f.n+'\');_polyGachaRender(\'已變身：'+f.n+'\')" title="'+polyFormDesc(f)+'"><span class="'+RARITY_POLY[r].color+' font-bold">'+f.n+'</span> ×'+dex[f.n]+'<span class="block text-slate-400" style="font-size:10px">'+polyFormDesc(f)+'</span></button>').join('');
+        let cards=fs.map(f=>{ var actBtn='<button class="btn !py-1 !px-2 text-left" style="font-size:11px" onclick="polyActivate(\''+f.n+'\');_polyGachaRender(\'已變身：'+f.n+'\')" title="'+polyFormDesc(f)+'"><span class="'+RARITY_POLY[r].color+' font-bold">'+f.n+'</span> ×'+dex[f.n]+'<span class="block text-slate-400" style="font-size:10px">'+polyFormDesc(f)+'</span></button>'; if(r==='青支配'){ return '<div class="flex gap-1 items-stretch">'+actBtn+'<button class="btn !py-1 !px-2" style="font-size:11px;white-space:nowrap" onclick="_polyOpenConvert(\''+f.n+'\')" title="轉換成其他職業的青支配（消耗1換1，轉換後會自動登出）">🔄洗</button></div>'; } return actBtn; }).join('');
         return '<div class="mb-1"><div class="'+RARITY_POLY[r].color+' font-bold text-sm mb-1">'+r+'</div><div class="grid grid-cols-2 gap-1">'+cards+'</div></div>';
     }).join('') || '<div class="text-slate-400 text-sm">尚無收藏，先抽卡吧！</div>';
     let cur=(player.polyLock&&player.poly)?player.poly.n:'無';
@@ -11313,7 +11356,7 @@ window.__mergePolyDex = function(serverDex){
     try{
         var dex = (typeof polyDexObj==='function') ? polyDexObj() : (player.polyDex = player.polyDex || {});
         var changed=false;
-        for(var k in serverDex){ var v=serverDex[k]||0; if((dex[k]||0) < v){ dex[k]=v; changed=true; } }
+        for(var k in serverDex){ if(window._isCyanDomForm && window._isCyanDomForm(k)) continue; var v=serverDex[k]||0; if((dex[k]||0) < v){ dex[k]=v; changed=true; } }
         if(changed){ if(typeof updateUI==='function') updateUI(); if(typeof saveGame==='function') saveGame(); }
         return changed;
     }catch(e){ return false; }
