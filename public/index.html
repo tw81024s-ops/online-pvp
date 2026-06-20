@@ -771,7 +771,7 @@
                         <div class="text-blue-300">水屬性抗性</div> <div class="text-blue-200 text-right font-bold" id="dt-reswater">0%</div>
                         <div class="text-green-300">風屬性抗性</div> <div class="text-green-200 text-right font-bold" id="dt-reswind">0%</div>
                         <div class="text-amber-300">地屬性抗性</div> <div class="text-amber-200 text-right font-bold" id="dt-researth">0%</div>
-                        <div class="text-slate-200">攻擊速度</div> <div class="text-white text-right font-bold" id="dt-spd">1.0s</div>
+                        <div class="text-slate-200">攻速加成</div> <div class="text-white text-right font-bold" id="dt-spd">+0%</div>
                     </div>
                     <div class="border-t border-slate-700 pt-4 text-base leading-relaxed" id="dt-buffs"></div>
                     <div id="ui-panacea-info" class="border-t border-slate-700 pt-3 mt-3 text-base leading-relaxed"></div>
@@ -9076,7 +9076,7 @@ function updateUI() {
 	if(document.getElementById('dt-hpr')) document.getElementById('dt-hpr').innerText = formatBonus(player.d.hpR || 0);
     document.getElementById('dt-er').innerText = `${player.d.er}%`;
     document.getElementById('dt-dr').innerText = player.d.dr;
-    document.getElementById('dt-spd').innerText = `${player.d.aspd.toFixed(2)}s`;
+    { var _asp = player.d.aspd || 1; var _spct = Math.round((1 - _asp) * 100); document.getElementById('dt-spd').innerText = (_spct >= 0 ? '+' : '') + _spct + '%'; }
     if(document.getElementById('dt-resfire')) {
         document.getElementById('dt-resfire').innerText  = `${player.d.resFire  || 0}%`;
         document.getElementById('dt-reswater').innerText = `${player.d.resWater || 0}%`;

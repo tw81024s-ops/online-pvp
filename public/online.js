@@ -1301,6 +1301,7 @@
         row(null, '＋紋樣精煉石', v => { const n = parseInt(v) || 1000; if (window.gainItem) window.gainItem('dom_refine_stone', n, true); refreshGame(); toast('紋樣精煉石 +' + n, '#14532d'); }, true, '數量（預設 1000）');
         row('＋傳送石（全層 各1）', '發放', () => { if (window.gainDomTp) { for (var L = 2; L <= 11; L++) window.gainDomTp(L, true); } refreshGame(); toast('支配者之塔傳送石（2樓~頂樓）已發放', '#14532d'); });
         row('＋耳環（全4種 各1）', '發放', () => { if (window.gainItem) ['dom_ear_blue','dom_ear_red','dom_ear_black','dom_ear_purple'].forEach(function(id){ window.gainItem(id, 1, true); }); refreshGame(); toast('4 種耳環已發放', '#14532d'); });
+        row(null, '🗼 傳送支配塔', v => { var f = Math.max(1, Math.min(11, parseInt(v) || 1)); var mk = (f >= 11) ? 'dom_top' : ('dom_' + f + 'f'); if (window.setMapSelectors && window.changeMap) { window.setMapSelectors(mk); window.changeMap(true); refreshGame(); toast('已傳送到支配塔 ' + (f >= 11 ? '頂樓' : f + '樓') + '（管理員直入）', '#14532d'); } else { toast('傳送函式未就緒', '#7f1d1d'); } }, true, '樓層 1~11（11＝頂樓；force 直入免石/免轉生）');
         section('🎴 合卡各階成功率（%，留空＝用預設×倍率）');
         row(null, '高級 合成率%', v => setCfg('synthGao', Math.max(0, Math.min(100, parseFloat(v) || 0)), '高級 合成率%'), true, '預設 50（×合卡倍率）');
         row(null, '稀有 合成率%', v => setCfg('synthRare', Math.max(0, Math.min(100, parseFloat(v) || 0)), '稀有 合成率%'), true, '預設 35');
