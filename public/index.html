@@ -4691,13 +4691,17 @@ window._polyOpenConvert=function(fromName){
     if(!window._isCyanDomForm(fromName)) return;
     var fs=(RARITY_POLY['青支配']&&RARITY_POLY['青支配'].forms)||[];
     var myCls=(player.dragon?'dragon':player.darkelf?'darkelf':(player.cls==='mage'?'mage':(player.cls==='elf'?'elf':'knight')));
-    var btns=fs.map(function(f){ var me=(f.cls===myCls)?' ★':''; return '<button class="btn !py-1 !px-2" style="font-size:11px" onclick="_polyConfirmConvert(\''+fromName+'\',\''+f.n+'\')"'+(f.n===fromName?' disabled style="opacity:.4"':'')+'><span class="text-cyan-300">'+f.n+me+'</span></button>'; }).join('');
-    var box=document.getElementById('poly-gacha-result');
-    if(box) box.innerHTML='<div class="text-cyan-200" style="font-size:12px;margin-bottom:4px">把「'+fromName+'」洗成（消耗1換1，★=你的職業，<b class="text-rose-300">轉換後會自動登出</b>）：</div><div class="flex flex-wrap gap-1 justify-center">'+btns+'</div>';
+    var ov=document.getElementById('cyanconv-ov');
+    if(!ov){ ov=document.createElement('div'); ov.id='cyanconv-ov'; ov.style.cssText='position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.8)'; ov.addEventListener('click',function(e){ if(e.target===ov) window._polyCloseConvert(); }); document.body.appendChild(ov); }
+    var btns=fs.map(function(f){ var me=(f.cls===myCls); var dis=(f.n===fromName); return '<button '+(dis?'disabled':'')+' onclick="_polyConfirmConvert(\''+fromName+'\',\''+f.n+'\')" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:'+(dis?'#1e293b':'#0e3a4a')+';color:#fff;border:1px solid '+(me?'#fbbf24':'#155e6b')+';border-radius:10px;padding:10px 12px;margin-bottom:7px;cursor:'+(dis?'not-allowed':'pointer')+';font-size:13px;'+(dis?'opacity:.45;':'')+'"><span style="flex:1;color:#67e8f9;font-weight:700">'+f.n+'</span>'+(me?'<span style="color:#fbbf24;font-size:11px">★你的職業</span>':'')+(dis?'<span style="color:#94a3b8;font-size:11px">目前這隻</span>':'')+'</button>'; }).join('');
+    ov.innerHTML='<div style="width:340px;max-width:90vw;background:#0f172a;border:1px solid #155e6b;border-radius:14px;padding:16px;box-shadow:0 0 30px rgba(0,0,0,.85)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="color:#67e8f9;font-weight:800;font-size:16px">🔄 洗青支配</div><button onclick="_polyCloseConvert()" style="background:#334155;color:#fff;border:none;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px">✕</button></div><div style="color:#cbd5e1;font-size:12px;margin-bottom:12px;line-height:1.5">把 <b style="color:#67e8f9">'+fromName+'</b> 洗成下列職業（消耗 1 換 1）：<br><span style="color:#fca5a5">⚠️ 選擇後會自動登出，需重新登入以確保同步。</span></div>'+btns+'<button onclick="_polyCloseConvert()" style="width:100%;background:#334155;color:#fff;border:none;border-radius:10px;padding:9px;cursor:pointer;margin-top:4px;font-size:13px">取消</button></div>';
+    ov.style.display='flex';
 };
+window._polyCloseConvert=function(){ var ov=document.getElementById('cyanconv-ov'); if(ov) ov.style.display='none'; };
 window._polyConfirmConvert=function(fromName,toName){
     if(fromName===toName||!window._isCyanDomForm(fromName)||!window._isCyanDomForm(toName)) return;
-    if(!confirm('確定將「'+fromName+'」轉換為「'+toName+'」？\n轉換後會自動登出（確保雲端同步、避免重複），需重新登入。')) return;
+    if(!confirm('確定將「'+fromName+'」洗成「'+toName+'」？\n選擇後會自動登出（確保雲端同步、避免重複），需重新登入。')) return;
+    try{ window._polyCloseConvert(); }catch(e){}
     window.polyConvertCyan(fromName,toName);
 };
 window.polyConvertCyan=function(fromName,toName){
