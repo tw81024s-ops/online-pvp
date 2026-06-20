@@ -3817,10 +3817,7 @@ function _polyTier(name){ try{ for(var r in RARITY_POLY){ var fs=RARITY_POLY[r].
 function _applyPolyElec(tierName){
   var sp=document.getElementById('status-panel'); if(!sp) return;
   var el=sp.querySelector('.poly-elec');
-  var cls = tierName==='傳說'?'gold':tierName==='神話'?'pink':tierName==='唯一'?'cyan':null;
-  if(!cls){ if(el) el.classList.remove('on','gold','pink','cyan'); return; }
-  if(!el){ el=document.createElement('div'); el.className='poly-elec'; sp.appendChild(el); }
-  el.classList.remove('gold','pink','cyan'); el.classList.add(cls,'on');
+  if(el) el.classList.remove('on','gold','pink','cyan');   // 取消所有階級電光外框（傳說/神話/唯一/青支配一律不套）
 }
 /* ===== 套裝監視 ===== */
 var _SMV_REQ={leather:4,oasis:4,gnome:3,silver:4,bone:3,steel:5,mage:2,dk:4,kurt:4,mr:3,guard:3};
