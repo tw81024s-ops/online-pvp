@@ -332,6 +332,63 @@ const trades = new Map();       // tradeId -> {a,b,offerA,offerB,confA,confB}
 const userTrade = new Map();    // username -> tradeId（同時只能進行一場交換）
 const userNames = new Map();    // username -> 角色名字（競技場顯示）
 
+// ===== 🏟️ 無界擂台：伺服器端固定數值對決（防作弊：數值由伺服器固定）=====
+const INF_STATS = {
+    '騎士': { hp: 12000, atk: 538, def: 40, spd: 1.0, crit: 8, critDmg: 50, evade: 0 },
+    '龍騎': { hp: 8600, atk: 507, def: 25, spd: 0.7, crit: 15, critDmg: 60, evade: 0 },
+    '法師': { hp: 7700, atk: 964, def: 20, spd: 1.2, crit: 12, critDmg: 80, evade: 0 },
+    '妖精': { hp: 8924, atk: 517, def: 30, spd: 0.8, crit: 15, critDmg: 55, evade: 8 },
+    '黑妖': { hp: 7200, atk: 451, def: 20, spd: 0.7, crit: 24, critDmg: 75, evade: 20 },
+};
+const INF_CLS = ['騎士', '龍騎', '法師', '妖精', '黑妖'];
+const INF_COUNTER = { '法師': '騎士', '騎士': '黑妖', '黑妖': '龍騎', '龍騎': '妖精', '妖精': '法師' };
+const INF_CUP = 1.10, INF_HEAL = 0.10;
+function infCM(a, d) { return INF_COUNTER[a] === d ? INF_CUP : 1.0; }
+function infValidOrder(o) { return Array.isArray(o) && o.length === 5 && INF_CLS.every(c => o.indexOf(c) >= 0); }
+function infDuel(aCls, bCls, aHp0, bHp0, aLast, bLast) {
+    const SA = INF_STATS[aCls], SB = INF_STATS[bCls];
+    let a = { hp: aHp0 }, b = { hp: bHp0 };
+    function spec(S, last) { let atk = S.atk, crit = S.crit, iv = Math.max(1, Math.round(S.spd * 10)); if (last) { atk *= 1.4; crit += 20; iv = Math.max(1, Math.round(iv / 1.15)); } return { atk, crit, critDmg: S.critDmg, iv }; }
+    let sa = spec(SA, aLast), sb = spec(SB, bLast), cmA = infCM(aCls, bCls), cmB = infCM(bCls, aCls);
+    let aCd = 1 + Math.floor(Math.random() * sa.iv), bCd = 1 + Math.floor(Math.random() * sb.iv), log = [];
+    function swing(by, foe, sm, fs, cm) {
+        if (Math.random() * 100 < fs.evade) { log.push({ by, evade: true, aHp: Math.max(0, a.hp), bHp: Math.max(0, b.hp) }); return; }
+        let base = sm.atk * (0.9 + Math.random() * 0.2) - fs.def;
+        let crit = Math.random() * 100 < sm.crit; if (crit) base *= (1 + sm.critDmg / 100);
+        base *= cm; let dmg = Math.max(1, Math.round(base)); foe.hp -= dmg;
+        log.push({ by, dmg, crit, counter: cm > 1, aHp: Math.max(0, a.hp), bHp: Math.max(0, b.hp) });
+    }
+    for (let t = 1; t <= 2000 && a.hp > 0 && b.hp > 0; t++) {
+        aCd--; if (aCd <= 0) { swing('A', b, sa, SB, cmA); aCd = sa.iv; if (b.hp <= 0) break; }
+        bCd--; if (bCd <= 0) { swing('B', a, sb, SA, cmB); bCd = sb.iv; if (a.hp <= 0) break; }
+    }
+    let winner = (a.hp > 0 && b.hp <= 0) ? 'A' : (b.hp > 0 && a.hp <= 0) ? 'B' : (a.hp >= b.hp ? 'A' : 'B');
+    return { winner, aHp: Math.max(0, a.hp), bHp: Math.max(0, b.hp), log };
+}
+function infRunMatch(mo, fo) {
+    let mi = 0, fi = 0, myHp = INF_STATS[mo[0]].hp, foeHp = INF_STATS[fo[0]].hp, rounds = [], guard = 0;
+    while (mi < 5 && fi < 5 && guard++ < 30) {
+        let aCls = mo[mi], bCls = fo[fi], aLast = (mi === 4), bLast = (fi === 4), aStart = myHp, bStart = foeHp;
+        let r = infDuel(aCls, bCls, myHp, foeHp, aLast, bLast);
+        let rec = { aCls, bCls, aLast, bLast, aStart, bStart, winner: r.winner, aEnd: r.aHp, bEnd: r.bHp, log: r.log };
+        if (r.winner === 'A') { myHp = Math.min(INF_STATS[aCls].hp, r.aHp + Math.round(INF_STATS[aCls].hp * INF_HEAL)); fi++; if (fi < 5) foeHp = INF_STATS[fo[fi]].hp; rec.carry = myHp; }
+        else { foeHp = Math.min(INF_STATS[bCls].hp, r.bHp + Math.round(INF_STATS[bCls].hp * INF_HEAL)); mi++; if (mi < 5) myHp = INF_STATS[mo[mi]].hp; rec.carry = foeHp; }
+        rounds.push(rec);
+    }
+    return { win: fi >= 5, rounds };
+}
+// 鏡像 rounds（接受方視角：把 A/B 對調，讓客戶端一律「A＝自己」）
+function infFlipRounds(rounds) {
+    return rounds.map(r => ({
+        aCls: r.bCls, bCls: r.aCls, aStart: r.bStart, bStart: r.aStart, aEnd: r.bEnd, bEnd: r.aEnd,
+        aLast: r.bLast, bLast: r.aLast, winner: r.winner === 'A' ? 'B' : 'A', carry: r.carry,
+        log: (r.log || []).map(e => e.evade
+            ? { by: e.by === 'A' ? 'B' : 'A', evade: true, aHp: e.bHp, bHp: e.aHp }
+            : { by: e.by === 'A' ? 'B' : 'A', dmg: e.dmg, crit: e.crit, counter: e.counter, aHp: e.bHp, bHp: e.aHp })
+    }));
+}
+const pendingInf = new Map();   // id -> {from, to, fromOrder, fromStreak, ts}
+
 function send(ws, obj) { try { ws.send(JSON.stringify(obj)); } catch (e) { } }
 function broadcastOnline() {
     const list = [...online.keys()];
@@ -642,6 +699,51 @@ wss.on('connection', (ws) => {
             };
             send(fromWs, payload);
             send(ws, payload);
+            return;
+        }
+
+        // ====== 🏟️ 無界擂台 真人對戰 ======
+        if (msg.type === 'inf_challenge') {
+            const target = String(msg.to || '').trim();
+            const tw = online.get(target);
+            if (!tw) return send(ws, { type: 'error', error: `${target} 不在線上` });
+            if (target === ws.username) return send(ws, { type: 'error', error: '不能挑戰自己' });
+            if (!infValidOrder(msg.order)) return send(ws, { type: 'error', error: '出戰順序不合法' });
+            const id = makeToken().slice(0, 12);
+            pendingInf.set(id, { from: ws.username, to: target, fromOrder: msg.order.slice(0, 5), fromStreak: Math.max(0, parseInt(msg.streak) || 0), ts: Date.now() });
+            send(tw, { type: 'inf_challenge_received', id, from: ws.username, fromName: userNames.get(ws.username) || '' });
+            send(ws, { type: 'inf_challenge_sent', to: target });
+            return;
+        }
+        if (msg.type === 'inf_challenge_cancel') {
+            const c = pendingInf.get(msg.id);
+            if (c && c.from === ws.username) { pendingInf.delete(msg.id); const tw = online.get(c.to); if (tw) send(tw, { type: 'inf_challenge_cancelled', by: ws.username }); }
+            return;
+        }
+        if (msg.type === 'inf_challenge_decline') {
+            const c = pendingInf.get(msg.id);
+            if (c && c.to === ws.username) { pendingInf.delete(msg.id); const fw = online.get(c.from); if (fw) send(fw, { type: 'inf_challenge_declined', by: ws.username }); }
+            return;
+        }
+        if (msg.type === 'inf_challenge_accept') {
+            const c = pendingInf.get(msg.id);
+            if (!c || c.to !== ws.username) return send(ws, { type: 'error', error: '挑戰已失效' });
+            pendingInf.delete(msg.id);
+            const fromWs = online.get(c.from);
+            if (!fromWs) return send(ws, { type: 'error', error: `${c.from} 已離線` });
+            if (!infValidOrder(msg.order)) return send(ws, { type: 'error', error: '出戰順序不合法' });
+            const bStreak = Math.max(0, parseInt(msg.streak) || 0);
+            const res = infRunMatch(c.fromOrder, msg.order.slice(0, 5));   // A=挑戰者(from)、B=接受者(this)
+            try { store.addBattle(c.from, ws.username, res.win ? c.from : ws.username); } catch (e) { }
+            const startAt = Date.now() + 1200;
+            send(fromWs, { type: 'inf_battle_start', myOrder: c.fromOrder, foeOrder: msg.order.slice(0, 5), win: res.win, rounds: res.rounds, foeName: userNames.get(ws.username) || ws.username, foeStreak: bStreak, startAt });
+            send(ws, { type: 'inf_battle_start', myOrder: msg.order.slice(0, 5), foeOrder: c.fromOrder, win: !res.win, rounds: infFlipRounds(res.rounds), foeName: userNames.get(c.from) || c.from, foeStreak: c.fromStreak, startAt });
+            return;
+        }
+        if (msg.type === 'inf_broadcast') {
+            const st = Math.max(0, parseInt(msg.streak) || 0);
+            const nm = userNames.get(ws.username) || ws.username;
+            for (const w of online.values()) send(w, { type: 'inf_announce', name: nm, streak: st });
             return;
         }
 

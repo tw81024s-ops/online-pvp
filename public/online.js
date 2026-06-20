@@ -356,6 +356,12 @@
             if (m.type === 'challenge_cancelled') { if (_incTimer) { clearInterval(_incTimer); _incTimer = null; } if (_incOv) { try { _incOv.remove(); } catch (e) { } _incOv = null; } toast((m.by || '對方') + ' 取消了挑戰', '#7f1d1d'); }
             if (m.type === 'challenge_received') showIncoming(m);
             if (m.type === 'battle_start') { _closeWait(); playBattle(m); }
+            if (m.type === 'inf_challenge_sent') toast('已向 ' + m.to + ' 發出無界擂台挑戰，等待接受…');
+            if (m.type === 'inf_challenge_declined') { _infCloseWait(); toast((m.by || '對方') + ' 拒絕了你的無界擂台挑戰', '#7f1d1d'); }
+            if (m.type === 'inf_challenge_cancelled') { _infCloseInc(); toast((m.by || '對方') + ' 取消了無界擂台挑戰', '#7f1d1d'); }
+            if (m.type === 'inf_challenge_received') showInfIncoming(m);
+            if (m.type === 'inf_battle_start') onInfBattleStart(m);
+            if (m.type === 'inf_announce') { try { toast('📢 ' + (m.name || '某玩家') + ' 已 ' + m.streak + ' 連勝，速來無界擂台踢館！', '#5b21b6'); } catch (e) { } }
             if (m.type === 'pvp_reward') { try { if (typeof window.__applyPvpReward === 'function') window.__applyPvpReward(m.gold || 0, m.tickets || 0, m.reason); } catch (e) { } }
             if (m.type === 'admin_grant_poly') { try { if (typeof window.__adminGrantPoly === 'function') { window.__adminGrantPoly(m.formName); toast('🎁 獲得變身卡：' + m.formName, '#14532d'); } } catch (e) { } }
             if (m.type === 'admin_updated') {
@@ -1190,6 +1196,11 @@
             if (!Array.isArray(p.inv)) p.inv = [];
             qty = parseInt(qty) || 1; if (qty < 1) qty = 1;
             const mkUid = () => (typeof uid === 'function') ? uid() : Math.random().toString(36).slice(2, 11);
+            if (id === 'dom_tpstone') {   // 🔑 傳送石必須帶樓層 lv，否則資料不完整、顯示/合成異常；發放全層 2樓~頂樓 各 qty
+                for (var _L = 2; _L <= 11; _L++) p.inv.push({ id: 'dom_tpstone', uid: mkUid(), cnt: qty, lv: _L, en: 0, lock: false, junk: false });
+                toast('待加入 傳送石（2樓~頂樓 各×' + qty + '）（記得按下方儲存）', '#1e3a5f');
+                return;
+            }
             const stackable = ['wpn', 'arm', 'acc'].indexOf(it.type) === -1;   // 裝備不可疊，拆成多件
             if (stackable) {
                 p.inv.push({ id: id, uid: mkUid(), cnt: qty, en: 0, bless: false, anc: false, attr: false, lock: false, junk: false });
@@ -1533,52 +1544,48 @@
             setTimeout(function () { try { syncCloudSaves(); } catch (e) { } }, 1500);
         }
     }
-    /* ===================== 🏟️ 無界擂台 Infinite Arena（vs AI 完整版） ===================== */
+    /* ===================== 🏟️ 無界擂台 Infinite Arena ===================== */
     const INF_CLS = ['騎士', '龍騎', '法師', '妖精', '黑妖'];
     const INF_STATS = {
-        '騎士': { hp: 12000, atk: 538, def: 40, spd: 1.0, crit: 8, critDmg: 50, evade: 0, emo: '🛡️', col: '#fbbf24', desc: '坦克' },
-        '龍騎': { hp: 8600, atk: 507, def: 25, spd: 0.7, crit: 15, critDmg: 60, evade: 0, emo: '🐉', col: '#f87171', desc: '近戰高速' },
-        '法師': { hp: 7700, atk: 964, def: 20, spd: 1.2, crit: 12, critDmg: 80, evade: 0, emo: '🪄', col: '#a78bfa', desc: '高爆脆皮' },
-        '妖精': { hp: 8924, atk: 517, def: 30, spd: 0.8, crit: 15, critDmg: 55, evade: 8, emo: '🏹', col: '#34d399', desc: '穩定遠程' },
-        '黑妖': { hp: 7200, atk: 451, def: 20, spd: 0.7, crit: 24, critDmg: 75, evade: 20, emo: '🗡️', col: '#22d3ee', desc: '高爆高閃' },
+        '騎士': { hp: 12000, atk: 538, def: 40, spd: 1.0, crit: 8, critDmg: 50, evade: 0, emo: '🛡️', col: '#fbbf24', desc: '坦克', img: '支配青騎士_變身_m' },
+        '龍騎': { hp: 8600, atk: 507, def: 25, spd: 0.7, crit: 15, critDmg: 60, evade: 0, emo: '🐉', col: '#f87171', desc: '近戰高速', img: '支配青龍騎士_變身_m' },
+        '法師': { hp: 7700, atk: 964, def: 20, spd: 1.2, crit: 12, critDmg: 80, evade: 0, emo: '🪄', col: '#a78bfa', desc: '高爆脆皮', img: '支配青法師_變身_m' },
+        '妖精': { hp: 8924, atk: 517, def: 30, spd: 0.8, crit: 15, critDmg: 55, evade: 8, emo: '🏹', col: '#34d399', desc: '穩定遠程', img: '支配青妖精_變身_m' },
+        '黑妖': { hp: 7200, atk: 451, def: 20, spd: 0.7, crit: 24, critDmg: 75, evade: 20, emo: '🗡️', col: '#22d3ee', desc: '高爆高閃', img: '支配青黑暗妖精_變身_m' },
     };
-    const INF_COUNTER = { '法師': '騎士', '騎士': '黑妖', '黑妖': '龍騎', '龍騎': '妖精', '妖精': '法師' }; // key 剋 value
-    const INF_CUP = 1.10, INF_BASE_GOLD = 10000000, INF_BASE_REF = 100, INF_CAP = 10, INF_AI_MULT = 0.3, INF_HEAL = 0.10;
+    const INF_COUNTER = { '法師': '騎士', '騎士': '黑妖', '黑妖': '龍騎', '龍騎': '妖精', '妖精': '法師' };
+    const INF_CUP = 1.10, INF_BASE_GOLD = 10000000, INF_BASE_REF = 100, INF_CAP = 10, INF_AI_MULT = 0.3, INF_HEAL = 0.10, INF_BOUNTY_GOLD = 5000000, INF_BOUNTY_REF = 50;
+    let _infWaitOv = null, _infIncOv = null, _infIncTimer = null;
     function infCM(att, def) { return INF_COUNTER[att] === def ? INF_CUP : 1.0; }
     function infState() { const p = getPlayer(); if (!p) return null; if (!p.infArena) p.infArena = { streak: 0, wins: 0, best: 0 }; return p.infArena; }
+    function infSave() { try { if (window.saveGame) window.saveGame(); } catch (e) { } try { if (window.updateUI) window.updateUI(); } catch (e) { } }
 
-    // 單挑模擬：回傳 {winner, aHp, bHp}
     function infDuel(aCls, bCls, aHp0, bHp0, aLast, bLast) {
         const SA = INF_STATS[aCls], SB = INF_STATS[bCls];
         let a = { hp: aHp0 }, b = { hp: bHp0 };
         function spec(S, last) { let atk = S.atk, crit = S.crit, iv = Math.max(1, Math.round(S.spd * 10)); if (last) { atk *= 1.4; crit += 20; iv = Math.max(1, Math.round(iv / 1.15)); } return { atk, crit, critDmg: S.critDmg, iv }; }
-        let sa = spec(SA, aLast), sb = spec(SB, bLast);
-        let cmA = infCM(aCls, bCls), cmB = infCM(bCls, aCls);
-        let aCd = 1 + Math.floor(Math.random() * sa.iv), bCd = 1 + Math.floor(Math.random() * sb.iv);
-        function swing(me, foe, sm, foeS, cm) {
-            if (Math.random() * 100 < foeS.evade) return;
-            let base = sm.atk * (0.9 + Math.random() * 0.2) - foeS.def;
-            if (Math.random() * 100 < sm.crit) base *= (1 + sm.critDmg / 100);
-            base *= cm; foe.hp -= Math.max(1, Math.round(base));
+        let sa = spec(SA, aLast), sb = spec(SB, bLast), cmA = infCM(aCls, bCls), cmB = infCM(bCls, aCls);
+        let aCd = 1 + Math.floor(Math.random() * sa.iv), bCd = 1 + Math.floor(Math.random() * sb.iv), log = [];
+        function swing(by, foe, sm, fs, cm) {
+            if (Math.random() * 100 < fs.evade) { log.push({ by, evade: true, aHp: Math.max(0, a.hp), bHp: Math.max(0, b.hp) }); return; }
+            let base = sm.atk * (0.9 + Math.random() * 0.2) - fs.def;
+            let crit = Math.random() * 100 < sm.crit; if (crit) base *= (1 + sm.critDmg / 100);
+            base *= cm; let dmg = Math.max(1, Math.round(base)); foe.hp -= dmg;
+            log.push({ by, dmg, crit, counter: cm > 1, aHp: Math.max(0, a.hp), bHp: Math.max(0, b.hp) });
         }
         for (let t = 1; t <= 2000 && a.hp > 0 && b.hp > 0; t++) {
-            aCd--; if (aCd <= 0) { swing(a, b, sa, SB, cmA); aCd = sa.iv; if (b.hp <= 0) break; }
-            bCd--; if (bCd <= 0) { swing(b, a, sb, SA, cmB); bCd = sb.iv; if (a.hp <= 0) break; }
+            aCd--; if (aCd <= 0) { swing('A', b, sa, SB, cmA); aCd = sa.iv; if (b.hp <= 0) break; }
+            bCd--; if (bCd <= 0) { swing('B', a, sb, SA, cmB); bCd = sb.iv; if (a.hp <= 0) break; }
         }
         let winner = (a.hp > 0 && b.hp <= 0) ? 'A' : (b.hp > 0 && a.hp <= 0) ? 'B' : (a.hp >= b.hp ? 'A' : 'B');
-        return { winner, aHp: Math.max(0, a.hp), bHp: Math.max(0, b.hp) };
+        return { winner, aHp: Math.max(0, a.hp), bHp: Math.max(0, b.hp), log };
     }
-
-    // 車輪保血：回傳 {win, rounds:[{aCls,bCls,aLast,bLast,aStart,bStart,winner,aEnd,bEnd,carry}]}
     function infRunMatch(myOrder, foeOrder) {
-        let mi = 0, fi = 0;
-        let myHp = INF_STATS[myOrder[0]].hp, foeHp = INF_STATS[foeOrder[0]].hp;
-        let rounds = [], guard = 0;
+        let mi = 0, fi = 0, myHp = INF_STATS[myOrder[0]].hp, foeHp = INF_STATS[foeOrder[0]].hp, rounds = [], guard = 0;
         while (mi < 5 && fi < 5 && guard++ < 30) {
-            let aCls = myOrder[mi], bCls = foeOrder[fi], aLast = (mi === 4), bLast = (fi === 4);
-            let aStart = myHp, bStart = foeHp;
+            let aCls = myOrder[mi], bCls = foeOrder[fi], aLast = (mi === 4), bLast = (fi === 4), aStart = myHp, bStart = foeHp;
             let r = infDuel(aCls, bCls, myHp, foeHp, aLast, bLast);
-            let rec = { aCls, bCls, aLast, bLast, aStart, bStart, winner: r.winner, aEnd: r.aHp, bEnd: r.bHp };
+            let rec = { aCls, bCls, aLast, bLast, aStart, bStart, winner: r.winner, aEnd: r.aHp, bEnd: r.bHp, log: r.log };
             if (r.winner === 'A') { myHp = Math.min(INF_STATS[aCls].hp, r.aHp + Math.round(INF_STATS[aCls].hp * INF_HEAL)); fi++; if (fi < 5) foeHp = INF_STATS[foeOrder[fi]].hp; rec.carry = myHp; }
             else { foeHp = Math.min(INF_STATS[bCls].hp, r.bHp + Math.round(INF_STATS[bCls].hp * INF_HEAL)); mi++; if (mi < 5) myHp = INF_STATS[myOrder[mi]].hp; rec.carry = foeHp; }
             rounds.push(rec);
@@ -1586,22 +1593,22 @@
         return { win: fi >= 5, rounds };
     }
 
-    // 發獎（翻倍/封頂/歸零；vs AI ×0.3）
-    function infReward(win, vsAI) {
+    function infReward(win, opts) {
+        opts = opts || { vsAI: true };
         const p = getPlayer(), st = infState(); if (!p || !st) return null;
         if (win) {
             let mult = Math.pow(2, Math.min(st.streak, INF_CAP - 1));
-            let gold = Math.round(INF_BASE_GOLD * mult * (vsAI ? INF_AI_MULT : 1));
-            let ref = Math.round(INF_BASE_REF * mult * (vsAI ? INF_AI_MULT : 1));
-            p.gold = (p.gold || 0) + gold;
-            if (window.gainItem) window.gainItem('dom_refine_stone', ref, true);
+            let gold = Math.round(INF_BASE_GOLD * mult * (opts.vsAI ? INF_AI_MULT : 1));
+            let ref = Math.round(INF_BASE_REF * mult * (opts.vsAI ? INF_AI_MULT : 1));
+            let bGold = 0, bRef = 0;
+            if (!opts.vsAI && (opts.foeStreak || 0) > 0) { bGold = opts.foeStreak * INF_BOUNTY_GOLD; bRef = opts.foeStreak * INF_BOUNTY_REF; }
+            p.gold = (p.gold || 0) + gold + bGold;
+            if (window.gainItem) window.gainItem('dom_refine_stone', ref + bRef, true);
             st.streak++; st.wins = (st.wins || 0) + 1; if (st.streak > (st.best || 0)) st.best = st.streak;
-            infSave(); return { gold, ref, streak: st.streak, mult };
-        } else { st.streak = 0; infSave(); return { gold: 0, ref: 0, streak: 0, mult: 0 }; }
+            infSave(); return { gold, ref, bGold, bRef, streak: st.streak, mult };
+        } else { st.streak = 0; infSave(); return { gold: 0, ref: 0, bGold: 0, bRef: 0, streak: 0, mult: 0 }; }
     }
-    function infSave() { try { if (window.saveGame) window.saveGame(); } catch (e) { } try { if (window.updateUI) window.updateUI(); } catch (e) { } }
 
-    // ====== UI：主視窗 ======
     function openInfiniteArena() {
         const p = getPlayer(); if (!p || !p.cls) { toast('請先建立或載入角色再進入無界擂台', '#7f1d1d'); return; }
         const st = infState();
@@ -1613,19 +1620,20 @@
             `<div style="font-size:11px;color:#64748b;">${lab}</div><div style="font-size:20px;font-weight:900;color:${col};">${val}</div>`);
         stat.append(cell('目前連勝', st.streak, '#fbbf24'), cell('最高連勝', st.best || 0, '#22d3ee'), cell('總勝場', st.wins || 0, '#34d399'));
         wrap.append(stat);
-        // 克制環圖示
         wrap.append(el('div', { style: 'font-size:11px;color:#cbd5e1;background:#0b1220;border:1px solid #1e293b;border-radius:8px;padding:7px 9px;margin-bottom:12px;text-align:center;' },
             '克制環：法師→騎士→黑妖→龍騎→妖精→法師（剋者強優勢，約 78% 勝、可翻盤）'));
-        const start = bigBtn('⚔️ 排兵布陣 · 挑戰 AI', 'linear-gradient(180deg,#0891b2,#0e7490)');
-        start.onclick = () => { ov.remove(); infOrderUI(); };
-        wrap.append(start);
+        const bAI = bigBtn('🤖 排兵布陣 · 挑戰 AI', 'linear-gradient(180deg,#0891b2,#0e7490)');
+        bAI.onclick = () => { ov.remove(); infOrderUI('排兵布陣 · 挑戰 AI', order => infBattle(order)); };
+        wrap.append(bAI);
+        const bPvP = bigBtn('🌐 挑戰玩家（真人對戰）', 'linear-gradient(180deg,#7c3aed,#5b21b6)');
+        bPvP.onclick = () => { ov.remove(); infChallengeList(); };
+        wrap.append(bPvP);
         const ov = modal('🏟️ 無界擂台', wrap, { w: '460px' });
     }
 
-    // ====== UI：排兵布陣（點選出戰順序）======
-    function infOrderUI() {
+    function infOrderUI(title, onConfirm) {
         const wrap = el('div');
-        wrap.append(el('div', { style: 'font-size:12px;color:#94a3b8;margin-bottom:10px;' }, '依序點選 5 個職業，決定<b style="color:#22d3ee">出戰順序</b>（先點的先上場）：'));
+        wrap.append(el('div', { style: 'font-size:12px;color:#94a3b8;margin-bottom:10px;' }, '依序點選 5 個職業，決定<b style="color:#22d3ee">出戰順序</b>（先點的先上場；對手看不到，盲排）：'));
         let order = [];
         const slotBox = el('div', { style: 'display:flex;gap:6px;margin-bottom:10px;justify-content:center;' });
         const pickBox = el('div', { style: 'display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px;' });
@@ -1641,128 +1649,176 @@
                 else slotBox.append(el('div', { style: 'min-width:58px;background:#0b1220;border:2px dashed #334155;border-radius:10px;padding:8px 4px;text-align:center;color:#475569;font-size:12px;' }, `<div style="font-size:22px;">＿</div><div>${i + 1}</div>`));
             }
             INF_CLS.forEach(cls => {
-                const used = order.indexOf(cls) >= 0;
-                const S = INF_STATS[cls];
+                const used = order.indexOf(cls) >= 0, S = INF_STATS[cls];
                 const b = el('div', { style: `background:${used ? '#0b1220' : '#0f172a'};border:2px solid ${used ? '#1e293b' : S.col};border-radius:10px;padding:8px 4px;text-align:center;cursor:${used ? 'default' : 'pointer'};opacity:${used ? .35 : 1};` },
                     `<div style="font-size:22px;">${S.emo}</div><div style="font-weight:800;font-size:12px;color:${used ? '#475569' : S.col};">${cls}</div><div style="font-size:9px;color:#64748b;">${S.desc}</div>`);
                 if (!used) b.onclick = () => { order.push(cls); render(); };
                 pickBox.append(b);
             });
-            fight.disabled = order.length < 5;
-            fight.style.opacity = order.length < 5 ? .5 : 1;
-            fight.style.cursor = order.length < 5 ? 'not-allowed' : 'pointer';
+            fight.disabled = order.length < 5; fight.style.opacity = order.length < 5 ? .5 : 1; fight.style.cursor = order.length < 5 ? 'not-allowed' : 'pointer';
         }
         wrap.append(slotBox, pickBox);
-        const fight = bigBtn('🔥 開戰', 'linear-gradient(180deg,#dc2626,#991b1b)');
+        const fight = bigBtn('✅ 確定出戰', 'linear-gradient(180deg,#dc2626,#991b1b)');
         const reset = el('button', { style: 'width:100%;background:#475569;color:#fff;border:none;border-radius:8px;padding:9px;font-weight:bold;cursor:pointer;font-size:13px;' }, '↺ 重排');
         reset.onclick = () => { order = []; render(); };
-        fight.onclick = () => { if (order.length < 5) return; ov.remove(); infBattle(order.slice()); };
+        fight.onclick = () => { if (order.length < 5) return; ov.remove(); onConfirm(order.slice()); };
         wrap.append(fight, reset);
-        const ov = modal('🛡️ 排兵布陣', wrap, { w: '460px' });
+        const ov = modal('🛡️ ' + title, wrap, { w: '460px' });
         render();
     }
 
-    // ====== 對戰：產生 AI 順序 → 跑車輪 → 演示 ======
+    // ===== 對 AI =====
     function infBattle(myOrder) {
-        let aiOrder = INF_CLS.slice().sort(() => Math.random() - 0.5); // AI 隨機排序
+        let aiOrder = INF_CLS.slice().sort(() => Math.random() - 0.5);
         const result = infRunMatch(myOrder, aiOrder);
-        infReplay(myOrder, aiOrder, result);
+        infReplay(myOrder, aiOrder, result, { vsAI: true });
     }
 
-    // ====== 演示（逐輪動畫）======
-    function infReplay(myOrder, aiOrder, result) {
+    // ===== 真人對戰：挑戰清單 =====
+    function infChallengeList() {
+        if (!token || !ws || ws.readyState !== 1) { toast('請先登入再進行真人對戰', '#7f1d1d'); return; }
         const wrap = el('div');
-        const head = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12px;' });
-        head.append(el('div', { style: 'color:#34d399;font-weight:800;' }, '我方'), el('div', { style: 'color:#94a3b8;' }, '車輪戰'), el('div', { style: 'color:#f87171;font-weight:800;' }, 'AI'));
-        wrap.append(head);
-        // 雙方剩餘陣容
-        const teamBox = el('div', { style: 'display:flex;justify-content:space-between;margin-bottom:10px;' });
-        const myTeam = el('div', { style: 'display:flex;gap:3px;' }), aiTeam = el('div', { style: 'display:flex;gap:3px;flex-direction:row-reverse;' });
-        function teamDots(order, deadCount, mine) {
-            return order.map((c, i) => el('span', { style: `font-size:18px;filter:${i < deadCount ? 'grayscale(1) opacity(.3)' : 'none'};` }, INF_STATS[c].emo));
-        }
-        teamBox.append(myTeam, aiTeam); wrap.append(teamBox);
-        // 對戰台
-        const stage = el('div', { style: 'background:#0b1220;border:1px solid #1e293b;border-radius:12px;padding:14px 10px;margin-bottom:10px;' });
+        wrap.append(el('div', { style: 'font-size:12px;color:#94a3b8;margin-bottom:10px;' }, '挑選一位在線玩家發起無界擂台（雙方盲排、伺服器公平判定）：'));
+        const list = el('div', { style: 'display:flex;flex-direction:column;gap:6px;max-height:300px;overflow:auto;' });
+        const others = (onlineUsers || []).filter(u => u !== myName);
+        if (!others.length) list.append(el('div', { style: 'color:#64748b;text-align:center;padding:16px;font-size:13px;' }, '目前沒有其他在線玩家'));
+        others.forEach(u => {
+            const nm = (onlineNames && onlineNames[u]) ? onlineNames[u] : u;
+            const r = el('div', { style: 'display:flex;align-items:center;gap:8px;background:#0f172a;border:1px solid #334155;border-radius:10px;padding:8px 10px;' });
+            r.append(el('div', { style: 'flex:1;font-weight:700;color:#e2e8f0;' }, nm + ' <span style="color:#64748b;font-size:11px;">(' + u + ')</span>'));
+            const b = el('button', { style: 'background:linear-gradient(180deg,#7c3aed,#5b21b6);color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:bold;font-size:13px;' }, '⚔️ 挑戰');
+            b.onclick = () => { ov.remove(); infOrderUI('排兵布陣 · 挑戰 ' + nm, order => infSendChallenge(u, order)); };
+            r.append(b); list.append(r);
+        });
+        wrap.append(list);
+        const ov = modal('🌐 挑戰玩家', wrap, { w: '460px' });
+    }
+    function infSendChallenge(target, order) {
+        try { ws.send(JSON.stringify({ type: 'inf_challenge', to: target, order: order, streak: (infState() || {}).streak || 0 })); } catch (e) { toast('連線異常', '#7f1d1d'); return; }
+        const wrap = el('div', { style: 'text-align:center;' });
+        wrap.append(el('div', { style: 'font-size:15px;margin-bottom:12px;' }, '已向 <b style="color:#a78bfa">' + target + '</b> 發出無界擂台挑戰，等待對方接受…'));
+        const cancel = el('button', { style: 'background:#475569;color:#fff;border:none;border-radius:8px;padding:10px 22px;cursor:pointer;font-weight:bold;' }, '取消');
+        cancel.onclick = () => { try { ws.send(JSON.stringify({ type: 'inf_challenge_cancel' })); } catch (e) { } _infCloseWait(); toast('已取消挑戰'); };
+        wrap.append(cancel);
+        _infCloseWait(); _infWaitOv = modal('🌐 等待應戰', wrap, { w: '380px', noClose: true });
+    }
+    function _infCloseWait() { if (_infWaitOv) { try { _infWaitOv.remove(); } catch (e) { } _infWaitOv = null; } }
+
+    function showInfIncoming(m) {
+        _infCloseInc();
+        const wrap = el('div');
+        const fromNm = m.fromName ? (m.fromName + '（' + m.from + '）') : m.from;
+        wrap.append(el('div', { style: 'font-size:15px;margin-bottom:8px;' }, '<b style="color:#a78bfa">' + fromNm + '</b> 向你發起 🏟️ 無界擂台！'));
+        const cd = el('div', { style: 'text-align:center;font-size:13px;color:#94a3b8;margin-bottom:12px;' }, '30 秒內未回應將自動拒絕');
+        const acc = bigBtn('⚔️ 接受並排兵', '#6d28d9'), dec = bigBtn('拒絕', '#475569');
+        wrap.append(cd, acc, dec);
+        _infIncOv = modal('🏟️ 收到無界擂台挑戰', wrap, { w: '420px', noClose: true });
+        acc.onclick = () => { _infCloseInc(); infOrderUI('排兵布陣 · 應戰 ' + (m.fromName || m.from), order => { try { ws.send(JSON.stringify({ type: 'inf_challenge_accept', id: m.id, order: order, streak: (infState() || {}).streak || 0 })); } catch (e) { toast('連線異常', '#7f1d1d'); } }); };
+        dec.onclick = () => { try { ws.send(JSON.stringify({ type: 'inf_challenge_decline', id: m.id })); } catch (e) { } _infCloseInc(); };
+        let left = 30;
+        _infIncTimer = setInterval(() => { left--; if (cd) cd.textContent = left + ' 秒內未回應將自動拒絕'; if (left <= 0) { try { ws.send(JSON.stringify({ type: 'inf_challenge_decline', id: m.id })); } catch (e) { } _infCloseInc(); toast('超過 30 秒未回應，已自動拒絕', '#7f1d1d'); } }, 1000);
+    }
+    function _infCloseInc() { if (_infIncTimer) { clearInterval(_infIncTimer); _infIncTimer = null; } if (_infIncOv) { try { _infIncOv.remove(); } catch (e) { } _infIncOv = null; } }
+
+    function onInfBattleStart(m) {
+        _infCloseWait(); _infCloseInc();
+        infReplay(m.myOrder, m.foeOrder, { win: m.win, rounds: m.rounds }, { vsAI: false, foeName: m.foeName, foeStreak: m.foeStreak || 0 });
+    }
+
+    function infReplay(myOrder, foeOrder, result, opts) {
+        opts = opts || { vsAI: true };
+        const wrap = el('div');
+        const teamBox = el('div', { style: 'display:flex;justify-content:space-between;margin-bottom:8px;' });
+        const myTeam = el('div', { style: 'display:flex;gap:3px;' }), foeT = el('div', { style: 'display:flex;gap:3px;flex-direction:row-reverse;' });
+        teamBox.append(myTeam, foeT); wrap.append(teamBox);
+        const stage = el('div', { style: 'background:#0b1220;border:1px solid #1e293b;border-radius:12px;padding:12px 10px;margin-bottom:8px;' });
         wrap.append(stage);
-        const log = el('div', { style: 'font-size:12px;color:#cbd5e1;text-align:center;min-height:20px;margin-bottom:8px;' });
-        wrap.append(log);
+        const logBox = el('div', { style: 'background:#0a0f1a;border:1px solid #1e293b;border-radius:8px;padding:6px 8px;height:56px;overflow:hidden;font-size:11px;color:#cbd5e1;line-height:1.55;margin-bottom:8px;' });
+        wrap.append(logBox);
         const skip = el('button', { style: 'width:100%;background:#475569;color:#fff;border:none;border-radius:8px;padding:9px;font-weight:bold;cursor:pointer;font-size:13px;' }, '⏩ 跳過');
         wrap.append(skip);
-        const ov = modal('⚔️ 無界擂台對戰', wrap, { w: '460px', noClose: true });
+        const ov = modal('⚔️ ' + (opts.vsAI ? '無界擂台 · AI' : '無界擂台 · ' + (opts.foeName || '對手')), wrap, { w: '460px', noClose: true });
 
-        let myDead = 0, aiDead = 0;
-        function drawTeams() { myTeam.innerHTML = ''; aiTeam.innerHTML = ''; teamDots(myOrder, myDead).forEach(d => myTeam.append(d)); teamDots(aiOrder, aiDead).forEach(d => aiTeam.append(d)); }
+        let myDead = 0, foeDead = 0, msgs = [];
+        function dots(order, dead) { return order.map((c, i) => el('span', { style: `font-size:17px;filter:${i < dead ? 'grayscale(1) opacity(.3)' : 'none'};` }, INF_STATS[c].emo)); }
+        function drawTeams() { myTeam.innerHTML = ''; foeT.innerHTML = ''; dots(myOrder, myDead).forEach(d => myTeam.append(d)); dots(foeOrder, foeDead).forEach(d => foeT.append(d)); }
         drawTeams();
+        function pushMsg(h) { msgs.push(h); if (msgs.length > 3) msgs.shift(); logBox.innerHTML = msgs.map(m => '<div>' + m + '</div>').join(''); }
 
-        function fighterCard(cls, side, last) {
+        function card(cls, side, last) {
             const S = INF_STATS[cls];
-            const box = el('div', { style: 'flex:1;text-align:center;' });
-            box.append(el('div', { style: `font-size:34px;` }, S.emo + (last ? '🔥' : '')));
-            box.append(el('div', { style: `font-weight:800;font-size:13px;color:${S.col};` }, cls + (last ? '（背水）' : '')));
-            const barOut = el('div', { style: 'background:#1e293b;border-radius:6px;height:13px;overflow:hidden;margin-top:5px;border:1px solid #334155;' });
-            const barIn = el('div', { style: `height:100%;width:100%;background:linear-gradient(90deg,${side === 'A' ? '#16a34a,#4ade80' : '#dc2626,#f87171'});transition:width .12s;` });
+            const box = el('div', { style: 'flex:1;text-align:center;min-width:0;' });
+            const av = el('div', { style: `width:90px;height:90px;margin:0 auto 5px;border-radius:12px;overflow:hidden;border:2px solid ${side === 'A' ? '#22c55e' : '#ef4444'};background:#0b1220;display:flex;align-items:center;justify-content:center;font-size:42px;` });
+            const img = el('img', { src: 'assets/icons/poly/' + encodeURIComponent(S.img) + '.png', style: 'width:100%;height:100%;object-fit:cover;object-position:top;' });
+            img.onerror = () => { av.innerHTML = ''; av.textContent = S.emo; };
+            av.append(img); box.append(av);
+            box.append(el('div', { style: `font-weight:800;font-size:12px;color:${S.col};` }, (last ? '🔥' : '') + cls + (last ? '(背水)' : '')));
+            const barOut = el('div', { style: 'background:#1e293b;border-radius:6px;height:12px;overflow:hidden;margin-top:4px;border:1px solid #334155;' });
+            const barIn = el('div', { style: `height:100%;background:linear-gradient(90deg,${side === 'A' ? '#16a34a,#4ade80' : '#dc2626,#f87171'});` });
             barOut.append(barIn);
             const txt = el('div', { style: 'font-size:10px;color:#94a3b8;margin-top:2px;' }, '');
             box.append(barOut, txt);
-            return { box, barIn, txt, mhp: S.hp };
+            if (last) { try { av.animate([{ boxShadow: '0 0 4px 1px #f59e0b' }, { boxShadow: '0 0 15px 5px #f59e0b' }, { boxShadow: '0 0 4px 1px #f59e0b' }], { duration: 850, iterations: Infinity }); } catch (e) { } }
+            return { box, av, barIn, txt, mhp: S.hp, setHp(v) { this.barIn.style.width = Math.max(0, v / this.mhp * 100) + '%'; this.txt.textContent = Math.round(Math.max(0, v)).toLocaleString(); } };
         }
 
         let idx = 0, done = false;
-        function finish() { if (done) return; done = true; try { ov.remove(); } catch (e) { } infResult(result.win, myOrder, aiOrder); }
+        function finish() { if (done) return; done = true; try { ov.remove(); } catch (e) { } infResult(result.win, opts, myOrder, foeOrder); }
         skip.onclick = finish;
-
+        function endRound(r) {
+            if (r.winner === 'A') { foeDead++; pushMsg(`🟢 <b style="color:#4ade80">${r.aCls}</b> 獲勝！留台（回血至 ${Math.round(r.carry).toLocaleString()}）`); }
+            else { myDead++; pushMsg(`🔴 我方 <b style="color:#f87171">${r.aCls}</b> 倒下，${r.bCls} 留台`); }
+            drawTeams(); idx++; setTimeout(playRound, 680);
+        }
         function playRound() {
-            if (idx >= result.rounds.length) { setTimeout(finish, 350); return; }
+            if (idx >= result.rounds.length) { setTimeout(finish, 400); return; }
             const r = result.rounds[idx];
             stage.innerHTML = '';
-            const row = el('div', { style: 'display:flex;align-items:center;gap:8px;' });
-            const ca = fighterCard(r.aCls, 'A', r.aLast), cb = fighterCard(r.bCls, 'B', r.bLast);
-            const vs = el('div', { style: 'font-weight:900;color:#64748b;font-size:13px;' }, 'VS');
+            const row = el('div', { style: 'display:flex;align-items:center;gap:6px;' });
+            const ca = card(r.aCls, 'A', r.aLast), vs = el('div', { style: 'font-weight:900;color:#64748b;font-size:13px;' }, 'VS'), cb = card(r.bCls, 'B', r.bLast);
             row.append(ca.box, vs, cb.box); stage.append(row);
-            // 克制提示
-            let cTxt = '';
-            if (INF_COUNTER[r.aCls] === r.bCls) cTxt = `<span style="color:#34d399;">▲ ${r.aCls} 剋 ${r.bCls}</span>`;
-            else if (INF_COUNTER[r.bCls] === r.aCls) cTxt = `<span style="color:#f87171;">▼ ${r.bCls} 剋 ${r.aCls}</span>`;
-            log.innerHTML = cTxt || `${r.aCls} vs ${r.bCls}`;
-            // HP 動畫：從 start tween 到 end
-            const steps = 16; let s = 0;
-            const aFrom = r.aStart / ca.mhp, aTo = r.aEnd / ca.mhp, bFrom = r.bStart / cb.mhp, bTo = r.bEnd / cb.mhp;
-            ca.barIn.style.width = (aFrom * 100) + '%'; cb.barIn.style.width = (bFrom * 100) + '%';
-            ca.txt.textContent = Math.round(r.aStart); cb.txt.textContent = Math.round(r.bStart);
+            ca.setHp(r.aStart); cb.setHp(r.bStart);
+            if (INF_COUNTER[r.aCls] === r.bCls) pushMsg(`<span style="color:#22d3ee">⚡克制! ${r.aCls} 剋 ${r.bCls}</span>`);
+            else if (INF_COUNTER[r.bCls] === r.aCls) pushMsg(`<span style="color:#fb7185">⚡克制! ${r.bCls} 剋 ${r.aCls}</span>`);
+            const lg = r.log || []; let li = 0;
+            const stepMs = Math.max(55, Math.min(150, Math.round(1500 / Math.max(1, lg.length))));
             const tw = setInterval(() => {
-                s++; let k = s / steps;
-                let aw = (aFrom + (aTo - aFrom) * k), bw = (bFrom + (bTo - bFrom) * k);
-                ca.barIn.style.width = Math.max(0, aw * 100) + '%'; cb.barIn.style.width = Math.max(0, bw * 100) + '%';
-                ca.txt.textContent = Math.round(ca.mhp * Math.max(0, aw)); cb.txt.textContent = Math.round(cb.mhp * Math.max(0, bw));
-                if (s >= steps) {
-                    clearInterval(tw);
-                    // 結算本輪
-                    if (r.winner === 'A') { aiDead++; log.innerHTML = `🟢 ${r.aCls} 獲勝！留台（回血至 ${Math.round(r.carry)}）`; }
-                    else { myDead++; log.innerHTML = `🔴 ${r.bCls} 獲勝！我方 ${r.aCls} 倒下`; }
-                    drawTeams();
-                    idx++; setTimeout(playRound, 750);
-                }
-            }, 70);
+                if (li >= lg.length) { clearInterval(tw); endRound(r); return; }
+                const ev = lg[li++];
+                ca.setHp(ev.aHp); cb.setHp(ev.bHp);
+                const atk = ev.by === 'A' ? ca : cb, def = ev.by === 'A' ? cb : ca;
+                const atkName = ev.by === 'A' ? r.aCls : r.bCls, defName = ev.by === 'A' ? r.bCls : r.aCls;
+                if (ev.evade) { try { def.av.animate([{ opacity: .35 }, { opacity: 1 }], { duration: 200 }); } catch (e) { } pushMsg(`<span style="color:#94a3b8">${defName} 迴避了 ${atkName}</span>`); return; }
+                try {
+                    if (ev.crit) { def.av.animate([{ filter: 'brightness(2.6) saturate(2.5) hue-rotate(-15deg)' }, { filter: 'none' }], { duration: 240 }); def.av.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-5px)' }, { transform: 'translateX(5px)' }, { transform: 'translateX(-3px)' }, { transform: 'none' }], { duration: 240 }); }
+                    else def.av.animate([{ filter: 'brightness(1.9)' }, { filter: 'none' }], { duration: 140 });
+                    if (ev.counter) atk.av.animate([{ boxShadow: '0 0 14px 4px #22d3ee' }, { boxShadow: '0 0 0 0 rgba(0,0,0,0)' }], { duration: 320 });
+                } catch (e) { }
+                let tag = (ev.counter ? '<span style="color:#22d3ee">克制!</span>' : '') + (ev.crit ? '<span style="color:#fbbf24">暴擊!</span>' : '');
+                pushMsg(`${tag} ${atkName} → ${defName} <b style="color:${ev.by === 'A' ? '#4ade80' : '#f87171'}">-${ev.dmg.toLocaleString()}</b>`);
+            }, stepMs);
         }
         setTimeout(playRound, 400);
     }
 
-    // ====== 結果＋發獎 ======
-    function infResult(win, myOrder, aiOrder) {
-        const reward = infReward(win, true); // vs AI
-        const st = infState();
+    function infResult(win, opts, myOrder, foeOrder) {
+        opts = opts || { vsAI: true };
+        const reward = infReward(win, opts);
         const wrap = el('div', { style: 'text-align:center;' });
         wrap.append(el('div', { style: `font-size:30px;font-weight:900;color:${win ? '#fbbf24' : '#94a3b8'};margin-bottom:6px;` }, win ? '🏆 擂台勝利！' : '🛡️ 擂台落敗'));
         if (win) {
             wrap.append(el('div', { style: 'font-size:14px;color:#22d3ee;font-weight:800;margin-bottom:10px;' }, `${reward.streak} 連勝${reward.mult > 1 ? `　獎勵 ×${reward.mult}` : ''}`));
-            wrap.append(el('div', { style: 'background:#0f172a;border:1px solid #334155;border-radius:10px;padding:10px;margin-bottom:12px;font-size:14px;color:#cbd5e1;' },
-                `💰 金幣 <b style="color:#fbbf24">+${reward.gold.toLocaleString()}</b><br>🔹 紋樣精煉石 <b style="color:#5eead4">+${reward.ref.toLocaleString()}</b><div style="font-size:10px;color:#64748b;margin-top:4px;">（對 AI 獎勵 ×0.3）</div>`));
+            let html = `💰 金幣 <b style="color:#fbbf24">+${reward.gold.toLocaleString()}</b><br>🔹 紋樣精煉石 <b style="color:#5eead4">+${reward.ref.toLocaleString()}</b>`;
+            if (reward.bGold > 0) html += `<div style="margin-top:6px;color:#f0abfc;font-weight:700;">🎯 踢館賞金（對手 ${opts.foeStreak} 連勝）<br>＋金幣 ${reward.bGold.toLocaleString()}　＋精煉石 ${reward.bRef.toLocaleString()}</div>`;
+            if (opts.vsAI) html += `<div style="font-size:10px;color:#64748b;margin-top:4px;">（對 AI 獎勵 ×0.3）</div>`;
+            wrap.append(el('div', { style: 'background:#0f172a;border:1px solid #334155;border-radius:10px;padding:10px;margin-bottom:12px;font-size:14px;color:#cbd5e1;' }, html));
+            // 連勝廣播（真人對戰、5/10/15…里程碑）
+            if (!opts.vsAI && reward.streak >= 5 && reward.streak % 5 === 0) { try { if (ws && ws.readyState === 1) ws.send(JSON.stringify({ type: 'inf_broadcast', streak: reward.streak })); } catch (e) { } }
         } else {
             wrap.append(el('div', { style: 'font-size:13px;color:#94a3b8;margin-bottom:12px;' }, '連勝歸零，重新挑戰吧！'));
         }
-        const again = bigBtn('⚔️ 再戰一場', 'linear-gradient(180deg,#0891b2,#0e7490)');
-        again.onclick = () => { ov.remove(); infOrderUI(); };
+        const again = bigBtn(opts.vsAI ? '⚔️ 再戰一場' : '🏟️ 回擂台', 'linear-gradient(180deg,#0891b2,#0e7490)');
+        again.onclick = () => { ov.remove(); openInfiniteArena(); };
         const close = el('button', { style: 'width:100%;background:#475569;color:#fff;border:none;border-radius:8px;padding:9px;font-weight:bold;cursor:pointer;font-size:13px;' }, '離開');
         close.onclick = () => ov.remove();
         wrap.append(again, close);
