@@ -138,6 +138,21 @@ app.get('/api/battles', auth, (req, res) => {
     res.json({ battles: store.battlesFor(req.user.username) });
 });
 
+// 🏆 無界擂台 勝率排行榜（依勝率排名，Laplace 平滑避免少場數灌頂；公開讀取）
+app.get('/api/inf/leaderboard', (req, res) => {
+    try {
+        const all = Object.values(store.allPvp() || {});
+        const list = all.map(x => {
+            const w = x.infWins || 0, l = x.infLosses || 0, g = w + l;
+            return { username: x.username, name: x.name || x.username, wins: w, losses: l, games: g, rate: g > 0 ? w / g : 0, adj: (w + 1) / (g + 2) };
+        }).filter(x => x.games > 0)
+            .sort((a, b) => (b.adj - a.adj) || (b.wins - a.wins) || (a.losses - b.losses))
+            .slice(0, 50)
+            .map((x, i) => ({ rank: i + 1, name: x.name, username: x.username, wins: x.wins, losses: x.losses, games: x.games, rate: Math.round(x.rate * 100) }));
+        res.json({ list });
+    } catch (e) { res.json({ list: [] }); }
+});
+
 // ====== 管理員 API ======
 function adminOnly(req, res, next) {
     if (!isAdminUser(req.user)) return res.status(403).json({ error: '需要管理員權限' });
@@ -735,6 +750,17 @@ wss.on('connection', (ws) => {
             const bStreak = Math.max(0, parseInt(msg.streak) || 0);
             const res = infRunMatch(c.fromOrder, msg.order.slice(0, 5));   // A=挑戰者(from)、B=接受者(this)
             try { store.addBattle(c.from, ws.username, res.win ? c.from : ws.username); } catch (e) { }
+            // 🏆 無界擂台勝率排行：記在既有 pvp 紀錄上（infWins/infLosses）
+            try {
+                const uA = store.findUser(c.from), uB = store.findUser(ws.username);
+                if (uA && uB) {
+                    const rA = pvpGet(uA.id, c.from), rB = pvpGet(uB.id, ws.username);
+                    rA.name = userNames.get(c.from) || rA.name || ''; rB.name = userNames.get(ws.username) || rB.name || '';
+                    if (res.win) { rA.infWins = (rA.infWins || 0) + 1; rB.infLosses = (rB.infLosses || 0) + 1; }
+                    else { rB.infWins = (rB.infWins || 0) + 1; rA.infLosses = (rA.infLosses || 0) + 1; }
+                    store.putPvp(uA.id, rA); store.putPvp(uB.id, rB);
+                }
+            } catch (e) { console.error('inf record err:', e.message); }
             const startAt = Date.now() + 1200;
             send(fromWs, { type: 'inf_battle_start', myOrder: c.fromOrder, foeOrder: msg.order.slice(0, 5), win: res.win, rounds: res.rounds, foeName: userNames.get(ws.username) || ws.username, foeStreak: bStreak, startAt });
             send(ws, { type: 'inf_battle_start', myOrder: msg.order.slice(0, 5), foeOrder: c.fromOrder, win: !res.win, rounds: infFlipRounds(res.rounds), foeName: userNames.get(c.from) || c.from, foeStreak: c.fromStreak, startAt });

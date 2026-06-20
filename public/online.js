@@ -1628,6 +1628,9 @@
         const bPvP = bigBtn('🌐 挑戰玩家（真人對戰）', 'linear-gradient(180deg,#7c3aed,#5b21b6)');
         bPvP.onclick = () => { ov.remove(); infChallengeList(); };
         wrap.append(bPvP);
+        const bRank = el('button', { style: 'width:100%;background:#1e293b;color:#cbd5e1;border:1px solid #334155;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer;font-size:13px;margin-top:2px;' }, '🏆 勝率排行榜');
+        bRank.onclick = () => { ov.remove(); infLeaderboard(); };
+        wrap.append(bRank);
         const ov = modal('🏟️ 無界擂台', wrap, { w: '460px' });
     }
 
@@ -1823,6 +1826,27 @@
         close.onclick = () => ov.remove();
         wrap.append(again, close);
         const ov = modal(win ? '🏆 勝利' : '🛡️ 敗北', wrap, { w: '420px', noClose: true });
+    }
+    function infLeaderboard() {
+        const wrap = el('div');
+        wrap.append(el('div', { style: 'font-size:12px;color:#94a3b8;margin-bottom:10px;' }, '真人對戰勝率排行（依勝率排名；需有對戰紀錄。對 AI 不計入）：'));
+        const box = el('div', { style: 'max-height:340px;overflow:auto;' }); box.textContent = '載入中…';
+        wrap.append(box);
+        const ov = modal('🏆 無界擂台 · 勝率排行榜', wrap, { w: '460px' });
+        api('/api/inf/leaderboard').then(j => {
+            const list = (j && j.list) || [];
+            if (!list.length) { box.innerHTML = '<div style="color:#64748b;text-align:center;padding:18px;font-size:13px;">尚無真人對戰紀錄，快去挑戰玩家！</div>'; return; }
+            box.innerHTML = '';
+            list.forEach(r => {
+                const me = (r.username === myName);
+                const medal = r.rank === 1 ? '🥇' : r.rank === 2 ? '🥈' : r.rank === 3 ? '🥉' : ('#' + r.rank);
+                const row = el('div', { style: `display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:5px;background:${me ? '#1e3a5f' : '#0f172a'};border:1px solid ${me ? '#38bdf8' : '#334155'};` });
+                row.append(el('div', { style: 'width:36px;text-align:center;font-weight:900;font-size:14px;color:#fbbf24;' }, medal));
+                row.append(el('div', { style: 'flex:1;min-width:0;font-weight:700;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;' }, r.name + (me ? ' <span style="color:#38bdf8;font-size:11px;">(你)</span>' : '')));
+                row.append(el('div', { style: 'text-align:right;flex:none;' }, `<div style="font-weight:800;color:#22d3ee;">${r.rate}%</div><div style="font-size:11px;color:#94a3b8;">${r.wins}勝 ${r.losses}負</div>`));
+                box.append(row);
+            });
+        }).catch(() => { box.innerHTML = '<div style="color:#f87171;text-align:center;padding:18px;">載入失敗</div>'; });
     }
     window.openInfiniteArena = openInfiniteArena;
     /* ===================== 無界擂台 END ===================== */
