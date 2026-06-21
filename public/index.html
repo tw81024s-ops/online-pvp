@@ -4790,7 +4790,6 @@ function _polyDoSynth(t){
 // 這樣即使分頁切到背景被瀏覽器降速、或機器卡頓導致 setInterval 延遲，
 // 遊戲時間仍會以正確速率前進（回到分頁時自動快轉補上落後的進度）。
 function gameLoop() {
-    if (window._domExploreActive) return;   // 🗼 探索模式進行中：暫停正常 3 格戰鬥
     let now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
     if(_loopLast == null) _loopLast = now;
     let elapsed = now - _loopLast;
@@ -4946,7 +4945,8 @@ function tick() {
 
     // === 出怪判定：以邏輯 tick (state.ticks) 為準，與主迴圈時間補跑同步 ===
     // mapState.spawnAt[i] = 該格子預定出怪的 tick 值；為 null 代表該格目前有怪、無需排程。
-    {
+    if (window._domExploreActive) { if (window._exploreSync) window._exploreSync(); }
+    else {
         let isPureBossMap = ['antaras_lair', 'fafurion_lair', 'valakas_lair'].includes(mapState.current);
         if(!mapState.spawnAt) mapState.spawnAt = [null, null, null];
         let nowT = state.ticks;
@@ -15627,23 +15627,19 @@ window.onload = () => {
     document.addEventListener('mousedown', hideTip);
 })();
 
-/* ===== 🗼 支配塔探索模式 (Phase 1) — 嵌入中央戰鬥區、接真實角色 ===== */
+/* ===== 🗼 支配塔探索模式 (Phase 1) — 戰鬥 100% 沿用真實 tick()，模組只管移動/鏡頭/同步 ===== */
 (function () {
     const FLOOR = 'dom_top';
-    const CW = 480, CH = 460, TW = 44, TH = 22, N = 25, AOE_R = 2.4;
-    const SWING = 0.5;
+    const CW = 480, CH = 460, TW = 44, TH = 22, N = 25, AOE_R = 2.4, ENGAGE = 5.5;
     let active = false, raf = null, wrap = null, cv = null, ctx = null, last = 0;
-    let cam = { x: 0, y: 0 }, T = 0, kills = 0, manualUntil = 0, savedMap = null, uiCd = 0;
-    const P = { gx: 12, gy: 12, tx: 12, ty: 12, swCd: 0, aoeCd: 0, hitT: 0, moving: false };
+    let cam = { x: 0, y: 0 }, T = 0, kills = 0, manualUntil = 0;
+    let savedMap = null, savedMobs = null, savedSpawnAt = null, savedTI = null, _lastPHp = null;
+    const P = { gx: 12, gy: 12, tx: 12, ty: 12, hitT: 0, moving: false };
     let mobs = [], dmgs = [], sparks = [], embers = [], aoes = [], marker = null;
     const imgCache = {};
     function gi(src) { if (!imgCache[src]) { const im = new Image(); im.src = src; imgCache[src] = im; } return imgCache[src]; }
     function mobImg(def) { return def.img || ('assets/icons/monsters/' + def.n + '.png'); }
-    function playerImg() {
-        const cn = { knight: '騎士', mage: '法師', elf: '妖精', darkelf: '黑暗妖精', dragon: '龍騎士' }[player.cls] || '騎士';
-        const mf = (player.avatar && player.avatar.indexOf('女') >= 0) ? 'f' : 'm';
-        return 'assets/icons/poly/支配青' + cn + '_變身_' + mf + '.png';
-    }
+    function playerImg() { const cn = { knight: '騎士', mage: '法師', elf: '妖精', darkelf: '黑暗妖精', dragon: '龍騎士' }[player.cls] || '騎士'; const mf = (player.avatar && player.avatar.indexOf('女') >= 0) ? 'f' : 'm'; return 'assets/icons/poly/支配青' + cn + '_變身_' + mf + '.png'; }
     function wiso(gx, gy) { return { x: (gx - gy) * (TW / 2), y: (gx + gy) * (TH / 2) }; }
     function scr(gx, gy) { const w = wiso(gx, gy); return { x: w.x - cam.x + CW / 2, y: w.y - cam.y + CH / 2 }; }
     function unproj(sx, sy) { const wx = sx - CW / 2 + cam.x, wy = sy - CH / 2 + cam.y; return { gx: (wx / (TW / 2) + wy / (TH / 2)) / 2, gy: (wy / (TH / 2) - wx / (TW / 2)) / 2 }; }
@@ -15655,72 +15651,55 @@ window.onload = () => {
         const ids = poolIds(); if (!ids.length) return null;
         const id = ids[Math.floor(Math.random() * ids.length)]; const def = DB.mobs[id];
         let gx, gy, tries = 0; do { gx = 1 + Math.random() * (N - 2); gy = 1 + Math.random() * (N - 2); tries++; } while (Math.hypot(gx - P.gx, gy - P.gy) < 3 && tries < 30);
-        return Object.assign({}, def, { id, gx, gy, wx: gx, wy: gy, curHp: def.hp, uid: (typeof uid === 'function' ? uid() : Math.random()), st: (typeof newMobStatus === 'function' ? newMobStatus() : {}), er: def.er || 0, atkCd: Math.random(), wander: 1 + Math.random() * 2, hitT: 0, dead: false, _img: mobImg(def) });
+        return Object.assign({}, def, { id, gx, gy, wx: gx, wy: gy, curHp: def.hp, uid: (typeof uid === 'function' ? uid() : Math.random()), _magCd: {}, justHit: false, st: (typeof newMobStatus === 'function' ? newMobStatus() : {}), er: def.er || 0, wander: 1 + Math.random() * 2, hitT: 0, dead: false, _lastHp: def.hp, _img: mobImg(def) });
     }
     function spawnField() { mobs = []; for (let i = 0; i < 16; i++) { const m = buildMob(); if (m) mobs.push(m); } }
-    function nearest() { let b = 99, t = null; for (const m of mobs) { if (m.dead) continue; const d = dist(P, m); if (d < b) { b = d; t = m; } } return t; }
-    function popDmg(pos, amount, kind) { const s = scr(pos.gx, pos.gy); dmgs.push({ x: s.x + (Math.random() * 14 - 7), y: s.y - 22, vy: -0.8, life: 1, amount, kind }); }
+    function nearest() { let b = 99, t = null; for (const m of mobs) { if (m.dead || m._dead || m.curHp <= 0) continue; const d = dist(P, m); if (d < b) { b = d; t = m; } } return t; }
+    function popDmg(pos, amount, kind) { const sc2 = scr(pos.gx, pos.gy); dmgs.push({ x: sc2.x + (Math.random() * 14 - 7), y: sc2.y - 22, vy: -0.8, life: 1, amount, kind }); }
     function burst(pos, col, n) { for (let i = 0; i < n; i++) { const a = Math.random() * 7, sp = 1 + Math.random() * 2.6; sparks.push({ gx: pos.gx, gy: pos.gy, ox: 0, oy: -10, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1, life: 1, col }); } }
 
-    function markDead(mob) { if (mob.dead) return; mob.dead = true; mob.respawn = 2.0; kills++; burst(mob, '#fca5a5', 14); }
-    function grantKill(mob) { try { const sM = mapState.mobs, sT = mapState.targetIdx; mapState.mobs = [mob, null, null]; mapState.targetIdx = 0; killMob(0); mapState.mobs = sM; mapState.targetIdx = sT; } catch (e) { console.error('explore reward err', e); } }
-    function onMaybeDead(mob) { if (mob.curHp <= 0 && !mob.dead) { if (!mob._dead) grantKill(mob); markDead(mob); try { if (typeof updateUI === 'function') updateUI(); } catch (e) {} } }
-    // 普攻：直接重用真實 playerAttack()，全部被動/加成/procs 都套用，killMob 也由它處理
-    function doSwing(mob) {
-        const sM = mapState.mobs, sT = mapState.targetIdx;
-        mapState.mobs = [mob, null, null]; mapState.targetIdx = 0;
-        const before = mob.curHp;
-        try { playerAttack(); } catch (e) { console.error('explore atk', e); try { mob.curHp -= Math.max(1, player.d.meleeDmg || 1); } catch (_) {} }
-        mapState.mobs = sM; mapState.targetIdx = sT;
-        const dealt = Math.max(0, Math.round(before - mob.curHp));
-        if (dealt > 0) { mob.hitT = 0.2; burst(mob, '#fde68a', 6); popDmg(mob, dealt, 'hit'); } else popDmg(mob, 0, 'miss');
-        onMaybeDead(mob);
+    // 真實 tick() 會呼叫這個：把最近的怪同步進 3 格戰鬥槽，讓 tick 用「技能/符石/娃娃/隊伍/普攻/爆擊」全套打它們
+    function syncSlots() {
+        if (!active) return;
+        const cand = mobs.filter(m => !m.dead && !m._dead && m.curHp > 0 && dist(P, m) <= ENGAGE).sort((a, b) => dist(P, a) - dist(P, b)).slice(0, 3);
+        mapState.mobs[0] = cand[0] || null; mapState.mobs[1] = cand[1] || null; mapState.mobs[2] = cand[2] || null;
+        mapState.targetIdx = cand.length ? 0 : -1;
+        if (!mapState.spawnAt) mapState.spawnAt = [null, null, null];
     }
-    function castAoE() {
-        aoes.push({ life: 1 }); burst(P, '#c7d2fe', 8);
-        const base = Math.max(1, player.d.magicDmg || player.d.meleeDmg || 1);
-        for (const m of mobs) {
-            if (m.dead || dist(P, m) > AOE_R) continue;
-            const crit = Math.random() * 100 < (player.d.magicCrit || 0);
-            let amt = Math.max(1, Math.round(base * (0.85 + Math.random() * 0.3) * (crit ? 2 : 1) * (1 - Math.min(0.8, (m.mr || 0) / 200))));
-            m.curHp -= amt; m.hitT = 0.2; burst(m, crit ? '#fecaca' : '#c7d2fe', crit ? 10 : 5);
-            popDmg(m, amt, crit ? 'crit' : 'hit');
-            onMaybeDead(m);
-        }
-    }
-    function hpUI() { const f = wrap && wrap.querySelector('#dx-hpfill'), t = wrap && wrap.querySelector('#dx-hptxt'), k = wrap && wrap.querySelector('#dx-kills');
-        if (f) f.style.width = (player.hp / (player.mmp || 1) * 100) + '%'; if (t) t.textContent = 'HP ' + Math.round(player.hp).toLocaleString() + ' / ' + (player.mmp || 0).toLocaleString(); if (k) k.textContent = kills; }
+    window._exploreSync = syncSlots;
 
     function update(dt) {
         T += dt;
-        if (T > manualUntil) { const t = nearest(); if (t) { const d = dist(P, t); if (d > AOE_R * 0.7) { const ax = t.gx - P.gx, ay = t.gy - P.gy, am = Math.hypot(ax, ay) || 1; P.tx = clampG(P.gx + ax / am * 1.6); P.ty = clampG(P.gy + ay / am * 1.6); } else { P.tx = P.gx; P.ty = P.gy; } } }
+        if (player.dead) { close(); return; }
+        if (T > manualUntil) { const t = nearest(); if (t) { const d = dist(P, t); if (d > 1.2) { const ax = t.gx - P.gx, ay = t.gy - P.gy, am = Math.hypot(ax, ay) || 1; P.tx = clampG(P.gx + ax / am * 1.6); P.ty = clampG(P.gy + ay / am * 1.6); } else { P.tx = P.gx; P.ty = P.gy; } } }
         const dx = P.tx - P.gx, dy = P.ty - P.gy, dm = Math.hypot(dx, dy);
         if (dm > 0.05) { const mv = Math.min(dm, 3.4 * dt); P.gx += dx / dm * mv; P.gy += dy / dm * mv; P.moving = true; } else P.moving = false;
         const tg = wiso(P.gx, P.gy); cam.x += (tg.x - cam.x) * Math.min(1, dt * 6); cam.y += (tg.y - cam.y) * Math.min(1, dt * 6);
-        P.swCd -= dt; const t2 = nearest();
-        if (t2 && dist(P, t2) <= 1.6 && P.swCd <= 0) { P.swCd = SWING; doSwing(t2); }
-        P.aoeCd -= dt; let anyIn = false; for (const m of mobs) { if (!m.dead && dist(P, m) <= AOE_R) { anyIn = true; break; } }
-        if (anyIn && P.aoeCd <= 0) { P.aoeCd = 1.0; castAoE(); }
         for (const m of mobs) {
             if (m.dead) { m.respawn -= dt; if (m.respawn <= 0) Object.assign(m, buildMob()); continue; }
-            m.hitT = Math.max(0, m.hitT - dt); const d = dist(P, m);
-            if (d < 4) { const ax = P.gx - m.gx, ay = P.gy - m.gy, am = Math.hypot(ax, ay) || 1; if (am > 1.1) { const mv = 1.4 * dt; m.gx += ax / am * mv; m.gy += ay / am * mv; }
-                m.atkCd -= dt; if (d <= 1.5 && m.atkCd <= 0) { m.atkCd = 1.2; const raw = (m.db || 0) + (m.dmg ? (m.dmg[0] + Math.floor(Math.random() * (m.dmg[1] - m.dmg[0] + 1))) : 50); const amt = Math.max(1, Math.round(raw * 0.5)); player.hp = Math.max(0, player.hp - amt); P.hitT = 0.2; popDmg(P, amt, 'taken'); if (player.hp <= 0) { player.hp = player.mmp; popDmg(P, 0, 'revive'); } }
-            } else { m.wander -= dt; if (m.wander <= 0) { m.wx = clampG(m.gx + (Math.random() * 4 - 2)); m.wy = clampG(m.gy + (Math.random() * 4 - 2)); m.wander = 1.6 + Math.random() * 2.6; } const wx = m.wx - m.gx, wy = m.wy - m.gy, wm = Math.hypot(wx, wy); if (wm > 0.06) { const mv = 0.7 * dt; m.gx += wx / wm * mv; m.gy += wy / wm * mv; } }
+            if (m._dead || m.curHp <= 0) { m.dead = true; m.respawn = 2.0; kills++; burst(m, '#fca5a5', 14); try { if (typeof updateUI === 'function') updateUI(); } catch (e) {} continue; }
+            if (m._lastHp === undefined) m._lastHp = m.curHp;
+            if (m.curHp < m._lastHp) { const d = Math.round(m._lastHp - m.curHp); popDmg(m, d, d >= m.hp * 0.25 ? 'crit' : 'hit'); m.hitT = 0.2; burst(m, '#fde68a', 5); }
+            m._lastHp = m.curHp; m.hitT = Math.max(0, m.hitT - dt);
+            const d = dist(P, m);
+            if (d < 5) { const ax = P.gx - m.gx, ay = P.gy - m.gy, am = Math.hypot(ax, ay) || 1; if (am > 1.0) { const mv = 1.4 * dt; m.gx += ax / am * mv; m.gy += ay / am * mv; } }
+            else { m.wander -= dt; if (m.wander <= 0) { m.wx = clampG(m.gx + (Math.random() * 4 - 2)); m.wy = clampG(m.gy + (Math.random() * 4 - 2)); m.wander = 1.6 + Math.random() * 2.6; } const wx = m.wx - m.gx, wy = m.wy - m.gy, wm = Math.hypot(wx, wy); if (wm > 0.06) { const mv = 0.7 * dt; m.gx += wx / wm * mv; m.gy += wy / wm * mv; } }
         }
-        P.hitT = Math.max(0, P.hitT - dt);
+        if (_lastPHp === null) _lastPHp = player.hp;
+        if (player.hp < _lastPHp) { const d = Math.round(_lastPHp - player.hp); popDmg(P, d, 'taken'); P.hitT = 0.2; }
+        _lastPHp = player.hp; P.hitT = Math.max(0, P.hitT - dt);
         for (const d of dmgs) { d.y += d.vy * dt * 60; d.vy += dt * 0.5; d.life -= dt / 0.85; } dmgs = dmgs.filter(d => d.life > 0);
         for (const s of sparks) { s.ox += s.vx; s.oy += s.vy; s.vy += 0.18; s.life -= dt / 0.5; } sparks = sparks.filter(s => s.life > 0);
-        for (const e of embers) { e.y -= e.s; e.x += Math.sin((e.y + T * 20) / 30) * 0.2; if (e.y < -4) { e.y = CH + 4; e.x = Math.random() * CW; } }
-        for (const a of aoes) { a.life -= dt / 0.5; } aoes = aoes.filter(a => a.life > 0);
-        if (marker) { const s = scr(P.tx, P.ty); marker.x = s.x; marker.y = s.y; marker.t -= dt / 0.6; if (marker.t <= 0) marker = null; }
-        hpUI();
-        uiCd -= dt; if (uiCd <= 0) { uiCd = 0.25; try { if (typeof updateUI === 'function') updateUI(); } catch (e) {} }   // 即時把角色數值更新到主面板
+        for (const ee of embers) { ee.y -= ee.s; ee.x += Math.sin((ee.y + T * 20) / 30) * 0.2; if (ee.y < -4) { ee.y = CH + 4; ee.x = Math.random() * CW; } }
+        if (marker) { const sc2 = scr(P.tx, P.ty); marker.x = sc2.x; marker.y = sc2.y; marker.t -= dt / 0.6; if (marker.t <= 0) marker = null; }
+        const f = wrap && wrap.querySelector('#dx-hpfill'), t2 = wrap && wrap.querySelector('#dx-hptxt'), k = wrap && wrap.querySelector('#dx-kills');
+        if (f) f.style.width = (player.hp / (player.mmp || 1) * 100) + '%'; if (t2) t2.textContent = 'HP ' + Math.round(player.hp).toLocaleString() + ' / ' + (player.mmp || 0).toLocaleString(); if (k) k.textContent = kills;
     }
+
     function lightGlow(p, r, col, a) { const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r); g.addColorStop(0, col.replace('rgb', 'rgba').replace(')', ',' + a + ')')); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 7); ctx.fill(); }
-    function drawTile(gx, gy) { const p = scr(gx, gy); if (p.x < -TW || p.x > CW + TW || p.y < -TH || p.y > CH + TH) return; const h = hash(gx, gy);
+    function drawTile(gx, gy) { const p = scr(gx, gy); if (p.x < -TW || p.x > CW + TW || p.y < -TH || p.y > CH + TH) return; const hh = hash(gx, gy);
         ctx.beginPath(); ctx.moveTo(p.x, p.y - TH / 2); ctx.lineTo(p.x + TW / 2, p.y); ctx.lineTo(p.x, p.y + TH / 2); ctx.lineTo(p.x - TW / 2, p.y); ctx.closePath();
-        const b = 20 + Math.floor(h * 16); ctx.fillStyle = 'rgb(' + (b + 6) + ',' + (b + 10) + ',' + (b + 22) + ')'; ctx.fill();
+        const b = 20 + Math.floor(hh * 16); ctx.fillStyle = 'rgb(' + (b + 6) + ',' + (b + 10) + ',' + (b + 22) + ')'; ctx.fill();
         ctx.beginPath(); ctx.moveTo(p.x - TW / 2, p.y); ctx.lineTo(p.x, p.y - TH / 2); ctx.lineTo(p.x + TW / 2, p.y); ctx.strokeStyle = 'rgba(120,150,210,.10)'; ctx.lineWidth = 1; ctx.stroke();
         ctx.beginPath(); ctx.moveTo(p.x - TW / 2, p.y); ctx.lineTo(p.x, p.y + TH / 2); ctx.lineTo(p.x + TW / 2, p.y); ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.stroke();
     }
@@ -15730,7 +15709,7 @@ window.onload = () => {
         ctx.save(); ctx.globalCompositeOperation = 'lighter'; lightGlow({ x: p.x, y: cy }, R * 2, isP ? 'rgb(56,189,248)' : 'rgb(225,29,72)', (isP ? 0.5 : 0.38)); ctx.restore();
         const img = gi(isP ? playerImg() : ent._img);
         ctx.save(); ctx.beginPath(); ctx.arc(p.x, cy, R, 0, 7); ctx.clip();
-        if (img && img.complete && img.naturalWidth) { const iw = img.naturalWidth, ih = img.naturalHeight, sc = Math.max(2 * R / iw, 2 * R / ih); ctx.drawImage(img, p.x - iw * sc / 2, cy - ih * sc / 2, iw * sc, ih * sc); if (ent.hitT > 0) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = Math.min(1, ent.hitT * 3.5); ctx.drawImage(img, p.x - iw * sc / 2, cy - ih * sc / 2, iw * sc, ih * sc); ctx.globalAlpha = 1; } }
+        if (img && img.complete && img.naturalWidth) { const iw = img.naturalWidth, ih = img.naturalHeight, sc2 = Math.max(2 * R / iw, 2 * R / ih); ctx.drawImage(img, p.x - iw * sc2 / 2, cy - ih * sc2 / 2, iw * sc2, ih * sc2); if (ent.hitT > 0) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = Math.min(1, ent.hitT * 3.5); ctx.drawImage(img, p.x - iw * sc2 / 2, cy - ih * sc2 / 2, iw * sc2, ih * sc2); ctx.globalAlpha = 1; } }
         else { ctx.fillStyle = isP ? '#38bdf8' : '#e11d48'; ctx.beginPath(); ctx.arc(p.x, cy, R, 0, 7); ctx.fill(); }
         ctx.restore();
         ctx.beginPath(); ctx.arc(p.x, cy, R, 0, 7); ctx.lineWidth = 2.5; ctx.strokeStyle = isP ? '#7dd3fc' : '#fca5a5'; ctx.stroke();
@@ -15745,22 +15724,21 @@ window.onload = () => {
         for (let s = 2 * a; s <= 2 * b; s++) for (let gx = a; gx <= b; gx++) { const gy = s - gx; if (gy < c || gy > d) continue; drawTile(gx, gy); }
         const pp = scr(P.gx, P.gy);
         ctx.save(); ctx.globalCompositeOperation = 'lighter'; const rx = AOE_R * TW * 0.5, ry = AOE_R * TH * 0.5;
-        ctx.strokeStyle = 'rgba(129,140,248,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(pp.x, pp.y, rx, ry, 0, 0, 7); ctx.stroke();
-        ctx.translate(pp.x, pp.y); ctx.scale(1, TH / TW); ctx.rotate(T * 0.6); ctx.strokeStyle = 'rgba(165,180,252,.4)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, rx * 0.68, 0, 7); ctx.stroke(); ctx.restore();
-        for (const ao of aoes) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const k = 1 - ao.life; ctx.strokeStyle = 'rgba(165,180,252,' + ao.life + ')'; ctx.lineWidth = 4 * ao.life; ctx.beginPath(); ctx.ellipse(pp.x, pp.y, rx * (0.3 + k), ry * (0.3 + k), 0, 0, 7); ctx.stroke(); ctx.restore(); }
+        ctx.strokeStyle = 'rgba(129,140,248,.32)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(pp.x, pp.y, rx, ry, 0, 0, 7); ctx.stroke();
+        ctx.translate(pp.x, pp.y); ctx.scale(1, TH / TW); ctx.rotate(T * 0.6); ctx.strokeStyle = 'rgba(165,180,252,.35)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, rx * 0.68, 0, 7); ctx.stroke(); ctx.restore();
         if (marker) { ctx.strokeStyle = 'rgba(125,211,252,' + marker.t + ')'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(marker.x, marker.y, 14 * (1.4 - marker.t), 7 * (1.4 - marker.t), 0, 0, 7); ctx.stroke(); }
         const ents = [{ e: P, p: true }]; for (const m of mobs) { if (!m.dead) ents.push({ e: m, p: false }); } ents.sort((u, v) => (u.e.gx + u.e.gy) - (v.e.gx + v.e.gy)); for (const o of ents) drawAvatar(o.e, o.p);
         ctx.save(); ctx.globalCompositeOperation = 'lighter'; for (const s of sparks) { const sp = scr(s.gx, s.gy); ctx.globalAlpha = Math.max(0, s.life); ctx.fillStyle = s.col; ctx.beginPath(); ctx.arc(sp.x + s.ox, sp.y + s.oy, 2 * s.life + 0.5, 0, 7); ctx.fill(); } ctx.restore(); ctx.globalAlpha = 1;
-        for (const e of embers) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = 'rgba(255,170,80,' + (e.a * 0.5) + ')'; ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, 7); ctx.fill(); ctx.restore(); }
+        for (const ee of embers) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = 'rgba(255,170,80,' + (ee.a * 0.5) + ')'; ctx.beginPath(); ctx.arc(ee.x, ee.y, ee.r, 0, 7); ctx.fill(); ctx.restore(); }
         ctx.textAlign = 'center';
         for (const dn of dmgs) { const al = Math.max(0, Math.min(1, dn.life * 1.4)); ctx.globalAlpha = al; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.85)'; let fs, col, txt;
-            if (dn.kind === 'crit') { fs = 24; col = '#fb7185'; txt = '-' + dn.amount; } else if (dn.kind === 'taken') { fs = 19; col = '#ef4444'; txt = '-' + dn.amount; } else if (dn.kind === 'revive') { fs = 16; col = '#67e8f9'; txt = '復活'; } else if (dn.kind === 'miss') { fs = 15; col = '#94a3b8'; txt = 'MISS'; } else { fs = 18; col = '#fde047'; txt = '-' + dn.amount; }
+            if (dn.kind === 'crit') { fs = 24; col = '#fb7185'; txt = '-' + dn.amount; } else if (dn.kind === 'taken') { fs = 19; col = '#ef4444'; txt = '-' + dn.amount; } else { fs = 18; col = '#fde047'; txt = '-' + dn.amount; }
             ctx.font = '900 ' + fs + 'px sans-serif'; ctx.strokeText(txt, dn.x, dn.y); ctx.fillStyle = col; ctx.fillText(txt, dn.x, dn.y); }
         ctx.globalAlpha = 1;
         const vg = ctx.createRadialGradient(CW / 2, CH / 2, 150, CW / 2, CH / 2, 360); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.5)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, CW, CH);
     }
-    function loop(now) { if (!active) return; const dt = Math.min(0.05, (now - last) / 1000); last = now; update(dt); draw(); raf = requestAnimationFrame(loop); }
-    function onTap(e) { const r = cv.getBoundingClientRect(); const t = e.touches ? e.touches[0] : e; const sx = (t.clientX - r.left) * (CW / r.width), sy = (t.clientY - r.top) * (CH / r.height); const g = unproj(sx, sy); P.tx = clampG(g.gx); P.ty = clampG(g.gy); const s = scr(P.tx, P.ty); marker = { x: s.x, y: s.y, t: 1 }; manualUntil = T + 3; }
+    function loop(now) { if (!active) return; const dt = Math.min(0.05, (now - last) / 1000); last = now; update(dt); if (active) draw(); raf = requestAnimationFrame(loop); }
+    function onTap(e) { const r = cv.getBoundingClientRect(); const t = e.touches ? e.touches[0] : e; const sx = (t.clientX - r.left) * (CW / r.width), sy = (t.clientY - r.top) * (CH / r.height); const g = unproj(sx, sy); P.tx = clampG(g.gx); P.ty = clampG(g.gy); const sc2 = scr(P.tx, P.ty); marker = { x: sc2.x, y: sc2.y, t: 1 }; manualUntil = T + 3; }
 
     function open() {
         if (active) return;
@@ -15768,19 +15746,20 @@ window.onload = () => {
         if (!poolIds().length) { alert('支配塔頂層怪物資料未載入'); return; }
         const host = document.getElementById('battle-view'); if (!host) { alert('找不到戰鬥區'); return; }
         active = true; window._domExploreActive = true;
-        savedMap = mapState.current; mapState.current = FLOOR;
-        P.gx = P.tx = 12; P.gy = P.ty = 12; cam = wiso(12, 12); T = 0; kills = 0; manualUntil = 0; uiCd = 0;
+        savedMap = mapState.current; savedMobs = mapState.mobs ? mapState.mobs.slice() : [null, null, null]; savedSpawnAt = mapState.spawnAt ? mapState.spawnAt.slice() : null; savedTI = mapState.targetIdx;
+        mapState.current = FLOOR; mapState.mobs = [null, null, null]; mapState.spawnAt = [null, null, null]; mapState.targetIdx = -1;
+        P.gx = P.tx = 12; P.gy = P.ty = 12; cam = wiso(12, 12); T = 0; kills = 0; manualUntil = 0; _lastPHp = player.hp;
         dmgs = []; sparks = []; aoes = []; marker = null;
         embers = []; for (let i = 0; i < 24; i++) embers.push({ x: Math.random() * CW, y: Math.random() * CH, s: 0.2 + Math.random() * 0.5, r: 1 + Math.random() * 1.4, a: Math.random() });
         spawnField();
-        const ml = document.getElementById('mob-list'); if (ml) ml.style.display = 'none';   // 藏原本 3 格怪，畫面留在原位
+        const ml = document.getElementById('mob-list'); if (ml) ml.style.display = 'none';
         wrap = document.createElement('div'); wrap.id = 'dx-wrap'; wrap.style.cssText = 'width:100%;';
         wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
             + '<div style="color:#cbd5e1;font-weight:800;font-size:14px;">🗼 支配塔探索 <span style="color:#64748b;font-size:11px;">頂層</span> · 擊殺 <b id="dx-kills" style="color:#a5b4fc;">0</b></div>'
             + '<button id="dx-exit" style="background:linear-gradient(180deg,#7f1d1d,#991b1b);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-weight:700;cursor:pointer;font-size:13px;">✕ 離開探索</button></div>'
             + '<div style="position:relative;width:100%;"><canvas id="dx-cv" width="' + CW + '" height="' + CH + '" style="width:100%;max-width:640px;display:block;margin:0 auto;border:1px solid #1e293b;border-radius:12px;touch-action:none;"></canvas>'
             + '<div style="position:absolute;left:14px;bottom:12px;width:170px;pointer-events:none;"><div style="height:10px;background:#1e293b;border:1px solid #475569;border-radius:99px;overflow:hidden;"><div id="dx-hpfill" style="height:100%;width:100%;background:linear-gradient(90deg,#22c55e,#a3e635);"></div></div><div id="dx-hptxt" style="font-size:11px;color:#cbd5e1;margin-top:2px;text-shadow:0 1px 2px #000;"></div></div></div>'
-            + '<div style="margin-top:6px;font-size:11px;color:#64748b;text-align:center;">點地板移動、自動找怪、圓圈魔法自動範圍打擊。傷害吃你真實能力，擊殺給<b>真實 exp／金幣／掉落</b>並即時更新角色面板。</div>';
+            + '<div style="margin-top:6px;font-size:11px;color:#64748b;text-align:center;">點地板移動、自動找怪。戰鬥沿用正常系統：技能／符石／娃娃／隊伍／爆擊／攻速全套用，獎勵即時進角色。</div>';
         host.appendChild(wrap);
         cv = wrap.querySelector('#dx-cv'); ctx = cv.getContext('2d');
         cv.addEventListener('mousedown', onTap); cv.addEventListener('touchstart', function (e) { e.preventDefault(); onTap(e); }, { passive: false });
@@ -15788,9 +15767,11 @@ window.onload = () => {
         last = performance.now(); raf = requestAnimationFrame(loop);
     }
     function close() {
+        if (!active) return;
         active = false; window._domExploreActive = false;
         if (raf) cancelAnimationFrame(raf); raf = null;
         if (savedMap != null) mapState.current = savedMap;
+        if (savedMobs) mapState.mobs = savedMobs; if (savedSpawnAt) mapState.spawnAt = savedSpawnAt; if (savedTI != null) mapState.targetIdx = savedTI;
         if (wrap && wrap.parentNode) wrap.parentNode.removeChild(wrap); wrap = null;
         const ml = document.getElementById('mob-list'); if (ml) ml.style.display = '';
         try { if (typeof calcStats === 'function') calcStats(); if (typeof updateUI === 'function') updateUI(); if (typeof renderMobs === 'function') renderMobs(); } catch (e) {}
