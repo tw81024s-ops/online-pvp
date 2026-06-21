@@ -15634,6 +15634,7 @@ window.onload = () => {
     const CW = 480, CH = 460, TW = 44, TH = 22, N = 25, AOE_R = 2.4, ENGAGE = 5.5;
     let active = false, raf = null, wrap = null, cv = null, ctx = null, last = 0;
     let cam = { x: 0, y: 0 }, T = 0, kills = 0, manualUntil = 0, logCd = 0;
+    const _LOGROWS = [5, 8, 12, 16]; let _logRi = 0;
     let savedMap = null, savedMobs = null, savedSpawnAt = null, savedTI = null, _lastPHp = null;
     const P = { gx: 12, gy: 12, tx: 12, ty: 12, hitT: 0, moving: false };
     let mobs = [], dmgs = [], sparks = [], embers = [], aoes = [], marker = null;
@@ -15649,8 +15650,19 @@ window.onload = () => {
     function hash(x, y) { let h = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return h - Math.floor(h); }
     function poolIds() { const p = (typeof DB !== 'undefined' && DB.maps && DB.maps[FLOOR]) || []; return p.filter(id => DB.mobs && DB.mobs[id]); }
     function buildMob() {
-        const ids = poolIds(); if (!ids.length) return null;
-        const id = ids[Math.floor(Math.random() * ids.length)]; const def = DB.mobs[id];
+        const pool = poolIds(); if (!pool.length) return null;
+        const bossPool = pool.filter(id => DB.mobs[id] && DB.mobs[id].boss);
+        const normalPool = pool.filter(id => DB.mobs[id] && !DB.mobs[id].boss);
+        // 🐉 套用王規則：冷卻中不生王、場上同時只一隻王、純王房只生那隻王
+        const onBossCd = (player.dragonBossCd && Date.now() < (player.dragonBossCd[FLOOR] || 0)) || (player.domBossCd && Date.now() < (player.domBossCd[FLOOR] || 0));
+        const bossOnField = mobs.some(m => m && !m.dead && m.boss);
+        let id = null;
+        if (bossPool.length && !onBossCd && !bossOnField && (normalPool.length === 0 || Math.random() < 0.03)) {
+            id = bossPool[Math.floor(Math.random() * bossPool.length)];
+        } else if (normalPool.length) {
+            id = normalPool[Math.floor(Math.random() * normalPool.length)];
+        } else { return null; }   // 純王房且王不可生（冷卻中／已在場）→ 此格不生
+        const def = DB.mobs[id];
         let gx, gy, tries = 0; do { gx = 1 + Math.random() * (N - 2); gy = 1 + Math.random() * (N - 2); tries++; } while (Math.hypot(gx - P.gx, gy - P.gy) < 3 && tries < 30);
         return Object.assign({}, def, { id, gx, gy, wx: gx, wy: gy, curHp: def.hp, uid: (typeof uid === 'function' ? uid() : Math.random()), _magCd: {}, justHit: false, st: (typeof newMobStatus === 'function' ? newMobStatus() : {}), er: def.er || 0, wander: 1 + Math.random() * 2, hitT: 0, dead: false, _lastHp: def.hp, _img: mobImg(def) });
     }
@@ -15669,6 +15681,7 @@ window.onload = () => {
     }
     window._exploreSync = syncSlots;
 
+    function _applyLogRows() { const r = _LOGROWS[_logRi]; const dl = wrap && wrap.querySelector('#dx-log'); const ex = wrap && wrap.querySelector('#dx-exp'); if (dl) dl.style.height = (r * 14 + 8) + 'px'; if (ex) ex.textContent = '⤢ ' + r + '行'; if (dl) dl.scrollTop = dl.scrollHeight; }
     function mapNameNow() { try { const se = document.getElementById('map-select'); if (se && se.options[se.selectedIndex]) return se.options[se.selectedIndex].text; } catch (e) {} return FLOOR; }
     function reinit(nf) {
         FLOOR = nf; savedMap = nf;
@@ -15704,10 +15717,11 @@ window.onload = () => {
         for (const ee of embers) { ee.y -= ee.s; ee.x += Math.sin((ee.y + T * 20) / 30) * 0.2; if (ee.y < -4) { ee.y = CH + 4; ee.x = Math.random() * CW; } }
         if (marker) { const sc2 = scr(P.tx, P.ty); marker.x = sc2.x; marker.y = sc2.y; marker.t -= dt / 0.6; if (marker.t <= 0) marker = null; }
         const f = wrap && wrap.querySelector('#dx-hpfill'), t2 = wrap && wrap.querySelector('#dx-hptxt'), mf = wrap && wrap.querySelector('#dx-mpfill'), mt = wrap && wrap.querySelector('#dx-mptxt'), k = wrap && wrap.querySelector('#dx-kills');
-        if (f) f.style.width = (player.hp / (player.mhp || 1) * 100) + '%'; if (t2) t2.textContent = 'HP ' + Math.round(player.hp).toLocaleString() + ' / ' + (player.mhp || 0).toLocaleString();
-        if (mf) mf.style.width = (player.mp / (player.mmp || 1) * 100) + '%'; if (mt) mt.textContent = 'MP ' + Math.round(player.mp).toLocaleString() + ' / ' + (player.mmp || 0).toLocaleString();
+        const hpPct = Math.round(player.hp / (player.mhp || 1) * 100), mpPct = Math.round(player.mp / (player.mmp || 1) * 100);
+        if (f) f.style.width = Math.min(100, hpPct) + '%'; if (t2) t2.innerHTML = 'HP ' + Math.round(player.hp).toLocaleString() + ' / ' + (player.mhp || 0).toLocaleString() + ' · <b style="color:#a3e635;">' + hpPct + '%</b>';
+        if (mf) mf.style.width = Math.min(100, mpPct) + '%'; if (mt) mt.innerHTML = 'MP ' + Math.round(player.mp).toLocaleString() + ' / ' + (player.mmp || 0).toLocaleString() + ' · <b style="color:#22d3ee;">' + mpPct + '%</b>';
         if (k) k.textContent = kills;
-        logCd -= dt; if (logCd <= 0) { logCd = 0.2; const cl = document.getElementById('combat-log'), dl = wrap && wrap.querySelector('#dx-log'); if (cl && dl) { const ks = cl.children, nn = ks.length; let lh = ''; for (let i = Math.max(0, nn - 9); i < nn; i++) lh += ks[i].outerHTML; if (dl.innerHTML !== lh) { dl.innerHTML = lh; dl.scrollTop = dl.scrollHeight; } } }
+        logCd -= dt; if (logCd <= 0) { logCd = 0.2; const cl = document.getElementById('combat-log'), dl = wrap && wrap.querySelector('#dx-log'); if (cl && dl) { const ks = cl.children, nn = ks.length; let lh = ''; for (let i = Math.max(0, nn - 50); i < nn; i++) lh += ks[i].outerHTML; if (dl.innerHTML !== lh) { const atB = (dl.scrollHeight - dl.scrollTop - dl.clientHeight) < 24; const pv = dl.scrollTop; dl.innerHTML = lh; if (atB) dl.scrollTop = dl.scrollHeight; else dl.scrollTop = pv; } } }
     }
 
     function lightGlow(p, r, col, a) { const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r); g.addColorStop(0, col.replace('rgb', 'rgba').replace(')', ',' + a + ')')); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 7); ctx.fill(); }
@@ -15786,7 +15800,11 @@ window.onload = () => {
             + '<div style="margin-top:6px;font-size:11px;color:#64748b;text-align:center;">點地板移動、自動找怪。戰鬥沿用正常系統：技能／符石／娃娃／隊伍／爆擊／攻速全套用，獎勵即時進角色。</div>';
         host.appendChild(wrap);
         cv = wrap.querySelector('#dx-cv'); ctx = cv.getContext('2d');
-        const _logDiv = document.createElement('div'); _logDiv.id = 'dx-log'; _logDiv.style.cssText = 'position:absolute;right:8px;bottom:10px;width:48%;max-width:300px;max-height:42%;overflow:hidden;background:rgba(5,8,12,.5);border:1px solid rgba(120,150,210,.25);border-radius:8px;padding:5px 7px;font-size:11px;line-height:1.35;pointer-events:none;text-shadow:0 1px 2px #000;'; cv.parentNode.appendChild(_logDiv);
+        const _lw = document.createElement('div'); _lw.id = 'dx-logwrap'; _lw.style.cssText = 'position:absolute;right:8px;bottom:10px;width:62%;max-width:420px;display:flex;flex-direction:column;align-items:flex-end;gap:3px;';
+        const _exp = document.createElement('button'); _exp.id = 'dx-exp'; _exp.style.cssText = 'pointer-events:auto;background:rgba(13,22,34,.8);color:#a5b4fc;border:1px solid rgba(120,150,210,.35);border-radius:7px;font-size:10px;font-weight:700;padding:2px 7px;cursor:pointer;text-shadow:0 1px 2px #000;';
+        _exp.onclick = function () { _logRi = (_logRi + 1) % _LOGROWS.length; _applyLogRows(); };
+        const _logDiv = document.createElement('div'); _logDiv.id = 'dx-log'; _logDiv.style.cssText = 'width:100%;height:78px;overflow-y:auto;overflow-x:hidden;background:rgba(5,8,12,.5);border:1px solid rgba(120,150,210,.25);border-radius:8px;padding:4px 7px;font-size:10px;line-height:1.3;pointer-events:auto;touch-action:pan-y;text-shadow:0 1px 2px #000;';
+        _lw.appendChild(_exp); _lw.appendChild(_logDiv); cv.parentNode.appendChild(_lw); _logRi = 0; _applyLogRows();
         cv.addEventListener('mousedown', onTap); cv.addEventListener('touchstart', function (e) { e.preventDefault(); onTap(e); }, { passive: false });
         wrap.querySelector('#dx-exit').onclick = close;
         last = performance.now(); raf = requestAnimationFrame(loop);
