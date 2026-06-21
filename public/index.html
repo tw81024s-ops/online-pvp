@@ -5269,6 +5269,11 @@ function spawnMob(idx) {
     }
     let pool = DB.maps[mapState.current];
     if(!pool) return;
+    // 🐉 五龍巢穴：王死後 30 分鐘重生 CD，冷卻中此巢穴不出怪（純王房，期間空場）
+    if ((mapState.current === 'antaras_lair' || mapState.current === 'fafurion_lair' || mapState.current === 'valakas_lair' || mapState.current === 'lindvior_lair' || mapState.current === 'giltas_lair')
+        && Date.now() < ((player.dragonBossCd && player.dragonBossCd[mapState.current]) || 0)) {
+        return;   // 冷卻中：不重生王
+    }
     let bossInBattle = mapState.mobs.some(m => m && m.boss);
     let bossPool = pool.filter(id => DB.mobs[id] && DB.mobs[id].boss);
     let normalPool = pool.filter(id => DB.mobs[id] && !DB.mobs[id].boss);
@@ -6694,25 +6699,19 @@ function killMob(idx) {
             if (_BT[3] && Math.random() < 0.01*_sm) gainSoulStone(_BT[3][Math.floor(Math.random()*_BT[3].length)], 1);
         }
     }
-    // ===== 🐉 五龍特殊圖：靈魂石保底（每隻龍各自 30 分鐘 CD；過了必掉 1 顆，T3 70% / T4 20% / T5 10%）=====
+    // ===== 🐉 五龍巢穴：王死後該巢穴 30 分鐘才重生；每次擊殺必掉 1 顆靈魂石（T3 70% / T4 20% / T5 10%）=====
     (function(){
         var _DRG = { '安塔瑞斯':1, '法利昂':1, '巴拉卡斯':1, '林德拜爾':1, '吉爾塔斯':1 };
         if (mob && mob.boss && _DRG[mob.n]) {
-            if (!player.dragonSoulCd) player.dragonSoulCd = {};
-            var _now = Date.now(), _ok = player.dragonSoulCd[mob.n] || 0;
-            if (_now >= _ok) {
-                if (typeof gainSoulStone === 'function') {
-                    var _r = Math.random(), _t = (_r < 0.70 ? 3 : (_r < 0.90 ? 4 : 5));
-                    var _poolT = (window.SOULSTONE_BY_TIER || {})[_t] || [];
-                    if (_poolT.length) {
-                        gainSoulStone(_poolT[Math.floor(Math.random() * _poolT.length)], 1);   // gainSoulStone 已自帶「獲得靈魂石」訊息
-                        player.dragonSoulCd[mob.n] = _now + 30 * 60 * 1000;
-                        if (typeof logSys === 'function') logSys('🔮 <span class="text-rose-400 font-bold">' + mob.n + ' 靈魂石保底已發放！</span>（此王 30 分鐘後再保底）');
-                    }
-                }
-            } else if (typeof logSys === 'function') {
-                logSys('<span class="text-slate-400">' + mob.n + ' 的靈魂石保底冷卻中（約 ' + Math.ceil((_ok - _now) / 60000) + ' 分鐘）。</span>');
+            if (!player.dragonBossCd) player.dragonBossCd = {};
+            player.dragonBossCd[mapState.current] = Date.now() + 30 * 60 * 1000;   // 此巢穴 30 分鐘後王才重生
+            if (typeof gainSoulStone === 'function') {
+                var _r = Math.random(), _t = (_r < 0.70 ? 3 : (_r < 0.90 ? 4 : 5));
+                var _poolT = (window.SOULSTONE_BY_TIER || {})[_t] || [];
+                if (_poolT.length) gainSoulStone(_poolT[Math.floor(Math.random() * _poolT.length)], 1);   // gainSoulStone 自帶「獲得靈魂石」訊息
             }
+            if (typeof logSys === 'function') logSys('🐉 <span class="text-rose-400 font-bold">' + mob.n + ' 已被擊敗！</span>此巢穴 30 分鐘後才會再現身。');
+            try { if (typeof saveGame === 'function') saveGame(); } catch (e) { }   // 立即寫檔：CD 絕對時間戳即刻持久化，重登不會跳過
         }
     })();
     // ===== 夢幻之島（3轉）：萬能藥水掉落（6種各自獨立 2%）=====
