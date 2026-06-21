@@ -15635,6 +15635,12 @@ window.onload = () => {
 /* ===== 🗼 支配塔探索模式 (Phase 1) — 戰鬥 100% 沿用真實 tick()，模組只管移動/鏡頭/同步 ===== */
 (function () {
     let FLOOR = 'dom_top';
+    function _exploreBlocked(m) {
+        if (typeof isTowerMap === 'function' && isTowerMap(m)) return true;       // 🗼 守護TD／爬塔
+        if (typeof isSiegeArea === 'function' && isSiegeArea(m)) return true;     // 攻城（肯特內外城）
+        if (typeof player !== 'undefined' && player && player.tower && player.tower.active) return true;  // 爬塔進行中
+        return false;
+    }
     const CW = 480, CH = 460, TW = 44, TH = 22, N = 25, AOE_R = 2.4, ENGAGE = 5.5;
     let active = false, raf = null, wrap = null, cv = null, ctx = null, last = 0;
     let cam = { x: 0, y: 0 }, T = 0, kills = 0, manualUntil = 0, logCd = 0;
@@ -15736,6 +15742,7 @@ window.onload = () => {
     function reinit(nf) {
         FLOOR = nf; savedMap = nf;
         if (!poolIds().length) { close(); return; }   // 切到村莊等無怪地圖：離開探索
+        if (_exploreBlocked(FLOOR)) { close(); return; }   // 🚫 切到爬塔/攻城：離開地圖模式
         P.gx = P.tx = 12; P.gy = P.ty = 12; cam = wiso(12, 12); manualUntil = 0; _lastPHp = player.hp;
         spawnField();
         const tEl = wrap && wrap.querySelector('#dx-maptitle'); if (tEl) tEl.textContent = mapNameNow();
@@ -15847,6 +15854,7 @@ window.onload = () => {
         if (active) return;
         if (typeof player === 'undefined' || !player || !player.cls) { alert('請先載入角色'); return; }
         FLOOR = (mapState && mapState.current) || FLOOR;
+        if (_exploreBlocked(FLOOR)) return;   // 🚫 爬塔/攻城等特殊模式不套用地圖模式
         // 🔒 支配者之塔防呆：地圖模式同樣要求轉生 15＋持有該層傳送石（必須先合法傳送進入）
         if (FLOOR.indexOf('dom_') === 0) {
             if ((player.reborn || 0) < 15) { alert('🔒 支配者之塔需轉生 15 轉以上才能進入。'); return; }
@@ -15894,7 +15902,7 @@ window.onload = () => {
         try { if (typeof calcStats === 'function') calcStats(); if (typeof updateUI === 'function') updateUI(); if (typeof renderMobs === 'function') renderMobs(); } catch (e) {}
     }
     window.openDomExplore = function () { autoMode = true; open(); };
-    window._exploreMaybeAutoEnter = function () { try { if (autoMode && !active && typeof mapState !== 'undefined' && mapState.current && DB.maps[mapState.current] && DB.maps[mapState.current].length) open(); } catch (e) {} };
+    window._exploreMaybeAutoEnter = function () { try { if (autoMode && !active && typeof mapState !== 'undefined' && mapState.current && DB.maps[mapState.current] && DB.maps[mapState.current].length && !_exploreBlocked(mapState.current)) open(); } catch (e) {} };
     (function _waitAutoEnter() { let n = 0; const iv = setInterval(function () { n++; if (n > 60) { clearInterval(iv); return; } try { if (typeof player !== 'undefined' && player && player.cls && typeof mapState !== 'undefined' && mapState.current) { clearInterval(iv); setTimeout(function () { try { window._exploreMaybeAutoEnter(); } catch (e) {} }, 900); } } catch (e) {} }, 500); })();
 })();
 /* ===== 支配塔探索模式 END ===== */
