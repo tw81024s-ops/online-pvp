@@ -5896,6 +5896,7 @@ function playerAttack() {
             }
         }
         target.curHp -= result.dmg;
+        if (result.crit && window._domExploreActive) target._critFlash = Date.now();
         target.justHit = getWpnEle(player.eq.wpn, wpn);
         if (player._setBeauty5 && result.heavy) player._beautyNextSure = true;   // 🔮 麗人 5/5：觸發重擊 → 下一次一般攻擊必中
         if (player._setWhiteBird5 && target.curHp > 0) { if (!target.st) target.st = newMobStatus(); target.st.fragile = 30; }   // 🔮 白鳥 5/5：脆弱 3 秒（重複觸發刷新）
@@ -15642,6 +15643,29 @@ window.onload = () => {
     const imgCache = {};
     function gi(src) { if (!imgCache[src]) { const im = new Image(); im.src = src; imgCache[src] = im; } return imgCache[src]; }
     function mobImg(def) { return def.img || ('assets/icons/monsters/' + def.n + '.png'); }
+    function exploreTheme(m) { m = m || '';
+        const O = { fire_dragon:'fire', dragon_valley:'fire', demon_temple:'fire',
+            forgotten_island:'water', dream_island:'water', talking_island_port:'water',
+            giltas_lair:'ice', silver_knight:'ice',
+            lindvior_lair:'wind', windwood:'wind',
+            fallen_knights:'dark', graveyard:'dark', elf_tomb:'dark',
+            thebes_1:'desert', thebes_2:'desert', thebes_3:'desert', thebes_altar:'desert', desert:'desert',
+            rasta:'desert', rasta_1:'desert', rasta_2:'desert', rasta_3:'desert', rasta_4:'desert',
+            elf_forest:'forest', mirror_forest:'forest', tikal_temple:'forest', jp_field:'forest',
+            rebirth_abyss:'poison', demon_realm:'poison' };
+        if (O[m]) return O[m];
+        if (/^dom_/.test(m)) return 'ice';
+        if (/^tower_/.test(m)) return 'dark';
+        if (/poison|venom|toxic|swamp|abyss/.test(m)) return 'poison';
+        if (/fire|lava|volcano|dragon|demon|hell/.test(m)) return 'fire';
+        if (/ice|snow|frost|glacier|silver|dom/.test(m)) return 'ice';
+        if (/wind|storm|sky|thunder/.test(m)) return 'wind';
+        if (/water|sea|port|island|lake|ocean/.test(m)) return 'water';
+        if (/desert|sand|thebes|rasta/.test(m)) return 'desert';
+        if (/forest|wood|tree|elf|jungle|temple|mirror/.test(m)) return 'forest';
+        if (/tomb|grave|dark|shadow|knight|fallen/.test(m)) return 'dark';
+        return 'dark';
+    }
     function playerImg() { const cn = { knight: '騎士', mage: '法師', elf: '妖精', darkelf: '黑暗妖精', dragon: '龍騎士' }[player.cls] || '騎士'; const mf = (player.avatar && player.avatar.indexOf('女') >= 0) ? 'f' : 'm'; return 'assets/icons/poly/支配青' + cn + '_變身_' + mf + '.png'; }
     function wiso(gx, gy) { return { x: (gx - gy) * (TW / 2), y: (gx + gy) * (TH / 2) }; }
     function scr(gx, gy) { const w = wiso(gx, gy); return { x: w.x - cam.x + CW / 2, y: w.y - cam.y + CH / 2 }; }
@@ -15680,7 +15704,7 @@ window.onload = () => {
     }
     function spawnField() { mobs = []; for (let i = 0; i < 30; i++) { const m = buildMob(); if (m) mobs.push(m); } }
     function nearest() { let b = 99, t = null; for (const m of mobs) { if (m.dead || m._dead || m.curHp <= 0) continue; const d = dist(P, m); if (d < b) { b = d; t = m; } } return t; }
-    function popDmg(pos, amount, kind) { const sc2 = scr(pos.gx, pos.gy); dmgs.push({ x: sc2.x + (Math.random() * 14 - 7), y: sc2.y - 22, vy: -0.8, life: 1, amount, kind }); }
+    function popDmg(pos, amount, kind) { const sc2 = scr(pos.gx, pos.gy); dmgs.push({ x: sc2.x + (Math.random() * 14 - 7), y: sc2.y - 22, vy: -0.8, life: 1, amount, kind, t: 0 }); }
     function burst(pos, col, n) { for (let i = 0; i < n; i++) { const a = Math.random() * 7, sp = 1 + Math.random() * 2.6; sparks.push({ gx: pos.gx, gy: pos.gy, ox: 0, oy: -10, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1, life: 1, col }); } }
 
     // 真實 tick() 會呼叫這個：把最近的怪同步進 3 格戰鬥槽，讓 tick 用「技能/符石/娃娃/隊伍/普攻/爆擊」全套打它們
@@ -15723,7 +15747,7 @@ window.onload = () => {
         for (let mi = 0; mi < mobs.length; mi++) { const m = mobs[mi];
             if (!m || m.dead || m._dead) continue;
             if (m._lastHp === undefined) m._lastHp = m.curHp;
-            if (m.curHp < m._lastHp) { const d = Math.round(m._lastHp - m.curHp); popDmg(m, d, d >= m.hp * 0.25 ? 'crit' : 'hit'); m.hitT = 0.2; burst(m, '#fde68a', 5); }
+            if (m.curHp < m._lastHp) { const d = Math.round(m._lastHp - m.curHp); const isCrit = m._critFlash && (Date.now() - m._critFlash) < 500; if (isCrit) m._critFlash = 0; popDmg(m, d, isCrit ? 'crit' : 'hit'); m.hitT = 0.2; burst(m, isCrit ? '#fbbf24' : '#fde68a', isCrit ? 9 : 5); }
             m._lastHp = m.curHp; m.hitT = Math.max(0, m.hitT - dt);
             const d = dist(P, m);
             if (d < 5) { const ax = P.gx - m.gx, ay = P.gy - m.gy, am = Math.hypot(ax, ay) || 1; if (am > 1.0) { const mv = 1.4 * dt; m.gx += ax / am * mv; m.gy += ay / am * mv; } }
@@ -15732,7 +15756,7 @@ window.onload = () => {
         if (_lastPHp === null) _lastPHp = player.hp;
         if (player.hp < _lastPHp) { const d = Math.round(_lastPHp - player.hp); popDmg(P, d, 'taken'); P.hitT = 0.2; }
         _lastPHp = player.hp; P.hitT = Math.max(0, P.hitT - dt);
-        for (const d of dmgs) { d.y += d.vy * dt * 60; d.vy += dt * 0.5; d.life -= dt / 0.85; } dmgs = dmgs.filter(d => d.life > 0);
+        for (const d of dmgs) { d.y += d.vy * dt * 60; d.vy += dt * 0.5; d.life -= dt / 0.85; d.t = (d.t || 0) + 1; } dmgs = dmgs.filter(d => d.life > 0);
         for (const s of sparks) { s.ox += s.vx; s.oy += s.vy; s.vy += 0.18; s.life -= dt / 0.5; } sparks = sparks.filter(s => s.life > 0);
         for (const ee of embers) { ee.y -= ee.s; ee.x += Math.sin((ee.y + T * 20) / 30) * 0.2; if (ee.y < -4) { ee.y = CH + 4; ee.x = Math.random() * CW; } }
         if (marker) { const sc2 = scr(P.tx, P.ty); marker.x = sc2.x; marker.y = sc2.y; marker.t -= dt / 0.6; if (marker.t <= 0) marker = null; }
@@ -15764,11 +15788,27 @@ window.onload = () => {
         if (!isP) { const w = 2 * R + 2; ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(p.x - w / 2, cy - R - 9, w, 4); ctx.fillStyle = '#ef4444'; ctx.fillRect(p.x - w / 2 + 1, cy - R - 8, (w - 2) * Math.max(0, ent.curHp / ent.hp), 2);
             ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.strokeText(ent.n, p.x, cy - R - 12); ctx.fillStyle = '#fda4af'; ctx.fillText(ent.n, p.x, cy - R - 12); }
         else { ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.strokeText('你', p.x, cy - R - 8); ctx.fillStyle = '#7dd3fc'; ctx.fillText('你', p.x, cy - R - 8); }
+        if (isP && typeof DOLLS !== 'undefined' && player.dollEquip && player.dollEquip.length) {
+            const eq = player.dollEquip.slice(0, 3), n = eq.length, dr = 9, dist = 12;
+            for (let i = 0; i < n; i++) { const def = DOLLS.find(d => d.id === eq[i]); if (!def) continue;
+                const ang = (i / n) * Math.PI * 2 + T * 0.5;
+                const dx2 = p.x + Math.cos(ang) * (R + dist + 4), dy2 = cy + Math.sin(ang) * (R + dist + 4) * 0.55;
+                const rr = dr * (0.82 + 0.18 * (Math.sin(ang) * 0.5 + 0.5));
+                ctx.beginPath(); ctx.ellipse(dx2, dy2 + rr + 2, rr * 0.8, rr * 0.32, 0, 0, 7); ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.fill();
+                const dim = gi(def.img);
+                ctx.save(); ctx.beginPath(); ctx.arc(dx2, dy2, rr, 0, 7); ctx.clip();
+                if (dim && dim.complete && dim.naturalWidth) { const iw = dim.naturalWidth, ih = dim.naturalHeight, s = Math.max(2 * rr / iw, 2 * rr / ih); ctx.drawImage(dim, dx2 - iw * s / 2, dy2 - ih * s / 2, iw * s, ih * s); }
+                else { ctx.fillStyle = '#5b21b6'; ctx.fillRect(dx2 - rr, dy2 - rr, rr * 2, rr * 2); ctx.fillStyle = '#fff'; ctx.font = (rr * 1.3) + 'px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(def.emo || '🧸', dx2, dy2 + rr * 0.45); }
+                ctx.restore();
+                ctx.beginPath(); ctx.arc(dx2, dy2, rr, 0, 7); ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(196,181,253,.95)'; ctx.stroke();
+            }
+            ctx.textAlign = 'left';
+        }
     }
     function draw() {
         ctx.clearRect(0, 0, CW, CH);
         const bg = ctx.createLinearGradient(0, 0, 0, CH); bg.addColorStop(0, '#0a0e1a'); bg.addColorStop(1, '#05070d'); ctx.fillStyle = bg; ctx.fillRect(0, 0, CW, CH);
-        const bg2 = gi('assets/maps/explore_' + FLOOR + '.jpg');
+        const bg2 = gi('assets/maps/explore_theme_' + exploreTheme(FLOOR) + '.jpg');
         if (bg2 && bg2.complete && bg2.naturalWidth) { const x0 = -N * TW / 2 - cam.x + CW / 2, y0 = 0 - cam.y + CH / 2; ctx.drawImage(bg2, x0, y0, N * TW, N * TH); }
         else { const a = Math.max(0, Math.floor(P.gx) - 16), b = Math.min(N - 1, Math.floor(P.gx) + 16), c = Math.max(0, Math.floor(P.gy) - 16), d = Math.min(N - 1, Math.floor(P.gy) + 16);
             for (let s = 2 * a; s <= 2 * b; s++) for (let gx = a; gx <= b; gx++) { const gy = s - gx; if (gy < c || gy > d) continue; drawTile(gx, gy); } }
@@ -15781,9 +15821,17 @@ window.onload = () => {
         ctx.save(); ctx.globalCompositeOperation = 'lighter'; for (const s of sparks) { const sp = scr(s.gx, s.gy); ctx.globalAlpha = Math.max(0, s.life); ctx.fillStyle = s.col; ctx.beginPath(); ctx.arc(sp.x + s.ox, sp.y + s.oy, 2 * s.life + 0.5, 0, 7); ctx.fill(); } ctx.restore(); ctx.globalAlpha = 1;
         for (const ee of embers) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = 'rgba(255,170,80,' + (ee.a * 0.5) + ')'; ctx.beginPath(); ctx.arc(ee.x, ee.y, ee.r, 0, 7); ctx.fill(); ctx.restore(); }
         ctx.textAlign = 'center';
-        for (const dn of dmgs) { const al = Math.max(0, Math.min(1, dn.life * 1.4)); ctx.globalAlpha = al; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.85)'; let fs, col, txt;
-            if (dn.kind === 'crit') { fs = 24; col = '#fb7185'; txt = '-' + dn.amount; } else if (dn.kind === 'taken') { fs = 19; col = '#ef4444'; txt = '-' + dn.amount; } else { fs = 18; col = '#fde047'; txt = '-' + dn.amount; }
-            ctx.font = '900 ' + fs + 'px sans-serif'; ctx.strokeText(txt, dn.x, dn.y); ctx.fillStyle = col; ctx.fillText(txt, dn.x, dn.y); }
+        for (const dn of dmgs) { const al = Math.max(0, Math.min(1, dn.life * 1.4)); ctx.globalAlpha = al; const t = dn.t || 0;
+            if (dn.kind === 'crit') {
+                const k = Math.min(1, t / 8), sc = t < 8 ? (0.5 + 0.9 * (1 - Math.pow(1 - k, 2.2))) : 1;
+                const ox = t < 10 ? (Math.random() * 6 - 3) * (1 - t / 10) : 0;
+                ctx.save(); ctx.translate(dn.x + ox, dn.y); ctx.scale(sc, sc); ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.85)';
+                ctx.font = '900 13px sans-serif'; ctx.strokeText('爆擊!', 0, -26); ctx.fillStyle = '#fbbf24'; ctx.fillText('爆擊!', 0, -26);
+                ctx.font = '900 27px sans-serif'; ctx.strokeText('-' + dn.amount, 0, 0); ctx.fillStyle = '#f97316'; ctx.fillText('-' + dn.amount, 0, 0);
+                ctx.restore(); ctx.textAlign = 'left';
+            } else { let fs = (dn.kind === 'taken') ? 19 : 18, col = (dn.kind === 'taken') ? '#ef4444' : '#fde047';
+                ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.font = '900 ' + fs + 'px sans-serif'; ctx.strokeText('-' + dn.amount, dn.x, dn.y); ctx.fillStyle = col; ctx.fillText('-' + dn.amount, dn.x, dn.y); }
+        }
         ctx.globalAlpha = 1;
         const vg = ctx.createRadialGradient(CW / 2, CH / 2, 150, CW / 2, CH / 2, 360); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.5)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, CW, CH);
     }
