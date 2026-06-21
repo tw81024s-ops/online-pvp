@@ -12847,6 +12847,7 @@ function changeMap(force) {
         mapState.suppressSiegeBoss = true;   // 初次進場：必定不出現肯特城門/守護塔
         logSys(`--- 你走向了新的區域 ---`);
         renderMobs();
+        if (!force && window._exploreMaybeAutoEnter) try { window._exploreMaybeAutoEnter(); } catch (e) {}
     }
     syncMapSelectors();   // 切換完成後，同步分類選單與地圖選單為目前所在地圖
 }
@@ -15634,7 +15635,7 @@ window.onload = () => {
     const CW = 480, CH = 460, TW = 44, TH = 22, N = 25, AOE_R = 2.4, ENGAGE = 5.5;
     let active = false, raf = null, wrap = null, cv = null, ctx = null, last = 0;
     let cam = { x: 0, y: 0 }, T = 0, kills = 0, manualUntil = 0, logCd = 0;
-    const _LOGROWS = [5, 8, 12, 16]; let _logRi = 0;
+    const _LOGROWS = [5, 8, 12, 16]; let _logRi = 0; let autoMode = true;
     let savedMap = null, savedMobs = null, savedSpawnAt = null, savedTI = null, _lastPHp = null;
     const P = { gx: 12, gy: 12, tx: 12, ty: 12, hitT: 0, moving: false };
     let mobs = [], dmgs = [], sparks = [], embers = [], aoes = [], marker = null;
@@ -15653,15 +15654,26 @@ window.onload = () => {
         const pool = poolIds(); if (!pool.length) return null;
         const bossPool = pool.filter(id => DB.mobs[id] && DB.mobs[id].boss);
         const normalPool = pool.filter(id => DB.mobs[id] && !DB.mobs[id].boss);
-        // 🐉 套用王規則：冷卻中不生王、場上同時只一隻王、純王房只生那隻王
-        const onBossCd = (player.dragonBossCd && Date.now() < (player.dragonBossCd[FLOOR] || 0)) || (player.domBossCd && Date.now() < (player.domBossCd[FLOOR] || 0));
-        const bossOnField = mobs.some(m => m && !m.dead && m.boss);
+        const LAIRS = ['antaras_lair', 'fafurion_lair', 'valakas_lair', 'lindvior_lair', 'giltas_lair'];
         let id = null;
-        if (bossPool.length && !onBossCd && !bossOnField && (normalPool.length === 0 || Math.random() < 0.03)) {
+        if (LAIRS.indexOf(FLOOR) >= 0) {
+            // 龍巢純王房：冷卻中不生、場上只一隻王
+            const onCd = player.dragonBossCd && Date.now() < (player.dragonBossCd[FLOOR] || 0);
+            const anyAlive = mobs.some(m => m && !m.dead && !m._dead && m.curHp > 0);
+            if (onCd || anyAlive) return null;
+            const bp = bossPool.length ? bossPool : pool;
+            id = bp[Math.floor(Math.random() * bp.length)];
+        } else if (normalPool.length === 0) {
+            // 全王池但非龍巢（5轉墮落騎士團／8轉終焉之地）：王＝常規怪，滿場刷
             id = bossPool[Math.floor(Math.random() * bossPool.length)];
-        } else if (normalPool.length) {
-            id = normalPool[Math.floor(Math.random() * normalPool.length)];
-        } else { return null; }   // 純王房且王不可生（冷卻中／已在場）→ 此格不生
+        } else {
+            // 混合池（一般圖／支配塔）：滿場小怪，王稀有(3%)、場上最多一隻、冷卻中不生
+            const onCd = player.domBossCd && Date.now() < (player.domBossCd[FLOOR] || 0);
+            const bossOnField = mobs.some(m => m && !m.dead && !m._dead && m.boss);
+            if (bossPool.length && !onCd && !bossOnField && Math.random() < 0.03) id = bossPool[Math.floor(Math.random() * bossPool.length)];
+            else id = normalPool[Math.floor(Math.random() * normalPool.length)];
+        }
+        if (!id) return null;
         const def = DB.mobs[id];
         let gx, gy, tries = 0; do { gx = 1 + Math.random() * (N - 2); gy = 1 + Math.random() * (N - 2); tries++; } while (Math.hypot(gx - P.gx, gy - P.gy) < 3 && tries < 30);
         return Object.assign({}, def, { id, gx, gy, wx: gx, wy: gy, curHp: def.hp, uid: (typeof uid === 'function' ? uid() : Math.random()), _magCd: {}, justHit: false, st: (typeof newMobStatus === 'function' ? newMobStatus() : {}), er: def.er || 0, wander: 1 + Math.random() * 2, hitT: 0, dead: false, _lastHp: def.hp, _img: mobImg(def) });
@@ -15674,7 +15686,16 @@ window.onload = () => {
     // 真實 tick() 會呼叫這個：把最近的怪同步進 3 格戰鬥槽，讓 tick 用「技能/符石/娃娃/隊伍/普攻/爆擊」全套打它們
     function syncSlots() {
         if (!active) return;
-        const cand = mobs.filter(m => !m.dead && !m._dead && m.curHp > 0 && dist(P, m) <= ENGAGE).sort((a, b) => dist(P, a) - dist(P, b)).slice(0, 3);
+        const now = Date.now();
+        // 死亡結算 + 重生（時間戳，背景掛機也有效）
+        for (let i = 0; i < mobs.length; i++) { const m = mobs[i]; if (!m) continue;
+            if (m.dead) { if (now >= (m.respawnAt || 0)) { const nm = buildMob(); if (nm) mobs[i] = nm; } continue; }
+            if (m._dead || m.curHp <= 0) { m.dead = true; m.respawnAt = now + 2000; kills++; burst(m, '#fca5a5', 14); try { if (typeof updateUI === 'function') updateUI(); } catch (e) {} }
+        }
+        const alive = mobs.filter(m => m && !m.dead && !m._dead && m.curHp > 0);
+        let cand;
+        if (typeof document !== 'undefined' && document.hidden) cand = alive.slice().sort((a, b) => dist(P, a) - dist(P, b)).slice(0, 3);  // 背景：抓全場最近，保證持續開打
+        else cand = alive.filter(m => dist(P, m) <= ENGAGE).sort((a, b) => dist(P, a) - dist(P, b)).slice(0, 3);                         // 前景：螢幕內接戰
         mapState.mobs[0] = cand[0] || null; mapState.mobs[1] = cand[1] || null; mapState.mobs[2] = cand[2] || null;
         mapState.targetIdx = cand.length ? 0 : -1;
         if (!mapState.spawnAt) mapState.spawnAt = [null, null, null];
@@ -15700,8 +15721,7 @@ window.onload = () => {
         if (dm > 0.05) { const mv = Math.min(dm, 3.4 * dt); P.gx += dx / dm * mv; P.gy += dy / dm * mv; P.moving = true; } else P.moving = false;
         const tg = wiso(P.gx, P.gy); cam.x += (tg.x - cam.x) * Math.min(1, dt * 6); cam.y += (tg.y - cam.y) * Math.min(1, dt * 6);
         for (let mi = 0; mi < mobs.length; mi++) { const m = mobs[mi];
-            if (m.dead) { m.respawn -= dt; if (m.respawn <= 0) { const nm = buildMob(); if (nm) mobs[mi] = nm; } continue; }
-            if (m._dead || m.curHp <= 0) { m.dead = true; m.respawn = 2.0; kills++; burst(m, '#fca5a5', 14); try { if (typeof updateUI === 'function') updateUI(); } catch (e) {} continue; }
+            if (!m || m.dead || m._dead) continue;
             if (m._lastHp === undefined) m._lastHp = m.curHp;
             if (m.curHp < m._lastHp) { const d = Math.round(m._lastHp - m.curHp); popDmg(m, d, d >= m.hp * 0.25 ? 'crit' : 'hit'); m.hitT = 0.2; burst(m, '#fde68a', 5); }
             m._lastHp = m.curHp; m.hitT = Math.max(0, m.hitT - dt);
@@ -15783,6 +15803,7 @@ window.onload = () => {
         if (!poolIds().length) { alert('此地圖沒有可探索的怪物（村莊等非戰鬥地圖無法進入）'); return; }
         const host = document.getElementById('battle-view'); if (!host) { alert('找不到戰鬥區'); return; }
         active = true; window._domExploreActive = true;
+        if (!window._dxStyle) { const _st = document.createElement('style'); _st.textContent = '#dx-log,#dx-log *{font-size:10px !important;line-height:1.3 !important;letter-spacing:0 !important;} #dx-log .log-entry{padding:1px 0 !important;}'; (document.head||document.documentElement).appendChild(_st); window._dxStyle = true; }
         savedMap = mapState.current; savedMobs = mapState.mobs ? mapState.mobs.slice() : [null, null, null]; savedSpawnAt = mapState.spawnAt ? mapState.spawnAt.slice() : null; savedTI = mapState.targetIdx;
         mapState.current = FLOOR; mapState.mobs = [null, null, null]; mapState.spawnAt = [null, null, null]; mapState.targetIdx = -1;
         P.gx = P.tx = 12; P.gy = P.ty = 12; cam = wiso(12, 12); T = 0; kills = 0; manualUntil = 0; logCd = 0; _lastPHp = player.hp;
@@ -15806,7 +15827,7 @@ window.onload = () => {
         const _logDiv = document.createElement('div'); _logDiv.id = 'dx-log'; _logDiv.style.cssText = 'width:100%;height:78px;overflow-y:auto;overflow-x:hidden;background:rgba(5,8,12,.5);border:1px solid rgba(120,150,210,.25);border-radius:8px;padding:4px 7px;font-size:10px;line-height:1.3;pointer-events:auto;touch-action:pan-y;text-shadow:0 1px 2px #000;';
         _lw.appendChild(_exp); _lw.appendChild(_logDiv); cv.parentNode.appendChild(_lw); _logRi = 0; _applyLogRows();
         cv.addEventListener('mousedown', onTap); cv.addEventListener('touchstart', function (e) { e.preventDefault(); onTap(e); }, { passive: false });
-        wrap.querySelector('#dx-exit').onclick = close;
+        wrap.querySelector('#dx-exit').onclick = function () { autoMode = false; close(); };
         last = performance.now(); raf = requestAnimationFrame(loop);
     }
     function close() {
@@ -15819,7 +15840,9 @@ window.onload = () => {
         const ml = document.getElementById('mob-list'); if (ml) ml.style.display = '';
         try { if (typeof calcStats === 'function') calcStats(); if (typeof updateUI === 'function') updateUI(); if (typeof renderMobs === 'function') renderMobs(); } catch (e) {}
     }
-    window.openDomExplore = open;
+    window.openDomExplore = function () { autoMode = true; open(); };
+    window._exploreMaybeAutoEnter = function () { try { if (autoMode && !active && typeof mapState !== 'undefined' && mapState.current && DB.maps[mapState.current] && DB.maps[mapState.current].length) open(); } catch (e) {} };
+    (function _waitAutoEnter() { let n = 0; const iv = setInterval(function () { n++; if (n > 60) { clearInterval(iv); return; } try { if (typeof player !== 'undefined' && player && player.cls && typeof mapState !== 'undefined' && mapState.current) { clearInterval(iv); setTimeout(function () { try { window._exploreMaybeAutoEnter(); } catch (e) {} }, 900); } } catch (e) {} }, 500); })();
 })();
 /* ===== 支配塔探索模式 END ===== */
 
