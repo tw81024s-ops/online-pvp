@@ -15633,7 +15633,7 @@ window.onload = () => {
     let FLOOR = 'dom_top';
     const CW = 480, CH = 460, TW = 44, TH = 22, N = 25, AOE_R = 2.4, ENGAGE = 5.5;
     let active = false, raf = null, wrap = null, cv = null, ctx = null, last = 0;
-    let cam = { x: 0, y: 0 }, T = 0, kills = 0, manualUntil = 0;
+    let cam = { x: 0, y: 0 }, T = 0, kills = 0, manualUntil = 0, logCd = 0;
     let savedMap = null, savedMobs = null, savedSpawnAt = null, savedTI = null, _lastPHp = null;
     const P = { gx: 12, gy: 12, tx: 12, ty: 12, hitT: 0, moving: false };
     let mobs = [], dmgs = [], sparks = [], embers = [], aoes = [], marker = null;
@@ -15669,9 +15669,18 @@ window.onload = () => {
     }
     window._exploreSync = syncSlots;
 
+    function mapNameNow() { try { const se = document.getElementById('map-select'); if (se && se.options[se.selectedIndex]) return se.options[se.selectedIndex].text; } catch (e) {} return FLOOR; }
+    function reinit(nf) {
+        FLOOR = nf; savedMap = nf;
+        if (!poolIds().length) { close(); return; }   // 切到村莊等無怪地圖：離開探索
+        P.gx = P.tx = 12; P.gy = P.ty = 12; cam = wiso(12, 12); manualUntil = 0; _lastPHp = player.hp;
+        spawnField();
+        const tEl = wrap && wrap.querySelector('#dx-maptitle'); if (tEl) tEl.textContent = mapNameNow();
+    }
     function update(dt) {
         T += dt;
         if (player.dead) { close(); return; }
+        if (active && mapState.current && mapState.current !== FLOOR) { reinit(mapState.current); if (!active) return; }
         if (mapState._shadowPending) { const key = mapState._shadowPending; mapState._shadowPending = null; const sb = (typeof buildShadowBase === 'function') ? buildShadowBase(key) : null; if (sb && mobs.length) { const gx = clampG(P.gx + (Math.random() * 6 - 3)), gy = clampG(P.gy + (Math.random() * 6 - 3)); mobs[Math.floor(Math.random() * mobs.length)] = Object.assign({}, sb, { curHp: sb.hp, uid: uid(), _magCd: {}, justHit: false, st: newMobStatus(), gx, gy, wx: gx, wy: gy, er: sb.er || 0, wander: 1 + Math.random() * 2, hitT: 0, dead: false, _lastHp: sb.hp, _img: mobImg(sb) }); try { if (typeof logSys === 'function') logSys('⚫ 你的影子「' + sb.n + '」現身了！'); } catch (e) {} } }
         if (T > manualUntil) { const t = nearest(); if (t) { const d = dist(P, t); if (d > 1.2) { const ax = t.gx - P.gx, ay = t.gy - P.gy, am = Math.hypot(ax, ay) || 1; P.tx = clampG(P.gx + ax / am * 1.6); P.ty = clampG(P.gy + ay / am * 1.6); } else { P.tx = P.gx; P.ty = P.gy; } } }
         const dx = P.tx - P.gx, dy = P.ty - P.gy, dm = Math.hypot(dx, dy);
@@ -15698,6 +15707,7 @@ window.onload = () => {
         if (f) f.style.width = (player.hp / (player.mhp || 1) * 100) + '%'; if (t2) t2.textContent = 'HP ' + Math.round(player.hp).toLocaleString() + ' / ' + (player.mhp || 0).toLocaleString();
         if (mf) mf.style.width = (player.mp / (player.mmp || 1) * 100) + '%'; if (mt) mt.textContent = 'MP ' + Math.round(player.mp).toLocaleString() + ' / ' + (player.mmp || 0).toLocaleString();
         if (k) k.textContent = kills;
+        logCd -= dt; if (logCd <= 0) { logCd = 0.2; const cl = document.getElementById('combat-log'), dl = wrap && wrap.querySelector('#dx-log'); if (cl && dl) { const ks = cl.children, nn = ks.length; let lh = ''; for (let i = Math.max(0, nn - 9); i < nn; i++) lh += ks[i].outerHTML; if (dl.innerHTML !== lh) { dl.innerHTML = lh; dl.scrollTop = dl.scrollHeight; } } }
     }
 
     function lightGlow(p, r, col, a) { const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r); g.addColorStop(0, col.replace('rgb', 'rgba').replace(')', ',' + a + ')')); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 7); ctx.fill(); }
@@ -15761,21 +15771,22 @@ window.onload = () => {
         active = true; window._domExploreActive = true;
         savedMap = mapState.current; savedMobs = mapState.mobs ? mapState.mobs.slice() : [null, null, null]; savedSpawnAt = mapState.spawnAt ? mapState.spawnAt.slice() : null; savedTI = mapState.targetIdx;
         mapState.current = FLOOR; mapState.mobs = [null, null, null]; mapState.spawnAt = [null, null, null]; mapState.targetIdx = -1;
-        P.gx = P.tx = 12; P.gy = P.ty = 12; cam = wiso(12, 12); T = 0; kills = 0; manualUntil = 0; _lastPHp = player.hp;
+        P.gx = P.tx = 12; P.gy = P.ty = 12; cam = wiso(12, 12); T = 0; kills = 0; manualUntil = 0; logCd = 0; _lastPHp = player.hp;
         dmgs = []; sparks = []; aoes = []; marker = null;
         embers = []; for (let i = 0; i < 24; i++) embers.push({ x: Math.random() * CW, y: Math.random() * CH, s: 0.2 + Math.random() * 0.5, r: 1 + Math.random() * 1.4, a: Math.random() });
         spawnField();
         const ml = document.getElementById('mob-list'); if (ml) ml.style.display = 'none';
-        const mapName = (function () { try { const se = document.getElementById('map-select'); if (se && se.options[se.selectedIndex]) return se.options[se.selectedIndex].text; } catch (e) {} return FLOOR; })();
+        const mapName = mapNameNow();
         wrap = document.createElement('div'); wrap.id = 'dx-wrap'; wrap.style.cssText = 'width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;';
         wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
-            + '<div style="color:#cbd5e1;font-weight:800;font-size:14px;">🗺️ 地圖探索 <span style="color:#94a3b8;font-size:12px;">' + mapName + '</span> · 擊殺 <b id="dx-kills" style="color:#a5b4fc;">0</b></div>'
+            + '<div style="color:#cbd5e1;font-weight:800;font-size:14px;">🗺️ 地圖探索 <span id="dx-maptitle" style="color:#94a3b8;font-size:12px;">' + mapName + '</span> · 擊殺 <b id="dx-kills" style="color:#a5b4fc;">0</b></div>'
             + '<button id="dx-exit" style="background:linear-gradient(180deg,#7f1d1d,#991b1b);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-weight:700;cursor:pointer;font-size:13px;">✕ 離開探索</button></div>'
             + '<div style="position:relative;width:100%;"><canvas id="dx-cv" width="' + CW + '" height="' + CH + '" style="width:100%;max-width:520px;aspect-ratio:480/460;max-height:56vh;display:block;margin:0 auto;border:1px solid #1e293b;border-radius:12px;touch-action:none;box-sizing:border-box;"></canvas>'
             + '<div style="position:absolute;left:14px;bottom:12px;width:185px;pointer-events:none;">'+ '<div style="height:10px;background:#1e293b;border:1px solid #475569;border-radius:99px;overflow:hidden;"><div id="dx-hpfill" style="height:100%;width:100%;background:linear-gradient(90deg,#22c55e,#a3e635);"></div></div>'+ '<div id="dx-hptxt" style="font-size:11px;color:#cbd5e1;margin-top:1px;text-shadow:0 1px 2px #000;"></div>'+ '<div style="height:8px;background:#1e293b;border:1px solid #475569;border-radius:99px;overflow:hidden;margin-top:2px;"><div id="dx-mpfill" style="height:100%;width:100%;background:linear-gradient(90deg,#3b82f6,#22d3ee);"></div></div>'+ '<div id="dx-mptxt" style="font-size:11px;color:#a5c8ff;margin-top:1px;text-shadow:0 1px 2px #000;"></div>'+ '</div></div>'
             + '<div style="margin-top:6px;font-size:11px;color:#64748b;text-align:center;">點地板移動、自動找怪。戰鬥沿用正常系統：技能／符石／娃娃／隊伍／爆擊／攻速全套用，獎勵即時進角色。</div>';
         host.appendChild(wrap);
         cv = wrap.querySelector('#dx-cv'); ctx = cv.getContext('2d');
+        const _logDiv = document.createElement('div'); _logDiv.id = 'dx-log'; _logDiv.style.cssText = 'position:absolute;right:8px;bottom:10px;width:48%;max-width:300px;max-height:42%;overflow:hidden;background:rgba(5,8,12,.5);border:1px solid rgba(120,150,210,.25);border-radius:8px;padding:5px 7px;font-size:11px;line-height:1.35;pointer-events:none;text-shadow:0 1px 2px #000;'; cv.parentNode.appendChild(_logDiv);
         cv.addEventListener('mousedown', onTap); cv.addEventListener('touchstart', function (e) { e.preventDefault(); onTap(e); }, { passive: false });
         wrap.querySelector('#dx-exit').onclick = close;
         last = performance.now(); raf = requestAnimationFrame(loop);
