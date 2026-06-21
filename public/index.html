@@ -15630,7 +15630,7 @@ window.onload = () => {
 
 /* ===== 🗼 支配塔探索模式 (Phase 1) — 戰鬥 100% 沿用真實 tick()，模組只管移動/鏡頭/同步 ===== */
 (function () {
-    const FLOOR = 'dom_top';
+    let FLOOR = 'dom_top';
     const CW = 480, CH = 460, TW = 44, TH = 22, N = 25, AOE_R = 2.4, ENGAGE = 5.5;
     let active = false, raf = null, wrap = null, cv = null, ctx = null, last = 0;
     let cam = { x: 0, y: 0 }, T = 0, kills = 0, manualUntil = 0;
@@ -15672,6 +15672,7 @@ window.onload = () => {
     function update(dt) {
         T += dt;
         if (player.dead) { close(); return; }
+        if (mapState._shadowPending) { const key = mapState._shadowPending; mapState._shadowPending = null; const sb = (typeof buildShadowBase === 'function') ? buildShadowBase(key) : null; if (sb && mobs.length) { const gx = clampG(P.gx + (Math.random() * 6 - 3)), gy = clampG(P.gy + (Math.random() * 6 - 3)); mobs[Math.floor(Math.random() * mobs.length)] = Object.assign({}, sb, { curHp: sb.hp, uid: uid(), _magCd: {}, justHit: false, st: newMobStatus(), gx, gy, wx: gx, wy: gy, er: sb.er || 0, wander: 1 + Math.random() * 2, hitT: 0, dead: false, _lastHp: sb.hp, _img: mobImg(sb) }); try { if (typeof logSys === 'function') logSys('⚫ 你的影子「' + sb.n + '」現身了！'); } catch (e) {} } }
         if (T > manualUntil) { const t = nearest(); if (t) { const d = dist(P, t); if (d > 1.2) { const ax = t.gx - P.gx, ay = t.gy - P.gy, am = Math.hypot(ax, ay) || 1; P.tx = clampG(P.gx + ax / am * 1.6); P.ty = clampG(P.gy + ay / am * 1.6); } else { P.tx = P.gx; P.ty = P.gy; } } }
         const dx = P.tx - P.gx, dy = P.ty - P.gy, dm = Math.hypot(dx, dy);
         if (dm > 0.05) { const mv = Math.min(dm, 3.4 * dt); P.gx += dx / dm * mv; P.gy += dy / dm * mv; P.moving = true; } else P.moving = false;
@@ -15723,7 +15724,7 @@ window.onload = () => {
     function draw() {
         ctx.clearRect(0, 0, CW, CH);
         const bg = ctx.createLinearGradient(0, 0, 0, CH); bg.addColorStop(0, '#0a0e1a'); bg.addColorStop(1, '#05070d'); ctx.fillStyle = bg; ctx.fillRect(0, 0, CW, CH);
-        const bg2 = gi('assets/maps/dom_explore_bg.jpg');
+        const bg2 = gi('assets/maps/explore_' + FLOOR + '.jpg');
         if (bg2 && bg2.complete && bg2.naturalWidth) { const x0 = -N * TW / 2 - cam.x + CW / 2, y0 = 0 - cam.y + CH / 2; ctx.drawImage(bg2, x0, y0, N * TW, N * TH); }
         else { const a = Math.max(0, Math.floor(P.gx) - 16), b = Math.min(N - 1, Math.floor(P.gx) + 16), c = Math.max(0, Math.floor(P.gy) - 16), d = Math.min(N - 1, Math.floor(P.gy) + 16);
             for (let s = 2 * a; s <= 2 * b; s++) for (let gx = a; gx <= b; gx++) { const gy = s - gx; if (gy < c || gy > d) continue; drawTile(gx, gy); } }
@@ -15748,7 +15749,14 @@ window.onload = () => {
     function open() {
         if (active) return;
         if (typeof player === 'undefined' || !player || !player.cls) { alert('請先載入角色'); return; }
-        if (!poolIds().length) { alert('支配塔頂層怪物資料未載入'); return; }
+        FLOOR = (mapState && mapState.current) || FLOOR;
+        // 🔒 支配者之塔防呆：地圖模式同樣要求轉生 15＋持有該層傳送石（必須先合法傳送進入）
+        if (FLOOR.indexOf('dom_') === 0) {
+            if ((player.reborn || 0) < 15) { alert('🔒 支配者之塔需轉生 15 轉以上才能進入。'); return; }
+            const _df = (FLOOR === 'dom_top') ? 11 : parseInt(FLOOR.slice(4), 10);
+            if (_df >= 2 && (!window.hasDomTp || !window.hasDomTp(_df))) { alert('🔒 沒有「' + (window.domFloorName ? window.domFloorName(_df) : (_df + '樓')) + '傳送石」，請先用傳送石進入該層，才能開啟地圖模式。'); return; }
+        }
+        if (!poolIds().length) { alert('此地圖沒有可探索的怪物（村莊等非戰鬥地圖無法進入）'); return; }
         const host = document.getElementById('battle-view'); if (!host) { alert('找不到戰鬥區'); return; }
         active = true; window._domExploreActive = true;
         savedMap = mapState.current; savedMobs = mapState.mobs ? mapState.mobs.slice() : [null, null, null]; savedSpawnAt = mapState.spawnAt ? mapState.spawnAt.slice() : null; savedTI = mapState.targetIdx;
@@ -15758,11 +15766,12 @@ window.onload = () => {
         embers = []; for (let i = 0; i < 24; i++) embers.push({ x: Math.random() * CW, y: Math.random() * CH, s: 0.2 + Math.random() * 0.5, r: 1 + Math.random() * 1.4, a: Math.random() });
         spawnField();
         const ml = document.getElementById('mob-list'); if (ml) ml.style.display = 'none';
-        wrap = document.createElement('div'); wrap.id = 'dx-wrap'; wrap.style.cssText = 'width:100%;';
+        const mapName = (function () { try { const se = document.getElementById('map-select'); if (se && se.options[se.selectedIndex]) return se.options[se.selectedIndex].text; } catch (e) {} return FLOOR; })();
+        wrap = document.createElement('div'); wrap.id = 'dx-wrap'; wrap.style.cssText = 'width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;';
         wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
-            + '<div style="color:#cbd5e1;font-weight:800;font-size:14px;">🗼 支配塔探索 <span style="color:#64748b;font-size:11px;">頂層</span> · 擊殺 <b id="dx-kills" style="color:#a5b4fc;">0</b></div>'
+            + '<div style="color:#cbd5e1;font-weight:800;font-size:14px;">🗺️ 地圖探索 <span style="color:#94a3b8;font-size:12px;">' + mapName + '</span> · 擊殺 <b id="dx-kills" style="color:#a5b4fc;">0</b></div>'
             + '<button id="dx-exit" style="background:linear-gradient(180deg,#7f1d1d,#991b1b);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-weight:700;cursor:pointer;font-size:13px;">✕ 離開探索</button></div>'
-            + '<div style="position:relative;width:100%;"><canvas id="dx-cv" width="' + CW + '" height="' + CH + '" style="width:100%;max-width:640px;display:block;margin:0 auto;border:1px solid #1e293b;border-radius:12px;touch-action:none;"></canvas>'
+            + '<div style="position:relative;width:100%;"><canvas id="dx-cv" width="' + CW + '" height="' + CH + '" style="width:100%;max-width:520px;aspect-ratio:480/460;max-height:56vh;display:block;margin:0 auto;border:1px solid #1e293b;border-radius:12px;touch-action:none;box-sizing:border-box;"></canvas>'
             + '<div style="position:absolute;left:14px;bottom:12px;width:185px;pointer-events:none;">'+ '<div style="height:10px;background:#1e293b;border:1px solid #475569;border-radius:99px;overflow:hidden;"><div id="dx-hpfill" style="height:100%;width:100%;background:linear-gradient(90deg,#22c55e,#a3e635);"></div></div>'+ '<div id="dx-hptxt" style="font-size:11px;color:#cbd5e1;margin-top:1px;text-shadow:0 1px 2px #000;"></div>'+ '<div style="height:8px;background:#1e293b;border:1px solid #475569;border-radius:99px;overflow:hidden;margin-top:2px;"><div id="dx-mpfill" style="height:100%;width:100%;background:linear-gradient(90deg,#3b82f6,#22d3ee);"></div></div>'+ '<div id="dx-mptxt" style="font-size:11px;color:#a5c8ff;margin-top:1px;text-shadow:0 1px 2px #000;"></div>'+ '</div></div>'
             + '<div style="margin-top:6px;font-size:11px;color:#64748b;text-align:center;">點地板移動、自動找怪。戰鬥沿用正常系統：技能／符石／娃娃／隊伍／爆擊／攻速全套用，獎勵即時進角色。</div>';
         host.appendChild(wrap);
