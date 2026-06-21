@@ -15662,27 +15662,19 @@ window.onload = () => {
     function popDmg(pos, amount, kind) { const s = scr(pos.gx, pos.gy); dmgs.push({ x: s.x + (Math.random() * 14 - 7), y: s.y - 22, vy: -0.8, life: 1, amount, kind }); }
     function burst(pos, col, n) { for (let i = 0; i < n; i++) { const a = Math.random() * 7, sp = 1 + Math.random() * 2.6; sparks.push({ gx: pos.gx, gy: pos.gy, ox: 0, oy: -10, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1, life: 1, col }); } }
 
-    function killReward(mob) {
-        if (mob.dead) return;
-        mob.dead = true; mob.respawn = 2.0; kills++;
-        try {
-            const sM = mapState.mobs, sT = mapState.targetIdx;
-            mapState.mobs = [mob, null, null]; mob.curHp = 0; mob._dead = false;
-            killMob(0);
-            mapState.mobs = sM; mapState.targetIdx = sT;
-        } catch (e) { console.error('explore reward err', e); }
-        try { if (typeof updateUI === 'function') updateUI(); } catch (e) {}   // 擊殺後立即把經驗/等級/金幣套用到角色面板
-    }
+    function markDead(mob) { if (mob.dead) return; mob.dead = true; mob.respawn = 2.0; kills++; burst(mob, '#fca5a5', 14); }
+    function grantKill(mob) { try { const sM = mapState.mobs, sT = mapState.targetIdx; mapState.mobs = [mob, null, null]; mapState.targetIdx = 0; killMob(0); mapState.mobs = sM; mapState.targetIdx = sT; } catch (e) { console.error('explore reward err', e); } }
+    function onMaybeDead(mob) { if (mob.curHp <= 0 && !mob.dead) { if (!mob._dead) grantKill(mob); markDead(mob); try { if (typeof updateUI === 'function') updateUI(); } catch (e) {} } }
+    // 普攻：直接重用真實 playerAttack()，全部被動/加成/procs 都套用，killMob 也由它處理
     function doSwing(mob) {
-        const wpn = (player.eq && player.eq.wpn) ? DB.items[player.eq.wpn.id] : null;
-        const dice = wpn ? (mob.s === 'L' ? wpn.dmgL : wpn.dmgS) : 2;
-        let res; try { res = getPhysicalDmg(dice, mob, wpn); } catch (e) { res = { hit: true, dmg: Math.max(1, (player.d.meleeDmg || 1)) }; }
-        if (res && res.hit) {
-            const crit = !!(res.crit || res.heavy);
-            mob.curHp -= res.dmg; mob.hitT = 0.2; burst(mob, crit ? '#fecaca' : '#fde68a', crit ? 12 : 6);
-            popDmg(mob, res.dmg, crit ? 'crit' : 'hit');
-            if (mob.curHp <= 0) killReward(mob);
-        } else popDmg(mob, 0, 'miss');
+        const sM = mapState.mobs, sT = mapState.targetIdx;
+        mapState.mobs = [mob, null, null]; mapState.targetIdx = 0;
+        const before = mob.curHp;
+        try { playerAttack(); } catch (e) { console.error('explore atk', e); try { mob.curHp -= Math.max(1, player.d.meleeDmg || 1); } catch (_) {} }
+        mapState.mobs = sM; mapState.targetIdx = sT;
+        const dealt = Math.max(0, Math.round(before - mob.curHp));
+        if (dealt > 0) { mob.hitT = 0.2; burst(mob, '#fde68a', 6); popDmg(mob, dealt, 'hit'); } else popDmg(mob, 0, 'miss');
+        onMaybeDead(mob);
     }
     function castAoE() {
         aoes.push({ life: 1 }); burst(P, '#c7d2fe', 8);
@@ -15693,7 +15685,7 @@ window.onload = () => {
             let amt = Math.max(1, Math.round(base * (0.85 + Math.random() * 0.3) * (crit ? 2 : 1) * (1 - Math.min(0.8, (m.mr || 0) / 200))));
             m.curHp -= amt; m.hitT = 0.2; burst(m, crit ? '#fecaca' : '#c7d2fe', crit ? 10 : 5);
             popDmg(m, amt, crit ? 'crit' : 'hit');
-            if (m.curHp <= 0) killReward(m);
+            onMaybeDead(m);
         }
     }
     function hpUI() { const f = wrap && wrap.querySelector('#dx-hpfill'), t = wrap && wrap.querySelector('#dx-hptxt'), k = wrap && wrap.querySelector('#dx-kills');
