@@ -736,7 +736,7 @@
                 <button id="btn-trash-gear" class="btn text-base py-2 font-bold px-0" style="grid-column:1 / -1; background: linear-gradient(135deg,#5b3a10 0%,#b45309 28%,#4a2f0c 52%,#d97706 76%,#3a2509 100%); color:#fde68a; border-color:#d97706;" onclick="sellUnlockedGear()">🗑️ 一鍵賣裝（賣掉未上鎖裝備/武器換金幣）</button>
             </div>
 
-            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic casino-marquee" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openTreasurePanel()"><span class="ic">🗺️</span><span class="tx">奪寶</span></button><button class="fn-ic" onclick="openMapFragPanel()"><span class="ic">🧩</span><span class="tx">寶圖</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="openDomTpPanel()"><span class="ic">🔑</span><span class="tx">傳送石</span></button><button class="fn-ic" onclick="openSigilPanel()"><span class="ic">🔯</span><span class="tx">紋樣</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="openInfiniteArena()"><span class="ic">🏟️</span><span class="tx">無界擂台</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
+            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic casino-marquee" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openTreasurePanel()"><span class="ic">🗺️</span><span class="tx">奪寶</span></button><button class="fn-ic" onclick="openMapFragPanel()"><span class="ic">🧩</span><span class="tx">寶圖</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="openDomTpPanel()"><span class="ic">🔑</span><span class="tx">傳送石</span></button><button class="fn-ic" onclick="openSigilPanel()"><span class="ic">🔯</span><span class="tx">紋樣</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="openInfiniteArena()"><span class="ic">🏟️</span><span class="tx">無界擂台</span></button><button class="fn-ic" onclick="openDomExplore()"><span class="ic">🗼</span><span class="tx">支配塔探索</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
 
             <div class="panel flex-1 flex flex-col overflow-hidden relative">
                 <!-- 能力 -->
@@ -4790,6 +4790,7 @@ function _polyDoSynth(t){
 // 這樣即使分頁切到背景被瀏覽器降速、或機器卡頓導致 setInterval 延遲，
 // 遊戲時間仍會以正確速率前進（回到分頁時自動快轉補上落後的進度）。
 function gameLoop() {
+    if (window._domExploreActive) return;   // 🗼 探索模式進行中：暫停正常 3 格戰鬥
     let now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
     if(_loopLast == null) _loopLast = now;
     let elapsed = now - _loopLast;
@@ -15625,6 +15626,194 @@ window.onload = () => {
     });
     document.addEventListener('mousedown', hideTip);
 })();
+
+/* ===== 🗼 支配塔探索模式 (Phase 1) — 與正常戰鬥並存，獨立全螢幕斜角大地圖 ===== */
+(function () {
+    const FLOOR = 'dom_top';                 // Phase 1 試點：支配塔頂層
+    const CW = 480, CH = 520, TW = 44, TH = 22, N = 25, AOE_R = 2.4;
+    const SWING = 0.5;                        // 普攻間隔(秒) — Phase 2 再依武器攻速
+    let active = false, raf = null, ov = null, cv = null, ctx = null, last = 0;
+    let cam = { x: 0, y: 0 }, T = 0, kills = 0, manualUntil = 0, savedMap = null, php = 0, pmhp = 1;
+    const P = { gx: 12, gy: 12, tx: 12, ty: 12, swCd: 0, aoeCd: 0, hitT: 0, moving: false };
+    let mobs = [], dmgs = [], sparks = [], embers = [], meteors = [], rings = [], aoes = [], marker = null;
+    const imgCache = {};
+    function gi(src) { if (!imgCache[src]) { const im = new Image(); im.src = src; imgCache[src] = im; } return imgCache[src]; }
+    function mobImg(def) { return def.img || ('assets/icons/monsters/' + def.n + '.png'); }
+    function playerImg() {
+        const cn = { knight: '騎士', mage: '法師', elf: '妖精', darkelf: '黑暗妖精', dragon: '龍騎士' }[player.cls] || '騎士';
+        const mf = (player.avatar && player.avatar.indexOf('女') >= 0) ? 'f' : 'm';
+        return 'assets/icons/poly/支配青' + cn + '_變身_' + mf + '.png';
+    }
+    function wiso(gx, gy) { return { x: (gx - gy) * (TW / 2), y: (gx + gy) * (TH / 2) }; }
+    function scr(gx, gy) { const w = wiso(gx, gy); return { x: w.x - cam.x + CW / 2, y: w.y - cam.y + CH / 2 }; }
+    function unproj(sx, sy) { const wx = sx - CW / 2 + cam.x, wy = sy - CH / 2 + cam.y; return { gx: (wx / (TW / 2) + wy / (TH / 2)) / 2, gy: (wy / (TH / 2) - wx / (TW / 2)) / 2 }; }
+    function clampG(v) { return Math.max(0.5, Math.min(N - 1.5, v)); }
+    function dist(a, b) { return Math.hypot(a.gx - b.gx, a.gy - b.gy); }
+    function hash(x, y) { let h = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return h - Math.floor(h); }
+    function poolIds() { const p = (typeof DB !== 'undefined' && DB.maps && DB.maps[FLOOR]) || []; return p.filter(id => DB.mobs && DB.mobs[id]); }
+    function buildMob() {
+        const ids = poolIds(); if (!ids.length) return null;
+        const id = ids[Math.floor(Math.random() * ids.length)]; const def = DB.mobs[id];
+        let gx, gy, tries = 0; do { gx = 1 + Math.random() * (N - 2); gy = 1 + Math.random() * (N - 2); tries++; } while (Math.hypot(gx - P.gx, gy - P.gy) < 3 && tries < 30);
+        const m = Object.assign({}, def, { id, gx, gy, wx: gx, wy: gy, curHp: def.hp, uid: (typeof uid === 'function' ? uid() : Math.random()), st: (typeof newMobStatus === 'function' ? newMobStatus() : {}), er: def.er || 0, atkCd: Math.random(), wander: 1 + Math.random() * 2, hitT: 0, dead: false, _img: mobImg(def) });
+        return m;
+    }
+    function spawnField() { mobs = []; for (let i = 0; i < 16; i++) { const m = buildMob(); if (m) mobs.push(m); } }
+    function nearest() { let b = 99, t = null; for (const m of mobs) { if (m.dead) continue; const d = dist(P, m); if (d < b) { b = d; t = m; } } return t; }
+    function popDmg(pos, amount, kind) { const s = scr(pos.gx, pos.gy); dmgs.push({ x: s.x + (Math.random() * 14 - 7), y: s.y - 22, vy: -0.8, life: 1, amount, kind }); }
+    function burst(pos, col, n) { for (let i = 0; i < n; i++) { const a = Math.random() * 7, sp = 1 + Math.random() * 2.6; sparks.push({ gx: pos.gx, gy: pos.gy, ox: 0, oy: -10, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1, life: 1, col }); } }
+
+    function killReward(mob) {
+        if (mob.dead) return;
+        mob.dead = true; mob.respawn = 2.0; kills++;
+        // 重用 killMob 的真實獎勵結算（暫存槽，正常 gameLoop 已暫停，不衝突）
+        try {
+            const saveMobs = mapState.mobs, saveTI = mapState.targetIdx;
+            mapState.mobs = [mob, null, null]; mob.curHp = 0; mob._dead = false;
+            killMob(0);
+            mapState.mobs = saveMobs; mapState.targetIdx = saveTI;
+        } catch (e) { console.error('explore reward err', e); }
+    }
+    function doSwing(mob) {
+        const wpn = (player.eq && player.eq.wpn) ? DB.items[player.eq.wpn.id] : null;
+        const isLarge = mob.s === 'L';
+        const dice = wpn ? (isLarge ? wpn.dmgL : wpn.dmgS) : 2;
+        let res; try { res = getPhysicalDmg(dice, mob, wpn); } catch (e) { res = { hit: true, dmg: Math.max(1, (player.d.meleeDmg || 1)) }; }
+        if (res && res.hit) {
+            const crit = !!(res.crit || res.heavy);
+            mob.curHp -= res.dmg; mob.hitT = 0.2; burst(mob, crit ? '#fecaca' : '#fde68a', crit ? 12 : 6);
+            popDmg(mob, res.dmg, crit ? 'crit' : 'hit');
+            if (mob.curHp <= 0) killReward(mob);
+        } else { popDmg(mob, 0, 'miss'); }
+    }
+    function castAoE() {
+        aoes.push({ life: 1 }); burst(P, '#c7d2fe', 8);
+        const base = Math.max(1, player.d.magicDmg || player.d.meleeDmg || 1);
+        for (const m of mobs) {
+            if (m.dead) continue; if (dist(P, m) > AOE_R) continue;
+            const crit = Math.random() * 100 < (player.d.magicCrit || 0);
+            let amt = Math.round(base * (0.85 + Math.random() * 0.3) * (crit ? 2 : 1) * (1 - Math.min(0.8, (m.mr || 0) / 200)));
+            amt = Math.max(1, amt);
+            m.curHp -= amt; m.hitT = 0.2; burst(m, crit ? '#fecaca' : '#c7d2fe', crit ? 10 : 5);
+            popDmg(m, amt, crit ? 'crit' : 'hit');
+            if (m.curHp <= 0) killReward(m);
+        }
+    }
+
+    function update(dt) {
+        T += dt;
+        const hunting = T > manualUntil;
+        if (hunting) { const t = nearest(); if (t) { const d = dist(P, t); if (d > AOE_R * 0.7) { const ax = t.gx - P.gx, ay = t.gy - P.gy, am = Math.hypot(ax, ay) || 1; P.tx = clampG(P.gx + ax / am * 1.6); P.ty = clampG(P.gy + ay / am * 1.6); } else { P.tx = P.gx; P.ty = P.gy; } } }
+        const dx = P.tx - P.gx, dy = P.ty - P.gy, dm = Math.hypot(dx, dy);
+        if (dm > 0.05) { const mv = Math.min(dm, 3.4 * dt); P.gx += dx / dm * mv; P.gy += dy / dm * mv; P.moving = true; } else P.moving = false;
+        const tg = wiso(P.gx, P.gy); cam.x += (tg.x - cam.x) * Math.min(1, dt * 6); cam.y += (tg.y - cam.y) * Math.min(1, dt * 6);
+        // auto melee on nearest in range
+        P.swCd -= dt; const t2 = nearest();
+        if (t2 && dist(P, t2) <= 1.6 && P.swCd <= 0) { P.swCd = SWING; doSwing(t2); }
+        // auto AoE
+        P.aoeCd -= dt; let anyIn = false; for (const m of mobs) { if (!m.dead && dist(P, m) <= AOE_R) { anyIn = true; break; } }
+        if (anyIn && P.aoeCd <= 0) { P.aoeCd = 1.0; castAoE(); }
+        // monsters
+        for (const m of mobs) {
+            if (m.dead) { m.respawn -= dt; if (m.respawn <= 0) Object.assign(m, buildMob()); continue; }
+            m.hitT = Math.max(0, m.hitT - dt); const d = dist(P, m);
+            if (d < 4) { const ax = P.gx - m.gx, ay = P.gy - m.gy, am = Math.hypot(ax, ay) || 1; if (am > 1.1) { const mv = 1.4 * dt; m.gx += ax / am * mv; m.gy += ay / am * mv; }
+                m.atkCd -= dt; if (d <= 1.5 && m.atkCd <= 0) { m.atkCd = 1.2; const raw = (m.db || 0) + (m.dmg ? (m.dmg[0] + Math.floor(Math.random() * (m.dmg[1] - m.dmg[0] + 1))) : 50); const amt = Math.max(1, Math.round(raw * 0.5)); php = Math.max(0, php - amt); P.hitT = 0.2; popDmg(P, amt, 'taken'); if (php <= 0) { php = pmhp; popDmg(P, 0, 'revive'); } }
+            } else { m.wander -= dt; if (m.wander <= 0) { m.wx = clampG(m.gx + (Math.random() * 4 - 2)); m.wy = clampG(m.gy + (Math.random() * 4 - 2)); m.wander = 1.6 + Math.random() * 2.6; } const wx = m.wx - m.gx, wy = m.wy - m.gy, wm = Math.hypot(wx, wy); if (wm > 0.06) { const mv = 0.7 * dt; m.gx += wx / wm * mv; m.gy += wy / wm * mv; } }
+        }
+        P.hitT = Math.max(0, P.hitT - dt);
+        for (const d of dmgs) { d.y += d.vy * dt * 60; d.vy += dt * 0.5; d.life -= dt / 0.85; } dmgs = dmgs.filter(d => d.life > 0);
+        for (const s of sparks) { s.ox += s.vx; s.oy += s.vy; s.vy += 0.18; s.life -= dt / 0.5; } sparks = sparks.filter(s => s.life > 0);
+        for (const e of embers) { e.y -= e.s; e.x += Math.sin((e.y + T * 20) / 30) * 0.2; if (e.y < -4) { e.y = CH + 4; e.x = Math.random() * CW; } }
+        for (const a of aoes) { a.life -= dt / 0.5; } aoes = aoes.filter(a => a.life > 0);
+        for (const r of rings) { r.r += 2.4; r.life -= dt / 0.5; } rings = rings.filter(r => r.life > 0);
+        if (marker) { const s = scr(P.tx, P.ty); marker.x = s.x; marker.y = s.y; marker.t -= dt / 0.6; if (marker.t <= 0) marker = null; }
+        const hb = ov.querySelector('#dx-hpfill'), ht = ov.querySelector('#dx-hptxt'), kc = ov.querySelector('#dx-kills');
+        if (hb) hb.style.width = (php / pmhp * 100) + '%'; if (ht) ht.textContent = 'HP ' + Math.round(php).toLocaleString(); if (kc) kc.textContent = kills;
+    }
+
+    function lightGlow(p, r, col, a) { const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r); g.addColorStop(0, col.replace('rgb', 'rgba').replace(')', ',' + a + ')')); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 7); ctx.fill(); }
+    function drawTile(gx, gy) { const p = scr(gx, gy); if (p.x < -TW || p.x > CW + TW || p.y < -TH || p.y > CH + TH) return; const h = hash(gx, gy);
+        ctx.beginPath(); ctx.moveTo(p.x, p.y - TH / 2); ctx.lineTo(p.x + TW / 2, p.y); ctx.lineTo(p.x, p.y + TH / 2); ctx.lineTo(p.x - TW / 2, p.y); ctx.closePath();
+        const b = 20 + Math.floor(h * 16); ctx.fillStyle = 'rgb(' + (b + 6) + ',' + (b + 10) + ',' + (b + 22) + ')'; ctx.fill();
+        ctx.beginPath(); ctx.moveTo(p.x - TW / 2, p.y); ctx.lineTo(p.x, p.y - TH / 2); ctx.lineTo(p.x + TW / 2, p.y); ctx.strokeStyle = 'rgba(120,150,210,.10)'; ctx.lineWidth = 1; ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(p.x - TW / 2, p.y); ctx.lineTo(p.x, p.y + TH / 2); ctx.lineTo(p.x + TW / 2, p.y); ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.stroke();
+    }
+    function drawAvatar(ent, isP) { const p = scr(ent.gx, ent.gy); const R = isP ? 18 : 15;
+        const bob = ent.moving ? Math.sin(T * 14) * 1.5 : Math.sin(T * 2 + ent.gx) * 0.6; const cy = p.y - R - 2 + bob;
+        ctx.beginPath(); ctx.ellipse(p.x, p.y + 1, R * 0.9, R * 0.4, 0, 0, 7); ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fill();
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; lightGlow({ x: p.x, y: cy }, R * 2, isP ? 'rgb(56,189,248)' : 'rgb(225,29,72)', (isP ? 0.5 : 0.38)); ctx.restore();
+        const img = gi(isP ? playerImg() : ent._img);
+        ctx.save(); ctx.beginPath(); ctx.arc(p.x, cy, R, 0, 7); ctx.clip();
+        if (img && img.complete && img.naturalWidth) { const iw = img.naturalWidth, ih = img.naturalHeight, sc = Math.max(2 * R / iw, 2 * R / ih); ctx.drawImage(img, p.x - iw * sc / 2, cy - ih * sc / 2, iw * sc, ih * sc); if (ent.hitT > 0) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = Math.min(1, ent.hitT * 3.5); ctx.drawImage(img, p.x - iw * sc / 2, cy - ih * sc / 2, iw * sc, ih * sc); ctx.globalAlpha = 1; } }
+        else { ctx.fillStyle = isP ? '#38bdf8' : '#e11d48'; ctx.beginPath(); ctx.arc(p.x, cy, R, 0, 7); ctx.fill(); }
+        ctx.restore();
+        ctx.beginPath(); ctx.arc(p.x, cy, R, 0, 7); ctx.lineWidth = 2.5; ctx.strokeStyle = isP ? '#7dd3fc' : '#fca5a5'; ctx.stroke();
+        if (!isP) { const w = 2 * R + 2; ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(p.x - w / 2, cy - R - 9, w, 4); ctx.fillStyle = '#ef4444'; ctx.fillRect(p.x - w / 2 + 1, cy - R - 8, (w - 2) * Math.max(0, ent.curHp / ent.hp), 2);
+            ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.strokeText(ent.n, p.x, cy - R - 12); ctx.fillStyle = '#fda4af'; ctx.fillText(ent.n, p.x, cy - R - 12); }
+        else { ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.strokeText('你', p.x, cy - R - 8); ctx.fillStyle = '#7dd3fc'; ctx.fillText('你', p.x, cy - R - 8); }
+    }
+    function draw() {
+        ctx.clearRect(0, 0, CW, CH);
+        const bg = ctx.createLinearGradient(0, 0, 0, CH); bg.addColorStop(0, '#0a0e1a'); bg.addColorStop(1, '#05070d'); ctx.fillStyle = bg; ctx.fillRect(0, 0, CW, CH);
+        const a = Math.max(0, Math.floor(P.gx) - 16), b = Math.min(N - 1, Math.floor(P.gx) + 16), c = Math.max(0, Math.floor(P.gy) - 16), d = Math.min(N - 1, Math.floor(P.gy) + 16);
+        for (let s = 2 * a; s <= 2 * b; s++) for (let gx = a; gx <= b; gx++) { const gy = s - gx; if (gy < c || gy > d) continue; drawTile(gx, gy); }
+        // magic circle
+        const pp = scr(P.gx, P.gy);
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; const rx = AOE_R * TW * 0.5, ry = AOE_R * TH * 0.5;
+        ctx.strokeStyle = 'rgba(129,140,248,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(pp.x, pp.y, rx, ry, 0, 0, 7); ctx.stroke();
+        ctx.translate(pp.x, pp.y); ctx.scale(1, TH / TW); ctx.rotate(T * 0.6); ctx.strokeStyle = 'rgba(165,180,252,.4)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, rx * 0.68, 0, 7); ctx.stroke(); ctx.restore();
+        for (const ao of aoes) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const k = 1 - ao.life; ctx.strokeStyle = 'rgba(165,180,252,' + ao.life + ')'; ctx.lineWidth = 4 * ao.life; ctx.beginPath(); ctx.ellipse(pp.x, pp.y, rx * (0.3 + k), ry * (0.3 + k), 0, 0, 7); ctx.stroke(); ctx.restore(); }
+        if (marker) { ctx.strokeStyle = 'rgba(125,211,252,' + marker.t + ')'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(marker.x, marker.y, 14 * (1.4 - marker.t), 7 * (1.4 - marker.t), 0, 0, 7); ctx.stroke(); }
+        const ents = [{ e: P, p: true }]; for (const m of mobs) { if (!m.dead) ents.push({ e: m, p: false }); } ents.sort((u, v) => (u.e.gx + u.e.gy) - (v.e.gx + v.e.gy)); for (const o of ents) drawAvatar(o.e, o.p);
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; for (const s of sparks) { const sp = scr(s.gx, s.gy); ctx.globalAlpha = Math.max(0, s.life); ctx.fillStyle = s.col; ctx.beginPath(); ctx.arc(sp.x + s.ox, sp.y + s.oy, 2 * s.life + 0.5, 0, 7); ctx.fill(); } ctx.restore(); ctx.globalAlpha = 1;
+        for (const e of embers) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = 'rgba(255,170,80,' + (e.a * 0.5) + ')'; ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, 7); ctx.fill(); ctx.restore(); }
+        ctx.textAlign = 'center';
+        for (const dn of dmgs) { const al = Math.max(0, Math.min(1, dn.life * 1.4)); ctx.globalAlpha = al; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.85)'; let fs, col, txt;
+            if (dn.kind === 'crit') { fs = 24; col = '#fb7185'; txt = '-' + dn.amount; } else if (dn.kind === 'taken') { fs = 19; col = '#ef4444'; txt = '-' + dn.amount; } else if (dn.kind === 'revive') { fs = 16; col = '#67e8f9'; txt = '復活'; } else if (dn.kind === 'miss') { fs = 15; col = '#94a3b8'; txt = 'MISS'; } else { fs = 18; col = '#fde047'; txt = '-' + dn.amount; }
+            ctx.font = '900 ' + fs + 'px sans-serif'; ctx.strokeText(txt, dn.x, dn.y); ctx.fillStyle = col; ctx.fillText(txt, dn.x, dn.y); }
+        ctx.globalAlpha = 1;
+        const vg = ctx.createRadialGradient(CW / 2, CH / 2, 150, CW / 2, CH / 2, 360); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.5)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, CW, CH);
+    }
+    function loop(now) { if (!active) return; const dt = Math.min(0.05, (now - last) / 1000); last = now; update(dt); draw(); raf = requestAnimationFrame(loop); }
+
+    function onTap(e) { const r = cv.getBoundingClientRect(); const t = e.touches ? e.touches[0] : e; const sx = (t.clientX - r.left) * (CW / r.width), sy = (t.clientY - r.top) * (CH / r.height); const g = unproj(sx, sy); P.tx = clampG(g.gx); P.ty = clampG(g.gy); const s = scr(P.tx, P.ty); marker = { x: s.x, y: s.y, t: 1 }; manualUntil = T + 3; }
+
+    function open() {
+        if (active) return;
+        if (typeof player === 'undefined' || !player || !player.cls) { alert('請先載入角色'); return; }
+        if (!poolIds().length) { alert('支配塔頂層怪物資料未載入'); return; }
+        active = true; window._domExploreActive = true;
+        savedMap = mapState.current; mapState.current = FLOOR;       // 讓 killMob 的塔倍率/掉落正確
+        php = pmhp = player.mmp || 1000; P.gx = P.tx = 12; P.gy = P.ty = 12; cam = wiso(12, 12); T = 0; kills = 0; manualUntil = 0;
+        dmgs = []; sparks = []; meteors = []; rings = []; aoes = []; marker = null;
+        embers = []; for (let i = 0; i < 24; i++) embers.push({ x: Math.random() * CW, y: Math.random() * CH, s: 0.2 + Math.random() * 0.5, r: 1 + Math.random() * 1.4, a: Math.random() });
+        spawnField();
+        ov = document.createElement('div');
+        ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#05060a;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:-apple-system,"PingFang TC",sans-serif;';
+        ov.innerHTML = '<div style="color:#cbd5e1;font-weight:800;margin-bottom:6px;">🗼 支配塔探索 <span style="color:#64748b;font-size:12px;">(Phase 1 · 頂層)</span></div>'
+            + '<div style="position:relative;"><canvas id="dx-cv" width="' + CW + '" height="' + CH + '" style="border:1px solid #1e293b;border-radius:12px;max-width:96vw;max-height:74vh;touch-action:none;"></canvas>'
+            + '<div style="position:absolute;left:12px;top:10px;color:#e5e7eb;font-size:12px;text-shadow:0 1px 3px #000;pointer-events:none;">擊殺：<b id="dx-kills" style="color:#a5b4fc;">0</b></div>'
+            + '<div style="position:absolute;left:12px;bottom:12px;width:160px;pointer-events:none;"><div style="height:10px;background:#1e293b;border:1px solid #475569;border-radius:99px;overflow:hidden;"><div id="dx-hpfill" style="height:100%;width:100%;background:linear-gradient(90deg,#22c55e,#a3e635);"></div></div><div id="dx-hptxt" style="font-size:11px;color:#cbd5e1;margin-top:2px;text-shadow:0 1px 2px #000;"></div></div></div>'
+            + '<div style="margin-top:10px;display:flex;gap:8px;"><button id="dx-exit" style="background:linear-gradient(180deg,#7f1d1d,#991b1b);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-weight:700;cursor:pointer;">✕ 離開探索</button></div>'
+            + '<div style="margin-top:8px;font-size:11px;color:#64748b;text-align:center;max-width:96vw;">點地板移動、自動找怪、圓圈魔法自動範圍打擊。擊殺給<b>真實 exp／金幣／掉落</b>（已加入你的角色）。</div>';
+        document.body.appendChild(ov);
+        cv = ov.querySelector('#dx-cv'); ctx = cv.getContext('2d');
+        cv.addEventListener('mousedown', onTap); cv.addEventListener('touchstart', function (e) { e.preventDefault(); onTap(e); }, { passive: false });
+        ov.querySelector('#dx-exit').onclick = close;
+        last = performance.now(); raf = requestAnimationFrame(loop);
+    }
+    function close() {
+        active = false; window._domExploreActive = false;
+        if (raf) cancelAnimationFrame(raf); raf = null;
+        if (savedMap != null) mapState.current = savedMap;
+        if (ov && ov.parentNode) ov.parentNode.removeChild(ov); ov = null;
+        try { if (typeof calcStats === 'function') calcStats(); if (typeof updateUI === 'function') updateUI(); } catch (e) { }
+    }
+    window.openDomExplore = open;
+})();
+/* ===== 支配塔探索模式 END ===== */
+
 </script>
 <script src="online.js"></script>
 </body>
