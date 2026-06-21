@@ -15653,7 +15653,7 @@ window.onload = () => {
         let gx, gy, tries = 0; do { gx = 1 + Math.random() * (N - 2); gy = 1 + Math.random() * (N - 2); tries++; } while (Math.hypot(gx - P.gx, gy - P.gy) < 3 && tries < 30);
         return Object.assign({}, def, { id, gx, gy, wx: gx, wy: gy, curHp: def.hp, uid: (typeof uid === 'function' ? uid() : Math.random()), _magCd: {}, justHit: false, st: (typeof newMobStatus === 'function' ? newMobStatus() : {}), er: def.er || 0, wander: 1 + Math.random() * 2, hitT: 0, dead: false, _lastHp: def.hp, _img: mobImg(def) });
     }
-    function spawnField() { mobs = []; for (let i = 0; i < 16; i++) { const m = buildMob(); if (m) mobs.push(m); } }
+    function spawnField() { mobs = []; for (let i = 0; i < 30; i++) { const m = buildMob(); if (m) mobs.push(m); } }
     function nearest() { let b = 99, t = null; for (const m of mobs) { if (m.dead || m._dead || m.curHp <= 0) continue; const d = dist(P, m); if (d < b) { b = d; t = m; } } return t; }
     function popDmg(pos, amount, kind) { const sc2 = scr(pos.gx, pos.gy); dmgs.push({ x: sc2.x + (Math.random() * 14 - 7), y: sc2.y - 22, vy: -0.8, life: 1, amount, kind }); }
     function burst(pos, col, n) { for (let i = 0; i < n; i++) { const a = Math.random() * 7, sp = 1 + Math.random() * 2.6; sparks.push({ gx: pos.gx, gy: pos.gy, ox: 0, oy: -10, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1, life: 1, col }); } }
@@ -15675,8 +15675,8 @@ window.onload = () => {
         const dx = P.tx - P.gx, dy = P.ty - P.gy, dm = Math.hypot(dx, dy);
         if (dm > 0.05) { const mv = Math.min(dm, 3.4 * dt); P.gx += dx / dm * mv; P.gy += dy / dm * mv; P.moving = true; } else P.moving = false;
         const tg = wiso(P.gx, P.gy); cam.x += (tg.x - cam.x) * Math.min(1, dt * 6); cam.y += (tg.y - cam.y) * Math.min(1, dt * 6);
-        for (const m of mobs) {
-            if (m.dead) { m.respawn -= dt; if (m.respawn <= 0) Object.assign(m, buildMob()); continue; }
+        for (let mi = 0; mi < mobs.length; mi++) { const m = mobs[mi];
+            if (m.dead) { m.respawn -= dt; if (m.respawn <= 0) { const nm = buildMob(); if (nm) mobs[mi] = nm; } continue; }
             if (m._dead || m.curHp <= 0) { m.dead = true; m.respawn = 2.0; kills++; burst(m, '#fca5a5', 14); try { if (typeof updateUI === 'function') updateUI(); } catch (e) {} continue; }
             if (m._lastHp === undefined) m._lastHp = m.curHp;
             if (m.curHp < m._lastHp) { const d = Math.round(m._lastHp - m.curHp); popDmg(m, d, d >= m.hp * 0.25 ? 'crit' : 'hit'); m.hitT = 0.2; burst(m, '#fde68a', 5); }
