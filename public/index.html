@@ -2832,6 +2832,22 @@ function applySaveDefaults(p) {
 // ============================================================================
 function sherineWorldActive() { return !!(player && player.sherineWorld); }
 function applySherineTheme() { document.body.classList.toggle('sherine-world', sherineWorldActive()); }
+// 🔮 席琳的世界：怪物強化＋報酬翻倍（spawnMob 與地圖模式 buildMob 共用，避免地圖模式漏套）
+function applySherineMob(m) {
+    if (!m) return m;
+    if (sherineWorldActive() && !isSiegeArea(mapState.current) && m.race !== '血盟') {
+        m.hp = Math.floor(m.hp * 3); m.curHp = m.hp;          // HP×3
+        m.ac = Math.floor((m.ac || 0) * 1.5);
+        m.mr = Math.floor((m.mr || 0) * 1.5);
+        m.exp = Math.floor((m.exp || 0) * 5);                 // 經驗×5
+        m.goldMin = Math.floor((m.goldMin || 0) * 5);         // 金錢×5
+        m.goldMax = Math.floor((m.goldMax || 0) * 5);
+        m.hit = Math.floor((m.hit || 0) * 1.5);
+        m.dr = (m.dr || 0) + Math.floor((m.lv || 1) / 3);     // 額外減傷：等級/3
+        m._sherine = true;                                    // 一般攻擊×2、技能最終傷害×2、掉落×3 於各計算點套用
+    }
+    return m;
+}
 let _sherineLootCtx = null;   // 擊殺掉落上下文：killMob 期間設定（{boss}），供 gainItem 判定詞綴×3 與套裝效果
 
 // ===== 🔮 席琳套裝效果（40 種，8 組 × 5 件；組名＝前兩字）=====
@@ -5348,21 +5364,7 @@ function spawnMob(idx) {
     }
     if(base.pledgeEnemy) applyPledgeEnemyScaling(mapState.mobs[idx]);   // 血盟敵人：依玩家等級縮放
     if(base.siegeEnemy) applySiegeEnemyScaling(mapState.mobs[idx]);   // 攻城敵人：依玩家等級縮放
-    // 🔮 席琳的世界：攻城區與血盟敵人除外，其餘怪物強化＋報酬翻倍
-    {
-        let _m = mapState.mobs[idx];
-        if (sherineWorldActive() && !isSiegeArea(mapState.current) && _m.race !== '血盟') {
-            _m.hp = Math.floor(_m.hp * 3); _m.curHp = _m.hp;   // HP×3
-            _m.ac = Math.floor((_m.ac || 0) * 1.5);
-            _m.mr = Math.floor((_m.mr || 0) * 1.5);
-            _m.exp = Math.floor((_m.exp || 0) * 5);            // 經驗×5
-            _m.goldMin = Math.floor((_m.goldMin || 0) * 5);    // 金錢×5
-            _m.goldMax = Math.floor((_m.goldMax || 0) * 5);
-            _m.hit = Math.floor((_m.hit || 0) * 1.5);
-            _m.dr = (_m.dr || 0) + Math.floor((_m.lv || 1) / 3);   // 額外減傷：等級/3
-            _m._sherine = true;   // 一般攻擊傷害×2、技能最終傷害×2、掉落×3 於對應計算點套用
-        }
-    }
+    applySherineMob(mapState.mobs[idx]);   // 🔮 席琳的世界：怪物強化＋報酬翻倍（與地圖模式共用同一函式）
     if(base.n === '肯特城門' && player.siege && player.siege.gateHp > 0) mapState.mobs[idx].curHp = Math.min(mapState.mobs[idx].hp, player.siege.gateHp);   // 城門HP保留
     if(base.n === '肯特守護塔' && player.siege && player.siege.towerHp > 0) mapState.mobs[idx].curHp = Math.min(mapState.mobs[idx].hp, player.siege.towerHp);   // 守護塔HP保留
 
@@ -15700,7 +15702,10 @@ window.onload = () => {
         if (!id) return null;
         const def = DB.mobs[id];
         let gx, gy, tries = 0; do { gx = 1 + Math.random() * (N - 2); gy = 1 + Math.random() * (N - 2); tries++; } while (Math.hypot(gx - P.gx, gy - P.gy) < 3 && tries < 30);
-        return Object.assign({}, def, { id, gx, gy, wx: gx, wy: gy, curHp: def.hp, uid: (typeof uid === 'function' ? uid() : Math.random()), _magCd: {}, justHit: false, st: (typeof newMobStatus === 'function' ? newMobStatus() : {}), er: def.er || 0, wander: 1 + Math.random() * 2, hitT: 0, dead: false, _lastHp: def.hp, _img: mobImg(def) });
+        const _nm = Object.assign({}, def, { id, gx, gy, wx: gx, wy: gy, curHp: def.hp, uid: (typeof uid === 'function' ? uid() : Math.random()), _magCd: {}, justHit: false, st: (typeof newMobStatus === 'function' ? newMobStatus() : {}), er: def.er || 0, wander: 1 + Math.random() * 2, hitT: 0, dead: false, _img: mobImg(def) });
+        try { if (typeof applySherineMob === 'function') applySherineMob(_nm); } catch (e) {}   // 🔮 地圖模式也套用席琳強化
+        _nm._lastHp = _nm.curHp;
+        return _nm;
     }
     function spawnField() { mobs = []; for (let i = 0; i < 30; i++) { const m = buildMob(); if (m) mobs.push(m); } }
     function nearest() { let b = 99, t = null; for (const m of mobs) { if (m.dead || m._dead || m.curHp <= 0) continue; const d = dist(P, m); if (d < b) { b = d; t = m; } } return t; }
