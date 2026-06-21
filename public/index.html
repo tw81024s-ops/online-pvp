@@ -2788,7 +2788,7 @@ const BUFF_NAMES = {   // buff 鍵 → 顯示名稱（DB.skills 查不到時使�
 // 遠古變體 true→'A'（其餘 'eternal'/'immortal'/'primordial' 原值）、屬性詞綴 attr。
 // 使用處：gainItem 堆疊、卸裝/換裝退回背包合併、倉庫一鍵存入(whSig)/堆疊(_whStackFind)、
 // 載入合併(consolidateInventory)、分頁重繪記憶簽章(renderTabs)。勿再各自手寫比對條件。
-function itemSig(it) { return it.id + '|' + (it.en || 0) + '|' + (it.bless === true ? 'B' : (it.bless ? 'C' : 0)) + '|' + (it.anc === true ? 'A' : (it.anc || 0)) + '|' + (it.attr || '') + '|' + (it.seteff || ''); }   // 🔮 含席琳套裝效果：帶效果的裝備不可與普通品合併
+function itemSig(it) { return it.id + '|' + (it.en || 0) + '|' + (it.bless === true ? 'B' : (it.bless ? 'C' : 0)) + '|' + (it.anc === true ? 'A' : (it.anc || 0)) + '|' + (it.attr || '') + '|' + (it.seteff || '') + '|' + (it.lv || ''); }   // 🔮 含席琳套裝效果；含樓層 lv（傳送石各樓層不可互相合併）
 function sameItemSig(a, b) { return itemSig(a) === itemSig(b); }
 
 // ===== 🔧 架構#6：存檔版本與集中式預設值 =====
@@ -8295,7 +8295,8 @@ function getItemFullName(item) {
     if (item.bless) segs += `<span class="${blessColorClass(item.bless)}">${blessName(item.bless)} </span>`;   // 祝福的金/詛咒的紅
     let en = item.en > 0 ? `+${item.en} ` : "";
     let cnt = item.cnt > 1 ? ` (${item.cnt})` : "";
-    return `${segs}<span class="${getItemColor(item)}">${en}${d.n}${cnt}</span>`;
+    let fl = (item.id === 'dom_tpstone') ? `（${(item.lv||2)>=11?'頂樓':((item.lv||2)+'樓')}）` : '';
+    return `${segs}<span class="${getItemColor(item)}">${en}${d.n}${fl}${cnt}</span>`;
 }
 
 function useItem(u, silent = false) {
