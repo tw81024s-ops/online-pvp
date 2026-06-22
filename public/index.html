@@ -712,7 +712,6 @@
             </div>
 
             <div id="combat-log-panel" class="panel flex-1 min-h-[180px] lg:min-h-0 flex flex-col overflow-hidden">
-                <div class="panel-header text-slate-100 text-lg border-b border-red-900/40">戰鬥日誌</div>
                 <div id="combat-log" class="flex-1 p-4 overflow-y-auto log-bg rounded-b-xl shadow-inner text-base tracking-wide"></div>
             </div>
 
@@ -728,9 +727,6 @@
                 <button class="btn active text-base py-2 font-bold px-0" onclick="switchTab('stats', this)">能力</button>
                 <button class="btn text-base py-2 font-bold px-0" onclick="switchTab('equip', this)">裝備</button>
                 <button class="btn text-base py-2 font-bold px-0" onclick="switchTab('skill', this)">技能</button>
-                <button class="btn text-base py-2 font-bold px-0" onclick="switchTab('weapons', this)">武器</button>
-                <button class="btn text-base py-2 font-bold px-0" onclick="switchTab('armors', this)">防具</button>
-                <button class="btn text-base py-2 font-bold px-0" onclick="switchTab('items', this)">道具</button>
                 <button class="btn text-base py-2 font-bold px-0" style="background:linear-gradient(135deg,#3a2a14,#7a5c25 50%,#140d06);color:#fbe9a8;border-color:#cda64e;" onclick="openMobileBag()">🎒 背包</button>
                 <button class="btn text-base py-2 font-bold px-0" style="background: linear-gradient(135deg, #565d68 0%, #6b7280 26%, #3f4651 48%, #5a6270 72%, #313740 100%); color: #f1f5f9; border-color: #6b7280;" onclick="switchTab('audit', this)">統計</button>
                 <button id="btn-sort-inv" class="btn text-base py-2 font-bold px-0" style="background: linear-gradient(135deg, #0c4a5e 0%, #0e7490 28%, #0a3d4d 52%, #11657e 76%, #093440 100%); color: #a5f3fc; border-color: #0891b2;" onclick="sortInventory()">一鍵排列</button>
