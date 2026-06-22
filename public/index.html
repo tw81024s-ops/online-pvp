@@ -731,6 +731,7 @@
                 <button class="btn text-base py-2 font-bold px-0" onclick="switchTab('weapons', this)">武器</button>
                 <button class="btn text-base py-2 font-bold px-0" onclick="switchTab('armors', this)">防具</button>
                 <button class="btn text-base py-2 font-bold px-0" onclick="switchTab('items', this)">道具</button>
+                <button class="btn text-base py-2 font-bold px-0" style="background:linear-gradient(135deg,#3a2a14,#7a5c25 50%,#140d06);color:#fbe9a8;border-color:#cda64e;" onclick="openMobileBag()">🎒 背包</button>
                 <button class="btn text-base py-2 font-bold px-0" style="background: linear-gradient(135deg, #565d68 0%, #6b7280 26%, #3f4651 48%, #5a6270 72%, #313740 100%); color: #f1f5f9; border-color: #6b7280;" onclick="switchTab('audit', this)">統計</button>
                 <button id="btn-sort-inv" class="btn text-base py-2 font-bold px-0" style="background: linear-gradient(135deg, #0c4a5e 0%, #0e7490 28%, #0a3d4d 52%, #11657e 76%, #093440 100%); color: #a5f3fc; border-color: #0891b2;" onclick="sortInventory()">一鍵排列</button>
                 <button id="btn-sell-junk" class="btn text-base py-2 font-bold px-0" style="background: linear-gradient(135deg, #6b2a10 0%, #b3490e 28%, #5a230e 52%, #9a3e0c 76%, #4a1d0c 100%); color: #fed7aa; border-color: #c2410c;" onclick="sellAllJunk()">賣出廢品</button>
@@ -9485,6 +9486,7 @@ player.inv.forEach(i => {
     // 還原各分頁捲動位置
     ['tab-items','tab-weapons','tab-armors','tab-equip','tab-skill'].forEach(id => { let el = document.getElementById(id); if(el && _scroll[id] != null) el.scrollTop = _scroll[id]; });
     updateSummonLock();
+    try{ var _mb=document.getElementById('mbag'); if(_mb && _mb.classList.contains('on') && typeof renderMobileBag==='function') renderMobileBag(); }catch(e){}   // 🎒 手機格狀背包開著時同步
 }
 
 // ===== 召喚類技能互斥：迷魅 / 召喚 / 造屍 / 召喚屬性精靈 / 召喚強力屬性精靈 同時只能開啟一個 =====
@@ -10439,8 +10441,7 @@ function _hubBuildOnce(){
           '<div class="fbtn gold" data-act="tab:stats"><span class="ic">📊</span>能力</div>'+
           '<div class="fbtn gold" data-act="tab:equip"><span class="ic">🛡️</span>裝備</div>'+
           '<div class="fbtn gold" data-act="tab:skill"><span class="ic">✨</span>技能</div>'+
-          '<div class="fbtn" data-act="tab:weapons"><span class="ic">⚔️</span>武器</div>'+
-          '<div class="fbtn" data-act="tab:items"><span class="ic">🎒</span>道具</div>'+
+          '<div class="fbtn gold" data-act="bag"><span class="ic">🎒</span>背包</div>'+
         '</div>'+
         '<div class="stage"><div class="badge"></div></div>'+
         '<div class="side">'+
@@ -10498,6 +10499,7 @@ function hubHome(){
 function hubAct(act){
     var P=_hubPanels();
     if(act==='status'){ hubOpenPanel(P.status); return; }
+    if(act==='bag'){ openMobileBag(); return; }
     if(act==='gacha'){ openHubGacha(); return; }
     if(act==='events'){ if(typeof window.showEvents==='function') window.showEvents(); else _hubClickFab(/活動/); return; }
     if(act==='offline'){ if(typeof window.showOffline==='function') window.showOffline(); else _hubClickFab(/離線/); return; }
@@ -10517,6 +10519,94 @@ function hubAct(act){
         _hubClickFab(/登入|登出/);
     }
 }
+/* ===================== 🎒 手機格狀背包（B案 第1步）===================== */
+var _bagFilter = 'all';
+function _bagBuildOnce() {
+    if (document.getElementById('mbag')) return;
+    if (!document.getElementById('mbag-css')) {
+        var st = document.createElement('style'); st.id = 'mbag-css';
+        st.textContent =
+            '#mbag{position:fixed;inset:0;z-index:70;display:none;flex-direction:column;background:radial-gradient(120% 80% at 50% 0%,#251a0f 0%,#120d08 55%,#0b0805 100%);color:#e9dcc4;}'
+            + '#mbag.on{display:flex;}'
+            + '#mbag .bg-head{display:flex;align-items:center;gap:10px;padding:14px 14px 6px;}'
+            + '#mbag .bg-title{font-size:18px;font-weight:800;letter-spacing:2px;color:#d8b45a;text-shadow:0 1px 0 #000;}'
+            + '#mbag .bg-cap{font-size:12px;color:#9a8a6e;margin-left:auto;}#mbag .bg-cap b{color:#e9dcc4;}'
+            + '#mbag .bg-x{width:34px;height:34px;border-radius:8px;background:#241a0f;border:1px solid #8a6d3a;color:#e9dcc4;font-size:17px;display:grid;place-items:center;cursor:pointer;}'
+            + '#mbag .bg-tabs{display:flex;gap:6px;overflow-x:auto;padding:4px 14px 8px;border-bottom:1px solid #2c2113;}'
+            + '#mbag .bg-tabs::-webkit-scrollbar{display:none;}'
+            + '#mbag .bg-tab{flex:none;padding:6px 14px;font-size:13px;font-weight:700;color:#9a8a6e;background:#1d150c;border:1px solid #34281a;border-radius:7px;cursor:pointer;}'
+            + '#mbag .bg-tab.on{color:#1a120a;background:linear-gradient(180deg,#f2da90,#d8b45a);border-color:#f2da90;}'
+            + '#mbag .bg-grid{flex:1;overflow-y:auto;padding:12px 12px 28px;display:grid;grid-template-columns:repeat(6,1fr);gap:7px;align-content:start;}'
+            + '#mbag .bg-grid::-webkit-scrollbar{width:0;}'
+            + '#mbag .bg-cell{position:relative;aspect-ratio:1/1;border-radius:8px;cursor:pointer;background:linear-gradient(160deg,#322617,#1f170d);border:1px solid #3e2f1c;display:grid;place-items:center;overflow:hidden;}'
+            + '#mbag .bg-cell:active{transform:scale(.93);}'
+            + '#mbag .bg-cell img{width:80%;height:80%;object-fit:contain;pointer-events:none;}'
+            + '#mbag .bg-q{position:absolute;right:3px;bottom:2px;font-size:11px;font-weight:800;color:#fff;text-shadow:0 1px 2px #000,0 0 3px #000;}'
+            + '#mbag .bg-en{position:absolute;left:4px;top:3px;font-size:11px;font-weight:800;color:#f2da90;text-shadow:0 1px 2px #000;}'
+            + '#mbag .bg-lock{position:absolute;right:3px;top:2px;font-size:10px;}'
+            + '#mbag .bg-empty{grid-column:1/-1;text-align:center;color:#7a6b50;padding:44px 0;font-size:13px;}'
+            + '@media (min-width:1025px){#mbag{z-index:45;background:rgba(5,4,3,.74);align-items:center;justify-content:flex-start;padding:5vh 0;}#mbag .bg-head,#mbag .bg-tabs{width:580px;max-width:92vw;background:rgba(18,13,8,.97);}#mbag .bg-head{border:1px solid #3a2c1a;border-bottom:none;border-radius:12px 12px 0 0;}#mbag .bg-tabs{border-left:1px solid #3a2c1a;border-right:1px solid #3a2c1a;}#mbag .bg-grid{width:580px;max-width:92vw;flex:none;max-height:72vh;grid-template-columns:repeat(8,1fr);border:1px solid #3a2c1a;border-top:none;border-radius:0 0 12px 12px;background:rgba(18,13,8,.97);}}';
+        document.head.appendChild(st);
+    }
+    var ov = document.createElement('div'); ov.id = 'mbag';
+    ov.innerHTML =
+        '<div class="bg-head"><span class="bg-title">背包</span><span class="bg-cap">共 <b id="mbag-cap">0</b> 件</span><div class="bg-x" onclick="closeMobileBag()">✕</div></div>'
+        + '<div class="bg-tabs"><div class="bg-tab on" data-f="all">全部</div><div class="bg-tab" data-f="item">道具</div><div class="bg-tab" data-f="wpn">武器</div><div class="bg-tab" data-f="arm">防具</div><div class="bg-tab" data-f="acc">飾品</div></div>'
+        + '<div class="bg-grid" id="mbag-grid"></div>';
+    document.body.appendChild(ov);
+    ov.querySelectorAll('.bg-tab').forEach(function (t) {
+        t.addEventListener('click', function () {
+            ov.querySelectorAll('.bg-tab').forEach(function (x) { x.classList.remove('on'); });
+            t.classList.add('on'); _bagFilter = t.getAttribute('data-f'); renderMobileBag();
+        });
+    });
+}
+function _bagCat(it) { var d = DB.items[it.id] || {}; return d.type === 'wpn' ? 'wpn' : (d.type === 'arm' ? 'arm' : (d.type === 'acc' ? 'acc' : 'item')); }
+function _bagBorder(it) {
+    var d = DB.items[it.id] || {};
+    if (it.seteff) return '#4ade80';
+    if (d.legend) return '#f0a93b';
+    if (it.bless || d.isB) return '#f2da90';
+    if (it.anc || d.isAnc) return '#b27bf0';
+    if (it.attr) return '#5b9bf3';
+    var c = d.c || '';
+    if (c.indexOf('cyan') >= 0) return '#22d3ee';
+    if (c.indexOf('purple') >= 0 || c.indexOf('violet') >= 0) return '#b27bf0';
+    if (c.indexOf('blue') >= 0 || c.indexOf('sky') >= 0) return '#5b9bf3';
+    if (c.indexOf('green') >= 0 || c.indexOf('emerald') >= 0 || c.indexOf('teal') >= 0) return '#4ade80';
+    if (c.indexOf('amber') >= 0 || c.indexOf('yellow') >= 0 || c.indexOf('orange') >= 0) return '#f0a93b';
+    if (c.indexOf('red') >= 0 || c.indexOf('rose') >= 0) return '#f87171';
+    return '#4a4f57';
+}
+function renderMobileBag() {
+    var grid = document.getElementById('mbag-grid'); if (!grid) return;
+    var list = (player.inv || []).filter(function (it) { return _bagFilter === 'all' || _bagCat(it) === _bagFilter; });
+    var cap = document.getElementById('mbag-cap'); if (cap) cap.textContent = (player.inv || []).length;
+    grid.innerHTML = '';
+    if (!list.length) { grid.innerHTML = '<div class="bg-empty">這個分類沒有物品</div>'; return; }
+    list.forEach(function (it) {
+        var d = DB.items[it.id] || {};
+        var cell = document.createElement('div'); cell.className = 'bg-cell'; cell.style.borderColor = _bagBorder(it);
+        var imgHtml;
+        if (it.id === 'dom_tpstone' && typeof window.domTpIconHtml === 'function') { imgHtml = window.domTpIconHtml(it.lv || 2, 40); }
+        else { imgHtml = '<img src="' + getIconUrl(d) + '" onerror="this.style.opacity=0">'; }
+        var qty = (it.cnt != null && it.cnt > 1) ? '<span class="bg-q">' + (it.cnt >= 10000 ? (it.cnt / 10000).toFixed(1) + '萬' : it.cnt) + '</span>' : '';
+        var en = ((it.en || 0) > 0) ? '<span class="bg-en">+' + it.en + '</span>' : '';
+        var lk = it.lock ? '<span class="bg-lock">🔒</span>' : '';
+        cell.innerHTML = imgHtml + en + qty + lk;
+        cell.addEventListener('click', function () { try { openModal(it, false); } catch (e) { } });
+        grid.appendChild(cell);
+    });
+}
+function openMobileBag() {
+    _bagBuildOnce(); _bagFilter = 'all';
+    var ov = document.getElementById('mbag');
+    ov.querySelectorAll('.bg-tab').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-f') === 'all'); });
+    renderMobileBag(); ov.classList.add('on');
+}
+function closeMobileBag() { var ov = document.getElementById('mbag'); if (ov) ov.classList.remove('on'); }
+window.openMobileBag = openMobileBag; window.closeMobileBag = closeMobileBag; window.renderMobileBag = renderMobileBag;
+
 function _hubClickFab(re){
     var fab=document.getElementById('online-fab'); if(!fab) return;
     var bs=Array.prototype.slice.call(fab.querySelectorAll('button'));
