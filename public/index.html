@@ -6691,7 +6691,7 @@ function killMob(idx) {
             var _rfFloor = (mapState.current==='dom_top')?11:(parseInt(mapState.current.slice(4),10)||1);
             if (Math.random() < 0.02*_dm) { var _rq=3*_rfFloor-2; gainItem('dom_refine_stone', _rq, true); logSys('<span class="text-teal-300 font-bold">✦ 獲得 紋樣精煉石 ×'+_rq+'！</span>'); }   // 掉率固定2%（×塔掉落倍率）；數量＝3×樓層−2（1樓1顆…頂樓31顆）；高亮訊息
             var _tkW2=['tk_2h_aqua','tk_2h_sun','tk_2h_sky','tk_2h_gloom','tk_wand_aqua','tk_wand_wind','tk_wand_ice','tk_wand_sun','tk_claw_sun','tk_claw_gloom','tk_claw_earth','tk_claw_frost','tk_chain_aqua','tk_chain_gloom','tk_chain_sun','tk_chain_sky','tk_bow_aqua','tk_bow_sun','tk_bow_gloom','tk_bow_earth','tk_sword_aqua','tk_sword_sun','tk_sword_gloom','tk_sword_earth'];
-            for(var _wi=0;_wi<_tkW2.length;_wi++){ if(Math.random()<0.004*_dm){ var _bz2=player.inv.length; gainItem(_tkW2[_wi],1,false,true); if(player.inv.length>_bz2){var _ni2=player.inv[player.inv.length-1]; if(_ni2&&_ni2.id===_tkW2[_wi]) _ni2.bless=true;} } }
+            for(var _wi=0;_wi<_tkW2.length;_wi++){ if(Math.random()<0.004*_dm){ var _bz2=player.inv.length; gainItem(_tkW2[_wi],1,false,true); if(player.inv.length>_bz2){var _ni2=player.inv[player.inv.length-1]; if(_ni2&&_ni2.id===_tkW2[_wi]){ _ni2.bless=true; var _dp2=player.inv.find(function(x){return x!==_ni2&&(x.en||0)===0&&!x.lock&&sameItemSig(x,_ni2);}); if(_dp2){_dp2.cnt+=(_ni2.cnt||1); player.inv=player.inv.filter(function(x){return x!==_ni2;});} }} } }
         }
     }
     if (mapState.current === 'tikal_temple') {
@@ -6701,7 +6701,7 @@ function killMob(idx) {
             if (Math.random() < 0.004 * _tkM) {
                 var _bz = player.inv.length;
                 gainItem(_tkW[_ti], 1, false, true);
-                if (player.inv.length > _bz) { var _ni = player.inv[player.inv.length - 1]; if (_ni && _ni.id === _tkW[_ti]) { _ni.bless = true; } }
+                if (player.inv.length > _bz) { var _ni = player.inv[player.inv.length - 1]; if (_ni && _ni.id === _tkW[_ti]) { _ni.bless = true; var _dp = player.inv.find(function(x){return x!==_ni&&(x.en||0)===0&&!x.lock&&sameItemSig(x,_ni);}); if(_dp){_dp.cnt+=(_ni.cnt||1); player.inv=player.inv.filter(function(x){return x!==_ni;});} } }
             }
         }
     }
