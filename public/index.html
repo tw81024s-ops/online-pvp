@@ -2832,6 +2832,24 @@ function applySaveDefaults(p) {
 // ============================================================================
 function sherineWorldActive() { return !!(player && player.sherineWorld); }
 function applySherineTheme() { document.body.classList.toggle('sherine-world', sherineWorldActive()); }
+// 🌊 地圖特例強化（夢幻之島等3轉強度）：spawnMob 與地圖模式 buildMob 共用，避免地圖模式漏套
+function applyMapRebalance(base, mapId) {
+    if (!base) return base;
+    if (mapId === 'dream_island') {   // 夢幻之島：3轉強度（倍率集中此處可調）
+        return Object.assign({}, base, {
+            hp: Math.round((base.hp || 10) * 2500),
+            dmg: [(base.dmg ? base.dmg[0] : 1) * 15, (base.dmg ? base.dmg[1] : 10) * 15],
+            db: Math.round((base.db || 0) * 20) + 100,
+            hit: (base.hit || 0) + 30,
+            ac: (base.ac || 0) - 60,
+            mr: (base.mr || 0) + 120,
+            exp: Math.round((base.exp || 0) * 400),
+            goldMin: Math.round((base.goldMin || 0) * 400),
+            goldMax: Math.round((base.goldMax || 0) * 400)
+        });
+    }
+    return base;
+}
 // 🔮 席琳的世界：怪物強化＋報酬翻倍（spawnMob 與地圖模式 buildMob 共用，避免地圖模式漏套）
 function applySherineMob(m) {
     if (!m) return m;
@@ -5344,19 +5362,7 @@ function spawnMob(idx) {
     }
     let base = DB.mobs[mobId];
     if(!base) return;
-    if (mapState.current === 'dream_island') {   // 夢幻之島：3轉強度（低於5轉；倍率集中此處可調）
-        var _di = base; base = Object.assign({}, _di, {
-            hp: Math.round((_di.hp||10) * 2500),
-            dmg: [ (_di.dmg ? _di.dmg[0] : 1) * 15, (_di.dmg ? _di.dmg[1] : 10) * 15 ],
-            db: Math.round((_di.db||0) * 20) + 100,
-            hit: (_di.hit||0) + 30,
-            ac: (_di.ac||0) - 60,
-            mr: (_di.mr||0) + 120,
-            exp: Math.round((_di.exp||0) * 400),
-            goldMin: Math.round((_di.goldMin||0) * 400),
-            goldMax: Math.round((_di.goldMax||0) * 400)
-        });
-    }
+    base = applyMapRebalance(base, mapState.current);   // 🌊 夢幻之島等特例強化（與地圖模式共用同一函式）
     mapState.mobs[idx] = { ...base, curHp: base.hp, uid: uid(), _magCd: {}, justHit: false, st: newMobStatus() };
     // 弓：場上原本沒有任何敵人時，第一個出現的敵人不論主動/被動，都強制視為被動（搭配弓攻擊3秒延遲，可先手放風箏）
     if(!base.boss && player.eq.wpn && DB.items[player.eq.wpn.id] && DB.items[player.eq.wpn.id].isBow && !mapState.mobs.some((m, j) => m && j !== idx)) {
@@ -15708,7 +15714,8 @@ window.onload = () => {
         if (!id) return null;
         const def = DB.mobs[id];
         let gx, gy, tries = 0; do { gx = 1 + Math.random() * (N - 2); gy = 1 + Math.random() * (N - 2); tries++; } while (Math.hypot(gx - P.gx, gy - P.gy) < 3 && tries < 30);
-        const _nm = Object.assign({}, def, { id, gx, gy, wx: gx, wy: gy, curHp: def.hp, uid: (typeof uid === 'function' ? uid() : Math.random()), _magCd: {}, justHit: false, st: (typeof newMobStatus === 'function' ? newMobStatus() : {}), er: def.er || 0, wander: 1 + Math.random() * 2, hitT: 0, dead: false, _img: mobImg(def) });
+        const rdef = (typeof applyMapRebalance === 'function') ? applyMapRebalance(def, FLOOR) : def;   // 🌊 夢幻之島等特例強化
+        const _nm = Object.assign({}, rdef, { id, gx, gy, wx: gx, wy: gy, curHp: rdef.hp, uid: (typeof uid === 'function' ? uid() : Math.random()), _magCd: {}, justHit: false, st: (typeof newMobStatus === 'function' ? newMobStatus() : {}), er: rdef.er || 0, wander: 1 + Math.random() * 2, hitT: 0, dead: false, _img: mobImg(rdef) });
         try { if (typeof applySherineMob === 'function') applySherineMob(_nm); } catch (e) {}   // 🔮 地圖模式也套用席琳強化
         _nm._lastHp = _nm.curHp;
         return _nm;
