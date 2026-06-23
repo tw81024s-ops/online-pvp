@@ -8169,17 +8169,17 @@ function _renderCharUI(){
         if(it&&typeof DB!=='undefined'&&DB.items&&DB.items[it.id]){
             var def=DB.items[it.id]; var img=def.img||''; var en=it.en?('<span style="position:absolute;top:1px;right:3px;font-size:9px;color:#fcd34d;font-weight:800;">+'+it.en+'</span>'):'';
             inner=(img?'<img src="'+img+'" style="width:30px;height:30px;object-fit:contain;">':'<span style="font-size:9px;color:#cbb27a;">'+(def.n||'').slice(0,3)+'</span>')+en; brd='#7c6126'; bg='#1c1509';
-        } else { inner='<span style="font-size:9px;color:#5b554a;">'+lab+'</span>'; }
+        } else { inner=''; }
         return '<div style="grid-area:'+slot+';position:relative;aspect-ratio:1;border:1.5px solid '+brd+';background:'+bg+';border-radius:7px;display:grid;place-items:center;text-align:center;">'+inner+'</div>';
     }
     var slotKeys=Object.keys(SLOTS);
     var doll='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;'
       +'grid-template-areas:'
       +'\'earring1 earring2 helm earring3 earring4\' '
-      +'\'wpn ring1 armor ring2 shield\' '
-      +'\'cloak ring3 tshirt ring4 gloves\' '
-      +'\'amulet arrow belt boots soul\' '
-      +'\'. rune1 . rune2 .\';">'
+      +'\'ring1 wpn armor shield ring2\' '
+      +'\'cloak amulet tshirt gloves rune1\' '
+      +'\'ring3 arrow belt rune2 ring4\' '
+      +'\'soul . boots . .\';">'
       +slotKeys.map(cellHtml).join('')+'</div>';
     box.innerHTML=''
       +'<div style="display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid #20190f;position:sticky;top:0;background:#14110d;z-index:2;"><div style="font-size:14px;font-weight:800;color:#ecd9a3;">🛡️ 角色</div><div onclick="closeCharUI()" style="margin-left:auto;cursor:pointer;color:#9a9486;font-size:18px;padding:0 4px;">✕</div></div>'
@@ -9666,6 +9666,8 @@ function __persistSkillSel(){
         var o={ a1:g('sel-atk-skill'), a2:g('sel-atk-skill2'), a3:g('sel-atk-skill3'), a4:g('sel-atk-skill4'), h:g('sel-heal-skill') };
         if(!(o.a1||o.a2||o.a3||o.a4||o.h)) return;   // 全空不寫：避免登入瞬間（下拉尚未還原）把已存的好紀錄覆蓋成空
         localStorage.setItem(_skillSelKey(), JSON.stringify(o));
+        // 🆕 同步寫進 player.config → 隨雲端存檔保留（修正：登出/換裝置技能設定遺失）
+        try{ player.config = player.config || {}; player.config.selAtkSkill=o.a1; player.config.selAtkSkill2=o.a2; player.config.selAtkSkill3=o.a3; player.config.selAtkSkill4=o.a4; player.config.selHealSkill=o.h; }catch(_e){}
     }catch(e){}
 }
 function __loadSkillSel(){ try{ var r=localStorage.getItem(_skillSelKey()); return r?JSON.parse(r):null; }catch(e){ return null; } }
