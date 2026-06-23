@@ -734,7 +734,7 @@
                 <button id="btn-trash-gear" class="btn text-base py-2 font-bold px-0" style="grid-column:1 / -1; background: linear-gradient(135deg,#5b3a10 0%,#b45309 28%,#4a2f0c 52%,#d97706 76%,#3a2509 100%); color:#fde68a; border-color:#d97706;" onclick="sellUnlockedGear()">🗑️ 一鍵賣裝（賣掉未上鎖裝備/武器換金幣）</button>
             </div>
 
-            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic casino-marquee" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openTreasurePanel()"><span class="ic">🗺️</span><span class="tx">奪寶</span></button><button class="fn-ic" onclick="openMapFragPanel()"><span class="ic">🧩</span><span class="tx">寶圖</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="openDomTpPanel()"><span class="ic">🔑</span><span class="tx">傳送石</span></button><button class="fn-ic" onclick="openSigilPanel()"><span class="ic">🔯</span><span class="tx">紋樣</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="openInfiniteArena()"><span class="ic">🏟️</span><span class="tx">無界擂台</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
+            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic" onclick="openSkillUI()"><span class="ic">⚔️</span><span class="tx">技能</span></button><button class="fn-ic casino-marquee" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openTreasurePanel()"><span class="ic">🗺️</span><span class="tx">奪寶</span></button><button class="fn-ic" onclick="openMapFragPanel()"><span class="ic">🧩</span><span class="tx">寶圖</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="openDomTpPanel()"><span class="ic">🔑</span><span class="tx">傳送石</span></button><button class="fn-ic" onclick="openSigilPanel()"><span class="ic">🔯</span><span class="tx">紋樣</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="openInfiniteArena()"><span class="ic">🏟️</span><span class="tx">無界擂台</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
 
             <div class="panel flex-1 flex flex-col overflow-hidden relative">
                 <!-- 能力 -->
@@ -8077,6 +8077,66 @@ function getAutoCastInterval() {
 }
 
 // 自動施放攻擊/治癒法術：每個 tick 呼叫一次，實際施放間隔由 player.cds.atkSk / healSk 控制
+// ===== 🆕 技能介面 overlay（天堂M風；只讀真實技能＋寫回現有 sel-atk-skill 槽，舊面板不動）=====
+function _skUIcat(id){ var s=DB.skills[id]; if(!s) return 'prof';
+    var n=['reqK','reqM','reqE'].filter(function(k){return s[k]!=null;}).length; return n>=3?'common':'prof'; }
+function _skuiAtkIds(){ return ['sel-atk-skill','sel-atk-skill2','sel-atk-skill3','sel-atk-skill4']; }
+function openSkillUI(){
+    var ov=document.getElementById('skui-ov');
+    if(!ov){
+        ov=document.createElement('div'); ov.id='skui-ov';
+        ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:10px;';
+        ov.innerHTML='<div id="skui-box" style="width:440px;max-width:100%;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;background:linear-gradient(180deg,#14110d,#0a0907);border:1px solid #2a2317;border-radius:14px;font-family:Noto Sans TC,Microsoft JhengHei,system-ui,sans-serif;"></div>';
+        ov.addEventListener('click',function(e){ if(e.target===ov) closeSkillUI(); });
+        document.body.appendChild(ov);
+    }
+    ov.style.display='flex'; if(window._skuiSlot==null) window._skuiSlot=0; _renderSkillUI();
+}
+function closeSkillUI(){ var ov=document.getElementById('skui-ov'); if(ov) ov.style.display='none'; }
+function _skuiPickSlot(i){ window._skuiSlot=i; _renderSkillUI(); }
+function _skuiAssign(id){
+    var sel=document.getElementById(_skuiAtkIds()[window._skuiSlot||0]);
+    if(sel){ sel.value=id; try{__persistSkillSel();}catch(e){} try{saveGame();}catch(e){} }
+    _renderSkillUI();
+}
+function _skuiClearSlot(){
+    var sel=document.getElementById(_skuiAtkIds()[window._skuiSlot||0]);
+    if(sel){ sel.value=''; try{__persistSkillSel();}catch(e){} try{saveGame();}catch(e){} }
+    _renderSkillUI();
+}
+function _renderSkillUI(){
+    var box=document.getElementById('skui-box'); if(!box) return;
+    var ids=_skuiAtkIds(); var sels=ids.map(function(id){return document.getElementById(id);});
+    var opts=[]; if(sels[0]){ for(var i=0;i<sels[0].options.length;i++){ var o=sels[0].options[i]; if(o.value) opts.push({id:o.value,n:o.textContent}); } }
+    var cur=sels.map(function(s){return s?s.value:'';});
+    var TYPE={atk:['攻擊','#d9655a','⚔'],buff:['增益','#5b9bd5','🛡'],heal:['治療','#6fc98a','✚'],manual:['手動','#a874d9','✋'],passive:['被動','#9a9486','◆'],convert:['轉換','#5bc6c2','⟳']};
+    function cdtxt(id){ var s=DB.skills[id]; var c=(typeof _skillCd==='function')?_skillCd(s):0; return c>0?('CD '+c+'s'):'常駐'; }
+    function card(o){
+        var s=DB.skills[o.id]||{}; var t=TYPE[s.type]||['技','#b6b0a4','◆']; var on=cur.indexOf(o.id)>=0;
+        return '<div onclick="_skuiAssign(\''+o.id+'\')" style="cursor:pointer;display:flex;gap:7px;align-items:center;background:'+(on?'#1c2a16':'linear-gradient(180deg,#17140d,#0e0b07)')+';border:1px solid '+(on?'#5a8a3f':'#2a2418')+';border-radius:9px;padding:7px;">'
+          +'<div style="width:34px;height:34px;flex:none;border-radius:7px;border:1.5px solid '+t[1]+';display:grid;place-items:center;color:'+t[1]+';font-size:15px;">'+t[2]+'</div>'
+          +'<div style="min-width:0;"><div style="font-size:12px;font-weight:700;color:#e7dfce;line-height:1.2;">'+o.n+'</div>'
+          +'<div style="font-size:10px;color:#8b857a;margin-top:2px;"><span style="color:'+t[1]+';font-weight:700;">'+t[0]+'</span> · <span style="color:#e8c45a;font-weight:700;">'+cdtxt(o.id)+'</span></div></div></div>';
+    }
+    var common=opts.filter(function(o){return _skUIcat(o.id)==='common';});
+    var prof=opts.filter(function(o){return _skUIcat(o.id)!=='common';});
+    var slot='';
+    for(var i=0;i<4;i++){ var id=cur[i]; var nm=(id&&DB.skills[id])?DB.skills[id].n:''; var act=(window._skuiSlot===i);
+        slot+='<div onclick="_skuiPickSlot('+i+')" style="cursor:pointer;flex:1;text-align:center;padding:7px 2px;border-radius:8px;border:2px solid '+(act?'#cba85a':'#3a3018')+';background:'+(act?'#231a0c':'#120e08')+';">'
+          +'<div style="font-size:9px;color:#8b857a;">槽'+(i+1)+(act?' ◀':'')+'</div>'
+          +'<div style="font-size:11px;font-weight:700;color:'+(nm?'#ecd9a3':'#5b554a')+';margin-top:2px;line-height:1.1;">'+(nm||'空')+'</div></div>';
+    }
+    box.innerHTML=''
+      +'<div style="display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid #20190f;"><div style="font-size:14px;font-weight:800;color:#ecd9a3;">⚔️ 技能 · 攻擊自動施放</div><div onclick="closeSkillUI()" style="margin-left:auto;cursor:pointer;color:#9a9486;font-size:18px;padding:0 4px;">✕</div></div>'
+      +'<div style="padding:8px 12px;border-bottom:1px solid #20190f;background:#0c0a06;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><span style="font-size:10px;color:#8b857a;flex:1;">點技能 → 指派到選中槽（◀）。CD 為新制冷卻。</span><span onclick="_skuiClearSlot()" style="cursor:pointer;font-size:10px;color:#d98a6a;border:1px solid #5a3320;border-radius:5px;padding:2px 7px;">清空此槽</span></div><div style="display:flex;gap:6px;">'+slot+'</div></div>'
+      +'<div style="flex:1;overflow:auto;padding:10px 12px;">'
+      +(prof.length?'<div style="font-size:12px;color:#ecd9a3;font-weight:800;border-left:3px solid #cba85a;padding-left:7px;margin:0 0 7px;">專職技能</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;">'+prof.map(card).join('')+'</div>':'')
+      +(common.length?'<div style="font-size:12px;color:#ecd9a3;font-weight:800;border-left:3px solid #cba85a;padding-left:7px;margin:0 0 7px;">通用技能</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">'+common.map(card).join('')+'</div>':'')
+      +(opts.length?'':'<div style="color:#6b665c;text-align:center;padding:34px 10px;font-size:12px;">目前沒有可指派的攻擊技能。<br>先到原本的技能頁學習/開放技能，這裡就會出現。</div>')
+      +'</div>';
+}
+window.openSkillUI=openSkillUI; window.closeSkillUI=closeSkillUI; window._skuiAssign=_skuiAssign; window._skuiPickSlot=_skuiPickSlot; window._skuiClearSlot=_skuiClearSlot;
+
 // 🔮 每技能獨立冷卻（依 類型×階級；數值為砍半後版本）。減CD% 走 player.d.cdr（預留掛鉤，上限50%）。
 function _skillCd(sk){   // 回傳「秒」
     if(!sk) return 5;
@@ -10873,13 +10933,13 @@ window.__adminGrantPoly = function(formName){
     BY_ID[s.id]=s; BY_TIER[s.tier].push(s.id);
     if(typeof DB!=='undefined' && DB.items){
       DB.items[s.id]={ n:s.n, type:'soulstone', soul:true, tier:s.tier, base:s.base, ele:s.ele, drain:!!s.drain,
-        p:0, noUse:true, noJunk:true, gachaWeight:0, c:TIER_CLS[s.tier], img:'assets/icons/'+s.n+'.png',
+        p:0, noUse:true, noJunk:true, gachaWeight:0, c:TIER_CLS[s.tier], img:'assets/icons/soul/'+s.id+'.png',
         d:'靈魂石 T'+s.tier+'：裝在靈魂石欄位，戰鬥自動施放、不耗MP、冷卻10秒，固定傷害（吃目標魔防）。基礎 '+s.base.toLocaleString()+' × 級數（最高10級）。'+(s.drain?'命中時吸取等量HP。':'')+' 3顆同石同級可合成升1級。' };
     }
   });
   window.SOULSTONES=STONES; window.SOULSTONE_BY_ID=BY_ID; window.SOULSTONE_BY_TIER=BY_TIER;
 
-  function icon(s,sz){ sz=sz||40; return '<img src="assets/icons/'+s.n+'.png" style="width:'+sz+'px;height:'+sz+'px;object-fit:contain;" onerror="this.style.opacity=0">'; }
+  function icon(s,sz){ sz=sz||40; return '<img src="assets/icons/soul/'+s.id+'.png" style="width:'+sz+'px;height:'+sz+'px;object-fit:contain;" onerror="this.style.opacity=0">'; }
   function countOf(id,lv){ var n=0; (player.inv||[]).forEach(function(i){ if(i.id===id&&(i.lv||1)===lv) n+=i.cnt; }); return n; }
   function removeFromInv(id,lv,cnt){
     for(var k=0;k<player.inv.length&&cnt>0;k++){ var i=player.inv[k]; if(i.id===id&&(i.lv||1)===lv){ var take=Math.min(i.cnt,cnt); i.cnt-=take; cnt-=take; } }
