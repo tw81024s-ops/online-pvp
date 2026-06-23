@@ -5904,7 +5904,7 @@ function playerAttack() {
         if (result.crit && window._domExploreActive) target._critFlash = Date.now();
         target.justHit = getWpnEle(player.eq.wpn, wpn);
         if (player._setBeauty5 && result.heavy) player._beautyNextSure = true;   // 🔮 麗人 5/5：觸發重擊 → 下一次一般攻擊必中
-        if (player._setWhiteBird5 && target.curHp > 0) { if (!target.st) target.st = newMobStatus(); target.st.fragile = 30; }   // 🔮 白鳥 5/5：脆弱 3 秒（重複觸發刷新）
+        if (player._setWhiteBird5) { mapState.mobs.forEach(function(_wb){ if (_wb && _wb.curHp > 0 && !_wb._dead) { if (!_wb.st) _wb.st = newMobStatus(); _wb.st.fragile = 30; } }); }   // 🔮 白鳥 5/5：脆弱 3 秒；對場上全部交戰中怪物套用（地圖探險/同框 3 隻全吃到；重複觸發刷新）
 
 		// 穿透（貝卡合金）：場上有兩名以上敵人時，普攻額外命中「主目標以外隨機一名敵人」，
 		// 造成與主目標相同的傷害與屬性；僅一名敵人時與一般近戰相同（不額外攻擊）。
@@ -7408,7 +7408,7 @@ function allyOnHitEffects(ally, t, res) {
         if (!(ally._cleaveTicks > 0)) logCombat(`<span class="text-teal-300 font-bold">【協力·${ally._allyName}】流暢的手感，攻速提升！</span>`, 'player');
         ally._cleaveTicks = 20;
     }
-    if (ally._setWhiteBird5 && t.curHp > 0 && !t._dead) { if (!t.st) t.st = newMobStatus(); t.st.fragile = 30; }   // 🔮 白鳥 5/5（傭兵快照）：命中附加脆弱
+    if (ally._setWhiteBird5) { mapState.mobs.forEach(function(_wb){ if (_wb && _wb.curHp > 0 && !_wb._dead) { if (!_wb.st) _wb.st = newMobStatus(); _wb.st.fragile = 30; } }); }   // 🔮 白鳥 5/5（傭兵快照）：對場上全部交戰中怪物附加脆弱
 }
 // 🔧 受擊觸發（判定「主操控玩家」受擊/迴避，傭兵代為反制攻擊者）
 // 反擊：傭兵持單手劍 → 玩家被命中 50%（玩家觸發格檔則必定）；必中、不重擊、傷害 50%
@@ -8077,6 +8077,22 @@ function getAutoCastInterval() {
 }
 
 // 自動施放攻擊/治癒法術：每個 tick 呼叫一次，實際施放間隔由 player.cds.atkSk / healSk 控制
+// 🔮 每技能獨立冷卻（依 類型×階級；數值為砍半後版本）。減CD% 走 player.d.cdr（預留掛鉤，上限50%）。
+function _skillCd(sk){   // 回傳「秒」
+    if(!sk) return 5;
+    var t=sk.type, tier=Math.min(sk.tier||1,5);
+    if(t==='passive'||t==='convert') return 0;          // 被動/開關：常駐無CD
+    if(t==='heal')   return ({1:1.5,2:2,3:3,4:3,5:3})[tier]||2;     // 治療 1.5~3s
+    if(t==='buff')   return ({1:15,2:18,3:22,4:26,5:30})[tier]||20; // 增益 15~30s（到期重放）
+    if(t==='manual') return 5;                          // 手動 ~5s
+    return ({1:1.5,2:2.5,3:4,4:6,5:10})[tier]||1.5;     // 攻擊 atk：T1~大招
+}
+function _skillCdTicks(sk){   // 回傳「tick(0.1秒)」；spellCd 以 tick 遞減
+    var s=_skillCd(sk);
+    var cdr=(typeof player!=='undefined'&&player&&player.d&&player.d.cdr)?player.d.cdr:0;   // 減CD%
+    s=s*(1-Math.min(0.5,(cdr||0)/100));
+    return Math.max(0,Math.round(s*10));
+}
 function autoCastSpells() {
     if(!state.running || player.dead) return;
     let mpPct = (player.mp / player.mmp) * 100;
@@ -8105,7 +8121,7 @@ function autoCastSpells() {
             let tagReq = (skDef && skDef.instakill && skDef.instakill.tag) || null;
             if(tagReq && (atkTarget.boss || !mobHasTag(atkTarget, tagReq))) continue;   // 即死技：目標無標籤/BOSS→跳過
             castSkill(_id);
-            if(player.cds.atkSk > 0) { player.cds.spellCd[_id] = 50; break; }   // 確實施放→該招進 5 秒CD，本次僅放 1 招
+            if(player.cds.atkSk > 0) { player.cds.spellCd[_id] = _skillCdTicks(skDef); break; }   // 確實施放→該招進「自身 CD」（_skillCd 依類型×階級），本次僅放 1 招
         }
     }
 
