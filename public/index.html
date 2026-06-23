@@ -730,7 +730,7 @@
                 <button class="btn text-base py-2 font-bold px-0" style="background:linear-gradient(135deg,#3a2a14,#7a5c25 50%,#140d06);color:#fbe9a8;border-color:#cda64e;" onclick="openMobileBag()">🎒 背包</button>
                 <button class="btn text-base py-2 font-bold px-0" style="background: linear-gradient(135deg, #565d68 0%, #6b7280 26%, #3f4651 48%, #5a6270 72%, #313740 100%); color: #f1f5f9; border-color: #6b7280;" onclick="switchTab('audit', this)">統計</button>
                 <button id="btn-sort-inv" class="btn text-base py-2 font-bold px-0" style="background: linear-gradient(135deg, #0c4a5e 0%, #0e7490 28%, #0a3d4d 52%, #11657e 76%, #093440 100%); color: #a5f3fc; border-color: #0891b2;" onclick="sortInventory()">一鍵排列</button>
-                <button id="btn-sell-junk" class="btn text-base py-2 font-bold px-0" style="background: linear-gradient(135deg, #6b2a10 0%, #b3490e 28%, #5a230e 52%, #9a3e0c 76%, #4a1d0c 100%); color: #fed7aa; border-color: #c2410c;" onclick="sellAllJunk()">賣出廢品</button><button id="btn-multi-recycle" class="btn text-base py-2 font-bold px-0" style="background:#3a2a12;border-color:#c2410c;" onclick="openRecycleUI()">🗑️多選回收</button>
+                <button id="btn-sell-junk" class="btn text-base py-2 font-bold px-0" style="background: linear-gradient(135deg, #6b2a10 0%, #b3490e 28%, #5a230e 52%, #9a3e0c 76%, #4a1d0c 100%); color: #fed7aa; border-color: #c2410c;" onclick="sellAllJunk()">賣出廢品</button>
                 <button id="btn-trash-gear" class="btn text-base py-2 font-bold px-0" style="grid-column:1 / -1; background: linear-gradient(135deg,#5b3a10 0%,#b45309 28%,#4a2f0c 52%,#d97706 76%,#3a2509 100%); color:#fde68a; border-color:#d97706;" onclick="sellUnlockedGear()">🗑️ 一鍵賣裝（賣掉未上鎖裝備/武器換金幣）</button>
             </div>
 
@@ -10865,9 +10865,9 @@ function _bagBuildOnce() {
     }
     var ov = document.createElement('div'); ov.id = 'mbag';
     ov.innerHTML =
-        '<div class="bg-head"><span class="bg-title">背包</span><span class="bg-cap">共 <b id="mbag-cap">0</b> 件</span><div class="bg-x" onclick="closeMobileBag()">✕</div></div>'
+        '<div class="bg-head"><span class="bg-title">背包</span><span class="bg-cap">共 <b id="mbag-cap">0</b> 件</span><div class="bg-x" id="mbag-selbtn" onclick="_bagToggleSelMode()" style="width:auto;padding:0 10px;font-size:13px;">選取</div><div class="bg-x" onclick="closeMobileBag()">✕</div></div>'
         + '<div class="bg-tabs"><div class="bg-tab on" data-f="all">全部</div><div class="bg-tab" data-f="item">道具</div><div class="bg-tab" data-f="wpn">武器</div><div class="bg-tab" data-f="arm">防具</div><div class="bg-tab" data-f="acc">飾品</div></div>'
-        + '<div class="bg-grid" id="mbag-grid"></div>'
+        + '<div class="bg-grid" id="mbag-grid"></div>'         + '<div id="mbag-seltool" style="display:none;gap:5px;padding:6px 12px;border-top:1px solid #2c2113;flex-wrap:wrap;"><button onclick="_bagSelAll()" style="flex:1;min-width:60px;background:#1f2a14;border:1px solid #3f5a2a;color:#bfe3a0;border-radius:6px;padding:6px;font-size:12px;cursor:pointer;">全選未鎖</button><button onclick="_bagSelClear()" style="flex:1;min-width:46px;background:#1a1712;border:1px solid #3a3018;color:#9a9486;border-radius:6px;padding:6px;font-size:12px;cursor:pointer;">清除</button><button onclick="_bagMarkJunkSel()" style="flex:1;min-width:60px;background:#2a1f10;border:1px solid #7c6126;color:#ecd9a3;border-radius:6px;padding:6px;font-size:12px;cursor:pointer;">標記廢品</button><button onclick="_bagRecycleSel()" style="flex:2;min-width:118px;background:#3a2a12;border:1px solid #c2410c;color:#fcd9a3;border-radius:6px;padding:6px;font-size:12px;font-weight:800;cursor:pointer;"><span id="mbag-selcnt">回收選取</span></button></div>'
         + '<div class="bg-foot"><button class="bg-pg" id="mbag-prev">‹</button><span class="bg-pgn"><b id="mbag-pg">1</b> / <span id="mbag-pgt">1</span></span><button class="bg-pg" id="mbag-next">›</button></div>';
     document.body.appendChild(ov);
     ov.querySelectorAll('.bg-tab').forEach(function (t) {
@@ -10918,19 +10918,29 @@ function renderMobileBag() {
         var qty = (it.cnt != null && it.cnt > 1) ? '<span class="bg-q">' + (it.cnt >= 10000 ? (it.cnt / 10000).toFixed(1) + '萬' : it.cnt) + '</span>' : '';
         var en = ((it.en || 0) > 0) ? '<span class="bg-en">+' + it.en + '</span>' : '';
         var lk = it.lock ? '<span class="bg-lock">🔒</span>' : '';
-        cell.innerHTML = imgHtml + en + qty + lk;
-        cell.addEventListener('click', function () { try { openModal(it, false); } catch (e) { } });
+        cell.innerHTML = imgHtml + en + qty + lk; if(_bagSelMode && _bagSel[it.uid]){ cell.style.outline='3px solid #7fe39a'; cell.style.outlineOffset='-3px'; cell.innerHTML += '<span style="position:absolute;top:1px;left:1px;background:#7fe39a;color:#000;font-size:10px;font-weight:900;border-radius:4px;padding:0 3px;z-index:6;">✓</span>'; }
+        cell.addEventListener('click', function () { if(_bagSelMode){ _bagToggleSel(it); return; } try { openModal(it, false); } catch (e) { } });
         grid.appendChild(cell);
     });
 }
 function openMobileBag() {
-    _bagBuildOnce(); _bagFilter = 'all'; _bagPage = 1;
+    _bagBuildOnce(); _bagFilter = 'all'; _bagPage = 1; _bagSelMode=false; _bagSel={}; var _stb=document.getElementById('mbag-seltool'); if(_stb)_stb.style.display='none'; var _ssb=document.getElementById('mbag-selbtn'); if(_ssb){_ssb.textContent='選取';_ssb.style.background='#241a0f';}
     var ov = document.getElementById('mbag');
     ov.querySelectorAll('.bg-tab').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-f') === 'all'); });
     renderMobileBag(); ov.classList.add('on');
 }
 function closeMobileBag() { var ov = document.getElementById('mbag'); if (ov) ov.classList.remove('on'); }
 window.openMobileBag = openMobileBag; window.closeMobileBag = closeMobileBag; window.renderMobileBag = renderMobileBag;
+var _bagSelMode=false, _bagSel={};
+function _bagToggleSelMode(){ _bagSelMode=!_bagSelMode; if(!_bagSelMode) _bagSel={}; var b=document.getElementById('mbag-selbtn'); if(b){ b.textContent=_bagSelMode?'取消':'選取'; b.style.background=_bagSelMode?'#3f5a2a':'#241a0f'; } var t=document.getElementById('mbag-seltool'); if(t) t.style.display=_bagSelMode?'flex':'none'; renderMobileBag(); _renderBagSelBar(); }
+function _bagToggleSel(it){ if(!it||!it.uid) return; if(_bagSel[it.uid]) delete _bagSel[it.uid]; else _bagSel[it.uid]=true; renderMobileBag(); _renderBagSelBar(); }
+function _bagSelList(){ return (player.inv||[]).filter(function(i){ return _bagSel[i.uid]; }); }
+function _bagSelAll(){ (player.inv||[]).forEach(function(i){ if((_bagFilter==='all'||_bagCat(i)===_bagFilter)&&!i.lock) _bagSel[i.uid]=true; }); renderMobileBag(); _renderBagSelBar(); }
+function _bagSelClear(){ _bagSel={}; renderMobileBag(); _renderBagSelBar(); }
+function _bagMarkJunkSel(){ var nn=0; _bagSelList().forEach(function(i){ if(!i.lock){ i.junk=true; nn++; } }); try{logSys('<span class="text-amber-300">\ud83d\uddd1\ufe0f 標記 '+nn+' 件為廢品</span>');}catch(e){} try{saveGame();}catch(e){} renderMobileBag(); _renderBagSelBar(); }
+function _bagRecycleSel(){ var g=0,n=0; _bagSelList().forEach(function(i){ if(!i.lock){ g+=getSellPrice(i)*i.cnt; n+=i.cnt; } }); if(n===0){ try{logSys('<span class="text-slate-400">沒有選取可回收的道具（鎖定會跳過）。</span>');}catch(e){} return; } if(!confirm('回收選取的 '+n+' 件 \u2192 '+g.toLocaleString()+' 金幣？\n（鎖定的會自動跳過）')) return; var keep=[],gold=0,cnt=0; (player.inv||[]).forEach(function(i){ if(_bagSel[i.uid]&&!i.lock){ gold+=getSellPrice(i)*i.cnt; cnt+=i.cnt; } else keep.push(i); }); player.inv=keep; player.gold=(player.gold||0)+gold; _bagSel={}; try{logSys('<span class="text-amber-300">\ud83d\uddd1\ufe0f 回收 '+cnt+' 件 \u2192 +'+gold.toLocaleString()+' 金幣</span>');}catch(e){} try{saveGame();}catch(e){} renderMobileBag(); _renderBagSelBar(); }
+function _renderBagSelBar(){ var el=document.getElementById('mbag-selcnt'); if(!el) return; var g=0,n=0; _bagSelList().forEach(function(i){ if(!i.lock){ g+=getSellPrice(i)*i.cnt; n+=i.cnt; } }); el.textContent='回收選取（'+n+'件\u2192'+g.toLocaleString()+'金）'; }
+
 
 function _hubClickFab(re){
     var fab=document.getElementById('online-fab'); if(!fab) return;
