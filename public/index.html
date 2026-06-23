@@ -8176,6 +8176,17 @@ function _renderSkillUI(){
     }
     var common=opts.filter(function(o){return _skUIcat(o.id)==='common';});
     var prof=opts.filter(function(o){return _skUIcat(o.id)!=='common';});
+    // ✋ 手動施放技能（type:manual）：列出玩家已習得者，附施放鈕（manualCast 自帶等級/開放/CD/MP 守衛）
+    var _mlist=(player.skills||[]).filter(function(id){var s=DB.skills[id];return s&&s.type==='manual';});
+    _mlist=_mlist.filter(function(id,i){return _mlist.indexOf(id)===i;}).sort(function(a,b){return (DB.skills[a].tier||0)-(DB.skills[b].tier||0);});
+    function _mAvail(id){var s=DB.skills[id];if(!s)return false;var g=player.grantedSkills&&player.grantedSkills.includes(id);if(g)return true;var nl=_skillReqLv(s);if(nl===undefined||player.lv<nl)return false;if(s.reqEle&&player.elfEle!==s.reqEle)return false;if(s.reqEleAny&&!player.elfEle)return false;if(s.reqReborn&&(player.reborn||0)<s.reqReborn)return false;return true;}
+    function _mCard(id){var s=DB.skills[id];var ok=_mAvail(id);var img=(typeof getIconUrl==='function')?getIconUrl(s,true):'';
+        return '<button '+(ok?'onclick="_skuiManual(\''+id+'\')"':'disabled')+' style="cursor:'+(ok?'pointer':'not-allowed')+';display:flex;gap:7px;align-items:center;text-align:left;background:'+(ok?'linear-gradient(180deg,#1a1322,#0e0b13)':'#0d0b08')+';border:1px solid '+(ok?'#7c5bbf':'#2a2418')+';border-radius:9px;padding:7px;opacity:'+(ok?'1':'.5')+';">'
+          +'<div style="width:34px;height:34px;flex:none;border-radius:7px;border:1.5px solid #a874d9;display:grid;place-items:center;overflow:hidden;color:#a874d9;font-size:15px;">'+(img?'<img src="'+img+'" onerror="this.style.display=\'none\';this.parentNode.textContent=\'✋\';" style="width:100%;height:100%;object-fit:contain;">':'✋')+'</div>'
+          +'<div style="min-width:0;flex:1;"><div style="font-size:12px;font-weight:700;color:#e7dfce;line-height:1.2;">'+s.n+'</div>'
+          +'<div style="font-size:10px;font-weight:700;color:'+(ok?'#c9a8ff':'#6b665c')+';margin-top:2px;">'+(ok?'點擊施放':'未開放')+'</div></div></button>';
+    }
+    var manualHtml=_mlist.length?'<div style="font-size:12px;color:#c9a8ff;font-weight:800;border-left:3px solid #a874d9;padding-left:7px;margin:12px 0 7px;">✋ 手動施放</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">'+_mlist.map(_mCard).join('')+'</div>':'';
     var slot='';
     for(var i=0;i<4;i++){ var id=cur[i]; var nm=(id&&DB.skills[id])?DB.skills[id].n:''; var act=(window._skuiSlot===i);
         slot+='<div onclick="_skuiPickSlot('+i+')" style="cursor:pointer;flex:1;text-align:center;padding:7px 2px;border-radius:8px;border:2px solid '+(act?'#cba85a':'#3a3018')+';background:'+(act?'#231a0c':'#120e08')+';">'
@@ -8188,10 +8199,12 @@ function _renderSkillUI(){
       +'<div style="flex:1;overflow:auto;padding:10px 12px;">'
       +(prof.length?'<div style="font-size:12px;color:#ecd9a3;font-weight:800;border-left:3px solid #cba85a;padding-left:7px;margin:0 0 7px;">專職技能</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;">'+prof.map(card).join('')+'</div>':'')
       +(common.length?'<div style="font-size:12px;color:#ecd9a3;font-weight:800;border-left:3px solid #cba85a;padding-left:7px;margin:0 0 7px;">通用技能</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">'+common.map(card).join('')+'</div>':'')
+      +manualHtml
       +(opts.length?'':'<div style="color:#6b665c;text-align:center;padding:34px 10px;font-size:12px;">目前沒有可指派的攻擊技能。<br>先到原本的技能頁學習/開放技能，這裡就會出現。</div>')
       +'</div>';
 }
-window.openSkillUI=openSkillUI; window.closeSkillUI=closeSkillUI; window._skuiAssign=_skuiAssign; window._skuiPickSlot=_skuiPickSlot; window._skuiClearSlot=_skuiClearSlot;
+function _skuiManual(id){ try{ if(typeof manualCast==='function') manualCast(id); }catch(e){} _renderSkillUI(); }
+window.openSkillUI=openSkillUI; window.closeSkillUI=closeSkillUI; window._skuiAssign=_skuiAssign; window._skuiPickSlot=_skuiPickSlot; window._skuiClearSlot=_skuiClearSlot; window._skuiManual=_skuiManual;
 // ===== 🆕 角色界面 overlay（天堂M風紙娃娃；唯讀 player.eq + 鏡像 dt-* 數值，不動裝備/屬性邏輯）=====
 function openCharUI(){
     var ov=document.getElementById('chui-ov');
@@ -16209,7 +16222,7 @@ window.onload = () => {
         if (f) f.style.width = Math.min(100, hpPct) + '%'; if (t2) t2.innerHTML = 'HP ' + Math.round(player.hp).toLocaleString() + ' / ' + (player.mhp || 0).toLocaleString() + ' · <b style="color:#a3e635;">' + hpPct + '%</b>';
         if (mf) mf.style.width = Math.min(100, mpPct) + '%'; if (mt) mt.innerHTML = 'MP ' + Math.round(player.mp).toLocaleString() + ' / ' + (player.mmp || 0).toLocaleString() + ' · <b style="color:#22d3ee;">' + mpPct + '%</b>';
         if (k) k.textContent = kills;
-        logCd -= dt; if (logCd <= 0) { logCd = 0.2; const cl = document.getElementById('combat-log'), dl = wrap && wrap.querySelector('#dx-log'); if (cl && dl) { const ks = cl.children, nn = ks.length; let lh = ''; for (let i = Math.max(0, nn - 50); i < nn; i++) lh += ks[i].outerHTML; if (dl.innerHTML !== lh) { const atB = (dl.scrollHeight - dl.scrollTop - dl.clientHeight) < 24; const pv = dl.scrollTop; dl.innerHTML = lh; if (atB) dl.scrollTop = dl.scrollHeight; else dl.scrollTop = pv; } } }
+        logCd -= dt; if (logCd <= 0) { logCd = 0.2; const cl = document.getElementById('combat-log'), dl = wrap && wrap.querySelector('#dx-log'); if (cl && dl) { const atB = (dl.scrollHeight - dl.scrollTop - dl.clientHeight) < 24; const _pill = wrap && wrap.querySelector('#dx-tobottom'); if (atB) { const ks = cl.children, nn = ks.length; let lh = ''; for (let i = Math.max(0, nn - 50); i < nn; i++) lh += ks[i].outerHTML; if (dl.innerHTML !== lh) { dl.innerHTML = lh; dl.scrollTop = dl.scrollHeight; } if (dl._dxFrozen) { dl._dxFrozen = false; if (_pill) _pill.style.display = 'none'; } } else { if (!dl._dxFrozen) dl._dxFrozen = true; if (_pill) _pill.style.display = 'block'; } } }
     }
 
     function lightGlow(p, r, col, a) { const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r); g.addColorStop(0, col.replace('rgb', 'rgba').replace(')', ',' + a + ')')); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 7); ctx.fill(); }
@@ -16318,7 +16331,9 @@ window.onload = () => {
         const _exp = document.createElement('button'); _exp.id = 'dx-exp'; _exp.style.cssText = 'pointer-events:auto;background:rgba(13,22,34,.8);color:#a5b4fc;border:1px solid rgba(120,150,210,.35);border-radius:7px;font-size:10px;font-weight:700;padding:2px 7px;cursor:pointer;text-shadow:0 1px 2px #000;';
         _exp.onclick = function () { _logRi = (_logRi + 1) % _LOGROWS.length; _applyLogRows(); };
         const _logDiv = document.createElement('div'); _logDiv.id = 'dx-log'; _logDiv.style.cssText = 'width:100%;height:78px;overflow-y:auto;overflow-x:hidden;background:rgba(5,8,12,.5);border:1px solid rgba(120,150,210,.25);border-radius:8px;padding:4px 7px;font-size:10px;line-height:1.3;pointer-events:auto;touch-action:pan-y;text-shadow:0 1px 2px #000;';
-        _lw.appendChild(_exp); _lw.appendChild(_logDiv); cv.parentNode.appendChild(_lw); _logRi = 0; _applyLogRows();
+        const _pill = document.createElement('div'); _pill.id = 'dx-tobottom'; _pill.textContent = '🔒 已鎖定 ▾ 回到最新'; _pill.style.cssText = 'display:none;position:absolute;right:0;bottom:6px;z-index:6;pointer-events:auto;background:#b45309;color:#fff;font-size:10px;font-weight:bold;padding:3px 9px;border-radius:9999px;box-shadow:0 2px 6px rgba(0,0,0,.5);cursor:pointer;white-space:nowrap;';
+        _pill.onclick = function () { const _cl = document.getElementById('combat-log'); const _dl = wrap && wrap.querySelector('#dx-log'); if (_cl && _dl) { const _ks = _cl.children, _nn = _ks.length; let _lh = ''; for (let i = Math.max(0, _nn - 50); i < _nn; i++) _lh += _ks[i].outerHTML; _dl.innerHTML = _lh; _dl.scrollTop = _dl.scrollHeight; _dl._dxFrozen = false; } _pill.style.display = 'none'; };
+        _lw.appendChild(_exp); _lw.appendChild(_logDiv); _lw.appendChild(_pill); cv.parentNode.appendChild(_lw); _logRi = 0; _applyLogRows();
         cv.addEventListener('mousedown', onTap); cv.addEventListener('touchstart', function (e) { e.preventDefault(); onTap(e); }, { passive: false });
         wrap.querySelector('#dx-exit').onclick = function () { autoMode = false; close(); };
         last = performance.now(); raf = requestAnimationFrame(loop);
