@@ -730,11 +730,11 @@
                 <button class="btn text-base py-2 font-bold px-0" style="background:linear-gradient(135deg,#3a2a14,#7a5c25 50%,#140d06);color:#fbe9a8;border-color:#cda64e;" onclick="openMobileBag()">🎒 背包</button>
                 <button class="btn text-base py-2 font-bold px-0" style="background: linear-gradient(135deg, #565d68 0%, #6b7280 26%, #3f4651 48%, #5a6270 72%, #313740 100%); color: #f1f5f9; border-color: #6b7280;" onclick="switchTab('audit', this)">統計</button>
                 <button id="btn-sort-inv" class="btn text-base py-2 font-bold px-0" style="background: linear-gradient(135deg, #0c4a5e 0%, #0e7490 28%, #0a3d4d 52%, #11657e 76%, #093440 100%); color: #a5f3fc; border-color: #0891b2;" onclick="sortInventory()">一鍵排列</button>
-                <button id="btn-sell-junk" class="btn text-base py-2 font-bold px-0" style="background: linear-gradient(135deg, #6b2a10 0%, #b3490e 28%, #5a230e 52%, #9a3e0c 76%, #4a1d0c 100%); color: #fed7aa; border-color: #c2410c;" onclick="sellAllJunk()">賣出廢品</button>
+                <button id="btn-sell-junk" class="btn text-base py-2 font-bold px-0" style="background: linear-gradient(135deg, #6b2a10 0%, #b3490e 28%, #5a230e 52%, #9a3e0c 76%, #4a1d0c 100%); color: #fed7aa; border-color: #c2410c;" onclick="sellAllJunk()">賣出廢品</button><button id="btn-multi-recycle" class="btn text-base py-2 font-bold px-0" style="background:#3a2a12;border-color:#c2410c;" onclick="openRecycleUI()">🗑️多選回收</button>
                 <button id="btn-trash-gear" class="btn text-base py-2 font-bold px-0" style="grid-column:1 / -1; background: linear-gradient(135deg,#5b3a10 0%,#b45309 28%,#4a2f0c 52%,#d97706 76%,#3a2509 100%); color:#fde68a; border-color:#d97706;" onclick="sellUnlockedGear()">🗑️ 一鍵賣裝（賣掉未上鎖裝備/武器換金幣）</button>
             </div>
 
-            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic" onclick="openSkillUI()"><span class="ic">⚔️</span><span class="tx">技能</span></button><button class="fn-ic" onclick="openCharUI()"><span class="ic">🛡️</span><span class="tx">角色</span></button><button class="fn-ic casino-marquee" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openTreasurePanel()"><span class="ic">🗺️</span><span class="tx">奪寶</span></button><button class="fn-ic" onclick="openMapFragPanel()"><span class="ic">🧩</span><span class="tx">寶圖</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="openDomTpPanel()"><span class="ic">🔑</span><span class="tx">傳送石</span></button><button class="fn-ic" onclick="openSigilPanel()"><span class="ic">🔯</span><span class="tx">紋樣</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="openInfiniteArena()"><span class="ic">🏟️</span><span class="tx">無界擂台</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
+            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic" onclick="openSkillUI()"><span class="ic">⚔️</span><span class="tx">技能</span></button><button class="fn-ic" onclick="openCharUI()"><span class="ic">🛡️</span><span class="tx">角色</span></button><button class="fn-ic" onclick="openTalentUI()"><span class="ic">🌳</span><span class="tx">天賦</span></button><button class="fn-ic casino-marquee" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openTreasurePanel()"><span class="ic">🗺️</span><span class="tx">奪寶</span></button><button class="fn-ic" onclick="openMapFragPanel()"><span class="ic">🧩</span><span class="tx">寶圖</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="openDomTpPanel()"><span class="ic">🔑</span><span class="tx">傳送石</span></button><button class="fn-ic" onclick="openSigilPanel()"><span class="ic">🔯</span><span class="tx">紋樣</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="openInfiniteArena()"><span class="ic">🏟️</span><span class="tx">無界擂台</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
 
             <div class="panel flex-1 flex flex-col overflow-hidden relative">
                 <!-- 能力 -->
@@ -946,30 +946,30 @@ const DB = {
         "dragon_chain_annihilator": { dragonOnly: true, chain: true, n: "殲滅者鎖鏈劍", type: "wpn", dmgS: 27, dmgL: 22, hit: 6, dmgBonus: 5, spd: 0.9, req: "knight", safe: 6, c: "text-purple-400", p: 500000, gachaWeight: 3, img: "assets/icons/weapons/dragon_chain_annihilator.png", d: "龍騎士專屬鎖鏈劍。" },
         "dragon_chain_osiris": { dragonOnly: true, chain: true, n: "歐西里斯鎖鏈劍", type: "wpn", dmgS: 29, dmgL: 25, hit: 6, dmgBonus: 5, spd: 0.9, req: "knight", safe: 6, c: "text-purple-400", p: 500000, gachaWeight: 3, img: "assets/icons/weapons/dragon_chain_osiris.png", d: "龍騎士專屬鎖鏈劍。" },
         "dragon_chain_aurakyria": { dragonOnly: true, chain: true, n: "奧拉奇里亞的鎖鏈劍", type: "wpn", dmgS: 31, dmgL: 26, hit: 6, dmgBonus: 5, spd: 0.9, req: "knight", safe: 6, c: "text-purple-400", p: 500000, gachaWeight: 3, img: "assets/icons/weapons/dragon_chain_aurakyria.png", d: "龍騎士專屬鎖鏈劍。" },
-        "tk_2h_aqua": { n: "蒼海聖劍", type: "wpn", dmgS: 44, dmgL: 48, hit: 10, dmgBonus: 28, con: 2, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_2h_aqua.png", procs: [{ name: "寒冰尖刺", rate: 0.08, min: 30, max: 58, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
-        "tk_2h_sun": { n: "烈陽聖劍", type: "wpn", dmgS: 48, dmgL: 52, hit: 8, dmgBonus: 34, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_2h_sun.png", procs: [{ name: "烈焰爆裂", rate: 0.08, min: 36, max: 70, ele: "fire", color: "#f97316" }], d: "提卡爾神廟的傳說武器・fire屬性。掉落即附帶祝福。" },
-        "tk_2h_sky": { n: "蒼穹聖劍", type: "wpn", dmgS: 46, dmgL: 46, hit: 14, dmgBonus: 26, dex: 2, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_2h_sky.png", procs: [{ name: "疾風斬", rate: 0.1, min: 26, max: 52, ele: "wind", color: "#4ade80" }], d: "提卡爾神廟的傳說武器・wind屬性。掉落即附帶祝福。" },
-        "tk_2h_gloom": { n: "幽冥聖劍", type: "wpn", dmgS: 42, dmgL: 50, hit: 10, dmgBonus: 38, crit: 8, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_2h_gloom.png", procs: [{ name: "闇蝕", rate: 0.08, min: 34, max: 68, ele: null, color: "#a78bfa" }], d: "提卡爾神廟的傳說武器・dark屬性。掉落即附帶祝福。" },
-        "tk_wand_aqua": { n: "碧波之杖", type: "wpn", dmgS: 34, dmgL: 18, hit: 14, dmgBonus: 5, mdmg: 7, mpR: 90, spd: 1.0, req: "mage", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_wand_aqua.png", procs: [{ name: "冰錐", rate: 0.08, min: 30, max: 58, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
-        "tk_wand_wind": { n: "流光之杖", type: "wpn", dmgS: 32, dmgL: 18, hit: 16, dmgBonus: 5, mdmg: 6, mpR: 100, dex: 2, spd: 1.0, req: "mage", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_wand_wind.png", procs: [{ name: "風刃", rate: 0.1, min: 26, max: 52, ele: "wind", color: "#4ade80" }], d: "提卡爾神廟的傳說武器・wind屬性。掉落即附帶祝福。" },
-        "tk_wand_ice": { n: "寒晶之杖", type: "wpn", dmgS: 36, dmgL: 22, hit: 13, dmgBonus: 6, mdmg: 9, mpR: 85, spd: 1.0, req: "mage", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_wand_ice.png", procs: [{ name: "暴風雪", rate: 0.08, min: 30, max: 58, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
-        "tk_wand_sun": { n: "日輪之杖", type: "wpn", dmgS: 38, dmgL: 20, hit: 13, dmgBonus: 6, mdmg: 10, mpR: 90, int: 2, spd: 1.0, req: "mage", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_wand_sun.png", procs: [{ name: "烈陽", rate: 0.08, min: 36, max: 70, ele: "fire", color: "#f97316" }], d: "提卡爾神廟的傳說武器・fire屬性。掉落即附帶祝福。" },
-        "tk_claw_sun": { n: "金鬃魔爪", type: "wpn", dmgS: 44, dmgL: 42, hit: 8, dmgBonus: 10, ignoreEva: 2, spd: 1.0, darkOnly: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_claw_sun.png", procs: [{ name: "烈焰爆裂", rate: 0.08, min: 36, max: 70, ele: "fire", color: "#f97316" }], d: "提卡爾神廟的傳說武器・fire屬性。掉落即附帶祝福。" },
-        "tk_claw_gloom": { n: "幽冥魔爪", type: "wpn", dmgS: 42, dmgL: 44, hit: 8, dmgBonus: 12, crit: 10, ignoreEva: 2, spd: 1.0, darkOnly: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_claw_gloom.png", procs: [{ name: "闇蝕", rate: 0.08, min: 34, max: 68, ele: null, color: "#a78bfa" }], d: "提卡爾神廟的傳說武器・dark屬性。掉落即附帶祝福。" },
-        "tk_claw_earth": { n: "翠裂魔爪", type: "wpn", dmgS: 46, dmgL: 40, hit: 8, dmgBonus: 8, str: 2, spd: 1.0, darkOnly: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_claw_earth.png", procs: [{ name: "大地撕裂", rate: 0.08, min: 34, max: 62, ele: "earth", color: "#ca8a04" }], d: "提卡爾神廟的傳說武器・earth屬性。掉落即附帶祝福。" },
-        "tk_claw_frost": { n: "霜白魔爪", type: "wpn", dmgS: 44, dmgL: 42, hit: 10, dmgBonus: 8, ignoreEva: 3, spd: 1.0, darkOnly: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_claw_frost.png", procs: [{ name: "寒冰尖刺", rate: 0.08, min: 30, max: 58, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
-        "tk_chain_aqua": { n: "碧波鎖鏈劍", type: "wpn", dmgS: 36, dmgL: 32, hit: 10, dmgBonus: 8, spd: 0.9, dragonOnly: true, chain: true, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_chain_aqua.png", procs: [{ name: "寒冰尖刺", rate: 0.08, min: 30, max: 58, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
-        "tk_chain_gloom": { n: "幽冥鎖鏈劍", type: "wpn", dmgS: 38, dmgL: 34, hit: 10, dmgBonus: 11, crit: 8, spd: 0.9, dragonOnly: true, chain: true, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_chain_gloom.png", procs: [{ name: "闇蝕", rate: 0.08, min: 34, max: 68, ele: null, color: "#a78bfa" }], d: "提卡爾神廟的傳說武器・dark屬性。掉落即附帶祝福。" },
-        "tk_chain_sun": { n: "金輝鎖鏈劍", type: "wpn", dmgS: 40, dmgL: 32, hit: 8, dmgBonus: 10, spd: 0.9, dragonOnly: true, chain: true, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_chain_sun.png", procs: [{ name: "烈焰爆裂", rate: 0.08, min: 36, max: 70, ele: "fire", color: "#f97316" }], d: "提卡爾神廟的傳說武器・fire屬性。掉落即附帶祝福。" },
-        "tk_chain_sky": { n: "蒼穹鎖鏈劍", type: "wpn", dmgS: 38, dmgL: 34, hit: 12, dmgBonus: 8, dex: 2, spd: 0.9, dragonOnly: true, chain: true, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_chain_sky.png", procs: [{ name: "疾風斬", rate: 0.1, min: 26, max: 52, ele: "wind", color: "#4ade80" }], d: "提卡爾神廟的傳說武器・wind屬性。掉落即附帶祝福。" },
-        "tk_bow_aqua": { n: "銀月之弓", type: "wpn", dmgS: 46, dmgL: 44, hit: 10, dmgBonus: 24, dex: 3, ignoreEva: 3, spd: 1.0, isBow: true, ranged: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_bow_aqua.png", procs: [{ name: "寒冰尖刺", rate: 0.08, min: 30, max: 58, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
-        "tk_bow_sun": { n: "金陽之弓", type: "wpn", dmgS: 50, dmgL: 44, hit: 8, dmgBonus: 30, dex: 2, spd: 1.0, isBow: true, ranged: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_bow_sun.png", procs: [{ name: "烈焰爆裂", rate: 0.08, min: 36, max: 70, ele: "fire", color: "#f97316" }], d: "提卡爾神廟的傳說武器・fire屬性。掉落即附帶祝福。" },
-        "tk_bow_gloom": { n: "幽棘之弓", type: "wpn", dmgS: 46, dmgL: 46, hit: 10, dmgBonus: 32, crit: 8, spd: 1.0, isBow: true, ranged: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_bow_gloom.png", procs: [{ name: "闇蝕", rate: 0.08, min: 34, max: 68, ele: null, color: "#a78bfa" }], d: "提卡爾神廟的傳說武器・dark屬性。掉落即附帶祝福。" },
-        "tk_bow_earth": { n: "翠藤之弓", type: "wpn", dmgS: 48, dmgL: 42, hit: 12, dmgBonus: 26, dex: 4, ignoreEva: 4, spd: 1.0, isBow: true, ranged: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_bow_earth.png", procs: [{ name: "大地撕裂", rate: 0.08, min: 34, max: 62, ele: "earth", color: "#ca8a04" }], d: "提卡爾神廟的傳說武器・earth屬性。掉落即附帶祝福。" },
-        "tk_sword_aqua": { n: "蒼藍聖劍", type: "wpn", dmgS: 42, dmgL: 46, hit: 10, dmgBonus: 28, con: 2, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_sword_aqua.png", procs: [{ name: "寒冰尖刺", rate: 0.08, min: 30, max: 58, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
-        "tk_sword_sun": { n: "聖陽之劍", type: "wpn", dmgS: 46, dmgL: 48, hit: 8, dmgBonus: 34, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_sword_sun.png", procs: [{ name: "烈焰爆裂", rate: 0.08, min: 36, max: 70, ele: "fire", color: "#f97316" }], d: "提卡爾神廟的傳說武器・fire屬性。掉落即附帶祝福。" },
-        "tk_sword_gloom": { n: "幽冥之劍", type: "wpn", dmgS: 42, dmgL: 48, hit: 10, dmgBonus: 38, crit: 8, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_sword_gloom.png", procs: [{ name: "闇蝕", rate: 0.08, min: 34, max: 68, ele: null, color: "#a78bfa" }], d: "提卡爾神廟的傳說武器・dark屬性。掉落即附帶祝福。" },
-        "tk_sword_earth": { n: "翠葉之劍", type: "wpn", dmgS: 44, dmgL: 46, hit: 12, dmgBonus: 30, str: 3, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_sword_earth.png", procs: [{ name: "大地撕裂", rate: 0.08, min: 34, max: 62, ele: "earth", color: "#ca8a04" }], d: "提卡爾神廟的傳說武器・earth屬性。掉落即附帶祝福。" },
+        "tk_2h_aqua": { n: "蒼海聖劍", type: "wpn", dmgS: 44, dmgL: 48, hit: 10, dmgBonus: 28, con: 2, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_2h_aqua.png", procs: [{ name: "寒冰尖刺", rate: 0.08, min: 18000, max: 24000, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
+        "tk_2h_sun": { n: "烈陽聖劍", type: "wpn", dmgS: 48, dmgL: 52, hit: 8, dmgBonus: 34, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_2h_sun.png", procs: [{ name: "烈焰爆裂", rate: 0.08, min: 18000, max: 24000, ele: "fire", color: "#f97316" }], d: "提卡爾神廟的傳說武器・fire屬性。掉落即附帶祝福。" },
+        "tk_2h_sky": { n: "蒼穹聖劍", type: "wpn", dmgS: 46, dmgL: 46, hit: 14, dmgBonus: 26, dex: 2, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_2h_sky.png", procs: [{ name: "疾風斬", rate: 0.08, min: 18000, max: 24000, ele: "wind", color: "#4ade80" }], d: "提卡爾神廟的傳說武器・wind屬性。掉落即附帶祝福。" },
+        "tk_2h_gloom": { n: "幽冥聖劍", type: "wpn", dmgS: 42, dmgL: 50, hit: 10, dmgBonus: 38, crit: 8, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_2h_gloom.png", procs: [{ name: "闇蝕", rate: 0.08, min: 18000, max: 24000, ele: null, color: "#a78bfa" }], d: "提卡爾神廟的傳說武器・dark屬性。掉落即附帶祝福。" },
+        "tk_wand_aqua": { n: "碧波之杖", type: "wpn", dmgS: 34, dmgL: 18, hit: 14, dmgBonus: 5, mdmg: 7, mpR: 90, spd: 1.0, req: "mage", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_wand_aqua.png", procs: [{ name: "冰錐", rate: 0.1, min: 16000, max: 24000, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
+        "tk_wand_wind": { n: "流光之杖", type: "wpn", dmgS: 32, dmgL: 18, hit: 16, dmgBonus: 5, mdmg: 6, mpR: 100, dex: 2, spd: 1.0, req: "mage", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_wand_wind.png", procs: [{ name: "風刃", rate: 0.1, min: 16000, max: 24000, ele: "wind", color: "#4ade80" }], d: "提卡爾神廟的傳說武器・wind屬性。掉落即附帶祝福。" },
+        "tk_wand_ice": { n: "寒晶之杖", type: "wpn", dmgS: 36, dmgL: 22, hit: 13, dmgBonus: 6, mdmg: 9, mpR: 85, spd: 1.0, req: "mage", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_wand_ice.png", procs: [{ name: "暴風雪", rate: 0.1, min: 16000, max: 24000, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
+        "tk_wand_sun": { n: "日輪之杖", type: "wpn", dmgS: 38, dmgL: 20, hit: 13, dmgBonus: 6, mdmg: 10, mpR: 90, int: 2, spd: 1.0, req: "mage", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_wand_sun.png", procs: [{ name: "烈陽", rate: 0.1, min: 16000, max: 24000, ele: "fire", color: "#f97316" }], d: "提卡爾神廟的傳說武器・fire屬性。掉落即附帶祝福。" },
+        "tk_claw_sun": { n: "金鬃魔爪", type: "wpn", dmgS: 44, dmgL: 42, hit: 8, dmgBonus: 10, ignoreEva: 2, spd: 1.0, darkOnly: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_claw_sun.png", procs: [{ name: "烈焰爆裂", rate: 0.16, min: 9000, max: 13000, ele: "fire", color: "#f97316" }], d: "提卡爾神廟的傳說武器・fire屬性。掉落即附帶祝福。" },
+        "tk_claw_gloom": { n: "幽冥魔爪", type: "wpn", dmgS: 42, dmgL: 44, hit: 8, dmgBonus: 12, crit: 10, ignoreEva: 2, spd: 1.0, darkOnly: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_claw_gloom.png", procs: [{ name: "闇蝕", rate: 0.16, min: 9000, max: 13000, ele: null, color: "#a78bfa" }], d: "提卡爾神廟的傳說武器・dark屬性。掉落即附帶祝福。" },
+        "tk_claw_earth": { n: "翠裂魔爪", type: "wpn", dmgS: 46, dmgL: 40, hit: 8, dmgBonus: 8, str: 2, spd: 1.0, darkOnly: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_claw_earth.png", procs: [{ name: "大地撕裂", rate: 0.16, min: 9000, max: 13000, ele: "earth", color: "#ca8a04" }], d: "提卡爾神廟的傳說武器・earth屬性。掉落即附帶祝福。" },
+        "tk_claw_frost": { n: "霜白魔爪", type: "wpn", dmgS: 44, dmgL: 42, hit: 10, dmgBonus: 8, ignoreEva: 3, spd: 1.0, darkOnly: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_claw_frost.png", procs: [{ name: "寒冰尖刺", rate: 0.16, min: 9000, max: 13000, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
+        "tk_chain_aqua": { n: "碧波鎖鏈劍", type: "wpn", dmgS: 36, dmgL: 32, hit: 10, dmgBonus: 8, spd: 0.9, dragonOnly: true, chain: true, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_chain_aqua.png", procs: [{ name: "寒冰尖刺", rate: 0.1, min: 14000, max: 20000, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
+        "tk_chain_gloom": { n: "幽冥鎖鏈劍", type: "wpn", dmgS: 38, dmgL: 34, hit: 10, dmgBonus: 11, crit: 8, spd: 0.9, dragonOnly: true, chain: true, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_chain_gloom.png", procs: [{ name: "闇蝕", rate: 0.1, min: 14000, max: 20000, ele: null, color: "#a78bfa" }], d: "提卡爾神廟的傳說武器・dark屬性。掉落即附帶祝福。" },
+        "tk_chain_sun": { n: "金輝鎖鏈劍", type: "wpn", dmgS: 40, dmgL: 32, hit: 8, dmgBonus: 10, spd: 0.9, dragonOnly: true, chain: true, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_chain_sun.png", procs: [{ name: "烈焰爆裂", rate: 0.1, min: 14000, max: 20000, ele: "fire", color: "#f97316" }], d: "提卡爾神廟的傳說武器・fire屬性。掉落即附帶祝福。" },
+        "tk_chain_sky": { n: "蒼穹鎖鏈劍", type: "wpn", dmgS: 38, dmgL: 34, hit: 12, dmgBonus: 8, dex: 2, spd: 0.9, dragonOnly: true, chain: true, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_chain_sky.png", procs: [{ name: "疾風斬", rate: 0.1, min: 14000, max: 20000, ele: "wind", color: "#4ade80" }], d: "提卡爾神廟的傳說武器・wind屬性。掉落即附帶祝福。" },
+        "tk_bow_aqua": { n: "銀月之弓", type: "wpn", dmgS: 46, dmgL: 44, hit: 10, dmgBonus: 24, dex: 3, ignoreEva: 3, spd: 1.0, isBow: true, ranged: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_bow_aqua.png", procs: [{ name: "寒冰尖刺", rate: 0.12, min: 14000, max: 20000, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
+        "tk_bow_sun": { n: "金陽之弓", type: "wpn", dmgS: 50, dmgL: 44, hit: 8, dmgBonus: 30, dex: 2, spd: 1.0, isBow: true, ranged: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_bow_sun.png", procs: [{ name: "烈焰爆裂", rate: 0.12, min: 14000, max: 20000, ele: "fire", color: "#f97316" }], d: "提卡爾神廟的傳說武器・fire屬性。掉落即附帶祝福。" },
+        "tk_bow_gloom": { n: "幽棘之弓", type: "wpn", dmgS: 46, dmgL: 46, hit: 10, dmgBonus: 32, crit: 8, spd: 1.0, isBow: true, ranged: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_bow_gloom.png", procs: [{ name: "闇蝕", rate: 0.12, min: 14000, max: 20000, ele: null, color: "#a78bfa" }], d: "提卡爾神廟的傳說武器・dark屬性。掉落即附帶祝福。" },
+        "tk_bow_earth": { n: "翠藤之弓", type: "wpn", dmgS: 48, dmgL: 42, hit: 12, dmgBonus: 26, dex: 4, ignoreEva: 4, spd: 1.0, isBow: true, ranged: true, req: "elf", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_bow_earth.png", procs: [{ name: "大地撕裂", rate: 0.12, min: 14000, max: 20000, ele: "earth", color: "#ca8a04" }], d: "提卡爾神廟的傳說武器・earth屬性。掉落即附帶祝福。" },
+        "tk_sword_aqua": { n: "蒼藍聖劍", type: "wpn", dmgS: 42, dmgL: 46, hit: 10, dmgBonus: 28, con: 2, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_sword_aqua.png", procs: [{ name: "寒冰尖刺", rate: 0.1, min: 15000, max: 21000, ele: "water", color: "#22d3ee" }], d: "提卡爾神廟的傳說武器・water屬性。掉落即附帶祝福。" },
+        "tk_sword_sun": { n: "聖陽之劍", type: "wpn", dmgS: 46, dmgL: 48, hit: 8, dmgBonus: 34, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_sword_sun.png", procs: [{ name: "烈焰爆裂", rate: 0.1, min: 15000, max: 21000, ele: "fire", color: "#f97316" }], d: "提卡爾神廟的傳說武器・fire屬性。掉落即附帶祝福。" },
+        "tk_sword_gloom": { n: "幽冥之劍", type: "wpn", dmgS: 42, dmgL: 48, hit: 10, dmgBonus: 38, crit: 8, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_sword_gloom.png", procs: [{ name: "闇蝕", rate: 0.1, min: 15000, max: 21000, ele: null, color: "#a78bfa" }], d: "提卡爾神廟的傳說武器・dark屬性。掉落即附帶祝福。" },
+        "tk_sword_earth": { n: "翠葉之劍", type: "wpn", dmgS: 44, dmgL: 46, hit: 12, dmgBonus: 30, str: 3, spd: 1.0, req: "knight", safe: 6, p: 800000, gachaWeight: 0, legend: true, c: "text-cyan-300", img: "assets/icons/weapons/tk_sword_earth.png", procs: [{ name: "大地撕裂", rate: 0.1, min: 15000, max: 21000, ele: "earth", color: "#ca8a04" }], d: "提卡爾神廟的傳說武器・earth屬性。掉落即附帶祝福。" },
         "dragon_chain_alice": { dragonOnly: true, chain: true, n: "艾莉絲(鎖鏈劍)", type: "wpn", dmgS: 32, dmgL: 28, hit: 8, dmgBonus: 7, spd: 0.9, req: "knight", safe: 7, c: "text-yellow-300", p: 0, gachaWeight: 0, noSell: true, img: "assets/icons/weapons/dragon_chain_alice.png", d: "龍騎士專屬鎖鏈劍。" },
         "dragon_chain_chronos": { dragonOnly: true, chain: true, n: "克洛諾斯之懼", type: "wpn", dmgS: 35, dmgL: 30, hit: 8, dmgBonus: 7, spd: 0.9, req: "knight", safe: 7, c: "text-yellow-300", p: 0, gachaWeight: 0, noSell: true, img: "assets/icons/weapons/dragon_chain_chronos.png", d: "龍騎士專屬鎖鏈劍。" },
         // ===== 黑妖裝備 + 法師魔杖（自動合併） =====
@@ -3884,6 +3884,61 @@ function openSetMonitor(){
 function closeSetMonitor(){ var ov=document.getElementById('smv-ov'); if(ov) ov.classList.remove('on'); }
 try{ window.openSetMonitor=openSetMonitor; window.closeSetMonitor=closeSetMonitor; window._applyPolyElec=_applyPolyElec; window._polyTier=_polyTier; }catch(e){}
 
+
+// ===== 🌳 轉生天賦樹系統（additive、安全整合） =====
+var TALENT_TREE={
+ war:{unlock:[0,5,12,20,30],nodes:[
+   {ly:0,k:'pdmg',v:1,cap:25},{ly:0,k:'mdmg',v:1,cap:25},
+   {ly:1,k:'hit',v:2,cap:20},{ly:1,k:'crit',v:0.5,cap:20},
+   {ly:2,k:'cdmg',v:2,cap:20},{ly:2,k:'sdmg',v:1,cap:25},
+   {ly:3,k:'pen',v:1,cap:25},{ly:4,k:'ks_w',ks:1,cap:1}]},
+ def:{unlock:[0,5,12,20,30],nodes:[
+   {ly:0,k:'hp',v:1,cap:25},{ly:0,k:'ac',v:1,cap:25},
+   {ly:1,k:'dr',v:1,cap:18},{ly:1,k:'mr',v:2,cap:18},
+   {ly:2,k:'er',v:1,cap:18},{ly:2,k:'hpr',v:1,cap:25},
+   {ly:3,k:'refl',v:1,cap:18},{ly:4,k:'ks_d',ks:1,cap:1}]},
+ farm:{unlock:[0,5,12,20,30],nodes:[
+   {ly:0,k:'exp',v:1,cap:40},{ly:0,k:'gold',v:1,cap:40},
+   {ly:1,k:'drop',v:1,cap:25},{ly:1,k:'soul',v:1,cap:25},
+   {ly:2,k:'off',v:2,cap:25},{ly:2,k:'cast',v:1,cap:18},
+   {ly:3,k:'eff',v:1,cap:18},{ly:4,k:'ks_f',ks:1,cap:1}]}
+};
+function _tNode(line,k){ var L=TALENT_TREE[line]; for(var i=0;i<L.nodes.length;i++) if(L.nodes[i].k===k) return L.nodes[i]; return null; }
+function talentRank(line,k){ try{ return (player.talents&&player.talents[line+'_'+k])||0; }catch(e){ return 0; } }
+function talentLineSpent(line){ var s=0,L=TALENT_TREE[line]; for(var i=0;i<L.nodes.length;i++) s+=talentRank(line,L.nodes[i].k); return s; }
+function talentSpent(){ return talentLineSpent('war')+talentLineSpent('def')+talentLineSpent('farm'); }
+function talentTotal(){ try{ return (player.reborn||0); }catch(e){ return 0; } }   // 點數＝轉生數，1點/轉生
+function talentAvail(){ return talentTotal()-talentSpent(); }
+function talentVal(line,k){ var nd=_tNode(line,k); return nd?(nd.v*talentRank(line,k)):0; }   // 該節點累計值
+// 套用加成到 player.d（在 recomputeStats 結尾呼叫）
+function applyTalentBonuses(d,p){
+  try{
+    if(!d) return;
+    // —— 戰：可加性的直接加進 d ——
+    d.meleeHit=(d.meleeHit||0)+talentVal('war','hit'); d.magicHit=(d.magicHit||0)+talentVal('war','hit');
+    d.meleeCrit=(d.meleeCrit||0)+talentVal('war','crit'); d.magicCrit=(d.magicCrit||0)+talentVal('war','crit');
+    d.meleeCritDmg=(d.meleeCritDmg||0)+talentVal('war','cdmg'); d.magicCritDmg=(d.magicCritDmg||0)+talentVal('war','cdmg');
+    // 穿透：存成欄位供傷害公式讀（若已有 pen 欄位則相加）
+    d.talentPen=talentVal('war','pen');
+    // —— 守：可加性的直接加進 d ——
+    d.ac=(d.ac||0)+talentVal('def','ac');
+    d.mr=(d.mr||0)+talentVal('def','mr');
+    d.dr=(d.dr||0)+talentVal('def','dr');
+    d.er=(d.er||0)+talentVal('def','er');
+    d.hpR=(d.hpR||0)+Math.floor((d.hpR||0)*talentVal('def','hpr')/100);   // HP恢復 +%（以現有 hpR 為基底）
+    // —— %總傷 / 反傷 / 最大HP%：存成倍率欄位（下階段接進公式）——
+    d.tPdmgPct=talentVal('war','pdmg'); d.tMdmgPct=talentVal('war','mdmg'); d.tSdmgPct=talentVal('war','sdmg');
+    d.tHpPct=talentVal('def','hp'); d.tReflPct=talentVal('def','refl');
+    // —— 殖：存成倍率欄位（下階段接進經驗/金幣/掉落系統）——
+    d.tExpPct=talentVal('farm','exp'); d.tGoldPct=talentVal('farm','gold'); d.tDropPct=talentVal('farm','drop');
+    d.tSoulPct=talentVal('farm','soul'); d.tOffPct=talentVal('farm','off'); d.tCastPct=talentVal('farm','cast'); d.tEffPct=talentVal('farm','eff');
+    // —— 究極大招旗標（下階段接戰鬥）——
+    d.ksWarCd = talentRank('war','ks_w')>0;     // 攻擊技CD −15%
+    d.ksDefInvuln = talentRank('def','ks_d')>0; // 低血無敵
+    d.ksFarmDouble = talentRank('farm','ks_f')>0; // 清怪收益×2
+  }catch(e){}
+}
+
 function recomputeStats() {
     let p = player, d = p.d, b = p.base, a = p.alloc;
 
@@ -4321,6 +4376,7 @@ d.mr += (baseMr + bonusMr);
     p.mp = Math.min(p.mp, p.mmp);
     // 🔧 偵測衍生屬性異常(NaN)：不自動修正（避免遮蔽 bug），改為跳出提示請玩家回報管理員，方便抓根因
     (function(){
+        applyTalentBonuses(d,p);
         var _bad = [];
         ['mr','ac','dr','er','meleeDmg','rangedDmg','magicDmg','aspd','meleeHit','rangedHit','meleeCrit','rangedCrit','magicCrit'].forEach(function(k){ if(!Number.isFinite(d[k])) _bad.push(k); });
         if(_bad.length && !window.__statNaNAlerted){
@@ -5594,7 +5650,7 @@ function procLightArrow(t) {
     if (!sk || !t || t.curHp <= 0) return;
     let effMr = (t.st && t.st.mrhalf > 0) ? (t.mr / 2) : t.mr;
     let mrFactor = effMr <= 100 ? (100 - (effMr / 2)) / 100 : (50 - ((effMr - 100) / 10)) / 100;
-    mrFactor = Math.max(0, mrFactor);
+    mrFactor = Math.max(0.15, mrFactor);
     let isCrit = Math.random() * 100 < player.d.magicCrit;
     let skillTier = sk.tier || 1;
     let spCoef = (1 + (3 * player.d.magicDmg / 16)) * (1 + (skillTier / 3));
@@ -5806,7 +5862,7 @@ function witchIceLance() {
         t = alive[Math.floor(Math.random() * alive.length)];
     }
     let effMr = (t.st && t.st.mrhalf > 0) ? (t.mr / 2) : t.mr;
-    let mrFactor = effMr <= 100 ? (100 - effMr/2)/100 : (50 - (effMr-100)/10)/100; mrFactor = Math.max(0, mrFactor);
+    let mrFactor = effMr <= 100 ? (100 - effMr/2)/100 : (50 - (effMr-100)/10)/100; mrFactor = Math.max(0.15, mrFactor);
     let isCrit = Math.random()*100 < player.d.magicCrit;
     let tier = sk.tier || 1;
     let spCoef = (1 + 3*player.d.magicDmg/16) * (1 + tier/3);
@@ -6212,7 +6268,7 @@ function applyMobMagic(mob, sk) {
     } else {
         mrFactor = (50 - ((player.d.mr - 100) / 10)) / 100;
     }
-    mrFactor = Math.max(0, mrFactor);
+    mrFactor = Math.max(0.15, mrFactor);
     
     if(sk.type === 'stone') {
         if(player.d.immStone) return; // 紅騎士盾牌：免疫石化
@@ -6609,7 +6665,7 @@ function killMob(idx) {
     logCombat(`擊敗了 <span class="${getMobColor(mob.lv)}">${mob.n}</span>！`, 'player-heavy');
     if (mob._shadow) dropShadowRune(mob);
     else if (!mob.boss && Math.random() < 0.003) rollShadowSpawn();  // 👈 新增
-    player.exp += Math.floor(mob.exp * getExpGainMult(player.lv) * (isTowerMap(mapState.current)?2:1) * mapRewardMult(mapState.current));
+    player.exp += Math.floor(mob.exp * getExpGainMult(player.lv) * (isTowerMap(mapState.current)?2:1) * mapRewardMult(mapState.current) * (1+((player.d&&player.d.tExpPct)||0)/100));
     checkLvUp();
     // 精神(WIS)：擊殺敵人時立即額外恢復 MP
     { let mpKill = getWisMpOnKill(player.d.wis); if (mpKill > 0 && player.mp < player.mmp) player.mp = Math.min(player.mmp, player.mp + mpKill); }
@@ -6618,7 +6674,7 @@ function killMob(idx) {
         let gMin = mob.goldMin || (mob.lv * 5);
         let gMax = mob.goldMax || (mob.lv * 10);
         let g = gMin + Math.floor(Math.random() * (gMax - gMin + 1));
-        player.gold += Math.round(g * (isTowerMap(mapState.current)?2:1) * mapRewardMult(mapState.current) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.goldDropMult)||1));
+        player.gold += Math.round(g * (isTowerMap(mapState.current)?2:1) * mapRewardMult(mapState.current) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.goldDropMult)||1) * (1+((player.d&&player.d.tGoldPct)||0)/100));
         // 💰 隨機金幣暴擊（取代金幣捲軸）：0.5% 機率直接給大量金幣
         if (Math.random() < 0.005) {
             let _jr = Math.random() * 100;
@@ -6666,7 +6722,7 @@ function killMob(idx) {
     }
     // ===== 寶圖碎片掉落（打怪掉落；高階碎片需較高等級怪）：英雄 0.5%／傳說 0.1%(Lv40+)／神話 0.02%(Lv60+) =====
     {
-        var _fdm = (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult) || 1;
+        var _fdm = ((window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult) || 1) * (1+((player.d&&player.d.tDropPct)||0)/100);
         if (Math.random() < 0.01 * _fdm) gainItem('map_frag_hero', 1, false);
         if ((mob.lv || 1) >= 40 && Math.random() < 0.0025 * _fdm) gainItem('map_frag_legend', 1, false);
         if ((mob.lv || 1) >= 60 && Math.random() < 0.0005 * _fdm) gainItem('map_frag_myth', 1, false);
@@ -7063,7 +7119,7 @@ function setupSummon(skId, sk) {
 function summonElementDamage(dice, ele, t, flatBonus, mult) {
     let mrBase = (t.st && t.st.mrhalf > 0) ? (t.mr / 2) : t.mr;
     let mrFactor = mrBase <= 100 ? (100 - mrBase / 2) / 100 : (50 - (mrBase - 100) / 10) / 100;
-    mrFactor = Math.max(0, mrFactor);
+    mrFactor = Math.max(0.15, mrFactor);
     let base = (roll(dice[0], dice[1]) + (flatBonus || 0)) * (mult || 1);
     let fixed = 0;
     if(ele === 'fire' && t.e === 'earth') fixed = 6;
@@ -7112,7 +7168,7 @@ function allyAttackOnce(ally) {
     let d = ally.d;
     if (ally.cls === 'mage') {
         let effMr = (t.st && t.st.mrhalf > 0) ? (t.mr / 2) : t.mr;
-        let mrFactor = effMr <= 100 ? (100 - effMr/2)/100 : (50 - (effMr-100)/10)/100; mrFactor = Math.max(0, mrFactor);
+        let mrFactor = effMr <= 100 ? (100 - effMr/2)/100 : (50 - (effMr-100)/10)/100; mrFactor = Math.max(0.15, mrFactor);
         let isCrit = Math.random()*100 < (d.magicCrit || 0);
         let spCoef = (1 + 3*(d.magicDmg||0)/16) * (1 + 1/3);
         let critMult = isCrit ? (1 + (d.magicCritDmg||0)/100) : 1;
@@ -7177,7 +7233,7 @@ function allyCastMagic(ally, sk) {
     let texts = [];
     targets.forEach(t => {
         let effMr = (t.st && t.st.mrhalf > 0) ? (t.mr / 2) : t.mr;
-        let mrFactor = effMr <= 100 ? (100 - effMr/2)/100 : (50 - (effMr-100)/10)/100; mrFactor = Math.max(0, mrFactor);
+        let mrFactor = effMr <= 100 ? (100 - effMr/2)/100 : (50 - (effMr-100)/10)/100; mrFactor = Math.max(0.15, mrFactor);
         let isCrit = Math.random()*100 < (d.magicCrit||0);
         let critMult = isCrit ? (1 + (d.magicCritDmg||0)/100) : 1;
         let dmgArray = sk.multiDmg || (sk.dmgDice ? [[sk.dmgDice[0], sk.dmgDice[1]]] : []);
@@ -7305,7 +7361,7 @@ function allyProcLightArrow(ally, t) {
     let d = ally.d || {};
     let effMr = (t.st && t.st.mrhalf > 0) ? (t.mr / 2) : t.mr;
     let mrFactor = effMr <= 100 ? (100 - effMr/2)/100 : (50 - (effMr-100)/10)/100;
-    mrFactor = Math.max(0, mrFactor);
+    mrFactor = Math.max(0.15, mrFactor);
     let isCrit = Math.random()*100 < (d.magicCrit||0);
     let tier = sk.tier || 1;
     let spCoef = (1 + 3*(d.magicDmg||0)/16) * (1 + tier/3);
@@ -7854,7 +7910,7 @@ function castSkill(skId) {
                     // 已修正：MR > 100 的公式除以 10
                     mrFactor = (50 - ((effMr - 100) / 10)) / 100;
                 }
-                mrFactor = Math.max(0, mrFactor);
+                mrFactor = Math.max(0.15, mrFactor);
 
                 let dmgArray = sk.multiDmg || (sk.dmgDice ? [[sk.dmgDice[0], sk.dmgDice[1]]] : []);
                 let totalDmg = 0;
@@ -8167,8 +8223,8 @@ function _renderCharUI(){
         var it=P.eq?P.eq[slot]:null; var lab=SLOTS[slot]||slot;
         var inner, brd='#3a3018', bg='#120e08';
         if(it&&typeof DB!=='undefined'&&DB.items&&DB.items[it.id]){
-            var def=DB.items[it.id]; var img=def.img||''; var en=it.en?('<span style="position:absolute;top:1px;right:3px;font-size:9px;color:#fcd34d;font-weight:800;">+'+it.en+'</span>'):'';
-            inner=(img?'<img src="'+img+'" style="width:30px;height:30px;object-fit:contain;">':'<span style="font-size:9px;color:#cbb27a;">'+(def.n||'').slice(0,3)+'</span>')+en; brd='#7c6126'; bg='#1c1509';
+            var def=DB.items[it.id]; var img=(typeof getIconUrl==='function'?(getIconUrl(def)||''):(def.img||'')); var en=it.en?('<span style="position:absolute;top:1px;right:3px;font-size:9px;color:#fcd34d;font-weight:800;">+'+it.en+'</span>'):'';
+            inner=(img?'<img src="'+img+'" onerror="this.style.display=\'none\'" style="width:30px;height:30px;object-fit:contain;">':'<span style="font-size:9px;color:#cbb27a;">'+(def.n||'').slice(0,3)+'</span>')+en; brd='#7c6126'; bg='#1c1509';
         } else { inner=''; }
         return '<div style="grid-area:'+slot+';position:relative;aspect-ratio:1;border:1.5px solid '+brd+';background:'+bg+';border-radius:7px;display:grid;place-items:center;text-align:center;">'+inner+'</div>';
     }
@@ -8194,6 +8250,121 @@ function _renderCharUI(){
       +'</div>';
 }
 window.openCharUI=openCharUI; window.closeCharUI=closeCharUI;
+
+// ===== 🌳 轉生天賦樹 UI overlay（additive；點數=轉生數）=====
+var _TUI_NAMES={pdmg:'物理傷害',mdmg:'魔法傷害',hit:'命中',crit:'爆擊率',cdmg:'爆擊傷害',sdmg:'技能傷害',pen:'穿透防禦',
+ hp:'最大HP',ac:'AC',dr:'減傷',mr:'魔防',er:'迴避',hpr:'HP恢復',refl:'反傷',
+ exp:'經驗加成',gold:'金幣加成',drop:'掉落率',soul:'靈魂石掉落',off:'離線收益',cast:'施放加速',eff:'戰鬥效率',
+ ks_w:'【究極】攻擊技CD−15%',ks_d:'【究極】低血無敵2秒',ks_f:'【究極】清怪收益翻倍'};
+var _TUI_UNIT={hit:'',pen:'',ac:'',dr:'',mr:'',er:'',crit:'%',cdmg:'%'};
+var _TUI_LINE={war:{n:'⚔️ 戰',c:'#d9655a'},def:{n:'🛡️ 守',c:'#5b9bd5'},farm:{n:'🌾 殖',c:'#6fc98a'}};
+function openTalentUI(){
+  if(!player.talents) player.talents={};
+  var ov=document.getElementById('tui-ov'); if(ov) ov.remove();
+  ov=document.createElement('div'); ov.id='tui-ov';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(4,3,6,.82);z-index:99999;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:14px 6px;';
+  ov.onclick=function(e){ if(e.target===ov) closeTalentUI(); };
+  ov.innerHTML='<div id="tui-box" style="max-width:470px;width:100%;background:linear-gradient(180deg,#100c07,#070608);border:1px solid #2a2317;border-radius:12px;padding:12px 9px 18px;"></div>';
+  document.body.appendChild(ov); _renderTalentUI();
+}
+function closeTalentUI(){ var ov=document.getElementById('tui-ov'); if(ov) ov.remove(); }
+function _tInvest(line,k){
+  if(!player.talents) player.talents={};
+  var nd=_tNode(line,k); if(!nd) return; var id=line+'_'+k, cur=talentRank(line,k);
+  if(cur>=(nd.cap||99)) return;
+  if(talentLineSpent(line)<TALENT_TREE[line].unlock[nd.ly] && cur===0) return;
+  if(talentAvail()<=0) return;
+  player.talents[id]=cur+1; _tAfter();
+}
+function _tRemove(line,k){ var id=line+'_'+k, cur=talentRank(line,k); if(cur>0){ player.talents[id]=cur-1; _tAfter(); } }
+function _tRespec(){ player.talents={}; _tAfter(); }
+function _tAfter(){ try{ recomputeStats(); }catch(e){} try{ saveGame(); }catch(e){} _renderTalentUI(); }
+function _renderTalentUI(){
+  var box=document.getElementById('tui-box'); if(!box) return;
+  var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
+    +'<div style="font-size:15px;color:#ecd9a3;font-weight:800;">🌳 轉生天賦樹</div>'
+    +'<div onclick="closeTalentUI()" style="font-size:20px;color:#9a9486;cursor:pointer;padding:0 6px;">✕</div></div>'
+    +'<div style="background:linear-gradient(180deg,#1b150d,#100c07);border:1px solid #2a2317;border-radius:9px;padding:8px 11px;margin-bottom:9px;display:flex;align-items:center;gap:10px;">'
+    +'<div style="font-size:13px;color:#efe7d4;">可用點數 <b style="color:#7fe39a;font-size:17px;">'+talentAvail()+'</b> / '+talentTotal()+'　<span style="font-size:10px;color:#8b857a;">(1點/轉生)</span></div>'
+    +'<button onclick="_tRespec()" style="margin-left:auto;background:#2a1f10;border:1px solid #7c6126;color:#ecd9a3;border-radius:6px;padding:5px 11px;font-size:12px;cursor:pointer;">洗點</button></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">';
+  for(var line in TALENT_TREE){ var L=TALENT_TREE[line], LI=_TUI_LINE[line], sp=talentLineSpent(line);
+    html+='<div style="background:linear-gradient(180deg,#14110d,#0a0907);border:1px solid #20190f;border-radius:9px;padding:7px 5px;">'
+      +'<div style="font-size:13px;text-align:center;font-weight:800;color:'+LI.c+';">'+LI.n+'</div>'
+      +'<div style="font-size:9px;color:#6b665c;text-align:center;margin:2px 0 7px;">已投 '+sp+' 點</div>';
+    var lastLy=-1;
+    for(var i=0;i<L.nodes.length;i++){ var nd=L.nodes[i], cur=talentRank(line,nd.k), need=L.unlock[nd.ly];
+      var locked=(sp<need && cur===0), maxed=cur>=(nd.cap||99);
+      if(nd.ly!==lastLy){ if(nd.ly>0) html+='<div style="font-size:8px;color:#5b554a;border-top:1px dashed #20190f;text-align:center;margin:6px 0 5px;padding-top:3px;">需投 '+need+' 點</div>'; lastLy=nd.ly; }
+      var bd=nd.ks?'#cba85a':(maxed?'#5a8a3f':'#2a2418'), bg=nd.ks?'linear-gradient(180deg,#2a2110,#16100a)':'linear-gradient(180deg,#17140d,#0e0b07)';
+      var unit=(_TUI_UNIT[nd.k]!==undefined?_TUI_UNIT[nd.k]:'%');
+      html+='<div style="background:'+bg+';border:1px solid '+bd+';border-radius:8px;padding:6px 5px;margin-bottom:6px;position:relative;'+(locked?'opacity:.38;':'')+'">'
+        +(nd.cap>1?'<span style="position:absolute;top:4px;right:5px;font-size:9px;font-weight:800;color:#ecd9a3;">'+cur+'/'+nd.cap+'</span>':(cur?'<span style="position:absolute;top:4px;right:5px;font-size:9px;color:#7fe39a;">✓</span>':''))
+        +'<div style="font-size:11px;font-weight:700;color:#e7dfce;line-height:1.15;">'+_TUI_NAMES[nd.k]+'</div>'
+        +(nd.ks?'':'<div style="font-size:10px;color:#8b857a;margin-top:2px;">'+(cur?('+'+(nd.v*cur)+unit):('每階 +'+nd.v+unit))+'</div>')
+        +(locked?'':'<div style="display:flex;gap:4px;margin-top:5px;">'
+           +'<button onclick="_tInvest(\''+line+'\',\''+nd.k+'\')" style="flex:1;background:#1f2a14;border:1px solid #3f5a2a;color:#bfe3a0;border-radius:5px;padding:3px;font-size:13px;cursor:pointer;'+(maxed?'opacity:.4;':'')+'">＋</button>'
+           +(cur>0?'<button onclick="_tRemove(\''+line+'\',\''+nd.k+'\')" style="width:30px;background:#2a1414;border:1px solid #5a2a2a;color:#e3a0a0;border-radius:5px;padding:3px;font-size:13px;cursor:pointer;">－</button>':'')
+           +'</div>')
+        +'</div>';
+    }
+    html+='</div>';
+  }
+  html+='</div><div style="font-size:10px;color:#6b665c;text-align:center;margin-top:9px;line-height:1.5;">每線要先投足點數才解鎖下層・免費洗點<br>戰/守加成已生效；殖線與究極大招陸續接入</div>';
+  box.innerHTML=html;
+}
+window.openTalentUI=openTalentUI; window.closeTalentUI=closeTalentUI;
+
+// ===== 🗑️ 背包多選回收 overlay（A複選回收 + B廢品一鍵；reuse getSellPrice/sellAllJunk）=====
+var _rcySel={};
+function _rcyList(){ return (player.inv||[]).filter(function(i){ var d=DB.items[i.id]; return d && getSellPrice(i)>0; }); }
+function openRecycleUI(){ if(!player.inv){return;} _rcySel={}; var ov=document.getElementById('rcy-ov'); if(ov)ov.remove();
+  ov=document.createElement('div'); ov.id='rcy-ov';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(4,3,6,.82);z-index:99999;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:14px 6px;';
+  ov.onclick=function(e){ if(e.target===ov) closeRecycleUI(); };
+  ov.innerHTML='<div id="rcy-box" style="max-width:470px;width:100%;background:linear-gradient(180deg,#100c07,#070608);border:1px solid #2a2317;border-radius:12px;padding:12px 9px 16px;"></div>';
+  document.body.appendChild(ov); _renderRecycleUI();
+}
+function closeRecycleUI(){ var ov=document.getElementById('rcy-ov'); if(ov) ov.remove(); }
+function _rcyToggle(uid){ if(_rcySel[uid]) delete _rcySel[uid]; else _rcySel[uid]=true; _renderRecycleUI(); }
+function _rcyAll(unlockedOnly){ var L=_rcyList(); L.forEach(function(i){ if(!unlockedOnly||!i.lock) _rcySel[i.uid]=true; }); _renderRecycleUI(); }
+function _rcyJunk(){ _rcySel={}; _rcyList().forEach(function(i){ if(i.junk&&!i.lock) _rcySel[i.uid]=true; }); _renderRecycleUI(); }
+function _rcyClear(){ _rcySel={}; _renderRecycleUI(); }
+function _rcySum(){ var g=0,n=0; _rcyList().forEach(function(i){ if(_rcySel[i.uid]&&!i.lock){ g+=getSellPrice(i)*i.cnt; n+=i.cnt; } }); return {g:g,n:n}; }
+function _rcyDoRecycle(){ var s=_rcySum(); if(s.n===0){ try{logSys('<span class="text-slate-400">沒有選取可回收的道具（鎖定不會回收）。</span>');}catch(e){} return; }
+  if(!confirm('回收選取的 '+s.n+' 件道具，獲得 '+s.g.toLocaleString()+' 金幣？\n（鎖定的道具會自動跳過）')) return;
+  var keep=[], gold=0, cnt=0;
+  (player.inv||[]).forEach(function(i){ if(_rcySel[i.uid]&&!i.lock){ gold+=getSellPrice(i)*i.cnt; cnt+=i.cnt; } else keep.push(i); });
+  player.inv=keep; player.gold=(player.gold||0)+gold; _rcySel={};
+  try{logSys('<span class="text-amber-300">🗑️ 回收 '+cnt+' 件 → +'+gold.toLocaleString()+' 金幣</span>');}catch(e){}
+  try{renderTabs();}catch(e){} try{saveGame();}catch(e){} _renderRecycleUI();
+}
+function _renderRecycleUI(){ var box=document.getElementById('rcy-box'); if(!box)return; var L=_rcyList(); var s=_rcySum();
+  var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
+    +'<div style="font-size:15px;color:#ecd9a3;font-weight:800;">🗑️ 多選回收</div>'
+    +'<div onclick="closeRecycleUI()" style="font-size:20px;color:#9a9486;cursor:pointer;padding:0 6px;">✕</div></div>'
+    +'<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">'
+    +'<button onclick="_rcyAll(true)" style="flex:1;background:#1f2a14;border:1px solid #3f5a2a;color:#bfe3a0;border-radius:6px;padding:5px;font-size:11px;cursor:pointer;">全選未鎖定</button>'
+    +'<button onclick="_rcyJunk()" style="flex:1;background:#2a1f10;border:1px solid #7c6126;color:#ecd9a3;border-radius:6px;padding:5px;font-size:11px;cursor:pointer;">選所有廢品</button>'
+    +'<button onclick="_rcyClear()" style="flex:1;background:#1a1712;border:1px solid #3a3018;color:#9a9486;border-radius:6px;padding:5px;font-size:11px;cursor:pointer;">清除</button></div>'
+    +'<div style="max-height:50vh;overflow:auto;border:1px solid #20190f;border-radius:8px;padding:4px;background:#0a0907;">';
+  if(L.length===0) html+='<div style="color:#6b665c;font-size:12px;text-align:center;padding:16px;">背包沒有可回收的道具</div>';
+  L.forEach(function(i){ var d=DB.items[i.id], sel=!!_rcySel[i.uid], img=(typeof getIconUrl==='function'?(getIconUrl(d)||''):(d.img||''));
+    html+='<div onclick="_rcyToggle(\''+i.uid+'\')" style="display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:6px;margin-bottom:3px;cursor:pointer;background:'+(sel?'#1c2a12':'transparent')+';border:1px solid '+(sel?'#3f5a2a':'#181410')+';'+(i.lock?'opacity:.55;':'')+'">'
+      +'<div style="width:18px;height:18px;border-radius:4px;border:2px solid '+(sel?'#7fe39a':'#3a3018')+';background:'+(sel?'#7fe39a':'transparent')+';flex:none;display:flex;align-items:center;justify-content:center;color:#0a0907;font-size:12px;font-weight:900;">'+(sel?'✓':'')+'</div>'
+      +(img?'<img src="'+img+'" onerror="this.style.display=\'none\'" style="width:26px;height:26px;object-fit:contain;flex:none;">':'')
+      +'<div style="flex:1;min-width:0;"><div style="font-size:12px;color:#e7dfce;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(d.n||'?')+(i.en?(' <span style="color:#fcd34d;">+'+i.en+'</span>'):'')+(i.cnt>1?(' ×'+i.cnt):'')+'</div>'
+      +'<div style="font-size:10px;color:#8b857a;">'+getSellPrice(i).toLocaleString()+' 金幣'+(i.lock?' · 🔒鎖定':(i.junk?' · 🗑️廢品':''))+'</div></div></div>';
+  });
+  html+='</div>'
+    +'<div style="margin-top:9px;display:flex;gap:6px;">'
+    +'<button onclick="_rcyDoRecycle()" style="flex:1;background:linear-gradient(180deg,#3a2a12,#241a0c);border:1px solid #c2410c;color:#fcd9a3;border-radius:8px;padding:9px;font-size:13px;font-weight:800;cursor:pointer;">回收選取（'+s.n+'件 → '+s.g.toLocaleString()+'金幣）</button></div>'
+    +'<div style="font-size:10px;color:#6b665c;text-align:center;margin-top:7px;">鎖定(🔒)的道具一律跳過 · 回收即換金幣</div>';
+  box.innerHTML=html;
+}
+window.openRecycleUI=openRecycleUI; window.closeRecycleUI=closeRecycleUI;
+
+
 
 
 // 🔮 每技能獨立冷卻（依 類型×階級；數值為砍半後版本）。減CD% 走 player.d.cdr（預留掛鉤，上限50%）。
@@ -11685,7 +11856,7 @@ window.__offlineStart = function(){
 };
 window.__offlineClaim = function(){
     var pnd=window.__offlinePending(); if(!pnd||!pnd.active) return null;
-    player.exp += pnd.exp; player.gold += pnd.gold;
+    player.exp += Math.floor(pnd.exp*(1+((player.d&&player.d.tOffPct)||0)/100)); player.gold += Math.floor(pnd.gold*(1+((player.d&&player.d.tOffPct)||0)/100));
     var st=_offlineState(); if(st) st.startAt = null;
     if(typeof checkLvUp==='function') checkLvUp();
     if(typeof updateUI==='function') updateUI();
