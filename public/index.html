@@ -630,11 +630,11 @@
                     
                     <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
                         <div class="text-sm text-slate-400 mb-3 border-b border-slate-700 pb-1">自動施放設定</div>
-                        <div class="flex justify-between items-center mb-2 text-sm"><span class="text-cyan-400 font-bold">攻擊技能（最多6種·每招CD5秒）</span><span>MP &gt; <input type="number" id="set-mp-atk" value="50" class="w-12 bg-slate-900 border text-center text-white rounded">%</span></div>
+                        <div style="display:none" id="atk-auto-hidden"><div class="flex justify-between items-center mb-2 text-sm"><span class="text-cyan-400 font-bold">攻擊技能（最多6種·每招CD5秒）</span><span>MP &gt; <input type="number" id="set-mp-atk" value="50" class="w-12 bg-slate-900 border text-center text-white rounded">%</span></div>
                         <select id="sel-atk-skill" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
                         <select id="sel-atk-skill2" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
                         <select id="sel-atk-skill3" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
-                        <select id="sel-atk-skill4" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-3 rounded text-sm"><option value="">無</option></select><select id="sel-atk-skill5" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-3 rounded text-sm"><option value="">無</option></select><select id="sel-atk-skill6" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-3 rounded text-sm"><option value="">無</option></select>
+                        <select id="sel-atk-skill4" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-3 rounded text-sm"><option value="">無</option></select><select id="sel-atk-skill5" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-3 rounded text-sm"><option value="">無</option></select><select id="sel-atk-skill6" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-3 rounded text-sm"><option value="">無</option></select></div>
                         <div class="flex justify-between items-center mb-2 text-sm"><span class="text-green-400 font-bold">治癒魔法</span><span>HP &lt; <input type="number" id="set-mp-heal" value="50" class="w-12 bg-slate-900 border text-center text-white rounded">%</span></div>
                         <select id="sel-heal-skill" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-green-300 px-2 py-2 rounded text-sm"><option value="">無</option></select>
                         <div id="ui-convert-row" class="hidden">
@@ -4057,7 +4057,8 @@ function recomputeStats() {
     let hpBase   = p.cls === 'knight' ? 16 : (p.cls === 'elf' ? (p.darkelf ? 13 : 15) : 12);
     let hpClsInc = p.cls === 'knight' ? 8.5 : (p.cls === 'elf' ? (p.darkelf ? 5.5 : 7.3) : 4.3);
     let conInc   = getConGrowth(d.con, p.cls);
-    p.mhp = hpBase + (p.lv - 1) * (hpClsInc + conInc) + (p.rebornHpBonus || 0);   // 小數隱藏不捨去；+轉生保留HP
+    p.mhp = hpBase + (p.lv - 1) * (hpClsInc + conInc) + (p.rebornHpBonus || 0);
+    { let _hpCapBase = (p.cls === 'knight') ? (p.dragon ? 12000000 : 15000000) : (p.cls === 'elf' ? 10000000 : 8000000); if (p.mhp > _hpCapBase) p.mhp = _hpCapBase; }   // 🔒 基礎血上限(分職)：騎士1500萬/龍騎1200萬/妖精·黑妖1000萬/法師800萬；裝備娃娃可突破   // 小數隱藏不捨去；+轉生保留HP
 
     let mpBase   = p.cls === 'knight' ? 1 : (p.cls === 'elf' ? 5 : 6);
     let mpClsInc = p.cls === 'knight' ? 1 : (p.cls === 'elf' ? 2.83 : 4.5);
