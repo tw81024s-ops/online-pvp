@@ -845,6 +845,79 @@ function _skillReqLv(sk){
 
 const DB = {
         items: {
+        "ea_01": { n: "傑尼斯覺醒戒指", type: "acc", slot: "ring", int: 55, wis: 33, mr: 27, crit: 5, mdmgPct: 0.2, req: "all", safe: 8, p: 60000000, c: "amber", img: "assets/icons/accessories/傑尼斯覺醒戒指.png" },
+        "ea_02": { n: "貝利亞爾的戒指", type: "acc", slot: "ring", str: 55, hit: 20, crit: 5, pdmgPct: 0.2, hpPct: 0.12, req: "all", safe: 8, p: 60000000, c: "amber", img: "assets/icons/accessories/貝利亞爾的戒指.png" },
+        "ea_03": { n: "聖地戒指", type: "acc", slot: "ring", str: 55, hit: 20, crit: 5, pdmgPct: 0.2, hpPct: 0.12, req: "all", safe: 8, p: 60000000, c: "amber", img: "assets/icons/accessories/聖地戒指.png" },
+        "ea_04": { n: "騎士團的戒指", type: "acc", slot: "ring", str: 55, hit: 20, crit: 5, pdmgPct: 0.2, hpPct: 0.12, req: "all", safe: 8, p: 60000000, c: "amber", img: "assets/icons/accessories/騎士團的戒指.png" },
+        "ea_05": { n: "神聖的歐西里斯戒指", type: "acc", slot: "ring", str: 55, int: 38, con: 38, wis: 27, ac: 25, mr: 55, hit: 20, crit: 5, pdmgPct: 0.2, mdmgPct: 0.2, hpPct: 0.12, req: "all", safe: 8, p: 60000000, c: "amber", img: "assets/icons/accessories/神聖的歐西里斯戒指.png" },
+        "ea_06": { n: "神聖的阿努比斯戒指", type: "acc", slot: "ring", str: 55, int: 38, con: 38, wis: 27, ac: 25, mr: 55, hit: 20, crit: 5, pdmgPct: 0.2, mdmgPct: 0.2, hpPct: 0.12, req: "all", safe: 8, p: 60000000, c: "amber", img: "assets/icons/accessories/神聖的阿努比斯戒指.png" },
+        "ea_07": { n: "神聖的賀洛斯戒指", type: "acc", slot: "ring", str: 55, int: 38, con: 38, wis: 27, ac: 25, mr: 55, hit: 20, crit: 5, pdmgPct: 0.2, mdmgPct: 0.2, hpPct: 0.12, req: "all", safe: 8, p: 60000000, c: "amber", img: "assets/icons/accessories/神聖的賀洛斯戒指.png" },
+        "ea_08": { n: "神聖的賢者之戒", type: "acc", slot: "ring", str: 55, int: 38, con: 38, wis: 27, ac: 25, mr: 55, hit: 20, crit: 5, pdmgPct: 0.2, mdmgPct: 0.2, hpPct: 0.12, req: "all", safe: 8, p: 60000000, c: "amber", img: "assets/icons/accessories/神聖的賢者之戒.png" },
+        "ea_09": { n: "神聖的征戰之戒", type: "acc", slot: "ring", str: 55, int: 38, con: 38, wis: 27, ac: 25, mr: 55, hit: 20, crit: 5, pdmgPct: 0.2, mdmgPct: 0.2, hpPct: 0.12, req: "all", safe: 8, p: 60000000, c: "amber", img: "assets/icons/accessories/神聖的征戰之戒.png" },
+        "ea_10": { n: "神聖的敏捷之戒", type: "acc", slot: "ring", str: 55, int: 38, con: 38, wis: 27, ac: 25, mr: 55, hit: 20, crit: 5, pdmgPct: 0.2, mdmgPct: 0.2, hpPct: 0.12, req: "all", safe: 8, p: 60000000, c: "amber", img: "assets/icons/accessories/神聖的敏捷之戒.png" },
+        "ea_11": { n: "賀洛斯戒指", type: "acc", slot: "ring", str: 35, hit: 15, crit: 3, pdmgPct: 0.12, hpPct: 0.08, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/賀洛斯戒指.png" },
+        "ea_12": { n: "阿努比斯戒指", type: "acc", slot: "ring", str: 35, hit: 15, crit: 3, pdmgPct: 0.12, hpPct: 0.08, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/阿努比斯戒指.png" },
+        "ea_13": { n: "死神戒指", type: "acc", slot: "ring", str: 35, hit: 15, crit: 3, pdmgPct: 0.12, hpPct: 0.08, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/死神戒指.png" },
+        "ea_14": { n: "巫妖戒指", type: "acc", slot: "ring", int: 35, wis: 21, mr: 17, crit: 3, mdmgPct: 0.12, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/巫妖戒指.png" },
+        "ea_15": { n: "死亡騎士項鍊", type: "acc", slot: "amulet", str: 35, hit: 15, crit: 3, pdmgPct: 0.12, hpPct: 0.08, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/死亡騎士項鍊.png" },
+        "ea_16": { n: "古代巨人戒指", type: "acc", slot: "ring", str: 35, hit: 15, crit: 3, pdmgPct: 0.12, hpPct: 0.08, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/古代巨人戒指.png" },
+        "ea_17": { n: "古代巨人項鍊", type: "acc", slot: "amulet", str: 35, hit: 15, crit: 3, pdmgPct: 0.12, hpPct: 0.08, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/古代巨人項鍊.png" },
+        "ea_18": { n: "變形怪首領之戒(右)", type: "acc", slot: "ring", str: 35, hit: 15, crit: 3, pdmgPct: 0.12, hpPct: 0.08, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/變形怪首領之戒(右).png" },
+        "ea_19": { n: "變形怪首領之戒(左)", type: "acc", slot: "ring", str: 35, hit: 15, crit: 3, pdmgPct: 0.12, hpPct: 0.08, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/變形怪首領之戒(左).png" },
+        "ea_20": { n: "變形怪首領項鍊", type: "acc", slot: "amulet", str: 35, hit: 15, crit: 3, pdmgPct: 0.12, hpPct: 0.08, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/變形怪首領項鍊.png" },
+        "ea_21": { n: "杰弗雷庫的力量項鍊", type: "acc", slot: "amulet", str: 35, hit: 15, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/杰弗雷庫的力量項鍊.png" },
+        "ea_22": { n: "杰弗雷庫的尖牙", type: "acc", slot: "amulet", str: 35, hit: 15, crit: 3, pdmgPct: 0.12, hpPct: 0.08, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/杰弗雷庫的尖牙.png" },
+        "ea_23": { n: "杰弗雷庫的敏捷項鍊", type: "acc", slot: "amulet", dex: 35, hit: 15, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/杰弗雷庫的敏捷項鍊.png" },
+        "ea_24": { n: "杰弗雷庫的智力項鍊", type: "acc", slot: "amulet", int: 35, hit: 15, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/杰弗雷庫的智力項鍊.png" },
+        "ea_25": { n: "杰弗雷庫的魔眼", type: "acc", slot: "amulet", str: 35, hit: 15, crit: 3, pdmgPct: 0.12, hpPct: 0.08, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/杰弗雷庫的魔眼.png" },
+        "ea_26": { n: "閃亮的地靈戒指", type: "acc", slot: "ring", con: 35, ac: 16, hpPct: 0.08, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/閃亮的地靈戒指.png" },
+        "ea_27": { n: "閃亮的水靈戒指", type: "acc", slot: "ring", int: 35, mr: 21, mdmgPct: 0.12, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/閃亮的水靈戒指.png" },
+        "ea_28": { n: "閃亮的火靈戒指", type: "acc", slot: "ring", str: 35, crit: 3, pdmgPct: 0.12, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/閃亮的火靈戒指.png" },
+        "ea_29": { n: "閃亮的風靈戒指", type: "acc", slot: "ring", dex: 35, er: 18, hit: 15, req: "all", safe: 7, p: 12000000, c: "purple", img: "assets/icons/accessories/閃亮的風靈戒指.png" },
+        "ea_30": { n: "火靈戒指", type: "acc", slot: "ring", str: 20, mhp: 4000, crit: 2, pdmgPct: 0.06, req: "all", safe: 7, p: 1500000, c: "red", img: "assets/icons/accessories/火靈戒指.png" },
+        "ea_31": { n: "水靈戒指", type: "acc", slot: "ring", int: 20, mr: 12, mdmgPct: 0.06, req: "all", safe: 7, p: 1500000, c: "red", img: "assets/icons/accessories/水靈戒指.png" },
+        "ea_32": { n: "地靈戒指", type: "acc", slot: "ring", con: 20, ac: 10, mhp: 4000, req: "all", safe: 7, p: 1500000, c: "red", img: "assets/icons/accessories/地靈戒指.png" },
+        "ea_33": { n: "風靈戒指", type: "acc", slot: "ring", dex: 20, er: 11, hit: 10, req: "all", safe: 7, p: 1500000, c: "red", img: "assets/icons/accessories/風靈戒指.png" },
+        "ea_34": { n: "火焰之影戒指", type: "acc", slot: "ring", str: 20, mhp: 4000, crit: 2, pdmgPct: 0.06, req: "all", safe: 7, p: 1500000, c: "red", img: "assets/icons/accessories/火焰之影戒指.png" },
+        "ea_35": { n: "火焰之影項鍊", type: "acc", slot: "amulet", str: 20, mhp: 4000, crit: 2, pdmgPct: 0.06, req: "all", safe: 7, p: 1500000, c: "red", img: "assets/icons/accessories/火焰之影項鍊.png" },
+        "ea_36": { n: "求道者戒指", type: "acc", slot: "ring", int: 20, wis: 12, mr: 10, crit: 2, mdmgPct: 0.06, req: "all", safe: 7, p: 1500000, c: "red", img: "assets/icons/accessories/求道者戒指.png" },
+        "ea_37": { n: "深淵戒指", type: "acc", slot: "ring", str: 20, mhp: 4000, hit: 10, crit: 2, pdmgPct: 0.06, req: "all", safe: 7, p: 1500000, c: "red", img: "assets/icons/accessories/深淵戒指.png" },
+        "ea_38": { n: "滅魔戒指", type: "acc", slot: "ring", mr: 20, pdmgPct: 0.06, mdmgPct: 0.06, req: "all", safe: 7, p: 1500000, c: "red", img: "assets/icons/accessories/滅魔戒指.png" },
+        "ea_39": { n: "史雷佛戒指", type: "acc", slot: "ring", str: 20, mhp: 4000, hit: 10, crit: 2, pdmgPct: 0.06, req: "all", safe: 7, p: 1500000, c: "red", img: "assets/icons/accessories/史雷佛戒指.png" },
+        "ea_40": { n: "海露拜的腳鐐", type: "acc", slot: "amulet", str: 20, mhp: 4000, hit: 10, crit: 2, pdmgPct: 0.06, req: "all", safe: 7, p: 1500000, c: "red", img: "assets/icons/accessories/海露拜的腳鐐.png" },
+        "ea_41": { n: "蕾雅戒指", type: "acc", slot: "ring", str: 20, mhp: 4000, hit: 10, crit: 2, pdmgPct: 0.06, req: "all", safe: 7, p: 1500000, c: "red", img: "assets/icons/accessories/蕾雅戒指.png" },
+        "ea_42": { n: "蕾雅項鍊", type: "acc", slot: "amulet", str: 20, mhp: 4000, hit: 10, crit: 2, pdmgPct: 0.06, req: "all", safe: 7, p: 1500000, c: "red", img: "assets/icons/accessories/蕾雅項鍊.png" },
+        "ea_43": { n: "光之沙哈的戒指", type: "acc", slot: "ring", int: 20, wis: 12, mr: 10, crit: 2, mdmgPct: 0.06, req: "all", safe: 7, p: 1500000, c: "red", img: "assets/icons/accessories/光之沙哈的戒指.png" },
+        "ea_44": { n: "光之沙哈的護身符", type: "acc", slot: "amulet", int: 20, wis: 12, mr: 10, crit: 2, mdmgPct: 0.06, req: "all", safe: 7, p: 1500000, c: "red", img: "assets/icons/accessories/光之沙哈的護身符.png" },
+        "ea_45": { n: "光之防禦戒指", type: "acc", slot: "ring", ac: 10, mr: 10, mhp: 4000, req: "all", safe: 7, p: 1500000, c: "red", img: "assets/icons/accessories/光之防禦戒指.png" },
+        "ea_46": { n: "傑尼斯戒指", type: "acc", slot: "ring", int: 20, wis: 12, mr: 10, crit: 2, mdmgPct: 0.06, req: "all", safe: 7, p: 1500000, c: "red", img: "assets/icons/accessories/傑尼斯戒指.png" },
+        "ea_47": { n: "史奈普的智慧戒指", type: "acc", slot: "ring", int: 12, wis: 7, mr: 6, crit: 1, mdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/史奈普的智慧戒指.png" },
+        "ea_48": { n: "史奈普的英雄戒指", type: "acc", slot: "ring", str: 12, mhp: 1500, hit: 6, crit: 1, pdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/史奈普的英雄戒指.png" },
+        "ea_49": { n: "史奈普的防禦戒指", type: "acc", slot: "ring", ac: 6, mr: 6, mhp: 1500, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/史奈普的防禦戒指.png" },
+        "ea_51": { n: "守護者的戒指", type: "acc", slot: "ring", ac: 6, mr: 6, mhp: 1500, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/守護者的戒指.png" },
+        "ea_52": { n: "守護者項鍊", type: "acc", slot: "amulet", ac: 6, mr: 6, mhp: 1500, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/守護者項鍊.png" },
+        "ea_53": { n: "征戰之戒", type: "acc", slot: "ring", str: 12, mhp: 1500, hit: 6, crit: 1, pdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/征戰之戒.png" },
+        "ea_54": { n: "榮譽戰鬥戒指", type: "acc", slot: "ring", str: 12, mhp: 1500, hit: 6, crit: 1, pdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/榮譽戰鬥戒指.png" },
+        "ea_55": { n: "榮譽戰鬥項鍊", type: "acc", slot: "amulet", str: 12, mhp: 1500, hit: 6, crit: 1, pdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/榮譽戰鬥項鍊.png" },
+        "ea_57": { n: "命中之戒", type: "acc", slot: "ring", dex: 6, hit: 11, crit: 1, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/命中之戒.png" },
+        "ea_58": { n: "疾風之戒", type: "acc", slot: "ring", dex: 12, er: 7, hit: 6, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/疾風之戒.png" },
+        "ea_59": { n: "戰士護身符", type: "acc", slot: "amulet", str: 12, mhp: 1500, hit: 6, crit: 1, pdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/戰士護身符.png" },
+        "ea_61": { n: "賢者之戒", type: "acc", slot: "ring", int: 12, wis: 7, mr: 6, crit: 1, mdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/賢者之戒.png" },
+        "ea_62": { n: "賢者項鍊", type: "acc", slot: "amulet", int: 12, wis: 7, mr: 6, crit: 1, mdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/賢者項鍊.png" },
+        "ea_63": { n: "艾莉絲的項鍊", type: "acc", slot: "amulet", str: 12, mhp: 1500, hit: 6, crit: 1, pdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/艾莉絲的項鍊.png" },
+        "ea_64": { n: "約定項鍊", type: "acc", slot: "amulet", str: 12, mhp: 1500, hit: 6, crit: 1, pdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/約定項鍊.png" },
+        "ea_65": { n: "發光的古老項鍊", type: "acc", slot: "amulet", str: 12, mhp: 1500, hit: 6, crit: 1, pdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/發光的古老項鍊.png" },
+        "ea_66": { n: "古魯丁的詛咒(刻印)", type: "acc", slot: "amulet", str: 12, mhp: 1500, hit: 6, crit: 1, pdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/古魯丁的詛咒(刻印).png" },
+        "ea_67": { n: "將軍項鍊(刻印)", type: "acc", slot: "amulet", str: 12, mhp: 1500, hit: 6, crit: 1, pdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/將軍項鍊(刻印).png" },
+        "ea_68": { n: "伊弗利特魔力項鍊(刻印)", type: "acc", slot: "amulet", int: 12, wis: 7, mr: 6, crit: 1, mdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/伊弗利特魔力項鍊(刻印).png" },
+        "ea_69": { n: "黑法師項鍊", type: "acc", slot: "amulet", int: 12, wis: 7, mr: 6, crit: 1, mdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/黑法師項鍊.png" },
+        "ea_70": { n: "魔族項鍊", type: "acc", slot: "amulet", int: 12, wis: 7, mr: 6, crit: 1, mdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/魔族項鍊.png" },
+        "ea_71": { n: "骷髏項鍊", type: "acc", slot: "amulet", str: 12, mhp: 1500, hit: 6, crit: 1, pdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/骷髏項鍊.png" },
+        "ea_72": { n: "修好的戒指", type: "acc", slot: "ring", str: 12, mhp: 1500, hit: 6, crit: 1, pdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/修好的戒指.png" },
+        "ea_73": { n: "奴隸項鍊", type: "acc", slot: "amulet", str: 12, mhp: 1500, hit: 6, crit: 1, pdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/奴隸項鍊.png" },
+        "ea_74": { n: "英雄變身戒指(真 死亡騎士 紅)", type: "acc", slot: "ring", str: 12, mhp: 1500, hit: 6, crit: 1, pdmgPct: 0.02, req: "all", safe: 6, p: 300000, c: "blue", img: "assets/icons/accessories/英雄變身戒指(真 死亡騎士 紅).png" },
+        "ea_78": { n: "智慧項鍊", type: "acc", slot: "amulet", wis: 8, hit: 3, req: "all", safe: 6, p: 80000, c: "green", img: "assets/icons/accessories/智慧項鍊.png" },
+        "ea_79": { n: "魅力項鍊", type: "acc", slot: "amulet", cha: 8, hit: 3, req: "all", safe: 6, p: 80000, c: "green", img: "assets/icons/accessories/魅力項鍊.png" },
         "gold_scroll": { n: "金幣捲軸", type: "scroll", req: "all", eff: "gold_scroll", c: "text-yellow-300", p: 1, gachaWeight: 0, noJunk: true, d: "深淵秘境的寶物，可交易。使用時開啟，隨機獲得 100萬~2000萬 金幣（金額越高越稀有）。" },
         "jackpot_scroll": { n: "頭獎金幣捲", type: "scroll", req: "all", eff: "jackpot_scroll", val: 100000000, c: "text-amber-300", p: 1, gachaWeight: 0, noJunk: true, noUse: false, d: "全服頭獎兌換券，可交易。使用獲得 1 億金幣（超過金幣上限的部分不予發放，請先花掉部分金幣再開）。" },
         "rune_str": { n: "力量符石", type: "acc", slot: "rune", req: "all", str: 1, c: "text-sky-300", p: 50000, gachaWeight: 0, runeTier: 1, d: "刻有力量之印的符石。力量 +1。" },
@@ -1925,6 +1998,20 @@ const DB = {
         "dom_tantalos": { n: "支配·坦塔洛斯", img: "assets/icons/monsters/dom_tantalos.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", boss: true, domBoss: true, domFloor: 11, e: "none", hp: 12000000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [10, 1620], db: 68, hit: 43 },
         "dom_sisyphus": { n: "支配·薛西弗斯", img: "assets/icons/monsters/dom_sisyphus.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", boss: true, domBoss: true, domFloor: 11, e: "none", hp: 12000000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [10, 1620], db: 68, hit: 43 },
         "dom_reaper": { n: "支配·邪惡的鐮刀死神", img: "assets/icons/monsters/dom_reaper.png", lv: 100, s: "L", beh: "主動", race: "支配者之塔", boss: true, domBoss: true, domFloor: 11, e: "none", hp: 15000000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [10, 1700], db: 68, hit: 43 },
+        "esc_firebee": { n: "火毒蜂", img: "assets/icons/monsters/esc_firebee.png", lv: 100, s: "L", beh: "主動", race: "艾斯卡洛斯", e: "fire", hp: 67500000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [90, 21600], db: 60, hit: 40 },
+        "esc_deathherald": { n: "死亡使者", img: "assets/icons/monsters/esc_deathherald.png", lv: 100, s: "L", beh: "主動", race: "艾斯卡洛斯", e: "dark", hp: 70650000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [90, 22050], db: 60, hit: 40 },
+        "esc_deathscorpion": { n: "死亡毒蠍", img: "assets/icons/monsters/esc_deathscorpion.png", lv: 100, s: "L", beh: "主動", race: "艾斯卡洛斯", e: "earth", hp: 73800000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [90, 22500], db: 60, hit: 40 },
+        "esc_bloodsuccubus": { n: "血翼魅魔", img: "assets/icons/monsters/esc_bloodsuccubus.png", lv: 100, s: "L", beh: "主動", race: "艾斯卡洛斯", e: "dark", hp: 76950000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [90, 22950], db: 60, hit: 40 },
+        "esc_abyssdevil": { n: "深淵魔鬼", img: "assets/icons/monsters/esc_abyssdevil.png", lv: 100, s: "L", beh: "主動", race: "艾斯卡洛斯", e: "dark", hp: 80100000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [90, 23400], db: 60, hit: 40 },
+        "esc_blackknight": { n: "黑騎士將軍", img: "assets/icons/monsters/esc_blackknight.png", lv: 100, s: "L", beh: "主動", race: "艾斯卡洛斯", e: "none", hp: 83250000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [90, 23850], db: 60, hit: 40 },
+        "esc_larva": { n: "腐化幼蟲", img: "assets/icons/monsters/esc_larva.png", lv: 100, s: "L", beh: "主動", race: "艾斯卡洛斯", e: "earth", hp: 86400000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [90, 24300], db: 60, hit: 40 },
+        "esc_steelworm": { n: "鋼甲巨蟲", img: "assets/icons/monsters/esc_steelworm.png", lv: 100, s: "L", beh: "主動", race: "艾斯卡洛斯", e: "earth", hp: 89550000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [90, 24750], db: 60, hit: 40 },
+        "esc_bonespider": { n: "骸骨蜘蛛", img: "assets/icons/monsters/esc_bonespider.png", lv: 100, s: "L", beh: "主動", race: "艾斯卡洛斯", e: "dark", hp: 92700000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [90, 25200], db: 60, hit: 40 },
+        "esc_mutantwasp": { n: "變異黃蜂", img: "assets/icons/monsters/esc_mutantwasp.png", lv: 100, s: "L", beh: "主動", race: "艾斯卡洛斯", e: "wind", hp: 95850000, ac: -115, mr: 80, exp: 3800000, goldMin: 60000, goldMax: 340000, atkSpd: 1.7, dmg: [90, 25650], db: 60, hit: 40 },
+        "esc_moonspirit": { n: "月靈", img: "assets/icons/monsters/esc_moonspirit.png", lv: 100, s: "L", beh: "主動", race: "艾斯卡洛斯", boss: true, e: "water", hp: 99000000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [150, 19500], db: 68, hit: 43 },
+        "esc_duperion": { n: "杜佩里恩", img: "assets/icons/monsters/esc_duperion.png", lv: 100, s: "L", beh: "主動", race: "艾斯卡洛斯", boss: true, e: "wind", hp: 135000000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [150, 21750], db: 68, hit: 43 },
+        "esc_yonir": { n: "約尼爾", img: "assets/icons/monsters/esc_yonir.png", lv: 100, s: "L", beh: "主動", race: "艾斯卡洛斯", boss: true, e: "fire", hp: 180000000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [150, 23550], db: 68, hit: 43 },
+        "esc_salah": { n: "薩拉赫", img: "assets/icons/monsters/esc_salah.png", lv: 100, s: "L", beh: "主動", race: "艾斯卡洛斯", boss: true, e: "dark", hp: 225000000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [150, 25500], db: 68, hit: 43 },
         "orc": { n: "妖魔", lv: 2, s: "S", beh: "被動", race: "妖魔", e: "fire", hp: 6, ac: 10, mr: 0, exp: 5, goldMin: 10, goldMax: 30, atkSpd: 2, dmg: [1, 2], db: 0, hit: 0 },
         "goblin": { n: "哥布林", lv: 2, s: "S", beh: "被動", race: "哥布林", e: "earth", hp: 3, ac: 10, mr: 2, exp: 5, goldMin: 10, goldMax: 30, atkSpd: 2, dmg: [1, 2], db: 0, hit: 0 },
         "esti_enemy": { n: "依詩蒂", img: "assets/icons/monsters/依詩蒂.png", lv: 1, s: "S", beh: "主動", race: "血盟", wild: true, e: "none", pledgeEnemy: true, excludeAvatar: "女騎士", seeInsight: true, hp: 20, ac: -10, mr: 0, exp: 100, goldMin: 1136, goldMax: 1136, atkSpd: 0.67, dmg: [1, 10], db: 0, hit: 2, regenHp: 15, scale: { hpC: 20, acBase: -10, acDiv: 3, mrBase: 0, mrDiv: 5, dmgSides: 10, dbDiv: 2, hitBase: 2, hitDiv: 3, atkSpd: 0.67 }, mag: { skn: "衝擊之暈", cd: 50, chance: 0.2, type: "extra_attack", stunChance: 10 } },
@@ -2441,6 +2528,7 @@ const DB = {
         "rebirth_abyss": ["abyss_osiris","abyss_anubis","abyss_horus","abyss_fire_dragon","abyss_ice_dragon","abyss_earth_dragon"],
         "tikal_temple":["tk_snake","tk_monkey","tk_aztec","tk_yuka","tk_kaila","tk_bara","tk_aeto","tk_aeto2","tk_sadmud","tk_sadska","tk_sadtio","tk_jefreku_f","tk_jefreku_m"],
         "fallen_knights": ["fk_baphomet","fk_balrog","fk_kt","fk_deathknight","fk_aris","fk_vander"],
+        "escaroth": ["esc_firebee","esc_deathherald","esc_deathscorpion","esc_bloodsuccubus","esc_abyssdevil","esc_blackknight","esc_larva","esc_steelworm","esc_bonespider","esc_mutantwasp","esc_moonspirit","esc_duperion","esc_yonir","esc_salah"],
         "graveyard": ["nw_038", "nw_051", "nw_052", "nw_053", "nw_064", "nw_117", "nw_119", "nw_181", "nw_043", "nw_044", "nw_045", "nw_046", "nw_088"],  // 骷髏墓地
         "demon_realm": ["nw_148", "nw_149", "nw_150", "nw_152", "nw_153", "nw_154", "nw_155", "nw_156", "nw_158", "nw_050", "nw_065", "nw_160"],  // 魔界
         "aden": ["nw_076", "nw_028", "nw_061", "nw_068", "nw_069", "nw_070", "nw_071", "nw_073", "nw_074", "nw_075", "nw_229"],  // 亞丁城
@@ -3953,7 +4041,7 @@ function recomputeStats() {
     d.cha = Math.min(300, (b.cha || 0) + (a.cha || 0) + (pn.cha||0));   // 魅力：第六屬性，上限60+轉生*20
 
     d.ac = 10; d.er = 0; d.dr = 0;
-    d.meleeDmg = 0; d.meleeHit = 0; d.meleeCrit = 0; d.dollDmgMult = 1;
+    d.meleeDmg = 0; d.meleeHit = 0; d.meleeCrit = 0; d.dollDmgMult = 1; d._accPdmg = 0; d._accMdmg = 0;
     d.rangedDmg = 0; d.rangedHit = 0; d.rangedCrit = 0;
     d.extraDmg = 0; d.extraHit = 0;
     d.magicDmg = 0; d.magicHit = 0; d.magicCrit = 0; d.extraMp = 0; d.mpReduce = 0;
@@ -4116,6 +4204,11 @@ d.mr += (baseMr + bonusMr);
         if(ed.rangedHit) d.rangedHit += ed.rangedHit;
         if(ed.meleeDmg)  d.meleeDmg  += ed.meleeDmg;
         if(ed.rangedDmg) d.rangedDmg += ed.rangedDmg;
+                if(ed.hit){ d.meleeHit += ed.hit; d.rangedHit += ed.hit; d.magicHit += ed.hit; }   // 飾品命中
+                if(ed.crit){ d.meleeCrit += ed.crit; d.rangedCrit += ed.crit; d.magicCrit += ed.crit; }   // 飾品爆擊
+                if(ed.hpPct) p.mhp = Math.round(p.mhp * (1 + ed.hpPct));   // 飾品最大HP%
+                if(ed.pdmgPct) d._accPdmg = (d._accPdmg||0) + ed.pdmgPct;   // 飾品物理總傷%（迴圈後統一套）
+                if(ed.mdmgPct) d._accMdmg = (d._accMdmg||0) + ed.mdmgPct;   // 飾品魔法總傷%
         if(ed.immStone) d.immStone = true;                    // 紅騎士盾牌：免疫石化
         if(ed.magicDrNonEle) d.magicDrNonEle += ed.magicDrNonEle; // 紅騎士盾牌：無屬性魔法減傷
         if(ed.eff && ed.eff === 'haste') p._equipHaste = true;   // 不再借用 buffs.haste 計時通道，避免卸裝後永久加速殘留
@@ -4378,6 +4471,8 @@ d.mr += (baseMr + bonusMr);
     // 🔧 偵測衍生屬性異常(NaN)：不自動修正（避免遮蔽 bug），改為跳出提示請玩家回報管理員，方便抓根因
     (function(){
         applyTalentBonuses(d,p);
+        { var _pp=(d._accPdmg||0)+(d.tPdmgPct||0); if(_pp){ d.dollDmgMult=(d.dollDmgMult||1)*(1+_pp); }   // 物理總傷%：飾品+天賦戰線
+          var _mp=(d._accMdmg||0)+(d.tMdmgPct||0); if(_mp){ d.magicDmg=Math.round((d.magicDmg||0)*(1+_mp)); } }   // 魔法總傷%：飾品+天賦戰線
         var _bad = [];
         ['mr','ac','dr','er','meleeDmg','rangedDmg','magicDmg','aspd','meleeHit','rangedHit','meleeCrit','rangedCrit','magicCrit'].forEach(function(k){ if(!Number.isFinite(d[k])) _bad.push(k); });
         if(_bad.length && !window.__statNaNAlerted){
@@ -6788,7 +6883,18 @@ function killMob(idx) {
             try { if (typeof saveGame === 'function') saveGame(); } catch (e) { }   // 立即寫檔：CD 絕對時間戳即刻持久化，重登不會跳過
         }
     })();
-    // ===== 夢幻之島（3轉）：萬能藥水掉落（6種各自獨立 2%）=====
+    // ===== 艾斯卡洛斯（20轉）：飾品掉落（各階獨立）=====
+                if (mapState.current === 'escaroth') {
+                    var _em = (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1);
+                    var _eHi=["ea_78","ea_79"], _eRa=["ea_47","ea_48","ea_49","ea_51","ea_52","ea_53","ea_54","ea_55","ea_57","ea_58","ea_59","ea_61","ea_62","ea_63","ea_64","ea_65","ea_66","ea_67","ea_68","ea_69","ea_70","ea_71","ea_72","ea_73","ea_74"], _eHe=["ea_30","ea_31","ea_32","ea_33","ea_34","ea_35","ea_36","ea_37","ea_38","ea_39","ea_40","ea_41","ea_42","ea_43","ea_44","ea_45","ea_46"], _eLe=["ea_11","ea_12","ea_13","ea_14","ea_15","ea_16","ea_17","ea_18","ea_19","ea_20","ea_21","ea_22","ea_23","ea_24","ea_25","ea_26","ea_27","ea_28","ea_29"], _eMy=["ea_01","ea_02","ea_03","ea_04","ea_05","ea_06","ea_07","ea_08","ea_09","ea_10"];
+                    var _eP = function(a){ return a[Math.floor(Math.random()*a.length)]; };
+                    if (_eHi.length && Math.random() < 0.30*_em)    gainItem(_eP(_eHi),1,false);   // 高級 30%
+                    if (_eRa.length && Math.random() < 0.20*_em)    gainItem(_eP(_eRa),1,false);   // 稀有 20%
+                    if (_eHe.length && Math.random() < 0.01*_em)    gainItem(_eP(_eHe),1,false);   // 英雄 1%
+                    if (_eLe.length && Math.random() < 0.0001*_em)  gainItem(_eP(_eLe),1,false);   // 傳說 0.01%
+                    if (_eMy.length && Math.random() < 0.00001*_em) gainItem(_eP(_eMy),1,false);   // 神話 0.001%
+                }
+                // ===== 夢幻之島（3轉）：萬能藥水掉落（6種各自獨立 2%）=====
     if (mapState.current === 'dream_island') {
         var _diPan = ['panacea_str','panacea_dex','panacea_con','panacea_int','panacea_wis','panacea_cha'];
         var _diRate = 0.02 * (window.__GAME_CONFIG && window.__GAME_CONFIG.dropMult || 1);
@@ -8207,6 +8313,48 @@ function _renderSkillUI(){
 function _skuiManual(id){ try{ if(typeof manualCast==='function') manualCast(id); }catch(e){} _renderSkillUI(); }
 window.openSkillUI=openSkillUI; window.closeSkillUI=closeSkillUI; window._skuiAssign=_skuiAssign; window._skuiPickSlot=_skuiPickSlot; window._skuiClearSlot=_skuiClearSlot; window._skuiManual=_skuiManual;
 // ===== 🆕 角色界面 overlay（天堂M風紙娃娃；唯讀 player.eq + 鏡像 dt-* 數值，不動裝備/屬性邏輯）=====
+function _charTipHide(){ var t=document.getElementById('chui-tip'); if(t) t.style.display='none'; }
+function _charTipShow(ev, slot){
+    try{ ev.stopPropagation(); }catch(e){}
+    if(!window.__charTipBound){ window.__charTipBound=true; document.addEventListener('click', _charTipHide); }
+    var P=(typeof player!=='undefined')?player:{};
+    var it=P.eq?P.eq[slot]:null;
+    if(!it||typeof DB==='undefined'||!DB.items||!DB.items[it.id]){ _charTipHide(); return; }
+    var d=DB.items[it.id];
+    var t=document.getElementById('chui-tip');
+    if(!t){ t=document.createElement('div'); t.id='chui-tip';
+        t.style.cssText='position:fixed;z-index:100000;max-width:250px;background:#0c0a06;border:1px solid #7c6126;border-radius:9px;padding:9px 11px;box-shadow:0 6px 24px rgba(0,0,0,.6);pointer-events:none;font-family:Noto Sans TC,Microsoft JhengHei,system-ui,sans-serif;';
+        document.body.appendChild(t);
+    }
+    var brd=(typeof _bagBorder==='function')?_bagBorder(it):'#e7dfce';
+    function sgn(v){ return (v>0?'+':'')+v; }
+    var SL={helm:'頭盔',armor:'盔甲',tshirt:'內甲',belt:'腰帶',boots:'長靴',wpn:'武器',shield:'盾牌',cloak:'斗篷',gloves:'手套',amulet:'項鍊',arrow:'箭矢',ring1:'戒指',ring2:'戒指',ring3:'戒指',ring4:'戒指',earring1:'耳環',earring2:'耳環',earring3:'耳環',earring4:'耳環',rune1:'符石',rune2:'符石',soul:'靈魂石'};
+    var rows=[];
+    if(d.type==='wpn'){
+        if(d.dmgS!=null||d.dmgL!=null) rows.push('小型 '+(d.dmgS||0)+' ／ 大型 '+(d.dmgL||0));
+        if(d.hit) rows.push((d.ranged?'遠距':'近距')+'命中 '+sgn(d.hit));
+        if(d.dmgBonus) rows.push((d.ranged?'遠距':'近距')+'傷害 '+sgn(d.dmgBonus));
+        if(d.mdmg) rows.push('魔法傷害 '+sgn(d.mdmg));
+    }
+    var FLAT=[['mr','抗魔'],['dr','傷害減免'],['er','迴避'],['str','力量'],['dex','敏捷'],['con','體質'],['int','智力'],['wis','精神'],['cha','魅力'],['mhp','最大HP'],['mmp','最大MP'],['hpR','HP恢復'],['mpR','MP恢復'],['hit','命中'],['crit','爆擊'],['meleeDmg','近距傷害'],['rangedDmg','遠距傷害'],['meleeHit','近距命中'],['rangedHit','遠距命中'],['extraDmg','額外傷害'],['resFire','火抗'],['resWater','水抗'],['resEarth','地抗'],['resWind','風抗']];
+    if(d.ac) rows.push('AC -'+d.ac);
+    FLAT.forEach(function(f){ if(d[f[0]]) rows.push(f[1]+' '+sgn(d[f[0]])); });
+    if(d.pdmgPct) rows.push('物理總傷 +'+Math.round(d.pdmgPct*100)+'%');
+    if(d.mdmgPct) rows.push('魔法總傷 +'+Math.round(d.mdmgPct*100)+'%');
+    if(d.hpPct) rows.push('最大HP +'+Math.round(d.hpPct*100)+'%');
+    var tags=[];
+    if(it.bless||d.isB) tags.push('<span style="color:#f2da90;">祝福</span>');
+    if(it.anc||d.isAnc) tags.push('<span style="color:#b27bf0;">遠古</span>');
+    var head='<div style="font-weight:800;color:'+brd+';font-size:13px;margin-bottom:1px;">'+(d.n||'')+(it.en?' <span style="color:#fcd34d;">+'+it.en+'</span>':'')+'</div>';
+    head+='<div style="color:#8b857a;font-size:10px;margin-bottom:5px;">'+(SL[slot]||slot)+(tags.length?'　'+tags.join(' '):'')+'</div>';
+    t.innerHTML=head+(rows.length?'<div style="color:#d6cdb8;font-size:11px;line-height:1.65;">'+rows.join('<br>')+'</div>':'<div style="color:#6b6558;font-size:11px;">無附加數值</div>');
+    t.style.display='block';
+    var w=t.offsetWidth,hh=t.offsetHeight,pad=14;
+    var x=ev.clientX+pad,y=ev.clientY+pad;
+    if(x+w>window.innerWidth-6) x=ev.clientX-pad-w;
+    if(y+hh>window.innerHeight-6) y=ev.clientY-pad-hh;
+    t.style.left=Math.max(4,x)+'px'; t.style.top=Math.max(4,y)+'px';
+}
 function openCharUI(){
     var ov=document.getElementById('chui-ov');
     if(!ov){
@@ -8218,7 +8366,7 @@ function openCharUI(){
     }
     ov.style.display='flex'; _renderCharUI();
 }
-function closeCharUI(){ var ov=document.getElementById('chui-ov'); if(ov) ov.style.display='none'; }
+function closeCharUI(){ var ov=document.getElementById('chui-ov'); if(ov) ov.style.display='none'; _charTipHide(); }
 function _dtv(id){ var el=document.getElementById(id); return el?el.textContent.trim():'-'; }
 function _renderCharUI(){
     var box=document.getElementById('chui-box'); if(!box) return;
@@ -8240,7 +8388,8 @@ function _renderCharUI(){
             var def=DB.items[it.id]; var img=(typeof getIconUrl==='function'?(getIconUrl(def)||''):(def.img||'')); var en=it.en?('<span style="position:absolute;top:1px;right:3px;font-size:9px;color:#fcd34d;font-weight:800;">+'+it.en+'</span>'):'';
             inner=(img?'<img src="'+img+'" onerror="this.style.display=\'none\'" style="width:30px;height:30px;object-fit:contain;">':'<span style="font-size:9px;color:#cbb27a;">'+(def.n||'').slice(0,3)+'</span>')+en; brd='#7c6126'; bg='#1c1509';
         } else { inner=''; }
-        return '<div style="grid-area:'+slot+';position:relative;aspect-ratio:1;border:1.5px solid '+brd+';background:'+bg+';border-radius:7px;display:grid;place-items:center;text-align:center;">'+inner+'</div>';
+        var _clk=(it&&typeof DB!=='undefined'&&DB.items&&DB.items[it.id])?(' onclick="_charTipShow(event,\''+slot+'\')"'):'';
+        return '<div'+_clk+' style="grid-area:'+slot+';position:relative;aspect-ratio:1;border:1.5px solid '+brd+';background:'+bg+';border-radius:7px;display:grid;place-items:center;text-align:center;'+(_clk?'cursor:pointer;':'')+'">'+inner+'</div>';
     }
     var slotKeys=Object.keys(SLOTS);
     var doll='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;'
@@ -11901,6 +12050,7 @@ const MAP_CATEGORIES = {
         {v:'tikal_temple',t:'提卡爾神廟（10轉）',c:'#22d3ee'},
         {v:'dream_island',t:'夢幻之島（3轉）',c:'#22c55e'},
         {v:'fallen_knights',t:'墮落騎士團（5轉）',c:'#dc2626'},
+        {v:'escaroth',t:'艾斯卡洛斯（20轉）',c:'#f97316'},
     ],
     tower: [
             {v:'tower_1f',t:'傲慢塔 1樓'},
@@ -13237,6 +13387,7 @@ function changeMap(force) {
           syncMapSelectors(); return;
       } }
     { if (!force && document.getElementById('map-select').value === 'fallen_knights' && (player.reborn||0) < 5) { logSys('🔒 此地圖為「墮落騎士團」，需轉生 5 轉以上才能進入。'); syncMapSelectors(); return; } }
+    { if (!force && document.getElementById('map-select').value === 'escaroth' && (player.reborn||0) < 20) { logSys('🔒 此地圖為「艾斯卡洛斯」，需轉生 20 轉以上才能進入。'); syncMapSelectors(); return; } }
     { var _dt = document.getElementById('map-select').value;
       if (!force && _dt.indexOf('dom_')===0) {
           if ((player.reborn||0) < 15) { logSys('🔒 此地圖為「支配者之塔」，需轉生 15 轉以上才能進入。'); syncMapSelectors(); return; }
