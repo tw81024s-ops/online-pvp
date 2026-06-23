@@ -12155,6 +12155,7 @@ function onMapCategoryChange() {
     // 優先回到該分類「上次到過」的地圖；無紀錄或已失效（如攻城結束）則用第一個可選地圖
     let remembered = player.lastMapByCat && player.lastMapByCat[cat];
     let target = (remembered && list.some(m => m.v === remembered && !m.disabled)) ? remembered : (firstOk ? firstOk.v : null);
+    if (cat === 'dom') target = 'dom_1f';   // 🗼 選支配者之塔一律從 1 樓開始（避免卡在沒傳送石的舊樓層）
     if (target) {
         document.getElementById('map-select').value = target;
         changeMap();   // 實際移動（受控狀態時 changeMap 會擋下並還原兩個選單）
