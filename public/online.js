@@ -306,7 +306,7 @@
     let _pdTimer = null;
     function pushPolyDexNow() {
         if (!token) return;
-        try { const _p = getPlayer(); if (!_p || !_p.polyDex) return; var _d = _p.polyDex, _f = {}; for (var _k in _d) { if (typeof window._isCyanDomForm === 'function' && window._isCyanDomForm(_k)) continue; _f[_k] = _d[_k]; } api('/api/polydex', 'POST', { dex: _f }).catch(() => { }); } catch (e) { }
+        try { const _p = getPlayer(); if (!_p || !_p.polyDex) return; var _d = _p.polyDex, _f = {}; for (var _k in _d) { _f[_k] = _d[_k]; }   /* 青支配也推送：帳號累積形態供別隻角色補缺 */ api('/api/polydex', 'POST', { dex: _f }).catch(() => { }); } catch (e) { }
     }
     async function pullMergePolyDex() {
         if (!token) return;

@@ -11852,7 +11852,7 @@ window.__mergePolyDex = function(serverDex){
     try{
         var dex = (typeof polyDexObj==='function') ? polyDexObj() : (player.polyDex = player.polyDex || {});
         var changed=false;
-        for(var k in serverDex){ if(window._isCyanDomForm && window._isCyanDomForm(k)) continue; var v=serverDex[k]||0; if((dex[k]||0) < v){ dex[k]=v; changed=true; } }
+        for(var k in serverDex){ var v=serverDex[k]||0; if(window._isCyanDomForm && window._isCyanDomForm(k)){ if(!(dex[k]>0) && v>0){ dex[k]=v; changed=true; } continue; }   /* 青支配：只補缺少的(本機0張才補)，已有不動以防洗 */ if((dex[k]||0) < v){ dex[k]=v; changed=true; } }
         if(changed){ if(typeof updateUI==='function') updateUI(); if(typeof saveGame==='function') saveGame(); }
         return changed;
     }catch(e){ return false; }
