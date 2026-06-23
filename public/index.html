@@ -8323,7 +8323,7 @@ function _charTipShow(ev, slot){
     var d=DB.items[it.id];
     var t=document.getElementById('chui-tip');
     if(!t){ t=document.createElement('div'); t.id='chui-tip';
-        t.style.cssText='position:fixed;z-index:100000;max-width:250px;background:#0c0a06;border:1px solid #7c6126;border-radius:9px;padding:9px 11px;box-shadow:0 6px 24px rgba(0,0,0,.6);pointer-events:none;font-family:Noto Sans TC,Microsoft JhengHei,system-ui,sans-serif;';
+        t.style.cssText='position:fixed;z-index:100000;max-width:250px;background:#0c0a06;border:1px solid #7c6126;border-radius:9px;padding:9px 11px;box-shadow:0 6px 24px rgba(0,0,0,.6);pointer-events:auto;font-family:Noto Sans TC,Microsoft JhengHei,system-ui,sans-serif;';
         document.body.appendChild(t);
     }
     var brd=(typeof _bagBorder==='function')?_bagBorder(it):'#e7dfce';
@@ -8347,7 +8347,8 @@ function _charTipShow(ev, slot){
     if(it.anc||d.isAnc) tags.push('<span style="color:#b27bf0;">遠古</span>');
     var head='<div style="font-weight:800;color:'+brd+';font-size:13px;margin-bottom:1px;">'+(d.n||'')+(it.en?' <span style="color:#fcd34d;">+'+it.en+'</span>':'')+'</div>';
     head+='<div style="color:#8b857a;font-size:10px;margin-bottom:5px;">'+(SL[slot]||slot)+(tags.length?'　'+tags.join(' '):'')+'</div>';
-    t.innerHTML=head+(rows.length?'<div style="color:#d6cdb8;font-size:11px;line-height:1.65;">'+rows.join('<br>')+'</div>':'<div style="color:#6b6558;font-size:11px;">無附加數值</div>');
+    t.innerHTML=head+(rows.length?'<div style="color:#d6cdb8;font-size:11px;line-height:1.65;">'+rows.join('<br>')+'</div>':'<div style="color:#6b6558;font-size:11px;">無附加數值</div>')
+        +'<button onclick="event.stopPropagation();unequipItem(\''+slot+'\');_charTipHide();if(typeof _renderCharUI===\'function\')_renderCharUI();" style="margin-top:8px;width:100%;background:#7c2d12;color:#fed7aa;border:1px solid #9a3412;border-radius:6px;padding:6px 0;font-size:12px;font-weight:800;cursor:pointer;">卸下</button>';
     t.style.display='block';
     var w=t.offsetWidth,hh=t.offsetHeight,pad=14;
     var x=ev.clientX+pad,y=ev.clientY+pad;

@@ -873,7 +873,7 @@
                     let n = Math.max(1, Math.min(avail, parseInt(qty.value) || 1));
                     const exist = myOffer.items.find(x => x.uid === e.uid);
                     if (exist) exist.cnt = Math.min(e.cnt, exist.cnt + n);
-                    else myOffer.items.push({ uid: e.uid, id: e.id, cnt: n, en: e.en || 0, bless: !!e.bless, anc: !!e.anc, attr: !!e.attr });
+                    else myOffer.items.push({ uid: e.uid, id: e.id, cnt: n, en: e.en || 0, bless: !!e.bless, anc: !!e.anc, attr: !!e.attr, lv: e.lv });
                     sendOffer(); render(search.value.trim());
                 };
                 r.append(qty, add); out.append(r);
@@ -894,7 +894,7 @@
         });
         p.gold = Math.max(0, (p.gold || 0) - (give.gold || 0));
         (get.items || []).forEach(it => {
-            p.inv.push({ id: it.id, uid: _uid(), cnt: it.cnt || 1, en: it.en || 0, bless: !!it.bless, anc: !!it.anc, attr: !!it.attr, lock: false, junk: false });
+            p.inv.push({ id: it.id, uid: _uid(), cnt: it.cnt || 1, en: it.en || 0, bless: !!it.bless, anc: !!it.anc, attr: !!it.attr, lv: it.lv, lock: false, junk: false });
         });
         p.gold = (p.gold || 0) + (get.gold || 0);
         try { if (typeof saveGame === 'function') saveGame(); } catch (e) { }
