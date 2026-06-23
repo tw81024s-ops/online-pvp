@@ -630,11 +630,11 @@
                     
                     <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
                         <div class="text-sm text-slate-400 mb-3 border-b border-slate-700 pb-1">自動施放設定</div>
-                        <div class="flex justify-between items-center mb-2 text-sm"><span class="text-cyan-400 font-bold">攻擊技能（最多4種·每招CD5秒）</span><span>MP &gt; <input type="number" id="set-mp-atk" value="50" class="w-12 bg-slate-900 border text-center text-white rounded">%</span></div>
+                        <div class="flex justify-between items-center mb-2 text-sm"><span class="text-cyan-400 font-bold">攻擊技能（最多6種·每招CD5秒）</span><span>MP &gt; <input type="number" id="set-mp-atk" value="50" class="w-12 bg-slate-900 border text-center text-white rounded">%</span></div>
                         <select id="sel-atk-skill" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
                         <select id="sel-atk-skill2" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
                         <select id="sel-atk-skill3" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-2 rounded text-sm"><option value="">無</option></select>
-                        <select id="sel-atk-skill4" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-3 rounded text-sm"><option value="">無</option></select>
+                        <select id="sel-atk-skill4" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-3 rounded text-sm"><option value="">無</option></select><select id="sel-atk-skill5" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-3 rounded text-sm"><option value="">無</option></select><select id="sel-atk-skill6" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-cyan-300 px-2 py-2 mb-3 rounded text-sm"><option value="">無</option></select>
                         <div class="flex justify-between items-center mb-2 text-sm"><span class="text-green-400 font-bold">治癒魔法</span><span>HP &lt; <input type="number" id="set-mp-heal" value="50" class="w-12 bg-slate-900 border text-center text-white rounded">%</span></div>
                         <select id="sel-heal-skill" onchange="try{__persistSkillSel();saveGame()}catch(e){}" class="w-full bg-slate-900 border text-green-300 px-2 py-2 rounded text-sm"><option value="">無</option></select>
                         <div id="ui-convert-row" class="hidden">
@@ -734,7 +734,7 @@
                 
             </div>
 
-            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic" onclick="openCharUI()"><span class="ic">🛡️</span><span class="tx">角色</span></button><button class="fn-ic" onclick="openTalentUI()"><span class="ic">🌳</span><span class="tx">天賦</span></button><button class="fn-ic casino-marquee" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openTreasurePanel()"><span class="ic">🗺️</span><span class="tx">奪寶</span></button><button class="fn-ic" onclick="openMapFragPanel()"><span class="ic">🧩</span><span class="tx">寶圖</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="openDomTpPanel()"><span class="ic">🔑</span><span class="tx">傳送石</span></button><button class="fn-ic" onclick="openSigilPanel()"><span class="ic">🔯</span><span class="tx">紋樣</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="openInfiniteArena()"><span class="ic">🏟️</span><span class="tx">無界擂台</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
+            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic" onclick="openSkillUI()"><span class="ic">⚔️</span><span class="tx">技能</span></button><button class="fn-ic" onclick="openCharUI()"><span class="ic">🛡️</span><span class="tx">角色</span></button><button class="fn-ic" onclick="openTalentUI()"><span class="ic">🌳</span><span class="tx">天賦</span></button><button class="fn-ic casino-marquee" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openTreasurePanel()"><span class="ic">🗺️</span><span class="tx">奪寶</span></button><button class="fn-ic" onclick="openMapFragPanel()"><span class="ic">🧩</span><span class="tx">寶圖</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="openDomTpPanel()"><span class="ic">🔑</span><span class="tx">傳送石</span></button><button class="fn-ic" onclick="openSigilPanel()"><span class="ic">🔯</span><span class="tx">紋樣</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="openInfiniteArena()"><span class="ic">🏟️</span><span class="tx">無界擂台</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
 
             <div class="panel flex-1 flex flex-col overflow-hidden relative">
                 <!-- 能力 -->
@@ -8136,7 +8136,7 @@ function getAutoCastInterval() {
 // ===== 🆕 技能介面 overlay（天堂M風；只讀真實技能＋寫回現有 sel-atk-skill 槽，舊面板不動）=====
 function _skUIcat(id){ var s=DB.skills[id]; if(!s) return 'prof';
     var n=['reqK','reqM','reqE'].filter(function(k){return s[k]!=null;}).length; return n>=3?'common':'prof'; }
-function _skuiAtkIds(){ return ['sel-atk-skill','sel-atk-skill2','sel-atk-skill3','sel-atk-skill4']; }
+function _skuiAtkIds(){ return ['sel-atk-skill','sel-atk-skill2','sel-atk-skill3','sel-atk-skill4','sel-atk-skill5','sel-atk-skill6']; }
 function openSkillUI(){
     var ov=document.getElementById('skui-ov');
     if(!ov){
@@ -8397,8 +8397,8 @@ function autoCastSpells() {
     // 🔮 4 攻擊技能槽輪替：每招獨立 5 秒 CD（player.cds.spellCd）；全域施法節奏仍由 player.cds.atkSk 控制（每間隔放 1 招）
     if(mpPct >= atkThr && atkTarget && player.cds.atkSk <= 0) {
         player.cds.spellCd = player.cds.spellCd || {};
-        let _slots = ['sel-atk-skill','sel-atk-skill2','sel-atk-skill3','sel-atk-skill4'];
-        let _cfgKeys = ['selAtkSkill','selAtkSkill2','selAtkSkill3','selAtkSkill4'];
+        let _slots = ['sel-atk-skill','sel-atk-skill2','sel-atk-skill3','sel-atk-skill4','sel-atk-skill5','sel-atk-skill6'];
+        let _cfgKeys = ['selAtkSkill','selAtkSkill2','selAtkSkill3','selAtkSkill4','selAtkSkill5','selAtkSkill6'];
         for(let _si=0; _si<_slots.length; _si++) {
             let _el = document.getElementById(_slots[_si]);
             let _id = _el ? _el.value : '';
@@ -9834,11 +9834,11 @@ function __persistSkillSel(){
     try{
         if(!(typeof player!=='undefined' && player && player.cls)) return;   // 沒載入角色不寫，避免空白覆蓋
         var g=function(id){ var e=document.getElementById(id); return e?e.value:''; };
-        var o={ a1:g('sel-atk-skill'), a2:g('sel-atk-skill2'), a3:g('sel-atk-skill3'), a4:g('sel-atk-skill4'), h:g('sel-heal-skill') };
-        if(!(o.a1||o.a2||o.a3||o.a4||o.h)) return;   // 全空不寫：避免登入瞬間（下拉尚未還原）把已存的好紀錄覆蓋成空
+        var o={ a1:g('sel-atk-skill'), a2:g('sel-atk-skill2'), a3:g('sel-atk-skill3'), a4:g('sel-atk-skill4'), a5:g('sel-atk-skill5'), a6:g('sel-atk-skill6'), h:g('sel-heal-skill') };
+        if(!(o.a1||o.a2||o.a3||o.a4||o.a5||o.a6||o.h)) return;   // 全空不寫：避免登入瞬間（下拉尚未還原）把已存的好紀錄覆蓋成空
         localStorage.setItem(_skillSelKey(), JSON.stringify(o));
         // 🆕 同步寫進 player.config → 隨雲端存檔保留（修正：登出/換裝置技能設定遺失）
-        try{ player.config = player.config || {}; player.config.selAtkSkill=o.a1; player.config.selAtkSkill2=o.a2; player.config.selAtkSkill3=o.a3; player.config.selAtkSkill4=o.a4; player.config.selHealSkill=o.h; }catch(_e){}
+        try{ player.config = player.config || {}; player.config.selAtkSkill=o.a1; player.config.selAtkSkill2=o.a2; player.config.selAtkSkill3=o.a3; player.config.selAtkSkill4=o.a4; player.config.selAtkSkill5=o.a5; player.config.selAtkSkill6=o.a6; player.config.selHealSkill=o.h; }catch(_e){}
     }catch(e){}
 }
 function __loadSkillSel(){ try{ var r=localStorage.getItem(_skillSelKey()); return r?JSON.parse(r):null; }catch(e){ return null; } }
@@ -9851,7 +9851,7 @@ function __applyCfgToDOM(c){
         function sc(id,v){ var e=document.getElementById(id); if(e&&v!==undefined) e.checked=!!v; }
         if(c.setPot){ var ps=document.getElementById('set-pot'); if(ps){ ps.value=c.setPot; ps.classList.remove('text-red-300','text-orange-300','text-white'); ps.classList.add(c.setPot==='potion_heal'?'text-red-300':(c.setPot==='potion_strong'?'text-orange-300':'text-white')); } }
         sv('set-hp-pot',c.setHpPot); sc('set-auto-buy-pot',c.setAutoBuyPot);
-        sv('sel-atk-skill',c.selAtkSkill); sv('sel-atk-skill2',c.selAtkSkill2); sv('sel-atk-skill3',c.selAtkSkill3); sv('sel-atk-skill4',c.selAtkSkill4);
+        sv('sel-atk-skill',c.selAtkSkill); sv('sel-atk-skill2',c.selAtkSkill2); sv('sel-atk-skill3',c.selAtkSkill3); sv('sel-atk-skill4',c.selAtkSkill4); sv('sel-atk-skill5',c.selAtkSkill5); sv('sel-atk-skill6',c.selAtkSkill6);
         sv('set-mp-atk',c.setMpAtk); sv('sel-heal-skill',c.selHealSkill); sv('set-mp-heal',c.setMpHeal);
         sv('sel-convert-skill',c.selConvertSkill); sv('set-hp-convert',c.setHpConvert);
         sc('set-haste',c.setHaste); sc('set-auto-buy-haste',c.setAutoBuyHaste);
@@ -9935,7 +9935,7 @@ function renderSkillSelects() {
     });
     
     document.getElementById('sel-atk-skill').innerHTML = aHtml;
-    ['sel-atk-skill2','sel-atk-skill3','sel-atk-skill4'].forEach(_id=>{ let _e=document.getElementById(_id); if(_e) _e.innerHTML = aHtml; });
+    ['sel-atk-skill2','sel-atk-skill3','sel-atk-skill4','sel-atk-skill5','sel-atk-skill6'].forEach(_id=>{ let _e=document.getElementById(_id); if(_e) _e.innerHTML = aHtml; });
     document.getElementById('sel-heal-skill').innerHTML = hHtml;
     // 還原先前選擇（該技能選項仍存在才還原；已不可用則自然回到「無」）
     let _atkEl = document.getElementById('sel-atk-skill');
