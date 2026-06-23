@@ -3278,7 +3278,8 @@ function ensureLogEnhanced(el){
 function logPush(el, html){
     ensureLogEnhanced(el); if(!el) return;
     var id=el.id;
-    var atBottom=(el.scrollHeight-el.scrollTop-el.clientHeight)<30;
+    var _hidden=(el.clientHeight===0 && el.scrollHeight>0);
+    var atBottom=_hidden || (el.scrollHeight-el.scrollTop-el.clientHeight)<30;
     if(atBottom){
         el.insertAdjacentHTML('beforeend', html);
         while(el.children.length>50) el.removeChild(el.firstChild);
@@ -8188,14 +8189,14 @@ function _renderSkillUI(){
     }
     var manualHtml=_mlist.length?'<div style="font-size:12px;color:#c9a8ff;font-weight:800;border-left:3px solid #a874d9;padding-left:7px;margin:12px 0 7px;">✋ 手動施放</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">'+_mlist.map(_mCard).join('')+'</div>':'';
     var slot='';
-    for(var i=0;i<4;i++){ var id=cur[i]; var nm=(id&&DB.skills[id])?DB.skills[id].n:''; var act=(window._skuiSlot===i);
-        slot+='<div onclick="_skuiPickSlot('+i+')" style="cursor:pointer;flex:1;text-align:center;padding:7px 2px;border-radius:8px;border:2px solid '+(act?'#cba85a':'#3a3018')+';background:'+(act?'#231a0c':'#120e08')+';">'
+    for(var i=0;i<6;i++){ var id=cur[i]; var nm=(id&&DB.skills[id])?DB.skills[id].n:''; var act=(window._skuiSlot===i);
+        slot+='<div onclick="_skuiPickSlot('+i+')" style="cursor:pointer;flex:1 1 30%;min-width:0;text-align:center;padding:7px 2px;border-radius:8px;border:2px solid '+(act?'#cba85a':'#3a3018')+';background:'+(act?'#231a0c':'#120e08')+';">'
           +'<div style="font-size:9px;color:#8b857a;">槽'+(i+1)+(act?' ◀':'')+'</div>'
           +'<div style="font-size:11px;font-weight:700;color:'+(nm?'#ecd9a3':'#5b554a')+';margin-top:2px;line-height:1.1;">'+(nm||'空')+'</div></div>';
     }
     box.innerHTML=''
       +'<div style="display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid #20190f;"><div style="font-size:14px;font-weight:800;color:#ecd9a3;">⚔️ 技能 · 攻擊自動施放</div><div onclick="closeSkillUI()" style="margin-left:auto;cursor:pointer;color:#9a9486;font-size:18px;padding:0 4px;">✕</div></div>'
-      +'<div style="padding:8px 12px;border-bottom:1px solid #20190f;background:#0c0a06;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><span style="font-size:10px;color:#8b857a;flex:1;">點技能 → 指派到選中槽（◀）。CD 為新制冷卻。</span><span onclick="_skuiClearSlot()" style="cursor:pointer;font-size:10px;color:#d98a6a;border:1px solid #5a3320;border-radius:5px;padding:2px 7px;">清空此槽</span></div><div style="display:flex;gap:6px;">'+slot+'</div></div>'
+      +'<div style="padding:8px 12px;border-bottom:1px solid #20190f;background:#0c0a06;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><span style="font-size:10px;color:#8b857a;flex:1;">點技能 → 指派到選中槽（◀）。CD 為新制冷卻。</span><span onclick="_skuiClearSlot()" style="cursor:pointer;font-size:10px;color:#d98a6a;border:1px solid #5a3320;border-radius:5px;padding:2px 7px;">清空此槽</span></div><div style="display:flex;flex-wrap:wrap;gap:6px;">'+slot+'</div></div>'
       +'<div style="flex:1;overflow:auto;padding:10px 12px;">'
       +(prof.length?'<div style="font-size:12px;color:#ecd9a3;font-weight:800;border-left:3px solid #cba85a;padding-left:7px;margin:0 0 7px;">專職技能</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;">'+prof.map(card).join('')+'</div>':'')
       +(common.length?'<div style="font-size:12px;color:#ecd9a3;font-weight:800;border-left:3px solid #cba85a;padding-left:7px;margin:0 0 7px;">通用技能</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">'+common.map(card).join('')+'</div>':'')
@@ -16317,6 +16318,7 @@ window.onload = () => {
         embers = []; for (let i = 0; i < 24; i++) embers.push({ x: Math.random() * CW, y: Math.random() * CH, s: 0.2 + Math.random() * 0.5, r: 1 + Math.random() * 1.4, a: Math.random() });
         spawnField();
         const ml = document.getElementById('mob-list'); if (ml) ml.style.display = 'none';
+        const _clp = document.getElementById('combat-log-panel'); if (_clp) _clp.classList.add('hidden');
         const mapName = mapNameNow();
         wrap = document.createElement('div'); wrap.id = 'dx-wrap'; wrap.style.cssText = 'width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;';
         wrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
@@ -16346,6 +16348,7 @@ window.onload = () => {
         if (savedMobs) mapState.mobs = savedMobs; if (savedSpawnAt) mapState.spawnAt = savedSpawnAt; if (savedTI != null) mapState.targetIdx = savedTI;
         if (wrap && wrap.parentNode) wrap.parentNode.removeChild(wrap); wrap = null;
         const ml = document.getElementById('mob-list'); if (ml) ml.style.display = '';
+        const _clp = document.getElementById('combat-log-panel'); if (_clp) _clp.classList.remove('hidden');
         try { if (typeof calcStats === 'function') calcStats(); if (typeof updateUI === 'function') updateUI(); if (typeof renderMobs === 'function') renderMobs(); } catch (e) {}
     }
     window.openDomExplore = function () { autoMode = true; open(); };
