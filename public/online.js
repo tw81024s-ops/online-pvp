@@ -291,9 +291,14 @@
     async function downloadSave() {
         const j = await api('/api/save?slot=' + activeSlot());
         if (j.data) {
-            localStorage.setItem(slotKey(), typeof j.data === 'string' ? j.data : JSON.stringify(j.data));
-            if (j.updatedAt) _setSts(activeSlot(), j.updatedAt);
-            return true;
+            var _cd = (typeof j.data === 'string' ? j.data : JSON.stringify(j.data));
+            var _ld = localStorage.getItem(slotKey());
+            if (_svValid(_cd) && (!_svValid(_ld) || _svT(_cd, j.updatedAt) >= _svT(_ld, null))) {   // 🛡️ 雲端有效且不比本地舊才覆蓋
+                localStorage.setItem(slotKey(), _cd);
+                if (j.updatedAt) _setSts(activeSlot(), j.updatedAt);
+                return true;
+            }
+            return false;
         }
         return false;
     }
@@ -528,6 +533,9 @@
     function _stsKey(n){ return 'lineage_idle_save_sts_' + n; }
     function _getSts(n){ var v=localStorage.getItem(_stsKey(n)); return v ? new Date(v).getTime() : 0; }
     function _setSts(n, iso){ if(iso){ try{ localStorage.setItem(_stsKey(n), iso); }catch(e){} } }
+    function _svParse(s){ try{ return JSON.parse(s); }catch(e){ return null; } }
+    function _svValid(s){ var o=_svParse(s); return !!(o && o.p && o.p.cls); }
+    function _svT(s, serverTs){ var o=_svParse(s); if(o && typeof o.t==='number') return o.t; return serverTs ? new Date(serverTs).getTime() : 0; }
     async function syncCloudSaves() {
         try {
             const _saveT = (raw, serverTs) => {
@@ -550,11 +558,11 @@
                 const anchorT = _getSts(sN);   // 本地上次同步到的「伺服器時間」
                 if (cloudStr && localStr) {
                     // 雲端在本機上次同步「之後」被別的裝置更新 → 雲端較新 → 載入雲端
-                    if (cloudT > anchorT) { localStorage.setItem(k, cloudStr); _setSts(sN, cTs); if (sN === cur) curChanged = true; }
+                    if (cloudT > anchorT && _svValid(cloudStr) && (!_svValid(localStr) || _svT(cloudStr,cTs) >= _svT(localStr,null))) { localStorage.setItem(k, cloudStr); _setSts(sN, cTs); if (sN === cur) curChanged = true; }   // 🛡️ 條件不成立時，由下方原有 else 上傳本地（不被舊雲端蓋掉）
                     // 否則本地是基於最新雲端（或有未同步變更）→ 上傳本地
                     else { try { const r = await api('/api/save?slot=' + sN, 'PUT', { data: JSON.parse(localStr) }); if (r && r.updatedAt) _setSts(sN, r.updatedAt); } catch (e) { } }
                 } else if (cloudStr) {
-                    localStorage.setItem(k, cloudStr); _setSts(sN, cTs); if (sN === cur) curChanged = true;
+                    if (_svValid(cloudStr)) { localStorage.setItem(k, cloudStr); _setSts(sN, cTs); if (sN === cur) curChanged = true; }   // 🛡️ 雲端須為有效角色才覆蓋
                 } else if (localStr) {
                     try { const r = await api('/api/save?slot=' + sN, 'PUT', { data: JSON.parse(localStr) }); if (r && r.updatedAt) _setSts(sN, r.updatedAt); } catch (e) { }
                 }
