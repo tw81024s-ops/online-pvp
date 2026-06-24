@@ -2575,7 +2575,7 @@ const DB = {
         "tikal_temple":["tk_snake","tk_monkey","tk_aztec","tk_yuka","tk_kaila","tk_bara","tk_aeto","tk_aeto2","tk_sadmud","tk_sadska","tk_sadtio","tk_jefreku_f","tk_jefreku_m"],
         "fallen_knights": ["fk_baphomet","fk_balrog","fk_kt","fk_deathknight","fk_aris","fk_vander"],
         "escaroth": ["esc_firebee","esc_deathherald","esc_deathscorpion","esc_bloodsuccubus","esc_abyssdevil","esc_blackknight","esc_larva","esc_steelworm","esc_bonespider","esc_mutantwasp","esc_moonspirit","esc_duperion","esc_yonir","esc_salah"],
-        "secret": ["esc_firebee","esc_deathherald","esc_deathscorpion","esc_bloodsuccubus","esc_abyssdevil","esc_blackknight","esc_larva","esc_steelworm","esc_bonespider","esc_mutantwasp","esc_moonspirit","esc_duperion","esc_yonir","esc_salah"],
+        "secret": ["esc_abyssdevil"],
         "graveyard": ["nw_038", "nw_051", "nw_052", "nw_053", "nw_064", "nw_117", "nw_119", "nw_181", "nw_043", "nw_044", "nw_045", "nw_046", "nw_088"],  // 骷髏墓地
         "demon_realm": ["nw_148", "nw_149", "nw_150", "nw_152", "nw_153", "nw_154", "nw_155", "nw_156", "nw_158", "nw_050", "nw_065", "nw_160"],  // 魔界
         "aden": ["nw_076", "nw_028", "nw_061", "nw_068", "nw_069", "nw_070", "nw_071", "nw_073", "nw_074", "nw_075", "nw_229"],  // 亞丁城
@@ -2981,10 +2981,10 @@ function applyMapRebalance(base, mapId) {
     }
     if (mapId === 'secret') {   // 🗺️ 秘密（30轉）：等級隨機1~300，能力依等級浮動，約10倍艾斯卡洛斯
         var _slv = 1 + Math.floor(Math.random() * 300);
-        var _shp = _slv * 30000000;
+        var _shp = _slv * 15000000;
         return Object.assign({}, base, {
             lv: _slv,
-            n: (base.n || '秘密怪物') + ' Lv' + _slv,
+            n: '秘密 Lv' + _slv,
             hp: _shp, curHp: _shp,
             dmg: [Math.max(1, Math.round(_slv * 8000 * 0.85)), _slv * 8000],
             ac: -250, mr: 200, hit: 300, db: 120,
