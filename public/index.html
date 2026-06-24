@@ -811,7 +811,7 @@
 <script>
 /** 遊戲核心資料庫 */
 const EXP_T = [0, 125, 175, 200, 250, 546, 1105, 1695, 2465, 3439, 4641, 6095, 7825, 9855, 12209, 14911, 17985, 21455, 25345, 29679, 34481, 40033, 45585, 51935, 58849, 66351, 74465, 83215, 92625, 102719, 113521, 125055, 137345, 150415, 164289, 178991, 194545, 210975, 228305, 246559, 265761, 285935, 307105, 329817, 352529, 729360, 1508416, 3495263, 9912189, 36065092];
-function getExpReq(lv) { return lv >= 100 ? Infinity : (lv >= 49 ? 36065092 : EXP_T[lv]); }
+function getExpReq(lv) { return lv >= 100 ? Infinity : 5 * (lv >= 49 ? 36065092 : EXP_T[lv]); }   // 升級所需經驗 ×5
 // 高等級打怪經驗衰減：50~69 ×1/2、70~79 ×1/3、80~89 ×1/4、90~99 ×1/5、100滿等不獲得
 function getExpGainMult(lv) {
     let m = 1;
@@ -822,6 +822,7 @@ function getExpGainMult(lv) {
     else if (lv >= 50)  m = 1/2;
     let g = (typeof window !== 'undefined' && window.__GAME_CONFIG && window.__GAME_CONFIG.expMult) ? window.__GAME_CONFIG.expMult : 1;   // 全服經驗倍率（管理者面板設定）
     let rb = 1 / (1 + (player.reborn || 0));   // 轉生經驗遞減：1轉×1/2、2轉×1/3、3轉×1/4…（避免轉生後練太快；要調整改這條）
+    if ((player.reborn || 0) >= 100) rb *= 0.1;   // 100轉以上經驗再額外 ×1/10
     return m * g * rb;
 }
 
@@ -2359,7 +2360,7 @@ const DB = {
         "sk_kn_warcry": { n: "戰吼", type: "buff", tier: 1, reqK: 25, mp: 8, dur: 1200, d: { str: 3, con: 3 } },
         "sk_kn_wpnmastery": { n: "武器精通", type: "buff", tier: 2, reqK: 35, mp: 10, dur: 1200, d: { meleeHit: 6, extraDmg: 5 } },
         "sk_kn_ironbody": { n: "鋼鐵之軀", type: "buff", tier: 2, reqK: 40, mp: 12, dur: 1200, d: { dr: 6, mr: 8 } },
-        "sk_kn_counterbarrier": { n: "反擊屏障", type: "buff", tier: 3, reqK: 50, mp: 15, dur: 300, d: { er: 12, dr: 5 } },
+        "sk_kn_counterbarrier": { n: "反擊屏障", type: "buff", tier: 3, reqK: 50, mp: 15, dur: 300, d: { er: 12, dr: 5, refl: 0.3 } },
         "sk_mg_timewarp": { n: "時空扭曲", type: "buff", tier: 5, reqM: 50, mp: 40, dur: 600, d: { magicDmg: 25, mpR: 10, int: 5 } },
         "sk_mg_archward": { n: "大魔導師結界", type: "buff", tier: 5, reqM: 50, mp: 40, dur: 1200, d: { ac: 5, mr: 15, resFire: 10, resWater: 10, resEarth: 10, resWind: 10 } },
         "sk_ef_kingarrow": { n: "精靈王之箭", type: "buff", tier: 5, reqE: 50, mp: 30, dur: 1200, d: { rangedDmg: 20, rangedHit: 8, dex: 4 } },
@@ -6244,6 +6245,7 @@ function enemyPhysicalAttack(mob, idx, stunChance = 0) {
 
         totalDmg = Math.max(1, Math.floor(totalDmg * _takenMult()));
         player.hp -= totalDmg;
+        { var _rf=((player.buffs&&player.buffs.sk_kn_counterbarrier>0&&DB.skills.sk_kn_counterbarrier.d&&DB.skills.sk_kn_counterbarrier.d.refl)||0)+((player.d&&player.d.tReflPct)||0); if(_rf>0&&mob&&mob.curHp>0){ var _rd=Math.max(1,Math.floor(totalDmg*_rf)); mob.curHp=Math.max(1,mob.curHp-_rd); logCombat(`🛡️ <span class="text-amber-300">反擊屏障</span> 反彈 ${_rd} 點傷害給 <span class="${getMobColor(mob.lv)}">${mob.n}</span>。`); } }
 
         let atkMsg = `${mobInsightPrefix}<span class="${getMobColor(mob.lv)}">${mob.n}</span> 擊中你，造成 ${totalDmg} 點傷害。`;
         if(heavy) atkMsg += " (重擊!)";
@@ -6497,6 +6499,7 @@ function applyMobMagic(mob, sk) {
         dmg = Math.max(1, Math.floor(dmg * _takenMult()));
 
         player.hp -= dmg;
+        { var _rf=((player.buffs&&player.buffs.sk_kn_counterbarrier>0&&DB.skills.sk_kn_counterbarrier.d&&DB.skills.sk_kn_counterbarrier.d.refl)||0)+((player.d&&player.d.tReflPct)||0); if(_rf>0&&mob&&mob.curHp>0){ var _rd=Math.max(1,Math.floor(dmg*_rf)); mob.curHp=Math.max(1,mob.curHp-_rd); logCombat(`🛡️ <span class="text-amber-300">反擊屏障</span> 反彈 ${_rd} 點傷害給 <span class="${getMobColor(mob.lv)}">${mob.n}</span>。`); } }
         logCombat(`<span class="${getMobColor(mob.lv)}">${mob.n}</span> 施放${sk.skn || '魔法'}，對你造成 ${dmg} 點魔法傷害。`, 'enemy');
         
         if(sk.vamp) {
@@ -9546,6 +9549,7 @@ function capGold() {
 function updateUI() {
     capGold();
     if(state.ff) return; // 補跑期間不刷新畫面
+    { if(document.getElementById('dx-wrap')){ var _clpU=document.getElementById('combat-log-panel'); if(_clpU && !_clpU.classList.contains('hidden')) _clpU.classList.add('hidden'); } }   // 🗺️ 地圖模式中保持下方戰鬥日誌隱藏（防重複/閃爍）
     document.getElementById('st-lv').innerText = ((player.reborn||0) > 0 ? (player.reborn + '轉 ') : '') + player.lv;
     { let rb = document.getElementById('btn-return-town'); if (rb) rb.textContent = siegeVictoryActive() ? '回城' : '回村'; }
     { let vb = document.getElementById('victory-badge'); if (vb) vb.style.display = siegeVictoryActive() ? 'inline-flex' : 'none'; }   // 攻城獲勝淡金黃標記（inline-flex 讓👑與文字水平置中）
@@ -13441,7 +13445,7 @@ function changeMap(force) {
         renderTownNPCs(mapState.current);
     } else {
         document.getElementById('battle-view').classList.remove('hidden');
-        document.getElementById('combat-log-panel').classList.remove('hidden');
+        (document.getElementById('dx-wrap')?0:document.getElementById('combat-log-panel').classList.remove('hidden'));
         document.getElementById('town-view').classList.add('hidden');
         document.getElementById('town-view').classList.remove('flex');
         
