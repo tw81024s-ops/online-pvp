@@ -660,6 +660,7 @@
                     <button onclick="openSherinePanel()" class="mt-auto btn w-full py-2 bg-emerald-800 hover:bg-emerald-700 text-base">🔮 席琳套裝</button>
       <button onclick="openTowerWindow()" class="btn w-full py-2 bg-rose-900 hover:bg-rose-800 text-base">🗼 守護TD</button>
 <button onclick="openDollWindow()" class="btn w-full py-2 bg-indigo-900 hover:bg-indigo-800 text-base">🧸 娃娃蒐藏</button>
+<button onclick="openTameDex()" class="btn w-full py-2 bg-pink-900 hover:bg-pink-800 text-base">🐾 馴服圖鑑</button>
             <button onclick="showAnnouncements()" class="btn w-full py-2 bg-amber-800 hover:bg-amber-700 text-base">📢 更新公告</button>
                     <button onclick="saveGame()" class="btn w-full py-3 bg-slate-700 text-lg mt-2">儲存遊戲進度</button>
                 </div>
@@ -3802,6 +3803,88 @@ function _dollFmt(eff, v) {
 function _dollStars(star) { return '★'.repeat(star) + '☆'.repeat(DOLL_MAX_STAR - star); }
 function _dollImgHtml(doll) { return '<div class="doll-img"><span class="di-emo">' + (doll.emo || '🧸') + '</span>' + (doll.img ? '<img class="di-art" src="' + doll.img + '" alt="" onerror="this.remove()">' : '') + '</div>'; }
 
+/* ============ 🐾 馴服系統 & 馴服圖鑑 (221) ============ */
+var TAME_CATS={wild:["orc","goblin","orc_archer","gremlin","nm_003","zombie","fighter","ice_wolf","wolf","gnome_warrior","skeleton","stone_golem","hobgoblin","b_knight","sparto","lycan","dragon_turtle","nm_035","doberman","spider","gandi_orc","rova_orc","atuba_orc","duda_orc","neruga_orc","nm_009","orc_scout","ogre_warrior","skel_archer","nm_011","lizardman","ant","nw_008","nw_009","nw_010","nw_011","nw_012","nw_013","nw_014","giant_ant","griffon","nw_104","nw_105","nw_106","nw_107","nw_126","nw_127","nw_128","nw_077","nw_078","nw_079","nw_099","nw_100","nw_101","nw_161","bear","nw_230","skel_sniper","skel_guard","skel_fighter","fire_archer","bomb_flower","dragon_fly","fire_warrior","salamander","fire_egg","ashitakio","bandit","bandit_boss","cyclops","nw_213","croc","troglodyte","lamia","giant_croc","doppelganger","crabman","nm_005","nm_004","nm_012","nm_014","nm_019","nm_020","nm_021","nm_017","nm_022","nm_046"],dungeon:["skel_spear","nw_168","nw_089","skel_axe","nm_008","nw_212","nw_067","nw_124","nw_125","nw_129","nw_130","nw_131","nw_132","nw_133","nw_178","nw_179","nw_180","nw_018","nw_204","nw_205","nw_206","ice_maid","nw_017","troll","monia","nw_062","nw_063","nw_084","nw_092","nw_093","ratman","mermaid","nm_010","crustacean","nw_022","nw_029","nw_135","nw_136","nw_137","nw_138","nw_139","nw_140","nw_141","nw_145","nw_055","nw_056","nm_013","nm_016","nm_018","nm_025","nm_026","nm_027","nm_033","nw_005","nw_021","nw_025","nw_027","nw_030","nw_031","nw_080","nw_086","nw_109","nw_110","nw_121","nw_142","nw_200","nw_207","nw_217","nw_095","nw_096","nw_097","nw_098","nw_038","nw_051","nw_052","nw_053","nw_064","nw_117","nw_119","nw_181","nw_043","nw_044","nw_045","nw_046","nw_088","nw_148","nw_149","nw_150","nw_152","nw_153","nw_154","nw_155","nw_156","nw_158","nw_050","nw_065","nw_160","nw_076","nw_028","nw_061","nw_068","nw_069","nw_070","nw_071","nw_073","nw_074","nw_075","nw_229","nw_007","nw_054","nw_057","nw_059","nw_087","nw_113","nw_114","nw_185","nw_202","nw_162","nw_163","nw_164","nw_186","nw_187","nw_188","nw_165","nw_196","nw_197","nw_226","nw_227","nw_189","nw_190","nw_015","nw_198","nw_221","nw_228","nw_035","nw_191","nw_192","nw_016","nw_103","nw_222","nw_223","nw_036","nw_037","nw_218","nw_193","nw_194","nw_177","nw_019","nw_072","nw_219","nw_224","nw_225","nw_167","nw_169","nw_220","nw_041","nw_042","nw_047","nw_081","nw_082","nw_083","nw_120","nw_122","nw_123","nw_146","nw_147","nw_151","nw_195","nw_208","nw_209","nw_210","nw_058","nw_090","nw_091","nw_102","nw_118","nw_134","nw_159","nw_166","nw_199","nw_211","nw_001","nw_002","nw_020","nw_026","nw_085","nw_176","nw_201","nw_203","nw_060","nw_048","nw_066","nw_094","nw_112","nw_157","nw_170","nw_172","nw_182","nw_183","nw_214","nw_049","nw_115","nw_143","nw_144","nw_173","nw_174","nw_175"],tower:["tw_medusa","tw_chimera","tw_arian","tw_zenis","tw_succq","tw_beholder","tw_darkwolf","tw_eye","nw_003","tw_nightmare","tw_cerberus","tw_ifrit","tw_vampire","tw_ghoul","tw_sparto","tw_skelf","tw_skels","tw_zombieking","nw_116","tw_golem","tw_firemage","tw_youngdragon","tw_bonedragon","tw_panther","tw_orczombie","tw_elmore","tw_mummyking","nw_032","nw_033","nw_034","nw_004","tw_lycan","tw_icetiger","tw_aris","nw_108","nw_171","nw_215","nw_216","tw_bknight","tw_firewarrior","tw_succq2","tw_vander","tw_fireelf","tw_windelf","tw_lich","tw_zenis2","tw_zking2","tw_mummy2","tw_aris2","tw_reaper","nw_006","nw_040","nw_184"],dom:["dom_t1","dom_zenis","dom_t2","dom_eye","dom_t3","dom_vampire","dom_t4","dom_zombieking","dom_t5","dom_panther","dom_t6","dom_mummyking","dom_t7","dom_aris","dom_t8","dom_vander","dom_t9","dom_lich","dom_t10","dom_ugnus","dom_t11","dom_tantalos","dom_sisyphus","dom_reaper"],rebirth:["thebes_mandragora","thebes_falcon","thebes_scarab","thebes_sphinx","thebes_scorpion","thebes_golem","thebes_priest","thebes_anubis","thebes_horus","thebes_osiris","abyss_osiris","abyss_anubis","abyss_horus","abyss_fire_dragon","abyss_ice_dragon","abyss_earth_dragon","tk_snake","tk_monkey","tk_aztec","tk_yuka","tk_kaila","tk_bara","tk_aeto","tk_aeto2","tk_sadmud","tk_sadska","tk_sadtio","tk_jefreku_f","tk_jefreku_m","nm_039","nm_040","nm_036","nm_041","nm_043","nm_044","nm_023","nm_024","nm_045","nm_032","nm_037","fk_baphomet","fk_balrog","fk_kt","fk_deathknight","fk_aris","fk_vander","esc_firebee","esc_deathherald","esc_deathscorpion","esc_bloodsuccubus","esc_abyssdevil","esc_blackknight","esc_larva","esc_steelworm","esc_bonespider","esc_mutantwasp","esc_moonspirit","esc_duperion","esc_yonir","esc_salah"],special:["nw_023","nw_024"]};
+var TAME_CAT_CN={wild:'🌲 野外',dungeon:'🕳️ 地監/洞穴',tower:'🗼 傲慢塔',dom:'👑 支配者之塔',rebirth:'🌀 轉生秘境',special:'🐉 特殊·王巢'};
+var TAME_CAT_ORDER=['wild','dungeon','tower','dom','rebirth','special'];
+function tameTier(mob){ if(!mob) return {tn:'普通',res:100,col:'#9ca3af'}; if(mob.boss) return {tn:'王',res:8000,col:'#f5c542'}; var lv=mob.lv||0; if(lv<=40) return {tn:'普通',res:100,col:'#9ca3af'}; if(lv<=75) return {tn:'精英',res:600,col:'#60a5fa'}; return {tn:'史詩',res:2000,col:'#c084fc'}; }
+function tamedCount(){ var c=0,t=(typeof player!=='undefined'&&player&&player.tamed)||{}; for(var k in t){ if(t[k]) c++; } return c; }
+function tameCharmBonus(){ return Math.min(100, Math.floor(tamedCount()/5)); }
+function _tameAllIds(){ var a=[]; for(var i=0;i<TAME_CAT_ORDER.length;i++){ var arr=TAME_CATS[TAME_CAT_ORDER[i]]||[]; for(var j=0;j<arr.length;j++) a.push(arr[j]); } return a; }
+function tameAttempt(){
+  if(typeof player==='undefined'||!player) return;
+  if(!player.skills||player.skills.indexOf('sk_charm')<0){ logSys('需先學會「迷魅術」才能馴服。'); return; }
+  var t=(typeof getTarget==='function')?getTarget():null;
+  if(!t){ logSys('沒有可馴服的目標。'); return; }
+  if(!player.tamed) player.tamed={};
+  if(player.tamed[t.id]){ logSys('「'+t.n+'」已在馴服圖鑑中。'); return; }
+  if((player.mp||0)<30){ logSys('魔力不足（馴服需 30）。'); return; }
+  if(Date.now() < (player.tameCdUntil||0)){ logSys('馴服冷卻中…'); return; }
+  player.mp-=30; player.tameCdUntil=Date.now()+1500;
+  var cha=(player.d&&player.d.cha)||0, res=tameTier(t).res, p=cha/(cha+res);
+  if(Math.random()<p){
+    player.tamed[t.id]=true;
+    logSys('🐾 <span style="color:#f9a8d4;font-weight:700;">馴服成功！</span>「'+t.n+'」已收入馴服圖鑑。');
+    var idx=mapState.mobs.findIndex(function(m){ return m&&m.uid===t.uid; });
+    if(idx>=0){ mapState.mobs[idx]=null; if(typeof renderMobs==='function') renderMobs(); }
+    if(typeof calcStats==='function') calcStats();
+  } else { logSys('🐾 馴服失敗（魅力越高越容易成功）。'); }
+  if(typeof updateUI==='function') updateUI();
+}
+window.tameAttempt=tameAttempt;
+function _tameChip(id){
+  var mob=(typeof DB!=='undefined'&&DB.mobs)?DB.mobs[id]:null; if(!mob) return '';
+  var ti=tameTier(mob), got=!!(player.tamed&&player.tamed[id]), nm=(mob.boss?'👑':'')+(mob.n||id);
+  if(got) return '<div style="border:1px solid '+ti.col+'66;background:'+ti.col+'1a;border-radius:7px;padding:5px 7px;font-size:12px;"><div style="font-weight:700;color:#e7e3d8;">'+nm+'</div><div style="font-size:10px;color:'+ti.col+';">Lv'+(mob.lv||0)+' '+ti.tn+'</div></div>';
+  return '<div style="border:1px solid #2a2f37;background:#15171c;border-radius:7px;padding:5px 7px;font-size:12px;opacity:.45;"><div style="font-weight:700;color:#6b7280;">？？？</div><div style="font-size:10px;color:#4b5563;">Lv'+(mob.lv||0)+' '+ti.tn+'</div></div>';
+}
+window.__renderTameDex=function(){
+  if(!player.tamed) player.tamed={};
+  var head=document.getElementById('tame-dex-head'), body=document.getElementById('tame-dex-body'); if(!body) return;
+  var all=_tameAllIds(), total=all.length, got=0;
+  for(var i=0;i<all.length;i++){ if(player.tamed[all[i]]) got++; }
+  var bonus=tameCharmBonus(), nextAt=(Math.floor(got/5)+1)*5;
+  if(head) head.innerHTML='<div style="background:#171b22;border:1px solid #2a2f37;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.7;">已馴服 <b style="color:#f9a8d4;">'+got+'</b> / '+total+'　｜　圖鑑魅力加成 <b style="color:#f5c542;">+'+bonus+'</b>（每馴 5 隻 +1，上限 +100）<br><span style="color:#9a948a;font-size:12px;">下一加成：再馴 '+(nextAt-got)+' 隻</span></div>';
+  var va=document.getElementById('tame-view-area'), vr=document.getElementById('tame-view-rare');
+  var on='background:#b45a78;color:#fff;', off='background:#2a2f37;color:#cbd5e1;';
+  if(va&&vr){ va.style.cssText='flex:1;padding:6px;border-radius:8px;border:none;font-weight:700;'+(window.__tameView==='area'?on:off); vr.style.cssText='flex:1;padding:6px;border-radius:8px;border:none;font-weight:700;'+(window.__tameView==='rare'?on:off); }
+  var html='';
+  if(window.__tameView==='rare'){
+    var tiers=[['👑 王',function(m){return m.boss;}],['史詩',function(m){return !m.boss&&(m.lv||0)>75;}],['精英',function(m){return !m.boss&&(m.lv||0)>40&&(m.lv||0)<=75;}],['普通',function(m){return !m.boss&&(m.lv||0)<=40;}]];
+    for(var a2=0;a2<tiers.length;a2++){
+      var lbl=tiers[a2][0], f=tiers[a2][1], ids=all.filter(function(id){ var m=DB.mobs[id]; return m&&f(m); });
+      var g2=ids.filter(function(id){return player.tamed[id];}).length;
+      html+='<div style="margin:14px 0 6px;font-size:15px;font-weight:800;color:#f5e6c8;">'+lbl+' <span style="font-size:12px;color:#9a948a;font-weight:400;">'+g2+'/'+ids.length+'</span></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:5px;">';
+      for(var k=0;k<ids.length;k++) html+=_tameChip(ids[k]); html+='</div>';
+    }
+  } else {
+    for(var c=0;c<TAME_CAT_ORDER.length;c++){
+      var cat=TAME_CAT_ORDER[c], ids3=TAME_CATS[cat]||[]; if(!ids3.length) continue;
+      var g3=ids3.filter(function(id){return player.tamed[id];}).length;
+      html+='<div style="margin:14px 0 6px;font-size:15px;font-weight:800;color:#f5e6c8;">'+TAME_CAT_CN[cat]+' <span style="font-size:12px;color:#9a948a;font-weight:400;">'+g3+'/'+ids3.length+'</span></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:5px;">';
+      for(var k2=0;k2<ids3.length;k2++) html+=_tameChip(ids3[k2]); html+='</div>';
+    }
+  }
+  body.innerHTML=html;
+};
+window.openTameDex=function(){
+  if(typeof player==='undefined'||!player||!player.cls){ if(typeof toast==='function') toast('請先建立角色'); return; }
+  if(!player.tamed) player.tamed={};
+  var ov=document.getElementById('tame-dex-ov');
+  if(!ov){
+    ov=document.createElement('div'); ov.id='tame-dex-ov';
+    ov.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(2,6,10,.92);display:flex;flex-direction:column;align-items:center;padding:12px;overflow:auto;';
+    ov.innerHTML='<div style="width:100%;max-width:760px;display:flex;justify-content:space-between;align-items:center;margin:2px 0 8px;"><div style="font-size:18px;font-weight:800;color:#f5e6c8;">🐾 馴服圖鑑</div><button id="tame-dex-close" style="background:#334155;color:#e2e8f0;border:none;border-radius:8px;padding:6px 12px;font-weight:700;">關閉</button></div><div id="tame-dex-head" style="width:100%;max-width:760px;"></div><div style="width:100%;max-width:760px;display:flex;gap:6px;margin:8px 0;"><button id="tame-view-area" style="flex:1;padding:6px;border-radius:8px;border:none;font-weight:700;">依地區</button><button id="tame-view-rare" style="flex:1;padding:6px;border-radius:8px;border:none;font-weight:700;">依稀有度</button></div><div id="tame-dex-body" style="width:100%;max-width:760px;"></div>';
+    document.body.appendChild(ov);
+    document.getElementById('tame-dex-close').addEventListener('click',function(){ ov.style.display='none'; });
+    document.getElementById('tame-view-area').addEventListener('click',function(){ window.__tameView='area'; window.__renderTameDex(); });
+    document.getElementById('tame-view-rare').addEventListener('click',function(){ window.__tameView='rare'; window.__renderTameDex(); });
+  }
+  ov.style.display='flex';
+  if(!window.__tameView) window.__tameView='area';
+  window.__renderTameDex();
+};
+
 function openDollWindow() {
   if (!player || !player.cls) { if (typeof toast === 'function') toast('請先建立角色', '#7f1d1d'); return; }
   _dollInit();
@@ -4100,7 +4183,7 @@ function recomputeStats() {
     // ===== Phase 0：基礎屬性 + 衍生欄位歸零（依基本設定，起始值0；AC起始10）=====
     let pn = player.panacea || {};
     d.str = b.str + a.str + (pn.str||0); d.dex = b.dex + a.dex + (pn.dex||0); d.con = b.con + a.con + (pn.con||0); d.int = b.int + a.int + (pn.int||0); d.wis = b.wis + a.wis + (pn.wis||0);
-    d.cha = Math.min(300, (b.cha || 0) + (a.cha || 0) + (pn.cha||0));   // 魅力：第六屬性，上限60+轉生*20
+    d.cha = Math.min(400, (b.cha || 0) + (a.cha || 0) + (pn.cha||0) + (typeof tameCharmBonus==='function'?tameCharmBonus():0));   // 魅力：第六屬性，上限60+轉生*20
 
     d.ac = 10; d.er = 0; d.dr = 0;
     d.meleeDmg = 0; d.meleeHit = 0; d.meleeCrit = 0; d.dollDmgMult = 1; d._accPdmg = 0; d._accMdmg = 0;
@@ -10051,6 +10134,7 @@ player.inv.forEach(i => {
                     <img src="${imgUrl}" onerror="this.style.display='none';" class="w-4 h-4 object-contain pointer-events-none">
                     <span>${sk.n}</span><span class="text-[10px] opacity-70">施放</span>
                 </button>`;
+                if(sid==='sk_charm'){ tDiv.innerHTML += `<button id="manual-btn-tame" onclick="tameAttempt()" class="px-2 py-1 text-xs border rounded whitespace-nowrap flex items-center gap-1 border-pink-500 text-pink-200 hover:bg-pink-900/40 cursor-pointer"><img src="assets/icons/items/tame_paw.png" onerror="this.style.display='none';" class="w-4 h-4 object-contain pointer-events-none"><span>馴服</span></button>`; }
                 return;
             }
             let c = sk.type === 'atk' ? 'text-cyan-300' : (sk.type === 'heal' ? 'text-green-300' : 'text-purple-300');
@@ -16740,6 +16824,6 @@ window.onload = () => {
 /* ===== 支配塔探索模式 END ===== */
 
 </script>
-<script src="online.js?v=220"></script>
+<script src="online.js?v=221"></script>
 </body>
 </html>
