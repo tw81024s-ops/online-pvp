@@ -9288,7 +9288,7 @@ function useItem(u, silent = false) {
     } else if (d.type === 'skillbk') {
         let sd = DB.skills[d.sk];
         let reqLv = _skillReqLv(sd);
-        if(sd.reqD !== undefined && !player.dragon) { logSys(`「${sd.n}」是龍騎專屬技能，只有龍騎能學習。`); return; }
+        if(sd.reqD !== undefined && !player.dragon && !(sd.reqK!==undefined && sd.reqM!==undefined && sd.reqE!==undefined)) { logSys(`「${sd.n}」是龍騎專屬技能，只有龍騎能學習。`); return; }
         if(sd.darkOnly && !player.darkelf) { logSys(`「${sd.n}」是黑妖專屬技能，只有黑妖能學習。`); return; }
         if(player.darkelf && sd.reqM !== undefined && d.sk !== 'sk_charm') { logSys(`黑妖是近戰刺客，無法學習法師魔法「${sd.n}」。`); return; }
         if(player.darkelf && isElfOnlySkill(sd)) { logSys(`「${sd.n}」是精靈專屬技能（精靈水晶），黑妖無法學習。`); return; }
