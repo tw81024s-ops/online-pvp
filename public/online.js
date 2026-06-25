@@ -150,6 +150,16 @@
     }
 
     // ============ 戰鬥數值打包（calcStats 之後的衍生值）============
+    // ===== 🏴 資源爭奪戰場：送出/工具 =====
+    function _terrName(k){ return k==='center'?'中央':(k==='west'?'西側':(k==='east'?'東側':k)); }
+    window.__terrName = _terrName;
+    window.__territorySend = {
+        get: function(){ try { ws.send(JSON.stringify({ type:'territory_get' })); } catch(e){} },
+        capture: function(point){ try { ws.send(JSON.stringify({ type:'territory_capture', point:point, profile:buildProfile() })); } catch(e){} },
+        challenge: function(point){ try { ws.send(JSON.stringify({ type:'territory_challenge', point:point, profile:buildProfile() })); } catch(e){} },
+        release: function(point){ try { ws.send(JSON.stringify({ type:'territory_release', point:point })); } catch(e){} }
+    };
+
     function buildProfile() {
         try { if (typeof calcStats === 'function') calcStats(); } catch (e) { }
         const p = getPlayer(); if (!p) return null; const d = p.d;
@@ -368,6 +378,10 @@
             if (m.type === 'inf_battle_start') onInfBattleStart(m);
             if (m.type === 'inf_announce') { try { toast('📢 ' + (m.name || '某玩家') + ' 已 ' + m.streak + ' 連勝，速來無界擂台踢館！', '#5b21b6'); } catch (e) { } }
             if (m.type === 'pvp_reward') { try { if (typeof window.__applyPvpReward === 'function') window.__applyPvpReward(m.gold || 0, m.tickets || 0, m.reason); } catch (e) { } }
+            if (m.type === 'territory_state') { window.__territory = { points: m.points || {}, mult: m.mult || {} }; try { if (typeof window.__renderTerritory === 'function') window.__renderTerritory(); } catch (e) { } }
+            if (m.type === 'territory_reward') { try { if (typeof window.__applyTerritoryReward === 'function') window.__applyTerritoryReward(m); } catch (e) { } }
+            if (m.type === 'territory_battle') { _closeWait(); m.startAt = Date.now() + 500; try { playBattle(m); } catch (e) { } try { if (typeof window.__territoryBattleResult === 'function') window.__territoryBattleResult(m); } catch (e) { } }
+            if (m.type === 'territory_lost') { try { toast('⚔️ 你在「' + _terrName(m.point) + '」的據點被 ' + (m.by || '某玩家') + ' 搶走了！', '#7f1d1d'); } catch (e) { } try { if (typeof window.__renderTerritory === 'function') window.__renderTerritory(); } catch (e) { } }
             if (m.type === 'admin_grant_poly') { try { if (typeof window.__adminGrantPoly === 'function') { window.__adminGrantPoly(m.formName); toast('🎁 獲得變身卡：' + m.formName, '#14532d'); } } catch (e) { } }
             if (m.type === 'admin_updated') {
                 // 自動重新載入雲端最新存檔（管理員的修改），避免線上玩家的自動存檔把修改蓋回去

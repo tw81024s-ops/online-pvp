@@ -44,7 +44,7 @@ function isAdminUser(u) {
     return !!(u && (u.is_admin || (process.env.ADMIN_USERNAME && u.username === process.env.ADMIN_USERNAME)));
 }
 // ===== 防作弊：上傳存檔時夾限可被竄改的數值（金幣/強化）=====
-const EN_CAP = 30;       // 裝備強化上限（+501 之類為作弊，可調整）
+const EN_CAP = 40;       // 裝備強化上限（配合遊戲內強化上限40；超過視為作弊）
 // 金幣不設上限：玩家可透過潘朵拉抽獎賣道具合法累積大量金幣，難判斷；只擋非法值（負/NaN/Infinity）
 function clampNum(v, lo, hi, dflt) {
     v = Number(v);
@@ -411,6 +411,61 @@ function broadcastOnline() {
     for (const ws of online.values()) send(ws, { type: 'online_list', users: list, names });
 }
 
+// ===== 🏴 資源爭奪戰場（全服 3 據點，伺服器權威）=====
+const TERR_POINTS = ['center', 'west', 'east'];
+const TERR_MULT = { center: 2, west: 1, east: 1 };
+const TERR_GOLD_BASE_HR = 50000000;   // 側翼 5000萬/時；中央 ×2 = 1億/時
+const TERR_REFINE_BASE_HR = 250;      // 側翼 250/時；中央 ×2 = 500/時
+function _terrSlotDefault() { return { holder: null, holderName: '', holderProfile: null, holdStart: 0, lastMin: 0, lastSoulSlot: 7, lastChestSlot: 11 }; }
+let territory = store.getTerritory();
+if (!territory || !territory.points) { territory = { points: {} }; for (const k of TERR_POINTS) territory.points[k] = _terrSlotDefault(); }
+for (const k of TERR_POINTS) if (!territory.points[k]) territory.points[k] = _terrSlotDefault();
+function terrSave() { try { store.putTerritory(territory); } catch (e) { } }
+function terrPublic() { const o = {}; for (const k of TERR_POINTS) { const p = territory.points[k]; o[k] = { holder: p.holder, holderName: p.holderName, holdStart: p.holdStart }; } return o; }
+function broadcastTerritory(extra) { const payload = Object.assign({ type: 'territory_state', points: terrPublic(), mult: TERR_MULT }, extra || {}); for (const ws of online.values()) send(ws, payload); }
+function terrReleaseOthers(username, keep) { for (const k of TERR_POINTS) if (k !== keep && territory.points[k].holder === username) territory.points[k] = _terrSlotDefault(); }
+function terrAddPending(username, res) {
+    const u = store.findUser(username); if (!u) return;
+    let rec = store.getTerrPend(u.id) || { gold: 0, refine: 0, souls: [], chests: [] };
+    rec.gold = (rec.gold || 0) + (res.gold || 0);
+    rec.refine = (rec.refine || 0) + (res.refine || 0);
+    if (res.soul) (rec.souls = rec.souls || []).push(res.soul);
+    if (res.chest) (rec.chests = rec.chests || []).push(res.chest);
+    store.putTerrPend(u.id, rec);
+    terrFlushPending(username);
+}
+function terrFlushPending(username) {
+    const u = store.findUser(username); if (!u) return;
+    let rec = store.getTerrPend(u.id); if (!rec) return;
+    const has = Math.floor(rec.gold || 0) > 0 || Math.floor(rec.refine || 0) > 0 || (rec.souls || []).length || (rec.chests || []).length;
+    if (!has) return;
+    const ws = online.get(username); if (!ws) return;
+    const gInt = Math.floor(rec.gold || 0), rInt = Math.floor(rec.refine || 0);
+    send(ws, { type: 'territory_reward', gold: gInt, refine: rInt, souls: rec.souls || [], chests: rec.chests || [] });
+    store.putTerrPend(u.id, { gold: (rec.gold || 0) - gInt, refine: (rec.refine || 0) - rInt, souls: [], chests: [] });
+}
+function terrTick() {
+    const now = Date.now(); let dirty = false;
+    for (const k of TERR_POINTS) {
+        const p = territory.points[k]; if (!p.holder || !p.holdStart) continue;
+        const holdMin = Math.floor((now - p.holdStart) / 60000);
+        const mult = TERR_MULT[k] || 1;
+        while (p.lastMin < holdMin) { p.lastMin++; terrAddPending(p.holder, { gold: TERR_GOLD_BASE_HR / 60 * mult, refine: TERR_REFINE_BASE_HR / 60 * mult }); dirty = true; }
+        const slot = Math.floor(holdMin / 30);
+        if (slot >= 8 && slot > p.lastSoulSlot) {   // 滿4hr後每30分靈魂石（中央T4-T5/側翼T2-T3）
+            for (let i = Math.max(p.lastSoulSlot, 7) + 1; i <= slot; i++) { const tier = (k === 'center') ? (4 + Math.floor(Math.random() * 2)) : (2 + Math.floor(Math.random() * 2)); terrAddPending(p.holder, { soul: tier }); }
+            p.lastSoulSlot = slot; dirty = true;
+        }
+        if (slot >= 12 && slot > p.lastChestSlot) {   // 滿6hr後每30分秘密寶箱（中央T1-T5/側翼T2-T3）
+            for (let i = Math.max(p.lastChestSlot, 11) + 1; i <= slot; i++) { const tier = (k === 'center') ? (1 + Math.floor(Math.random() * 5)) : (2 + Math.floor(Math.random() * 2)); terrAddPending(p.holder, { chest: tier }); }
+            p.lastChestSlot = slot; dirty = true;
+        }
+    }
+    if (dirty) terrSave();
+    broadcastTerritory();
+}
+setInterval(terrTick, 60000);
+
 // ===== PvP 積分系統 =====
 const PVP_TIERS = [
     { n: '青銅', min: 0 }, { n: '白銀', min: 1000 }, { n: '黃金', min: 1200 },
@@ -642,11 +697,13 @@ wss.on('connection', (ws) => {
             online.set(row.username, ws);
             send(ws, { type: 'auth_ok', username: row.username, isAdmin: isAdminUser(row) });
             broadcastOnline();
+            send(ws, { type: 'territory_state', points: terrPublic(), mult: TERR_MULT });
             // PvP：登入時做跨日/跨週結算，稍後把待領獎勵推給客戶端（等角色載入）
             try {
                 const r0 = pvpGet(row.id, row.username); pvpRollover(r0); store.putPvp(row.id, r0);
                 try { wbRollover(); } catch (e) { }   // 世界王跨日結算（任何人登入都會觸發一次）
                 setTimeout(() => { try { const r = pvpGet(row.id, row.username); pvpFlushPending(r); store.putPvp(row.id, r); } catch (e) { } }, 2500);
+                setTimeout(() => { try { terrFlushPending(row.username); } catch (e) { } }, 2600);
             } catch (e) { }
             return;
         }
@@ -656,6 +713,68 @@ wss.on('connection', (ws) => {
         if (msg.type === 'set_name') {
             userNames.set(ws.username, String(msg.name || '').slice(0, 20));
             broadcastOnline();
+            return;
+        }
+
+        // ===== 🏴 資源爭奪戰場 =====
+        if (msg.type === 'territory_get') {
+            send(ws, { type: 'territory_state', points: terrPublic(), mult: TERR_MULT });
+            return;
+        }
+        if (msg.type === 'territory_capture') {   // 佔領空據點
+            const k = String(msg.point || '');
+            if (!TERR_POINTS.includes(k)) return send(ws, { type: 'error', error: '無效據點' });
+            const p = territory.points[k];
+            if (p.holder && p.holder !== ws.username) return send(ws, { type: 'error', error: '此據點已被佔領，請挑戰' });
+            terrReleaseOthers(ws.username, k);
+            p.holder = ws.username; p.holderName = userNames.get(ws.username) || String(msg.name || '');
+            p.holderProfile = clampProfile(msg.profile || {});
+            if (!p.holdStart) { p.holdStart = Date.now(); p.lastMin = 0; p.lastSoulSlot = 7; p.lastChestSlot = 11; }
+            terrSave();
+            broadcastTerritory({ event: 'capture', point: k, by: p.holderName || ws.username });
+            return;
+        }
+        if (msg.type === 'territory_challenge') {   // 挑戰佔領者（對方離線也用其 profile）
+            const k = String(msg.point || '');
+            if (!TERR_POINTS.includes(k)) return send(ws, { type: 'error', error: '無效據點' });
+            const p = territory.points[k];
+            if (!p.holder) return send(ws, { type: 'error', error: '此據點無人佔領' });
+            if (p.holder === ws.username) return send(ws, { type: 'error', error: '你已佔領此據點' });
+            const pA = clampProfile(msg.profile || {});
+            const pB = p.holderProfile || {};
+            const _cfg = store.getConfig();
+            const result = simulate(pA, pB, {
+                pvpDmgMult: _cfg.pvpDmgMult != null ? _cfg.pvpDmgMult : 1,
+                pvpMagicMult: _cfg.pvpMagicMult != null ? _cfg.pvpMagicMult : 1,
+                mageDmgMult: _cfg.mageDmgMult != null ? _cfg.mageDmgMult : 1,
+                meleeDmgMult: _cfg.meleeDmgMult != null ? _cfg.meleeDmgMult : 1,
+                rangedDmgMult: _cfg.rangedDmgMult != null ? _cfg.rangedDmgMult : 1
+            });
+            const won = result.winner === 'A';
+            const oldHolder = p.holder, oldName = p.holderName;
+            send(ws, {
+                type: 'territory_battle', point: k, won,
+                a: { name: pA.name, user: ws.username, mhp: pA.mhp, mmp: pA.mmp, cls: pA.cls, lv: pA.lv, avatar: pA.avatar, darkelf: pA.darkelf },
+                b: { name: oldName || oldHolder, user: oldHolder, mhp: pB.mhp, mmp: pB.mmp, cls: pB.cls, lv: pB.lv, avatar: pB.avatar, darkelf: pB.darkelf },
+                events: result.events, winner: result.winner
+            });
+            if (won) {
+                terrReleaseOthers(ws.username, k);
+                p.holder = ws.username; p.holderName = userNames.get(ws.username) || pA.name || '';
+                p.holderProfile = pA; p.holdStart = Date.now(); p.lastMin = 0; p.lastSoulSlot = 7; p.lastChestSlot = 11;
+                terrSave();
+                const ows = online.get(oldHolder);
+                if (ows) send(ows, { type: 'territory_lost', point: k, by: p.holderName || ws.username });
+                broadcastTerritory({ event: 'capture', point: k, by: p.holderName || ws.username });
+            }
+            return;
+        }
+        if (msg.type === 'territory_release') {   // 放棄據點
+            const k = String(msg.point || '');
+            if (TERR_POINTS.includes(k) && territory.points[k].holder === ws.username) {
+                territory.points[k] = _terrSlotDefault();
+                terrSave(); broadcastTerritory({ event: 'release', point: k });
+            }
             return;
         }
 

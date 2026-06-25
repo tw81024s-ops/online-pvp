@@ -122,6 +122,11 @@ module.exports = {
     putWB(rec) { data.worldBoss = rec; flush(); return rec; },
     getTower() { if (!data.tower) data.tower = {}; return data.tower; },
     putTower(t) { data.tower = t; flush(); return t; },
+    // 🏴 資源爭奪戰場：全服 3 據點狀態 + 每帳號待領資源
+    getTerritory() { return data.territory || null; },
+    putTerritory(t) { data.territory = t; flush(); return t; },
+    getTerrPend(userId) { if (!data.terrPend) data.terrPend = {}; return data.terrPend[userId] || null; },
+    putTerrPend(userId, rec) { if (!data.terrPend) data.terrPend = {}; data.terrPend[userId] = rec; flush(); return rec; },
     // 全域遊戲設定（所有玩家生效）：經驗倍率 / 攻速倍率
     getConfig() { return data.config || {}; },
     setConfig(cfg) { data.config = Object.assign({}, data.config, cfg); flush(); return data.config; }
