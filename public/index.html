@@ -601,6 +601,7 @@
                     <button onclick="openPolyGacha()" style="width:100%;margin-top:6px;background:linear-gradient(90deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:8px;padding:9px;font-size:15px;font-weight:bold;cursor:pointer;box-shadow:0 0 10px rgba(168,85,247,.5);">🧬 變身殿堂（抽卡 / 合成 / 變身）</button>
                 </div>
                 <div class="p-4 pt-0 flex flex-col gap-3">
+                    <button id="map-tame-btn" onclick="tameAttempt()" class="btn w-full py-1.5 mb-1 bg-pink-900 hover:bg-pink-800 text-sm flex items-center justify-center gap-1"><img src="assets/icons/items/tame_paw.png" onerror="this.style.display='none';" class="w-4 h-4"> 馴服</button>
                     <div class="flex items-center gap-3"><span class="text-red-400 font-bold w-10 text-right text-base">HP</span><div class="bar-bg flex-1 !h-6"><div id="bar-hp" class="bar-fill bg-red-600" style="width:100%"></div><div id="txt-hp" class="bar-text text-white !text-sm !line-height-[24px]">16/16</div></div></div>
                     <div class="flex items-center gap-3"><span class="text-blue-400 font-bold w-10 text-right text-base">MP</span><div class="bar-bg flex-1 !h-6"><div id="bar-mp" class="bar-fill bg-blue-600" style="width:100%"></div><div id="txt-mp" class="bar-text text-white !text-sm !line-height-[24px]">1/1</div></div></div>
                     <div class="flex items-center gap-3 mt-1"><span class="text-yellow-500 font-bold w-10 text-right text-sm">EXP</span><div class="bar-bg flex-1 !h-4"><div id="bar-exp" class="bar-fill bg-yellow-500" style="width:0%"></div><div id="txt-exp" class="bar-text font-normal !text-xs !line-height-[16px]">0.00%</div></div></div>
@@ -660,7 +661,6 @@
                     <button onclick="openSherinePanel()" class="mt-auto btn w-full py-2 bg-emerald-800 hover:bg-emerald-700 text-base">🔮 席琳套裝</button>
       <button onclick="openTowerWindow()" class="btn w-full py-2 bg-rose-900 hover:bg-rose-800 text-base">🗼 守護TD</button>
 <button onclick="openDollWindow()" class="btn w-full py-2 bg-indigo-900 hover:bg-indigo-800 text-base">🧸 娃娃蒐藏</button>
-<button onclick="openTameDex()" class="btn w-full py-2 bg-pink-900 hover:bg-pink-800 text-base">🐾 馴服圖鑑</button>
             <button onclick="showAnnouncements()" class="btn w-full py-2 bg-amber-800 hover:bg-amber-700 text-base">📢 更新公告</button>
                     <button onclick="saveGame()" class="btn w-full py-3 bg-slate-700 text-lg mt-2">儲存遊戲進度</button>
                 </div>
@@ -724,6 +724,7 @@
 
         <!-- 右側：清單面板 -->
         <div class="w-full lg:w-[380px] lg:shrink-0 flex flex-col gap-3">
+            <button onclick="openTameDex()" class="btn w-full py-2 bg-pink-900 hover:bg-pink-800 text-base">🐾 馴服圖鑑</button>
             <div class="panel p-2 grid grid-cols-3 gap-2 bg-slate-800 tab-bar">
                 <button class="btn active text-base py-2 font-bold px-0" onclick="switchTab('stats', this)">能力</button>
                 <button class="btn text-base py-2 font-bold px-0" onclick="switchTab('equip', this)">裝備</button>
@@ -16868,6 +16869,6 @@ window.onload = () => {
 /* ===== 支配塔探索模式 END ===== */
 
 </script>
-<script src="online.js?v=223"></script>
+<script src="online.js?v=224"></script>
 </body>
 </html>
