@@ -2980,7 +2980,7 @@ function applyMapRebalance(base, mapId) {
         });
     }
     if (mapId === 'secret') {   // 🗺️ 秘密（30轉）：等級隨機1~300，能力依等級浮動，約10倍艾斯卡洛斯
-        var _slv = 1 + Math.floor(Math.random() * 300);
+        var _slv = 1 + Math.floor(Math.random() * 200);
         var _shp = _slv * 15000000;
         return Object.assign({}, base, {
             lv: _slv,
@@ -4078,6 +4078,7 @@ function applyTalentBonuses(d,p){
     // —— %總傷 / 反傷 / 最大HP%：存成倍率欄位（下階段接進公式）——
     d.tPdmgPct=talentVal('war','pdmg'); d.tMdmgPct=talentVal('war','mdmg'); d.tSdmgPct=talentVal('war','sdmg');
     d.tHpPct=talentVal('def','hp'); d.tReflPct=talentVal('def','refl');
+    if(d.tHpPct && p && p.mhp){ p.mhp = Math.round(p.mhp * (1 + d.tHpPct/100)); }   // 🩸 守線天賦 HP%：套在最後、突破基礎血上限
     // —— 殖：存成倍率欄位（下階段接進經驗/金幣/掉落系統）——
     d.tExpPct=talentVal('farm','exp'); d.tGoldPct=talentVal('farm','gold'); d.tDropPct=talentVal('farm','drop');
     d.tSoulPct=talentVal('farm','soul'); d.tOffPct=talentVal('farm','off'); d.tCastPct=talentVal('farm','cast'); d.tEffPct=talentVal('farm','eff');
@@ -10473,7 +10474,7 @@ function openModal(item, isEq, slot) {
     if (isEq) {
         act += `<button class="col-span-2 w-full btn border-red-700 bg-red-900 hover:bg-red-800 text-red-200 py-3 text-lg font-bold" onclick="unequipItem('${slot}')">卸除</button>`;
     } else {
-        if(d.type === 'pot' || d.type === 'skillbk' || d.eff === 'panacea' || d.eff === 'reborn') {   // 萬能藥(misc/eff=panacea)、轉生藥水(eff=reborn)亦顯示使用按鈕
+        if(d.type === 'pot' || d.type === 'skillbk' || d.eff === 'panacea' || d.eff === 'reborn' || d.eff === 'secret_box') {   // 萬能藥、轉生藥水、秘密寶箱亦顯示使用按鈕
             act += `<button class="col-span-2 w-full btn border-green-700 bg-emerald-800 hover:bg-emerald-700 text-green-100 py-3 text-lg font-bold" onclick="useItem('${item.uid}')">使用</button>`;
         }
         if(d.type === 'scroll') {
