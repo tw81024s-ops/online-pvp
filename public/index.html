@@ -16628,7 +16628,6 @@ window.onload = () => {
 (function () {
     let FLOOR = 'dom_top';
     function _exploreBlocked(m) {
-        if (typeof isTowerMap === 'function' && isTowerMap(m)) return true;       // 🗼 守護TD／爬塔
         if (typeof isSiegeArea === 'function' && isSiegeArea(m)) return true;     // 攻城（肯特內外城）
         if (typeof player !== 'undefined' && player && player.tower && player.tower.active) return true;  // 爬塔進行中
         return false;
@@ -16905,6 +16904,6 @@ window.onload = () => {
 /* ===== 支配塔探索模式 END ===== */
 
 </script>
-<script src="online.js?v=227"></script>
+<script src="online.js?v=228"></script>
 </body>
 </html>
