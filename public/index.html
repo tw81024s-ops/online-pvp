@@ -11475,42 +11475,54 @@ window.__adminGrantPoly = function(formName){
     var ov=document.getElementById('terr-overlay');
     if(!ov){
       ov=document.createElement('div'); ov.id='terr-overlay';
-      ov.style.cssText='position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:14px;';
-      ov.innerHTML='<div style="background:#0f172a;border:2px solid #a855f7;border-radius:14px;max-width:560px;width:100%;max-height:90vh;overflow:auto;padding:16px;">'
-        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><div style="font-size:19px;font-weight:800;color:#f1f5f9;">🏴 資源爭奪戰場</div><button id="terr-close" style="background:#334155;color:#e2e8f0;border:none;border-radius:8px;padding:6px 12px;font-weight:700;">關閉</button></div>'
-        +'<div style="color:#94a3b8;font-size:12.5px;line-height:1.6;margin-bottom:12px;">全服共用 3 據點，佔住持續產出（金幣/精煉石；滿4hr靈魂石、滿6hr秘密寶箱）。一人只能佔 1 點，連續佔越久產越多，被搶下歸零。</div>'
-        +'<div id="terr-points"></div></div>';
+      ov.style.cssText='position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.82);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:10px;overflow:auto;';
+      ov.innerHTML='<div style="width:100%;max-width:900px;display:flex;justify-content:space-between;align-items:center;margin:4px 0 8px;"><div style="font-size:18px;font-weight:800;color:#f5e6c8;">🏴 資源爭奪戰場</div><button id="terr-close" style="background:#334155;color:#e2e8f0;border:none;border-radius:8px;padding:6px 12px;font-weight:700;">關閉</button></div><div id="terr-stage" style="position:relative;width:100%;max-width:900px;aspect-ratio:1408/768;border-radius:10px;overflow:hidden;box-shadow:0 6px 30px rgba(0,0,0,.6);background-size:cover;background-position:center;background-image:url(assets/maps/battlefield.jpg);"></div><div style="font-size:11.5px;color:#b9a784;margin-top:8px;max-width:900px;line-height:1.7;text-align:center;">🟢 奇岩＝中央 ×2 高產　|　🔴 肯特、🟡 風木沙漠＝側翼 ×1。點城堡開啟據點操作。</div>';
       document.body.appendChild(ov);
       document.getElementById('terr-close').addEventListener('click',function(){ ov.style.display='none'; });
     }
     ov.style.display='flex';
     try{ if(window.__territorySend) window.__territorySend.get(); }catch(e){}
     window.__renderTerritory();
-    if(_terrTimer) clearInterval(_terrTimer);
-    _terrTimer=setInterval(function(){ var o=document.getElementById('terr-overlay'); if(o&&o.style.display!=='none') window.__renderTerritory(); else { clearInterval(_terrTimer); _terrTimer=null; } },1000);
+    if(window.__terrTimer) clearInterval(window.__terrTimer);
+    window.__terrTimer=setInterval(function(){ var o=document.getElementById('terr-overlay'); if(o&&o.style.display!=='none') window.__renderTerritory(); else { clearInterval(window.__terrTimer); window.__terrTimer=null; } },1000);
   };
+  window.__terrMAP={ center:{name:'奇岩',role:'中央 ×2 高產',color:'#22c55e',x:73,y:50}, west:{name:'肯特',role:'側翼 ×1',color:'#ef4444',x:33,y:33}, east:{name:'風木沙漠',role:'側翼 ×1',color:'#eab308',x:43,y:72} };
+  function _terrFmt(ms){if(ms<0)ms=0;var s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),ss=s%60;return (h>0?h+'時':'')+m+'分'+ss+'秒';}
   window.__renderTerritory=function(){
-    var box=document.getElementById('terr-points'); if(!box) return;
-    var T=window.__territory||{points:{}}; var me=_myName(); var now=Date.now(); var html='';
-    var iHoldKey=null; TPTS.forEach(function(dd){ var pp=(T.points&&T.points[dd[0]])||{}; if(pp.holder&&(pp.holder===window.__myUser||(window.__myUser==null&&pp.holderName===me))) iHoldKey=dd[0]; });
-    TPTS.forEach(function(d){
-      var k=d[0]; var p=(T.points&&T.points[k])||{};
-      var held=!!p.holder; var mine=held&&(p.holder===window.__myUser||(window.__myUser==null&&p.holderName===me));
-      var dur=held&&p.holdStart?_fmtDur(now-p.holdStart):'';
-      var holderTxt=held?('佔領者：<b style="color:#fbbf24">'+(p.holderName||p.holder)+'</b>'+(mine?'（你）':'')):'<span style="color:#64748b">無人佔領</span>';
-      var timeTxt=held?('<div style="color:#a5b4fc;font-size:13px;margin-top:2px;">⏱️ 已佔領 '+dur+'</div>'):'';
-      var act,label,color,dis=false;
-      if(mine){act='release';label='放棄佔領';color='#b45309';}
-      else if(iHoldKey){act='';label='先放棄目前據點';color='#475569';dis=true;}
-      else if(!held){act='capture';label='佔領';color='#15803d';}
-      else {act='challenge';label='挑戰佔領';color='#b91c1c';}
-      html+='<div style="border:1px solid #334155;border-radius:10px;padding:12px;margin-bottom:10px;background:#1e293b;"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><div><div style="font-weight:800;color:#e2e8f0;font-size:15px;">'+d[1]+' <span style="color:#a855f7;font-size:12px;">'+d[2]+'</span></div><div style="font-size:13.5px;margin-top:3px;">'+holderTxt+'</div>'+timeTxt+'</div><div><button '+(dis?'disabled ':'data-pt="'+k+'" data-act="'+act+'" ')+'style="background:'+color+';color:#fff;border:none;border-radius:8px;padding:8px 14px;font-weight:700;'+(dis?'opacity:.5;cursor:not-allowed;':'')+'">'+label+'</button></div></div></div>';
-    });
-    box.innerHTML=html;
-    Array.prototype.forEach.call(box.querySelectorAll('button[data-pt]'),function(b){
-      b.addEventListener('click',function(){ var pt=b.getAttribute('data-pt'), ac=b.getAttribute('data-act'); if(window.__territorySend&&window.__territorySend[ac]) window.__territorySend[ac](pt); });
+    var stage=document.getElementById('terr-stage'); if(!stage) return;
+    var MAPPT=window.__terrMAP; var T=window.__territory||{points:{}}; var now=Date.now();
+    var iHold=Object.keys(MAPPT).some(function(x){ var pp=(T.points&&T.points[x])||{}; return pp.holder&&pp.holder===window.__myUser; });
+    Array.prototype.forEach.call(stage.querySelectorAll('.terr-castle'),function(e){e.remove();});
+    Object.keys(MAPPT).forEach(function(k){
+      var d=MAPPT[k]; var p=(T.points&&T.points[k])||{}; var held=!!p.holder; var mine=held&&p.holder===window.__myUser;
+      var c=document.createElement('div'); c.className='terr-castle';
+      c.style.cssText='position:absolute;left:'+d.x+'%;top:'+d.y+'%;transform:translate(-50%,-50%);cursor:pointer;text-align:center;';
+      var ring='<div style="position:absolute;left:50%;top:50%;width:54px;height:54px;transform:translate(-50%,-50%);border-radius:50%;border:2.5px dashed '+(held?'rgba(255,215,0,.75)':'rgba(255,255,255,.5)')+';"></div>';
+      var holderLine=held?('👑 '+(p.holderName||p.holder)+(mine?'（你）':'')):'⚐ 無人佔領';
+      var timeLine=held&&p.holdStart?('<div style="font-size:10.5px;color:#ffe7a3;text-shadow:0 1px 3px #000;">⏱️ '+_terrFmt(now-p.holdStart)+'</div>'):'';
+      c.innerHTML=ring+'<div style="width:48px;height:48px;"></div><div style="position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);white-space:nowrap;"><span style="display:inline-block;padding:3px 9px;border-radius:8px;font-size:12px;font-weight:800;color:#fff;border:1.5px solid #fff;background:'+d.color+';box-shadow:0 2px 8px rgba(0,0,0,.5);">'+d.name+'</span><div style="margin-top:2px;font-size:11px;font-weight:700;color:#fff;text-shadow:0 1px 3px #000,0 0 4px #000;white-space:nowrap;">'+holderLine+'</div>'+timeLine+'</div>';
+      c.addEventListener('click',function(){ window.__terrOpenCard(k,d,p,held,mine,iHold); });
+      stage.appendChild(c);
     });
   };
+  window.__terrOpenCard=function(k,d,p,held,mine,iHold){
+    var now=Date.now();
+    var ov=document.getElementById('terr-card-ov');
+    if(!ov){ ov=document.createElement('div'); ov.id='terr-card-ov'; ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:130;padding:14px;'; ov.innerHTML='<div id="terr-card" style="background:#13131f;border:2px solid #a855f7;border-radius:14px;max-width:340px;width:100%;padding:16px;"></div>'; document.body.appendChild(ov); ov.addEventListener('click',function(e){ if(e.target===ov) ov.style.display='none'; }); }
+    var holderTxt=held?((p.holderName||p.holder)+(mine?'（你）':'')):'無人';
+    var html='<h3 style="margin:0 0 4px;font-size:18px;color:'+d.color+'">'+d.name+'</h3><div style="font-size:12px;color:#a855f7;font-weight:700;">'+d.role+'</div><div style="font-size:13px;color:#cbd5e1;line-height:1.7;margin:8px 0 12px;">佔領者：<b style="color:#fbbf24">'+holderTxt+'</b>'+(held&&p.holdStart?'<br>已佔領：<b style="color:#fbbf24">'+_terrFmt(now-p.holdStart)+'</b>':'')+'</div>';
+    var bs='display:block;width:100%;border:none;border-radius:9px;padding:11px;font-size:15px;font-weight:800;color:#fff;margin-top:8px;cursor:pointer;';
+    if(mine){ html+='<button style="'+bs+'background:#b45309" data-act="release">放棄佔領</button>'; }
+    else if(iHold){ html+='<button style="'+bs+'background:#475569;opacity:.6;cursor:not-allowed" disabled>先放棄目前據點</button>'; }
+    else if(held){ html+='<button style="'+bs+'background:#b91c1c" data-act="challenge">挑戰佔領</button>'; }
+    else { html+='<button style="'+bs+'background:#15803d" data-act="capture">佔領</button>'; }
+    html+='<button style="'+bs+'background:#334155" data-act="close">關閉</button>';
+    var card=document.getElementById('terr-card'); card.innerHTML=html; ov.style.display='flex';
+    Array.prototype.forEach.call(card.querySelectorAll('button[data-act]'),function(b){
+      b.addEventListener('click',function(){ var ac=b.getAttribute('data-act'); if(ac==='close'){ ov.style.display='none'; return; } if(window.__territorySend&&window.__territorySend[ac]) window.__territorySend[ac](k); ov.style.display='none'; });
+    });
+  };
+  
   window.__applyTerritoryReward=function(m){
     try{
       if(!window.player) return; var msgs=[];
