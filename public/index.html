@@ -3871,7 +3871,7 @@ window._autoTameSpawn=_autoTameSpawn;
 window.autoTameTry=autoTameTry; window.toggleAutoTame=toggleAutoTame;
 var TAME_ELE={fire:{n:'火',c:'#f97316'},water:{n:'水',c:'#38bdf8'},wind:{n:'風',c:'#4ade80'},earth:{n:'地',c:'#f5c542'},dark:{n:'暗',c:'#a78bfa'},none:{n:'無',c:'#9ca3af'}};
 function _tameEle(mob){ return TAME_ELE[(mob&&mob.e)||'none']||TAME_ELE.none; }
-function _tameZoomCfg(){ var z=window.__tameZoom||'m'; return z==='s'?{min:90,fs:11,pad:'3px 5px'}:(z==='l'?{min:160,fs:13,pad:'7px 9px'}:{min:120,fs:12,pad:'5px 7px'}); }
+function _tameZoomCfg(){ var z=window.__tameZoom||'m'; return z==='s'?{min:90,fs:11,pad:'3px 5px',hfs:13,cfs:10}:(z==='l'?{min:160,fs:13,pad:'7px 9px',hfs:19,cfs:14}:{min:120,fs:12,pad:'5px 7px',hfs:15,cfs:12}); }
 function _tameChip(id){
   var mob=(typeof DB!=='undefined'&&DB.mobs)?DB.mobs[id]:null; if(!mob) return '';
   var ti=tameTier(mob), el=_tameEle(mob), got=!!(player.tamed&&player.tamed[id]), z=_tameZoomCfg();
@@ -3908,7 +3908,7 @@ window.__renderTameDex=function(){
   function section(title,ids){
     ids=ids.filter(_tamePass); if(!ids.length) return;
     var g=ids.filter(function(id){return player.tamed[id];}).length;
-    html+='<div style="margin:12px 0 6px;font-size:15px;font-weight:800;color:#f5e6c8;">'+title+' <span style="font-size:12px;color:#9a948a;font-weight:400;">'+g+'/'+ids.length+'</span></div><div style="'+grid+'">';
+    html+='<div style="margin:12px 0 6px;font-size:'+z.hfs+'px;font-weight:800;color:#f5e6c8;">'+title+' <span style="font-size:'+z.cfs+'px;color:#9a948a;font-weight:400;">'+g+'/'+ids.length+'</span></div><div style="'+grid+'">';
     for(var k=0;k<ids.length;k++) html+=_tameChip(ids[k]); html+='</div>';
   }
   if(window.__tameView==='rare'){
@@ -15395,6 +15395,8 @@ function loadGame() {
             if (c.selAtkSkill2 && document.getElementById('sel-atk-skill2')) document.getElementById('sel-atk-skill2').value = c.selAtkSkill2;
             if (c.selAtkSkill3 && document.getElementById('sel-atk-skill3')) document.getElementById('sel-atk-skill3').value = c.selAtkSkill3;
             if (c.selAtkSkill4 && document.getElementById('sel-atk-skill4')) document.getElementById('sel-atk-skill4').value = c.selAtkSkill4;
+            if (c.selAtkSkill5 && document.getElementById('sel-atk-skill5')) document.getElementById('sel-atk-skill5').value = c.selAtkSkill5;
+            if (c.selAtkSkill6 && document.getElementById('sel-atk-skill6')) document.getElementById('sel-atk-skill6').value = c.selAtkSkill6;
             if (c.setMpAtk) document.getElementById('set-mp-atk').value = c.setMpAtk;
             if (c.selHealSkill) document.getElementById('sel-heal-skill').value = c.selHealSkill;
             if (c.setMpHeal) document.getElementById('set-mp-heal').value = c.setMpHeal;
