@@ -419,10 +419,12 @@ const TERR_REFINE_BASE_HR = 250;      // 側翼 250/時；中央 ×2 = 500/時
 function _terrSlotDefault() { return { holder: null, holderName: '', holderProfile: null, holdStart: 0, lastMin: 0, lastSoulSlot: 7, lastChestSlot: 11 }; }
 let territory = store.getTerritory();
 if (!territory || !territory.points) { territory = { points: {} }; for (const k of TERR_POINTS) territory.points[k] = _terrSlotDefault(); }
+if (!Array.isArray(territory.log)) territory.log = [];
 for (const k of TERR_POINTS) if (!territory.points[k]) territory.points[k] = _terrSlotDefault();
 function terrSave() { try { store.putTerritory(territory); } catch (e) { } }
+function terrPushLog(ev) { try { territory.log = territory.log || []; territory.log.unshift(ev); if (territory.log.length > 30) territory.log.length = 30; terrSave(); } catch (e) { } }
 function terrPublic() { const o = {}; for (const k of TERR_POINTS) { const p = territory.points[k]; o[k] = { holder: p.holder, holderName: p.holderName, holdStart: p.holdStart }; } return o; }
-function broadcastTerritory(extra) { const payload = Object.assign({ type: 'territory_state', points: terrPublic(), mult: TERR_MULT }, extra || {}); for (const ws of online.values()) send(ws, payload); }
+function broadcastTerritory(extra) { const payload = Object.assign({ type: 'territory_state', points: terrPublic(), mult: TERR_MULT, log: territory.log || [] }, extra || {}); for (const ws of online.values()) send(ws, payload); }
 function terrReleaseOthers(username, keep) { for (const k of TERR_POINTS) if (k !== keep && territory.points[k].holder === username) territory.points[k] = _terrSlotDefault(); }
 function terrAddPending(username, res) {
     const u = store.findUser(username); if (!u) return;
@@ -697,7 +699,7 @@ wss.on('connection', (ws) => {
             online.set(row.username, ws);
             send(ws, { type: 'auth_ok', username: row.username, isAdmin: isAdminUser(row) });
             broadcastOnline();
-            send(ws, { type: 'territory_state', points: terrPublic(), mult: TERR_MULT });
+            send(ws, { type: 'territory_state', points: terrPublic(), mult: TERR_MULT, log: territory.log || [] });
             // PvP：登入時做跨日/跨週結算，稍後把待領獎勵推給客戶端（等角色載入）
             try {
                 const r0 = pvpGet(row.id, row.username); pvpRollover(r0); store.putPvp(row.id, r0);
@@ -718,7 +720,7 @@ wss.on('connection', (ws) => {
 
         // ===== 🏴 資源爭奪戰場 =====
         if (msg.type === 'territory_get') {
-            send(ws, { type: 'territory_state', points: terrPublic(), mult: TERR_MULT });
+            send(ws, { type: 'territory_state', points: terrPublic(), mult: TERR_MULT, log: territory.log || [] });
             return;
         }
         if (msg.type === 'territory_capture') {   // 佔領空據點
@@ -772,6 +774,8 @@ wss.on('connection', (ws) => {
                 const ows2 = online.get(oldHolder);
                 if (ows2) send(ows2, { type: 'territory_defended', point: k, by: pA.name || ws.username });
             }
+            terrPushLog({ ts: Date.now(), point: k, who: pA.name || ws.username, from: oldName || oldHolder || '', won: won });
+            broadcastTerritory({});
             return;
         }
         if (msg.type === 'territory_release') {   // 放棄據點

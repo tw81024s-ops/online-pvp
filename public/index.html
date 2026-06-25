@@ -11476,15 +11476,46 @@ window.__adminGrantPoly = function(formName){
     if(!ov){
       ov=document.createElement('div'); ov.id='terr-overlay';
       ov.style.cssText='position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.82);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:10px;overflow:auto;';
-      ov.innerHTML='<div style="width:100%;max-width:900px;display:flex;justify-content:space-between;align-items:center;margin:4px 0 8px;"><div style="font-size:18px;font-weight:800;color:#f5e6c8;">🏴 資源爭奪戰場</div><button id="terr-close" style="background:#334155;color:#e2e8f0;border:none;border-radius:8px;padding:6px 12px;font-weight:700;">關閉</button></div><div id="terr-stage" style="position:relative;width:100%;max-width:900px;aspect-ratio:1408/768;border-radius:10px;overflow:hidden;box-shadow:0 6px 30px rgba(0,0,0,.6);background-size:cover;background-position:center;background-image:url(assets/maps/battlefield.jpg);"></div><div style="font-size:11.5px;color:#b9a784;margin-top:8px;max-width:900px;line-height:1.7;text-align:center;">🟢 奇岩＝中央 ×2 高產　|　🔴 肯特、🟡 風木沙漠＝側翼 ×1。點城堡開啟據點操作。</div>';
+      ov.innerHTML='<div style="width:100%;max-width:900px;display:flex;justify-content:space-between;align-items:center;margin:4px 0 8px;"><div style="font-size:18px;font-weight:800;color:#f5e6c8;">🏴 資源爭奪戰場</div><span style="display:flex;gap:6px;"><button id="terr-log-btn" style="background:#475569;color:#e2e8f0;border:none;border-radius:8px;padding:6px 12px;font-weight:700;">📜 紀錄</button><button id="terr-close" style="background:#334155;color:#e2e8f0;border:none;border-radius:8px;padding:6px 12px;font-weight:700;">關閉</button></span></div><div id="terr-stage" style="position:relative;width:100%;max-width:900px;aspect-ratio:1408/768;border-radius:10px;overflow:hidden;box-shadow:0 6px 30px rgba(0,0,0,.6);background-size:cover;background-position:center;background-image:url(assets/maps/battlefield.jpg);"></div><div style="font-size:11.5px;color:#b9a784;margin-top:8px;max-width:900px;line-height:1.7;text-align:center;">🟢 奇岩＝中央 ×2 高產　|　🔴 肯特、🟡 風木沙漠＝側翼 ×1。點城堡開啟據點操作。</div>';
       document.body.appendChild(ov);
       document.getElementById('terr-close').addEventListener('click',function(){ ov.style.display='none'; });
+      document.getElementById('terr-log-btn').addEventListener('click',function(){ window.openTerritoryLog(); });
     }
     ov.style.display='flex';
     try{ if(window.__territorySend) window.__territorySend.get(); }catch(e){}
     window.__renderTerritory();
     if(window.__terrTimer) clearInterval(window.__terrTimer);
     window.__terrTimer=setInterval(function(){ var o=document.getElementById('terr-overlay'); if(o&&o.style.display!=='none') window.__renderTerritory(); else { clearInterval(window.__terrTimer); window.__terrTimer=null; } },1000);
+  };
+  window.__renderTerritoryLog=function(){
+    var box=document.getElementById('terr-log-list'); if(!box) return;
+    var L=window.__territoryLog||[];
+    if(!L.length){ box.innerHTML='<div style="color:#8b857a;text-align:center;padding:24px 0;">目前沒有搶奪紀錄</div>'; return; }
+    var M=window.__terrMAP||{}; var html='';
+    for(var i=0;i<L.length;i++){
+      var e=L[i]; var pn=(M[e.point]&&M[e.point].name)||e.point||'?';
+      var d=new Date(e.ts||0);
+      var t=(d.getMonth()+1)+'/'+d.getDate()+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+      var who=(e.who||'?'), from=(e.from||'?');
+      var line=e.won
+        ? ('🏴 <b style="color:#fca5a5;">'+who+'</b> 從 <b style="color:#cbd5e1;">'+from+'</b> 手中搶下「'+pn+'」')
+        : ('🛡️ <b style="color:#cbd5e1;">'+who+'</b> 挑戰 <b style="color:#86efac;">'+from+'</b> 的「'+pn+'」失敗');
+      html+='<div style="padding:8px 10px;border-bottom:1px solid rgba(148,163,184,.18);font-size:12.5px;line-height:1.5;"><span style="color:#7c7668;font-size:11px;margin-right:8px;">'+t+'</span>'+line+'</div>';
+    }
+    box.innerHTML=html;
+  };
+  window.openTerritoryLog=function(){
+    var ov=document.getElementById('terr-log-overlay');
+    if(!ov){
+      ov=document.createElement('div'); ov.id='terr-log-overlay';
+      ov.style.cssText='position:fixed;inset:0;z-index:130;background:rgba(0,0,0,.78);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:14px;';
+      ov.innerHTML='<div style="width:100%;max-width:520px;display:flex;justify-content:space-between;align-items:center;margin:4px 0 8px;"><div style="font-size:16px;font-weight:800;color:#f5e6c8;">📜 搶奪紀錄</div><button id="terr-log-close" style="background:#334155;color:#e2e8f0;border:none;border-radius:8px;padding:6px 12px;font-weight:700;">關閉</button></div><div id="terr-log-list" style="width:100%;max-width:520px;background:rgba(15,23,42,.92);border:1px solid rgba(148,163,184,.25);border-radius:10px;max-height:70vh;overflow:auto;"></div>';
+      document.body.appendChild(ov);
+      document.getElementById('terr-log-close').addEventListener('click',function(){ ov.style.display='none'; });
+    }
+    ov.style.display='flex';
+    try{ if(window.__territorySend) window.__territorySend.get(); }catch(e){}
+    window.__renderTerritoryLog();
   };
   window.__terrMAP={ center:{name:'奇岩',role:'中央 ×2 高產',color:'#22c55e',x:73,y:50}, west:{name:'肯特',role:'側翼 ×1',color:'#ef4444',x:33,y:33}, east:{name:'風木沙漠',role:'側翼 ×1',color:'#eab308',x:43,y:72} };
   function _terrFmt(ms){if(ms<0)ms=0;var s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),ss=s%60;return (h>0?h+'時':'')+m+'分'+ss+'秒';}
@@ -16709,6 +16740,6 @@ window.onload = () => {
 /* ===== 支配塔探索模式 END ===== */
 
 </script>
-<script src="online.js"></script>
+<script src="online.js?v=220"></script>
 </body>
 </html>
