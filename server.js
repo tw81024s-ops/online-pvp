@@ -726,6 +726,7 @@ wss.on('connection', (ws) => {
             if (!TERR_POINTS.includes(k)) return send(ws, { type: 'error', error: '無效據點' });
             const p = territory.points[k];
             if (p.holder && p.holder !== ws.username) return send(ws, { type: 'error', error: '此據點已被佔領，請挑戰' });
+            for (const ok of TERR_POINTS) if (ok !== k && territory.points[ok].holder === ws.username) return send(ws, { type: 'error', error: '你已佔領其他據點，請先放棄才能佔領' });
             terrReleaseOthers(ws.username, k);
             p.holder = ws.username; p.holderName = userNames.get(ws.username) || String(msg.name || '');
             p.holderProfile = clampProfile(msg.profile || {});
@@ -740,6 +741,7 @@ wss.on('connection', (ws) => {
             const p = territory.points[k];
             if (!p.holder) return send(ws, { type: 'error', error: '此據點無人佔領' });
             if (p.holder === ws.username) return send(ws, { type: 'error', error: '你已佔領此據點' });
+            for (const ok of TERR_POINTS) if (ok !== k && territory.points[ok].holder === ws.username) return send(ws, { type: 'error', error: '你已佔領其他據點，請先放棄才能挑戰' });
             const pA = clampProfile(msg.profile || {});
             const pB = p.holderProfile || {};
             const _cfg = store.getConfig();
@@ -766,6 +768,9 @@ wss.on('connection', (ws) => {
                 const ows = online.get(oldHolder);
                 if (ows) send(ows, { type: 'territory_lost', point: k, by: p.holderName || ws.username });
                 broadcastTerritory({ event: 'capture', point: k, by: p.holderName || ws.username });
+            } else {
+                const ows2 = online.get(oldHolder);
+                if (ows2) send(ows2, { type: 'territory_defended', point: k, by: pA.name || ws.username });
             }
             return;
         }

@@ -11492,17 +11492,19 @@ window.__adminGrantPoly = function(formName){
   window.__renderTerritory=function(){
     var box=document.getElementById('terr-points'); if(!box) return;
     var T=window.__territory||{points:{}}; var me=_myName(); var now=Date.now(); var html='';
+    var iHoldKey=null; TPTS.forEach(function(dd){ var pp=(T.points&&T.points[dd[0]])||{}; if(pp.holder&&(pp.holder===window.__myUser||(window.__myUser==null&&pp.holderName===me))) iHoldKey=dd[0]; });
     TPTS.forEach(function(d){
       var k=d[0]; var p=(T.points&&T.points[k])||{};
-      var held=!!p.holder; var mine=held&&(p.holderName===me||p.holder===me);
+      var held=!!p.holder; var mine=held&&(p.holder===window.__myUser||(window.__myUser==null&&p.holderName===me));
       var dur=held&&p.holdStart?_fmtDur(now-p.holdStart):'';
       var holderTxt=held?('佔領者：<b style="color:#fbbf24">'+(p.holderName||p.holder)+'</b>'+(mine?'（你）':'')):'<span style="color:#64748b">無人佔領</span>';
       var timeTxt=held?('<div style="color:#a5b4fc;font-size:13px;margin-top:2px;">⏱️ 已佔領 '+dur+'</div>'):'';
-      var act,label,color;
-      if(!held){act='capture';label='佔領';color='#15803d';}
-      else if(mine){act='release';label='放棄佔領';color='#b45309';}
+      var act,label,color,dis=false;
+      if(mine){act='release';label='放棄佔領';color='#b45309';}
+      else if(iHoldKey){act='';label='先放棄目前據點';color='#475569';dis=true;}
+      else if(!held){act='capture';label='佔領';color='#15803d';}
       else {act='challenge';label='挑戰佔領';color='#b91c1c';}
-      html+='<div style="border:1px solid #334155;border-radius:10px;padding:12px;margin-bottom:10px;background:#1e293b;"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><div><div style="font-weight:800;color:#e2e8f0;font-size:15px;">'+d[1]+' <span style="color:#a855f7;font-size:12px;">'+d[2]+'</span></div><div style="font-size:13.5px;margin-top:3px;">'+holderTxt+'</div>'+timeTxt+'</div><div><button data-pt="'+k+'" data-act="'+act+'" style="background:'+color+';color:#fff;border:none;border-radius:8px;padding:8px 14px;font-weight:700;">'+label+'</button></div></div></div>';
+      html+='<div style="border:1px solid #334155;border-radius:10px;padding:12px;margin-bottom:10px;background:#1e293b;"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><div><div style="font-weight:800;color:#e2e8f0;font-size:15px;">'+d[1]+' <span style="color:#a855f7;font-size:12px;">'+d[2]+'</span></div><div style="font-size:13.5px;margin-top:3px;">'+holderTxt+'</div>'+timeTxt+'</div><div><button '+(dis?'disabled ':'data-pt="'+k+'" data-act="'+act+'" ')+'style="background:'+color+';color:#fff;border:none;border-radius:8px;padding:8px 14px;font-weight:700;'+(dis?'opacity:.5;cursor:not-allowed;':'')+'">'+label+'</button></div></div></div>';
     });
     box.innerHTML=html;
     Array.prototype.forEach.call(box.querySelectorAll('button[data-pt]'),function(b){
@@ -11517,6 +11519,18 @@ window.__adminGrantPoly = function(formName){
       if(m.souls&&m.souls.length){ var BT=window.SOULSTONE_BY_TIER||{}; m.souls.forEach(function(t){ var a=BT[t]; if(a&&a.length&&typeof window.gainSoulStone==='function') window.gainSoulStone(a[Math.floor(Math.random()*a.length)],1,true); }); msgs.push('靈魂石×'+m.souls.length); }
       if(m.chests&&m.chests.length){ m.chests.forEach(function(t){ if(typeof gainItem==='function') gainItem('secret_box_t'+t,1,true); }); msgs.push('秘密寶箱×'+m.chests.length); }
       if(msgs.length){ try{ if(typeof logSys==='function') logSys('🏴 戰場據點產出：'+msgs.join('、')); }catch(e){} try{ if(typeof updateUI==='function') updateUI(); }catch(e){} }
+    }catch(e){}
+  };
+  window.__territoryBattleResult=function(m){
+    try{
+      var nm=(m.b&&m.b.name)||'佔領者'; var pt=(window.__terrName?window.__terrName(m.point):m.point); var won=m.won;
+      var txt=won?('⚔️ 你擊敗了 '+nm+'\n成功佔領「'+pt+'」！'):('🛡️ 不敵 '+nm+'\n挑戰失敗');
+      var d=document.createElement('div');
+      d.style.cssText='position:fixed;left:50%;top:30%;transform:translateX(-50%);z-index:200;background:'+(won?'#14532d':'#7f1d1d')+';color:#fff;border:2px solid '+(won?'#22c55e':'#ef4444')+';border-radius:12px;padding:16px 22px;font-weight:800;font-size:16px;text-align:center;white-space:pre-line;box-shadow:0 8px 30px rgba(0,0,0,.5);';
+      d.textContent=txt; document.body.appendChild(d);
+      try{ if(typeof logSys==='function') logSys('🏴 '+txt.replace('\n','　')); }catch(e){}
+      setTimeout(function(){ try{ d.remove(); }catch(e){} },2500);
+      try{ window.__renderTerritory(); }catch(e){}
     }catch(e){}
   };
 })();

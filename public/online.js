@@ -361,7 +361,7 @@
         ws.onopen = () => ws.send(JSON.stringify({ type: 'auth', token }));
         ws.onmessage = (ev) => {
             let m; try { m = JSON.parse(ev.data); } catch (e) { return; }
-            if (m.type === 'auth_ok') { wsReady = true; isAdmin = m.isAdmin; setStatus('🟢 ' + m.username); refreshAdminBtn(); pushName(); try { pullMergePolyDex(); } catch (e) { } try { pullMergeDolls(); } catch (e) { } maybeOfflineToast(); }
+            if (m.type === 'auth_ok') { wsReady = true; isAdmin = m.isAdmin; window.__myUser = m.username; setStatus('🟢 ' + m.username); refreshAdminBtn(); pushName(); try { pullMergePolyDex(); } catch (e) { } try { pullMergeDolls(); } catch (e) { } maybeOfflineToast(); }
             if (m.type === 'auth_fail') { logout(true); }
             if (m.type === 'kicked') { toast('此帳號已在其他視窗登入', '#7f1d1d'); wsReady = false; }
             if (m.type === 'online_list') { onlineUsers = m.users; onlineNames = m.names || {}; renderOnline(); }
@@ -380,8 +380,9 @@
             if (m.type === 'pvp_reward') { try { if (typeof window.__applyPvpReward === 'function') window.__applyPvpReward(m.gold || 0, m.tickets || 0, m.reason); } catch (e) { } }
             if (m.type === 'territory_state') { window.__territory = { points: m.points || {}, mult: m.mult || {} }; try { if (typeof window.__renderTerritory === 'function') window.__renderTerritory(); } catch (e) { } }
             if (m.type === 'territory_reward') { try { if (typeof window.__applyTerritoryReward === 'function') window.__applyTerritoryReward(m); } catch (e) { } }
-            if (m.type === 'territory_battle') { _closeWait(); m.startAt = Date.now() + 500; try { playBattle(m); } catch (e) { } try { if (typeof window.__territoryBattleResult === 'function') window.__territoryBattleResult(m); } catch (e) { } }
-            if (m.type === 'territory_lost') { try { toast('⚔️ 你在「' + _terrName(m.point) + '」的據點被 ' + (m.by || '某玩家') + ' 搶走了！', '#7f1d1d'); } catch (e) { } try { if (typeof window.__renderTerritory === 'function') window.__renderTerritory(); } catch (e) { } }
+            if (m.type === 'territory_battle') { _closeWait(); try { if (typeof window.__territoryBattleResult === 'function') window.__territoryBattleResult(m); } catch (e) { } }
+            if (m.type === 'territory_defended') { try { toast('🛡️ 你擊退了 ' + (m.by||'某玩家') + ' 對「' + _terrName(m.point) + '」的挑戰！', '#14532d'); } catch(e){} try { if(typeof logSys==='function') logSys('🏴 你成功守住「'+_terrName(m.point)+'」據點，擊退 '+(m.by||'某玩家')); } catch(e){} }
+            if (m.type === 'territory_lost') { try { toast('⚔️ 你在「' + _terrName(m.point) + '」的據點被 ' + (m.by || '某玩家') + ' 搶走了！', '#7f1d1d'); } catch (e) { } try { if (typeof logSys === 'function') logSys('🏴 你在「' + _terrName(m.point) + '」的據點被 ' + (m.by || '某玩家') + ' 搶走了'); } catch (e) { } try { if (typeof window.__renderTerritory === 'function') window.__renderTerritory(); } catch (e) { } }
             if (m.type === 'admin_grant_poly') { try { if (typeof window.__adminGrantPoly === 'function') { window.__adminGrantPoly(m.formName); toast('🎁 獲得變身卡：' + m.formName, '#14532d'); } } catch (e) { } }
             if (m.type === 'admin_updated') {
                 // 自動重新載入雲端最新存檔（管理員的修改），避免線上玩家的自動存檔把修改蓋回去
