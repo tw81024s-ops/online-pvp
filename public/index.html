@@ -4549,7 +4549,7 @@ d.mr += (baseMr + bonusMr);
     if (_shN('紅獅') >= 3) { d.dr += 10; }
     p._setRedLion5 = _shN('紅獅') >= 5;          // 攻擊技能最終傷害 +20%（castSkill 套用）
     if (_shN('白鳥') >= 2) { d.extraHit += 5; }
-    if (_shN('白鳥') >= 3) { d.cha = Math.min(60, d.cha + 10); }
+    if (_shN('白鳥') >= 3) { d.cha = Math.min(400, d.cha + 10); }
     p._setWhiteBird5 = _shN('白鳥') >= 5;        // 一般攻擊命中附加「脆弱」3 秒
     if (_shN('鐵衛') >= 2) { d.ac -= 3; d.dr += 5; }
     p._setIron3 = _shN('鐵衛') >= 3;             // 受到傷害 −20%（受擊時套用）
