@@ -6868,6 +6868,7 @@ function auditTrackKill(mob) {
     let g = Math.floor((mob.exp || 0) * getExpGainMult(player.lv));
     if (g > 0) _audit.exp += g;
     _audit.kills++;
+    try{ player._nodeKillTotal=(player._nodeKillTotal||0)+1; player._nodeKillProg=(player._nodeKillProg||0)+1; }catch(e){}   // 🗺️ 特殊點擊殺計數
 }
 function auditTrackGain(res) {
     if (!res || !res.id || typeof DB === 'undefined' || !DB.items[res.id]) return;
@@ -16693,20 +16694,22 @@ window.onload = () => {
       return true;
     }catch(e){ return false; } }
     function _blessActive(){ return !!(player._mapBless && Date.now() < player._mapBless && player._mapBlessMap === FLOOR); }
-    function _nodePickTier(){ var w=[40,30,18,9,3], r=Math.random()*100, a=0; for(var i=0;i<5;i++){ a+=w[i]; if(r<a) return i+1; } return 1; }
+    function _dsum(n){ n=Math.abs(n|0); var s=0; while(n>0){ s+=n%10; n=Math.floor(n/10); } return s; }
+    function _tierFromDsum(ds){ var base=ds<=6?1:(ds<=12?2:(ds<=18?3:4)); var t=base+(Math.random()<0.5?0:1)+(Math.random()<0.2?1:0); return Math.max(1,Math.min(5,t)); }
     function _triggerNode(nd){ try{
+      var ds=_dsum(player._nodeKillTotal||0);
       if(nd.type==='chest'){
-        var tier=_nodePickTier(), arr=(window.SOULSTONE_BY_TIER||{})[tier]||[];
-        if(arr.length && typeof window.gainSoulStone==='function'){ window.gainSoulStone(arr[Math.floor(Math.random()*arr.length)],1,true); if(typeof logSys==='function') logSys('\uD83D\uDCB0 \u5BF6\u7BB1\uFF01\u7372\u5F97 <b style="color:#fbbf24;">\u9748\u9B42\u77F3 T'+tier+'</b>\u3002'); }
+        var tier=_tierFromDsum(ds), arr=(window.SOULSTONE_BY_TIER||{})[tier]||[];
+        if(arr.length && typeof window.gainSoulStone==='function'){ window.gainSoulStone(arr[Math.floor(Math.random()*arr.length)],1,true); if(typeof logSys==='function') logSys('💰 寶箱！（擊殺加總 '+ds+'）獲得 <b style="color:#fbbf24;">靈魂石 T'+tier+'</b>。'); }
         burst(nd,'#fde68a',22);
       } else {
-        player._mapBless=Date.now()+30000; player._mapBlessMap=FLOOR;
+        var dur=30+ds; player._mapBless=Date.now()+dur*1000; player._mapBlessMap=FLOOR;
         burst(nd,'#a78bfa',22);
-        if(typeof logSys==='function') logSys('\u2728 \u795D\u798F\u796D\u58C7\uFF0130 \u79D2\u5167 \u79FB\u901F+60%\u3001\u50B7\u5BB3+25%\uFF0C\u4E26\u81EA\u52D5\u65BD\u653E\u6D41\u661F\u96E8\uFF0F\u706B\u98A8\u66B4\uFF0F\u7A76\u6975\u5149\u70C8\u8853\u3002');
+        if(typeof logSys==='function') logSys('✨ 祝福祭壇！（擊殺加總 '+ds+'）'+dur+' 秒內 移速+60%、傷害+25%，自動施放流星雨／火風暴／究極光烈術。');
       }
       if(typeof updateUI==='function') updateUI();
     }catch(e){} }
-    function _castBlessSkill(){ try{
+        function _castBlessSkill(){ try{
       var which=(_aoeSeq++)%3, R=6.2;
       var inR=mobs.filter(function(m){ return m && !m.dead && !m._dead && m.curHp>0 && dist(P,m)<=R; });
       var hit=function(m){ var dmg=Math.round(70000+Math.random()*60000); m.curHp-=dmg; if(typeof popDmg==='function') popDmg(m,dmg,'magic'); if(m.curHp<=0){ m._dead=true; } };
@@ -16822,9 +16825,13 @@ window.onload = () => {
         if (T > manualUntil) { const t = nearest(); if (t) { const d = dist(P, t); if (d > 1.2) { const ax = t.gx - P.gx, ay = t.gy - P.gy, am = Math.hypot(ax, ay) || 1; P.tx = clampG(P.gx + ax / am * 1.6); P.ty = clampG(P.gy + ay / am * 1.6); } else { P.tx = P.gx; P.ty = P.gy; } } }
         const dx = P.tx - P.gx, dy = P.ty - P.gy, dm = Math.hypot(dx, dy);
         if (dm > 0.05) { const mv = Math.min(dm, (_blessActive()?5.44:3.4) * dt); P.gx += dx / dm * mv; P.gy += dy / dm * mv; P.moving = true; } else P.moving = false;
-        if(_nodeMapOk() && _nodes.length===0 && Date.now() >= (player._nodeCdUntil||0)){
-          if(!_nodeRoll) _nodeRoll = T + 20 + Math.random()*40;
-          if(T >= _nodeRoll){ _nodes.push({gx:clampG(P.gx+(Math.random()*10-5)),gy:clampG(P.gy+(Math.random()*10-5)),type:(Math.random()<0.5?'chest':'altar'),born:T}); player._nodeCdUntil=Date.now()+3600000; _nodeRoll=0; if(typeof logSys==='function') logSys('\u2728 \u5730\u5716\u51FA\u73FE\u4E86\u7279\u6B8A\u9EDE\uFF0C\u5FEB\u53BB\u8E29\u5B83\uFF01'); }
+        if(_nodeMapOk() && _nodes.length===0){
+          if(player._nodeKillNeed==null) player._nodeKillNeed = 500 + Math.floor(Math.random()*1001);
+          if((player._nodeKillProg||0) >= player._nodeKillNeed){
+            _nodes.push({gx:clampG(P.gx+(Math.random()*10-5)),gy:clampG(P.gy+(Math.random()*10-5)),type:(Math.random()<0.5?'chest':'altar'),born:T});
+            player._nodeKillProg = 0; player._nodeKillNeed = 500 + Math.floor(Math.random()*1001);
+            if(typeof logSys==='function') logSys('✨ 地圖出現了特殊點，快去踩它！');
+          }
         }
         for(var _ni=_nodes.length-1;_ni>=0;_ni--){ if(dist(P,_nodes[_ni])<1.3){ _triggerNode(_nodes[_ni]); _nodes.splice(_ni,1); } }
         if(_blessActive()){ _aoeT-=dt; if(_aoeT<=0){ _aoeT=1.0; _castBlessSkill(); } }
