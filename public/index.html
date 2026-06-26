@@ -6280,7 +6280,7 @@ function playerAttack() {
     
     let result = getPhysicalDmg(dice, target, wpn, arrowData, false, false, _sureHit);   // 🔮 麗人 5/5：必中（可自然重擊/爆擊）
     if(player._mapBless && Date.now()<player._mapBless && player._mapBlessMap===mapState.current && result) result.dmg = Math.round((result.dmg||0)*1.25);   // ✨ 祝福：傷害+25%
-    if(result) window._lastPlayerHit = result.dmg||0;   // 🐾 記錄普攻傷害供出戰寵物換算
+    if(result && result.dmg>0) window._lastPlayerHit = result.dmg;   // 🐾 記錄普攻傷害供出戰寵物換算
 
     if (result.hit) {
         // --- 命中滿血的被動怪物且為遠距離攻擊時，賦予 3 秒延遲 ---
@@ -16846,7 +16846,7 @@ window.onload = () => {
           var _adx=_aimx-_petPos.gx, _ady=_aimy-_petPos.gy, _adm=Math.hypot(_adx,_ady);
           if(_adm>0.05){ var _amv=Math.min(_adm,4.2*dt); _petPos.gx+=_adx/_adm*_amv; _petPos.gy+=_ady/_adm*_amv; }
           _petAtk-=dt;
-          if(_pbt && _pbd<1.7 && _petAtk<=0){ _petAtk=1.0; var _pdmg=Math.round((window._lastPlayerHit||0)*(((player.d&&player.d.cha)||0)/800)); if(_pdmg>0){ _pbt.curHp-=_pdmg; if(typeof popDmg==='function') popDmg(_pbt,_pdmg,'pet'); if(_pbt.curHp<=0 && typeof killMob==='function') killMob(_pbi); } }
+          if(_pbt && _pbd<1.7 && _petAtk<=0){ _petAtk=1.0; var _pdmg=Math.round((window._lastPlayerHit||0)*(((player.d&&player.d.cha)||0)/800)); if(_pdmg>0){ _pbt.curHp-=_pdmg; if(typeof popDmg==='function') popDmg(_pbt,_pdmg,'pet'); if(typeof logCombat==='function' && Date.now()-(window._petLogAt||0)>3000){ window._petLogAt=Date.now(); logCombat('🐾 '+((DB.mobs[player.activePet]||{}).n||'寵物')+' 造成 <b style="color:#f0abfc;">'+_pdmg.toLocaleString()+'</b> 傷害','player'); } if(_pbt.curHp<=0 && typeof killMob==='function') killMob(_pbi); } }
         } else if(_petPos){ _petPos=null; }
         const tg = wiso(P.gx, P.gy); cam.x += (tg.x - cam.x) * Math.min(1, dt * 6); cam.y += (tg.y - cam.y) * Math.min(1, dt * 6);
         for (let mi = 0; mi < mobs.length; mi++) { const m = mobs[mi];
@@ -16934,7 +16934,7 @@ window.onload = () => {
                 ctx.font = '900 13px sans-serif'; ctx.strokeText('爆擊!', 0, -26); ctx.fillStyle = '#fbbf24'; ctx.fillText('爆擊!', 0, -26);
                 ctx.font = '900 27px sans-serif'; ctx.strokeText('-' + dn.amount, 0, 0); ctx.fillStyle = '#f97316'; ctx.fillText('-' + dn.amount, 0, 0);
                 ctx.restore(); ctx.textAlign = 'left';
-            } else { let fs = (dn.kind === 'taken') ? 19 : 18, col = (dn.kind === 'taken') ? '#ef4444' : '#fde047';
+            } else { let fs = (dn.kind === 'taken') ? 19 : (dn.kind === 'pet' ? 16 : 18), col = (dn.kind === 'taken') ? '#ef4444' : (dn.kind === 'pet' ? '#f0abfc' : '#fde047');
                 ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.font = '900 ' + fs + 'px sans-serif'; ctx.strokeText('-' + dn.amount, dn.x, dn.y); ctx.fillStyle = col; ctx.fillText('-' + dn.amount, dn.x, dn.y); }
         }
         if(window._domExploreActive && player.activePet && DB.mobs[player.activePet] && _petPos){ var _pet=DB.mobs[player.activePet], _sp=scr(_petPos.gx,_petPos.gy), _R=15;
