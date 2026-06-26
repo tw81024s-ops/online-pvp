@@ -3872,6 +3872,7 @@ window.autoTameTry=autoTameTry; window.toggleAutoTame=toggleAutoTame;
 var TAME_ELE={fire:{n:'火',c:'#f97316'},water:{n:'水',c:'#38bdf8'},wind:{n:'風',c:'#4ade80'},earth:{n:'地',c:'#f5c542'},dark:{n:'暗',c:'#a78bfa'},none:{n:'無',c:'#9ca3af'}};
 function _tameEle(mob){ return TAME_ELE[(mob&&mob.e)||'none']||TAME_ELE.none; }
 function _tameZoomCfg(){ var n=window.__tameZoomN; if(n==null)n=2; n=Math.max(0,Math.min(4,n|0)); var T=[{min:80,fs:10,pad:'2px 4px',hfs:12,cfs:9},{min:100,fs:11,pad:'3px 5px',hfs:13,cfs:10},{min:120,fs:12,pad:'5px 7px',hfs:15,cfs:12},{min:148,fs:13,pad:'6px 8px',hfs:17,cfs:13},{min:180,fs:14,pad:'8px 10px',hfs:20,cfs:15}]; return T[n]; }
+window.setActivePet=function(id){ try{ if(!player.tamed||!player.tamed[id]) return; player.activePet=(player.activePet===id?null:id); if(typeof saveGame==='function') saveGame(); if(typeof window.__renderTameDex==='function') window.__renderTameDex(); if(typeof toast==='function') toast(player.activePet?('\u5DF2\u6D3E '+((DB.mobs[id]||{}).n||id)+' \u51FA\u6230'):'\u5DF2\u53D6\u6D88\u51FA\u6230'); }catch(e){} };
 function _tameChip(id){
   var mob=(typeof DB!=='undefined'&&DB.mobs)?DB.mobs[id]:null; if(!mob) return '';
   var ti=tameTier(mob), el=_tameEle(mob), got=!!(player.tamed&&player.tamed[id]), z=_tameZoomCfg();
@@ -3879,7 +3880,7 @@ function _tameChip(id){
   var mp=(typeof TAME_MOB_MAP!=='undefined'&&TAME_MOB_MAP[id])||'';
   var eb='<span style="display:inline-block;font-size:'+(z.fs-2)+'px;padding:0 4px;border-radius:6px;background:'+el.c+'33;color:'+el.c+';margin-left:4px;">'+el.n+'</span>';
   var mpline=mp?('<div style="font-size:'+(z.fs-3)+'px;color:#64748b;">📍'+mp+'</div>'):'';
-  if(got) return '<div style="border:1px solid '+ti.col+'66;background:'+ti.col+'1a;border-radius:7px;padding:'+z.pad+';font-size:'+z.fs+'px;"><div style="font-weight:700;color:#e7e3d8;">'+nm+eb+'</div><div style="font-size:'+(z.fs-2)+'px;color:'+ti.col+';">Lv'+(mob.lv||0)+' '+ti.tn+'</div>'+mpline+'</div>';
+  if(got) return '<div style="border:1px solid '+ti.col+'66;background:'+ti.col+'1a;border-radius:7px;padding:'+z.pad+';font-size:'+z.fs+'px;"><div style="font-weight:700;color:#e7e3d8;">'+nm+eb+'</div><div style="font-size:'+(z.fs-2)+'px;color:'+ti.col+';">Lv'+(mob.lv||0)+' '+ti.tn+'</div>'+mpline+'<button onclick="window.setActivePet(&#39;'+id+'&#39;);event.stopPropagation();return false;" style="margin-top:3px;width:100%;font-size:'+(z.fs-3)+'px;padding:2px 0;border:none;border-radius:5px;cursor:pointer;background:'+(player.activePet===id?'#7c3aed':'#334155')+';color:#fff;">'+(player.activePet===id?'✅ 出戰中':'⚔️ 出戰')+'</button></div>';
   return '<div style="border:1px solid #2a2f37;background:#15171c;border-radius:7px;padding:'+z.pad+';font-size:'+z.fs+'px;opacity:.5;"><div style="font-weight:700;color:#6b7280;">？？？'+eb+'</div><div style="font-size:'+(z.fs-2)+'px;color:#4b5563;">Lv'+(mob.lv||0)+' '+ti.tn+'</div>'+mpline+'</div>';
 }
 function _tamePass(id){
@@ -6279,6 +6280,7 @@ function playerAttack() {
     
     let result = getPhysicalDmg(dice, target, wpn, arrowData, false, false, _sureHit);   // 🔮 麗人 5/5：必中（可自然重擊/爆擊）
     if(player._mapBless && Date.now()<player._mapBless && player._mapBlessMap===mapState.current && result) result.dmg = Math.round((result.dmg||0)*1.25);   // ✨ 祝福：傷害+25%
+    if(window._domExploreActive && player.activePet && player.d && (player.d.cha||0)>0 && result){ var _pd=Math.round((result.dmg||0)*((player.d.cha||0)/800)); if(_pd>0) result.dmg+=_pd; }   // 🐾 出戰寵物：依魅力併入傷害（魅力400→+50%）
 
     if (result.hit) {
         // --- 命中滿血的被動怪物且為遠距離攻擊時，賦予 3 秒延遲 ---
@@ -16925,6 +16927,10 @@ window.onload = () => {
             } else { let fs = (dn.kind === 'taken') ? 19 : 18, col = (dn.kind === 'taken') ? '#ef4444' : '#fde047';
                 ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.font = '900 ' + fs + 'px sans-serif'; ctx.strokeText('-' + dn.amount, dn.x, dn.y); ctx.fillStyle = col; ctx.fillText('-' + dn.amount, dn.x, dn.y); }
         }
+        if(window._domExploreActive && player.activePet && DB.mobs[player.activePet]){ var _pp=scr(P.gx,P.gy), _bob=Math.sin(T*4)*3, _px=_pp.x+24, _py=_pp.y-4+_bob;
+          ctx.strokeStyle='rgba(250,204,21,0.45)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.ellipse(_px,_py+7,12,6,0,0,7); ctx.stroke();
+          ctx.fillStyle='#facc15'; ctx.strokeStyle='#854d0e'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(_px,_py,8,0,7); ctx.fill(); ctx.stroke();
+          ctx.fillStyle='#fde68a'; ctx.font='600 10px sans-serif'; ctx.textAlign='center'; ctx.fillText((DB.mobs[player.activePet].n||'寵物'),_px,_py-13); }
         for(var _k=0;_k<_nodes.length;_k++){ var _n=_nodes[_k], _sp=scr(_n.gx,_n.gy), _bob=Math.sin(T*3+_k)*3; var _img=gi(_n.type==='chest'?'assets/maps/node_chest.png':'assets/maps/node_altar.png');
           ctx.strokeStyle=_n.type==='chest'?'rgba(239,159,39,0.55)':'rgba(127,119,221,0.6)'; ctx.lineWidth=2; ctx.beginPath(); ctx.ellipse(_sp.x,_sp.y+6,18,9,0,0,7); ctx.stroke();
           if(_img&&_img.complete&&_img.naturalWidth){ var _w=(_n.type==='chest'?44:60), _h=_w*_img.naturalHeight/_img.naturalWidth; ctx.drawImage(_img,_sp.x-_w/2,_sp.y-_h+10+_bob,_w,_h); }
