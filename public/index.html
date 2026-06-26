@@ -6245,7 +6245,10 @@ function witchIceLance() {
 function playerAttack() {
     let target = getTarget();
     if(!target) return;
-    if(window.__autoTame && target && !target._tameTried && typeof autoTameTry==='function' && player.skills && player.skills.indexOf('sk_charm')>=0 && !(player.tamed&&player.tamed[target.id]) && (player.mp||0)>=30){ target._tameTried=true; autoTameTry(target); return; }   // 🐾 自動馴服：未收錄的怪第一下先馴再攻擊
+    if(window.__autoTame && target && typeof autoTameTry==='function' && player.skills && player.skills.indexOf('sk_charm')>=0 && !(player.tamed&&player.tamed[target.id])){
+        if(target.boss){ if((player.mp||0)>=30) autoTameTry(target); return; }   // 🐾 王：持續嘗試馴服、暫不打死，直到馴到或關閉自動馴服（MP不足也不攻擊，等回魔）
+        if(!target._tameTried && (player.mp||0)>=30){ target._tameTried=true; autoTameTry(target); return; }   // 一般怪：未收錄第一下先馴再攻擊
+    }
 
     let _sureHit = !!(player._setBeauty5 && player._beautyNextSure);   // 🔮 麗人 5/5：重擊後下一次一般攻擊 100% 命中（含無視怪物迴避）
     if (_sureHit) player._beautyNextSure = false;
@@ -6275,6 +6278,7 @@ function playerAttack() {
         }
     
     let result = getPhysicalDmg(dice, target, wpn, arrowData, false, false, _sureHit);   // 🔮 麗人 5/5：必中（可自然重擊/爆擊）
+    if(player._mapBless && Date.now()<player._mapBless && player._mapBlessMap===mapState.current && result) result.dmg = Math.round((result.dmg||0)*1.25);   // ✨ 祝福：傷害+25%
 
     if (result.hit) {
         // --- 命中滿血的被動怪物且為遠距離攻擊時，賦予 3 秒延遲 ---
@@ -16679,6 +16683,36 @@ window.onload = () => {
     let savedMap = null, savedMobs = null, savedSpawnAt = null, savedTI = null, _lastPHp = null;
     const P = { gx: 12, gy: 12, tx: 12, ty: 12, hitT: 0, moving: false };
     let mobs = [], dmgs = [], sparks = [], embers = [], aoes = [], marker = null;
+    let _nodes = [], _nodeRoll = 0, _aoeT = 0, _aoeSeq = 0, _fx = [];
+    function _nodeMapOk(){ try{
+      if(typeof isSiegeArea==='function' && isSiegeArea(FLOOR)) return false;
+      if(player.tower && player.tower.active) return false;
+      if(['antaras_lair','fafurion_lair','valakas_lair','lindvior_lair','giltas_lair'].indexOf(FLOOR)>=0) return false;
+      if(typeof isTowerMap==='function' && isTowerMap(FLOOR)) return false;
+      if((''+FLOOR).indexOf('dom_')===0) return false;
+      return true;
+    }catch(e){ return false; } }
+    function _blessActive(){ return !!(player._mapBless && Date.now() < player._mapBless && player._mapBlessMap === FLOOR); }
+    function _nodePickTier(){ var w=[40,30,18,9,3], r=Math.random()*100, a=0; for(var i=0;i<5;i++){ a+=w[i]; if(r<a) return i+1; } return 1; }
+    function _triggerNode(nd){ try{
+      if(nd.type==='chest'){
+        var tier=_nodePickTier(), arr=(window.SOULSTONE_BY_TIER||{})[tier]||[];
+        if(arr.length && typeof window.gainSoulStone==='function'){ window.gainSoulStone(arr[Math.floor(Math.random()*arr.length)],1,true); if(typeof logSys==='function') logSys('\uD83D\uDCB0 \u5BF6\u7BB1\uFF01\u7372\u5F97 <b style="color:#fbbf24;">\u9748\u9B42\u77F3 T'+tier+'</b>\u3002'); }
+        burst(nd,'#fde68a',22);
+      } else {
+        player._mapBless=Date.now()+30000; player._mapBlessMap=FLOOR;
+        burst(nd,'#a78bfa',22);
+        if(typeof logSys==='function') logSys('\u2728 \u795D\u798F\u796D\u58C7\uFF0130 \u79D2\u5167 \u79FB\u901F+60%\u3001\u50B7\u5BB3+25%\uFF0C\u4E26\u81EA\u52D5\u65BD\u653E\u6D41\u661F\u96E8\uFF0F\u706B\u98A8\u66B4\uFF0F\u7A76\u6975\u5149\u70C8\u8853\u3002');
+      }
+      if(typeof updateUI==='function') updateUI();
+    }catch(e){} }
+    function _castBlessSkill(){ try{
+      var which=(_aoeSeq++)%3, R=6.2;
+      var inR=mobs.filter(function(m){ return m && !m.dead && !m._dead && m.curHp>0 && dist(P,m)<=R; });
+      var hit=function(m){ var dmg=Math.round(70000+Math.random()*60000); m.curHp-=dmg; if(typeof popDmg==='function') popDmg(m,dmg,'magic'); if(m.curHp<=0){ m._dead=true; } };
+      if(which===2){ var tgt=null,bd=999; for(var i=0;i<inR.length;i++){ var dd=dist(P,inR[i]); if(dd<bd){bd=dd;tgt=inR[i];} } if(tgt){ hit(tgt); _fx.push({k:'light',gx:tgt.gx,gy:tgt.gy,t:0}); } }
+      else { for(var j=0;j<inR.length;j++) hit(inR[j]); _fx.push({k:which===0?'meteor':'fire',gx:P.gx,gy:P.gy,t:0}); }
+    }catch(e){} }
     const imgCache = {};
     function gi(src) { if (!imgCache[src]) { const im = new Image(); im.src = src; imgCache[src] = im; } return imgCache[src]; }
     function mobImg(def) { return def.img || ('assets/icons/monsters/' + def.n + '.png'); }
@@ -16773,6 +16807,7 @@ window.onload = () => {
     function mapNameNow() { try { const se = document.getElementById('map-select'); if (se && se.options[se.selectedIndex]) return se.options[se.selectedIndex].text; } catch (e) {} return FLOOR; }
     function reinit(nf) {
         FLOOR = nf; savedMap = nf;
+        _nodes=[]; _nodeRoll=0; _fx=[]; player._mapBless=0;
         if (!poolIds().length) { close(); return; }   // 切到村莊等無怪地圖：離開探索
         if (_exploreBlocked(FLOOR)) { close(); return; }   // 🚫 切到爬塔/攻城：離開地圖模式
         P.gx = P.tx = 12; P.gy = P.ty = 12; cam = wiso(12, 12); manualUntil = 0; _lastPHp = player.hp;
@@ -16786,7 +16821,14 @@ window.onload = () => {
         if (mapState._shadowPending) { const key = mapState._shadowPending; mapState._shadowPending = null; const sb = (typeof buildShadowBase === 'function') ? buildShadowBase(key) : null; if (sb && mobs.length) { const gx = clampG(P.gx + (Math.random() * 6 - 3)), gy = clampG(P.gy + (Math.random() * 6 - 3)); mobs[Math.floor(Math.random() * mobs.length)] = Object.assign({}, sb, { curHp: sb.hp, uid: uid(), _magCd: {}, justHit: false, st: newMobStatus(), gx, gy, wx: gx, wy: gy, er: sb.er || 0, wander: 1 + Math.random() * 2, hitT: 0, dead: false, _lastHp: sb.hp, _img: mobImg(sb) }); try { if (typeof logSys === 'function') logSys('⚫ 你的影子「' + sb.n + '」現身了！'); } catch (e) {} } }
         if (T > manualUntil) { const t = nearest(); if (t) { const d = dist(P, t); if (d > 1.2) { const ax = t.gx - P.gx, ay = t.gy - P.gy, am = Math.hypot(ax, ay) || 1; P.tx = clampG(P.gx + ax / am * 1.6); P.ty = clampG(P.gy + ay / am * 1.6); } else { P.tx = P.gx; P.ty = P.gy; } } }
         const dx = P.tx - P.gx, dy = P.ty - P.gy, dm = Math.hypot(dx, dy);
-        if (dm > 0.05) { const mv = Math.min(dm, 3.4 * dt); P.gx += dx / dm * mv; P.gy += dy / dm * mv; P.moving = true; } else P.moving = false;
+        if (dm > 0.05) { const mv = Math.min(dm, (_blessActive()?5.44:3.4) * dt); P.gx += dx / dm * mv; P.gy += dy / dm * mv; P.moving = true; } else P.moving = false;
+        if(_nodeMapOk() && _nodes.length===0 && Date.now() >= (player._nodeCdUntil||0)){
+          if(!_nodeRoll) _nodeRoll = T + 20 + Math.random()*40;
+          if(T >= _nodeRoll){ _nodes.push({gx:clampG(P.gx+(Math.random()*10-5)),gy:clampG(P.gy+(Math.random()*10-5)),type:(Math.random()<0.5?'chest':'altar'),born:T}); player._nodeCdUntil=Date.now()+3600000; _nodeRoll=0; if(typeof logSys==='function') logSys('\u2728 \u5730\u5716\u51FA\u73FE\u4E86\u7279\u6B8A\u9EDE\uFF0C\u5FEB\u53BB\u8E29\u5B83\uFF01'); }
+        }
+        for(var _ni=_nodes.length-1;_ni>=0;_ni--){ if(dist(P,_nodes[_ni])<1.3){ _triggerNode(_nodes[_ni]); _nodes.splice(_ni,1); } }
+        if(_blessActive()){ _aoeT-=dt; if(_aoeT<=0){ _aoeT=1.0; _castBlessSkill(); } }
+        for(var _fi=_fx.length-1;_fi>=0;_fi--){ _fx[_fi].t+=dt; if(_fx[_fi].t>0.6) _fx.splice(_fi,1); }
         const tg = wiso(P.gx, P.gy); cam.x += (tg.x - cam.x) * Math.min(1, dt * 6); cam.y += (tg.y - cam.y) * Math.min(1, dt * 6);
         for (let mi = 0; mi < mobs.length; mi++) { const m = mobs[mi];
             if (!m || m.dead || m._dead) continue;
@@ -16876,6 +16918,15 @@ window.onload = () => {
             } else { let fs = (dn.kind === 'taken') ? 19 : 18, col = (dn.kind === 'taken') ? '#ef4444' : '#fde047';
                 ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.font = '900 ' + fs + 'px sans-serif'; ctx.strokeText('-' + dn.amount, dn.x, dn.y); ctx.fillStyle = col; ctx.fillText('-' + dn.amount, dn.x, dn.y); }
         }
+        for(var _k=0;_k<_nodes.length;_k++){ var _n=_nodes[_k], _sp=scr(_n.gx,_n.gy), _bob=Math.sin(T*3+_k)*3; var _img=gi(_n.type==='chest'?'assets/maps/node_chest.png':'assets/maps/node_altar.png');
+          ctx.strokeStyle=_n.type==='chest'?'rgba(239,159,39,0.55)':'rgba(127,119,221,0.6)'; ctx.lineWidth=2; ctx.beginPath(); ctx.ellipse(_sp.x,_sp.y+6,18,9,0,0,7); ctx.stroke();
+          if(_img&&_img.complete&&_img.naturalWidth){ var _w=(_n.type==='chest'?44:60), _h=_w*_img.naturalHeight/_img.naturalWidth; ctx.drawImage(_img,_sp.x-_w/2,_sp.y-_h+10+_bob,_w,_h); }
+          else { ctx.fillStyle=_n.type==='chest'?'#EF9F27':'#7F77DD'; ctx.beginPath(); ctx.arc(_sp.x,_sp.y-8+_bob,12,0,7); ctx.fill(); } }
+        for(var _f=0;_f<_fx.length;_f++){ var _e=_fx[_f], _ep=scr(_e.gx,_e.gy), _pr=_e.t/0.6; ctx.globalAlpha=Math.max(0,1-_pr);
+          if(_e.k==='fire'){ ctx.strokeStyle='#fb923c'; ctx.lineWidth=4; ctx.beginPath(); ctx.ellipse(_ep.x,_ep.y,_pr*150,_pr*75,0,0,7); ctx.stroke(); }
+          else if(_e.k==='meteor'){ ctx.strokeStyle='#93c5fd'; ctx.lineWidth=3; for(var _m2=0;_m2<6;_m2++){ var _mx=_ep.x-90+_m2*32+_pr*40, _my=_ep.y-130+_pr*150; ctx.beginPath(); ctx.moveTo(_mx,_my); ctx.lineTo(_mx-14,_my-30); ctx.stroke(); } }
+          else { ctx.strokeStyle='#fde68a'; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(_ep.x,_ep.y-160); ctx.lineTo(_ep.x,_ep.y); ctx.stroke(); ctx.lineWidth=2; ctx.strokeStyle='#fffbe6'; ctx.stroke(); }
+          ctx.globalAlpha=1; }
         ctx.globalAlpha = 1;
         const vg = ctx.createRadialGradient(CW / 2, CH / 2, 150, CW / 2, CH / 2, 360); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.5)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, CW, CH);
     }
@@ -16929,6 +16980,7 @@ window.onload = () => {
     function close() {
         if (!active) return;
         active = false; window._domExploreActive = false;
+        try{ player._mapBless=0; }catch(e){}
         if (raf) cancelAnimationFrame(raf); raf = null;
         if (savedMap != null) mapState.current = savedMap;
         if (savedMobs) mapState.mobs = savedMobs; if (savedSpawnAt) mapState.spawnAt = savedSpawnAt; if (savedTI != null) mapState.targetIdx = savedTI;
