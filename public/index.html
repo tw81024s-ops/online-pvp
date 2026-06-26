@@ -16844,9 +16844,9 @@ window.onload = () => {
           for(var _pj=0;_pj<mapState.mobs.length;_pj++){ var _pmm=mapState.mobs[_pj]; if(_pmm&&!_pmm._dead&&!_pmm.dead&&_pmm.curHp>0){ var _pdd=dist(_petPos,_pmm); if(_pdd<_pbd){_pbd=_pdd;_pbt=_pmm;_pbi=_pj;} } }
           var _aimx=_pbt?_pbt.gx:(P.gx+0.7), _aimy=_pbt?_pbt.gy:(P.gy+0.7);
           var _adx=_aimx-_petPos.gx, _ady=_aimy-_petPos.gy, _adm=Math.hypot(_adx,_ady);
-          if(_adm>0.05){ var _amv=Math.min(_adm,4.2*dt); _petPos.gx+=_adx/_adm*_amv; _petPos.gy+=_ady/_adm*_amv; }
+          if(_adm>0.05){ var _amv=Math.min(_adm,5.2*dt); _petPos.gx+=_adx/_adm*_amv; _petPos.gy+=_ady/_adm*_amv; }
           _petAtk-=dt;
-          if(_pbt && _pbd<1.7 && _petAtk<=0){ _petAtk=1.0; var _pdmg=Math.round((window._lastPlayerHit||0)*(((player.d&&player.d.cha)||0)/800)); if(_pdmg>0){ _pbt.curHp-=_pdmg; if(typeof popDmg==='function') popDmg(_pbt,_pdmg,'pet'); if(typeof logCombat==='function' && Date.now()-(window._petLogAt||0)>3000){ window._petLogAt=Date.now(); logCombat('🐾 '+((DB.mobs[player.activePet]||{}).n||'寵物')+' 造成 <b style="color:#f0abfc;">'+_pdmg.toLocaleString()+'</b> 傷害','player'); } if(_pbt.curHp<=0 && typeof killMob==='function') killMob(_pbi); } }
+          if(_pbt && _pbd<5 && _petAtk<=0){ _petAtk=0.8; var _pdmg=Math.round((window._lastPlayerHit||0)*(((player.d&&player.d.cha)||0)/800)); if(_pdmg>0){ _pbt.curHp-=_pdmg; if(typeof popDmg==='function') popDmg(_pbt,_pdmg,'pet'); if(typeof logCombat==='function' && Date.now()-(window._petLogAt||0)>3000){ window._petLogAt=Date.now(); logCombat('🐾 '+((DB.mobs[player.activePet]||{}).n||'寵物')+' 造成 <b style="color:#f0abfc;">'+_pdmg.toLocaleString()+'</b> 傷害','player'); } if(_pbt.curHp<=0 && typeof killMob==='function') killMob(_pbi); } }
         } else if(_petPos){ _petPos=null; }
         const tg = wiso(P.gx, P.gy); cam.x += (tg.x - cam.x) * Math.min(1, dt * 6); cam.y += (tg.y - cam.y) * Math.min(1, dt * 6);
         for (let mi = 0; mi < mobs.length; mi++) { const m = mobs[mi];
