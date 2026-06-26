@@ -16927,10 +16927,12 @@ window.onload = () => {
             } else { let fs = (dn.kind === 'taken') ? 19 : 18, col = (dn.kind === 'taken') ? '#ef4444' : '#fde047';
                 ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.font = '900 ' + fs + 'px sans-serif'; ctx.strokeText('-' + dn.amount, dn.x, dn.y); ctx.fillStyle = col; ctx.fillText('-' + dn.amount, dn.x, dn.y); }
         }
-        if(window._domExploreActive && player.activePet && DB.mobs[player.activePet]){ var _pp=scr(P.gx,P.gy), _bob=Math.sin(T*4)*3, _px=_pp.x+24, _py=_pp.y-4+_bob;
-          ctx.strokeStyle='rgba(250,204,21,0.45)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.ellipse(_px,_py+7,12,6,0,0,7); ctx.stroke();
-          ctx.fillStyle='#facc15'; ctx.strokeStyle='#854d0e'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(_px,_py,8,0,7); ctx.fill(); ctx.stroke();
-          ctx.fillStyle='#fde68a'; ctx.font='600 10px sans-serif'; ctx.textAlign='center'; ctx.fillText((DB.mobs[player.activePet].n||'寵物'),_px,_py-13); }
+        if(window._domExploreActive && player.activePet && DB.mobs[player.activePet]){ var _pet=DB.mobs[player.activePet], _pp=scr(P.gx,P.gy), _bob=Math.sin(T*4)*3, _px=_pp.x+26, _py=_pp.y-2+_bob, _pw=32;
+          var _pi=gi((typeof mobImg==='function')?mobImg(_pet):(_pet.img||'assets/icons/monsters/'+(_pet.n||player.activePet)+'.png'));
+          ctx.save(); ctx.strokeStyle='rgba(250,204,21,0.5)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.ellipse(_px,_py+14,14,6,0,0,7); ctx.stroke();
+          if(_pi&&_pi.complete&&_pi.naturalWidth){ var _ph=_pw*_pi.naturalHeight/_pi.naturalWidth; ctx.shadowColor='rgba(250,204,21,0.8)'; ctx.shadowBlur=8; ctx.drawImage(_pi,_px-_pw/2,_py-_ph+12,_pw,_ph); ctx.shadowBlur=0; ctx.fillStyle='#fde68a'; ctx.font='600 10px sans-serif'; ctx.textAlign='center'; ctx.fillText((_pet.n||'寵物'),_px,_py-_ph+4); }
+          else { ctx.fillStyle='#facc15'; ctx.strokeStyle='#854d0e'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(_px,_py,8,0,7); ctx.fill(); ctx.stroke(); ctx.fillStyle='#fde68a'; ctx.font='600 10px sans-serif'; ctx.textAlign='center'; ctx.fillText((_pet.n||'寵物'),_px,_py-13); }
+          ctx.restore(); }
         for(var _k=0;_k<_nodes.length;_k++){ var _n=_nodes[_k], _sp=scr(_n.gx,_n.gy), _bob=Math.sin(T*3+_k)*3; var _img=gi(_n.type==='chest'?'assets/maps/node_chest.png':'assets/maps/node_altar.png');
           ctx.strokeStyle=_n.type==='chest'?'rgba(239,159,39,0.55)':'rgba(127,119,221,0.6)'; ctx.lineWidth=2; ctx.beginPath(); ctx.ellipse(_sp.x,_sp.y+6,18,9,0,0,7); ctx.stroke();
           if(_img&&_img.complete&&_img.naturalWidth){ var _w=(_n.type==='chest'?44:60), _h=_w*_img.naturalHeight/_img.naturalWidth; ctx.drawImage(_img,_sp.x-_w/2,_sp.y-_h+10+_bob,_w,_h); }
