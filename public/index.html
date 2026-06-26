@@ -6280,7 +6280,7 @@ function playerAttack() {
     
     let result = getPhysicalDmg(dice, target, wpn, arrowData, false, false, _sureHit);   // 🔮 麗人 5/5：必中（可自然重擊/爆擊）
     if(player._mapBless && Date.now()<player._mapBless && player._mapBlessMap===mapState.current && result) result.dmg = Math.round((result.dmg||0)*1.25);   // ✨ 祝福：傷害+25%
-    if(window._domExploreActive && player.activePet && player.d && (player.d.cha||0)>0 && result){ var _pd=Math.round((result.dmg||0)*((player.d.cha||0)/800)); if(_pd>0) result.dmg+=_pd; }   // 🐾 出戰寵物：依魅力併入傷害（魅力400→+50%）
+    if(result) window._lastPlayerHit = result.dmg||0;   // 🐾 記錄普攻傷害供出戰寵物換算
 
     if (result.hit) {
         // --- 命中滿血的被動怪物且為遠距離攻擊時，賦予 3 秒延遲 ---
@@ -16686,7 +16686,7 @@ window.onload = () => {
     let savedMap = null, savedMobs = null, savedSpawnAt = null, savedTI = null, _lastPHp = null;
     const P = { gx: 12, gy: 12, tx: 12, ty: 12, hitT: 0, moving: false };
     let mobs = [], dmgs = [], sparks = [], embers = [], aoes = [], marker = null;
-    let _nodes = [], _nodeRoll = 0, _aoeT = 0, _aoeSeq = 0, _fx = [];
+    let _nodes = [], _nodeRoll = 0, _aoeT = 0, _aoeSeq = 0, _fx = [], _petPos = null, _petAtk = 0;
     function _nodeMapOk(){ try{
       if(typeof isSiegeArea==='function' && isSiegeArea(FLOOR)) return false;
       if(player.tower && player.tower.active) return false;
@@ -16812,7 +16812,7 @@ window.onload = () => {
     function mapNameNow() { try { const se = document.getElementById('map-select'); if (se && se.options[se.selectedIndex]) return se.options[se.selectedIndex].text; } catch (e) {} return FLOOR; }
     function reinit(nf) {
         FLOOR = nf; savedMap = nf;
-        _nodes=[]; _nodeRoll=0; _fx=[]; player._mapBless=0;
+        _nodes=[]; _nodeRoll=0; _fx=[]; _petPos=null; player._mapBless=0;
         if (!poolIds().length) { close(); return; }   // 切到村莊等無怪地圖：離開探索
         if (_exploreBlocked(FLOOR)) { close(); return; }   // 🚫 切到爬塔/攻城：離開地圖模式
         P.gx = P.tx = 12; P.gy = P.ty = 12; cam = wiso(12, 12); manualUntil = 0; _lastPHp = player.hp;
@@ -16838,6 +16838,16 @@ window.onload = () => {
         for(var _ni=_nodes.length-1;_ni>=0;_ni--){ if(dist(P,_nodes[_ni])<1.3){ _triggerNode(_nodes[_ni]); _nodes.splice(_ni,1); } }
         if(_blessActive()){ _aoeT-=dt; if(_aoeT<=0){ _aoeT=1.0; _castBlessSkill(); } }
         for(var _fi=_fx.length-1;_fi>=0;_fi--){ _fx[_fi].t+=dt; if(_fx[_fi].t>0.6) _fx.splice(_fi,1); }
+        if(window._domExploreActive && player.activePet && DB.mobs[player.activePet]){
+          if(!_petPos) _petPos={gx:P.gx,gy:P.gy};
+          var _pbt=null,_pbi=-1,_pbd=99;
+          for(var _pj=0;_pj<mapState.mobs.length;_pj++){ var _pmm=mapState.mobs[_pj]; if(_pmm&&!_pmm._dead&&!_pmm.dead&&_pmm.curHp>0){ var _pdd=dist(_petPos,_pmm); if(_pdd<_pbd){_pbd=_pdd;_pbt=_pmm;_pbi=_pj;} } }
+          var _aimx=_pbt?_pbt.gx:(P.gx+0.7), _aimy=_pbt?_pbt.gy:(P.gy+0.7);
+          var _adx=_aimx-_petPos.gx, _ady=_aimy-_petPos.gy, _adm=Math.hypot(_adx,_ady);
+          if(_adm>0.05){ var _amv=Math.min(_adm,4.2*dt); _petPos.gx+=_adx/_adm*_amv; _petPos.gy+=_ady/_adm*_amv; }
+          _petAtk-=dt;
+          if(_pbt && _pbd<1.7 && _petAtk<=0){ _petAtk=1.0; var _pdmg=Math.round((window._lastPlayerHit||0)*(((player.d&&player.d.cha)||0)/800)); if(_pdmg>0){ _pbt.curHp-=_pdmg; if(typeof popDmg==='function') popDmg(_pbt,_pdmg,'pet'); if(_pbt.curHp<=0 && typeof killMob==='function') killMob(_pbi); } }
+        } else if(_petPos){ _petPos=null; }
         const tg = wiso(P.gx, P.gy); cam.x += (tg.x - cam.x) * Math.min(1, dt * 6); cam.y += (tg.y - cam.y) * Math.min(1, dt * 6);
         for (let mi = 0; mi < mobs.length; mi++) { const m = mobs[mi];
             if (!m || m.dead || m._dead) continue;
@@ -16927,12 +16937,12 @@ window.onload = () => {
             } else { let fs = (dn.kind === 'taken') ? 19 : 18, col = (dn.kind === 'taken') ? '#ef4444' : '#fde047';
                 ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.font = '900 ' + fs + 'px sans-serif'; ctx.strokeText('-' + dn.amount, dn.x, dn.y); ctx.fillStyle = col; ctx.fillText('-' + dn.amount, dn.x, dn.y); }
         }
-        if(window._domExploreActive && player.activePet && DB.mobs[player.activePet]){ var _pet=DB.mobs[player.activePet], _pp=scr(P.gx,P.gy), _bob=Math.sin(T*4)*3, _px=_pp.x+26, _py=_pp.y-2+_bob, _pw=32;
-          var _pi=gi((typeof mobImg==='function')?mobImg(_pet):(_pet.img||'assets/icons/monsters/'+(_pet.n||player.activePet)+'.png'));
-          ctx.save(); ctx.strokeStyle='rgba(250,204,21,0.5)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.ellipse(_px,_py+14,14,6,0,0,7); ctx.stroke();
-          if(_pi&&_pi.complete&&_pi.naturalWidth){ var _ph=_pw*_pi.naturalHeight/_pi.naturalWidth; ctx.shadowColor='rgba(250,204,21,0.8)'; ctx.shadowBlur=8; ctx.drawImage(_pi,_px-_pw/2,_py-_ph+12,_pw,_ph); ctx.shadowBlur=0; ctx.fillStyle='#fde68a'; ctx.font='600 10px sans-serif'; ctx.textAlign='center'; ctx.fillText((_pet.n||'寵物'),_px,_py-_ph+4); }
-          else { ctx.fillStyle='#facc15'; ctx.strokeStyle='#854d0e'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(_px,_py,8,0,7); ctx.fill(); ctx.stroke(); ctx.fillStyle='#fde68a'; ctx.font='600 10px sans-serif'; ctx.textAlign='center'; ctx.fillText((_pet.n||'寵物'),_px,_py-13); }
-          ctx.restore(); }
+        if(window._domExploreActive && player.activePet && DB.mobs[player.activePet] && _petPos){ var _pet=DB.mobs[player.activePet], _sp=scr(_petPos.gx,_petPos.gy), _R=15;
+          var _pi=gi((typeof mobImg==='function')?mobImg(_pet):(_pet.img||''));
+          ctx.fillStyle='rgba(0,0,0,0.28)'; ctx.beginPath(); ctx.ellipse(_sp.x,_sp.y+_R-1,_R*0.85,_R*0.34,0,0,7); ctx.fill();
+          if(_pi&&_pi.complete&&_pi.naturalWidth){ ctx.save(); ctx.beginPath(); ctx.arc(_sp.x,_sp.y,_R,0,7); ctx.closePath(); ctx.clip(); var _s=Math.max(_R*2/_pi.naturalWidth,_R*2/_pi.naturalHeight), _iw=_pi.naturalWidth*_s, _ih=_pi.naturalHeight*_s; ctx.drawImage(_pi,_sp.x-_iw/2,_sp.y-_ih/2,_iw,_ih); ctx.restore(); }
+          else { ctx.fillStyle='#facc15'; ctx.beginPath(); ctx.arc(_sp.x,_sp.y,_R,0,7); ctx.fill(); }
+          ctx.strokeStyle='#facc15'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.arc(_sp.x,_sp.y,_R,0,7); ctx.stroke(); }
         for(var _k=0;_k<_nodes.length;_k++){ var _n=_nodes[_k], _sp=scr(_n.gx,_n.gy), _bob=Math.sin(T*3+_k)*3; var _img=gi(_n.type==='chest'?'assets/maps/node_chest.png':'assets/maps/node_altar.png');
           ctx.strokeStyle=_n.type==='chest'?'rgba(239,159,39,0.55)':'rgba(127,119,221,0.6)'; ctx.lineWidth=2; ctx.beginPath(); ctx.ellipse(_sp.x,_sp.y+6,18,9,0,0,7); ctx.stroke();
           if(_img&&_img.complete&&_img.naturalWidth){ var _w=(_n.type==='chest'?44:60), _h=_w*_img.naturalHeight/_img.naturalWidth; ctx.drawImage(_img,_sp.x-_w/2,_sp.y-_h+10+_bob,_w,_h); }
