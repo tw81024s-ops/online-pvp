@@ -1170,7 +1170,7 @@
             `帳號：<b style="color:#fbbf24">${username}</b>　職業：${clsName}　等級：${p.lv || 1}<br>金幣：${(p.gold || 0).toLocaleString()}　HP：${p.mhp || 0}　MP：${p.mmp || 0}`));
         // 🛡️ 目前裝備（管理員檢視）
         (function () {
-            const SLOT_LABEL = { wpn: '武器', helm: '頭盔', armor: '盔甲', shield: '盾牌', cloak: '披風', tshirt: '內衣', gloves: '手套', boots: '鞋子', ring1: '戒指1', ring2: '戒指2', amulet: '項鍊', belt: '腰帶' };
+            const SLOT_LABEL = { wpn: '武器', helm: '頭盔', armor: '盔甲', shield: '盾牌', cloak: '披風', tshirt: '內衣', gloves: '手套', boots: '鞋子', ring1: '戒指1', ring2: '戒指2', wrist1: '手環1', wrist2: '手環2', amulet: '項鍊', belt: '腰帶' };
             const _DB = (typeof getDB === 'function') ? getDB() : (window.DB || null);
             const eq = (p && p.eq) || {};
             const box = el('div', { style: 'background:#0f172a;border:1px solid #334155;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:#cbd5e1;' });
