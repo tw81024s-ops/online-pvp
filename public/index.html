@@ -845,8 +845,45 @@ function _skillReqLv(sk){
     return player.cls === 'mage' ? sk.reqM : (player.cls === 'knight' ? sk.reqK : sk.reqE);
 }
 
-const DB = {
+window.VOID_GEAR_TIER = {1:["wrist_01","wrist_02","wrist_03","tsx_01","tsx_02","tsx_03","tsx_04"],2:["wrist_04","wrist_05","wrist_06","wrist_07","tsx_05","tsx_06","tsx_07","tsx_08"],3:["wrist_08","wrist_09","wrist_10","wrist_11","tsx_09","tsx_10","tsx_11"],4:["wrist_12","wrist_13","wrist_14","wrist_15","tsx_12","tsx_13"],5:["wrist_16","wrist_17","wrist_18","tsx_14","tsx_15","tsx_16","tsx_17","tsx_18"]};
+        const DB = {
         items: {
+        "wrist_01": { n: "力量手環", type: "acc", slot: "wrist", str: 5, req: "all", safe: 4, p: 50000, c: "blue", tier: 1, img: "assets/icons/accessories/wrist_01.png" },
+        "wrist_02": { n: "智力手環", type: "acc", slot: "wrist", int: 5, req: "all", safe: 4, p: 50000, c: "blue", tier: 1, img: "assets/icons/accessories/wrist_02.png" },
+        "wrist_03": { n: "敏捷手環", type: "acc", slot: "wrist", dex: 5, req: "all", safe: 4, p: 50000, c: "blue", tier: 1, img: "assets/icons/accessories/wrist_03.png" },
+        "wrist_04": { n: "成長的手環", type: "acc", slot: "wrist", mhp: 2000, hpPct: 0.03, req: "all", safe: 4, p: 300000, c: "blue", tier: 2, img: "assets/icons/accessories/wrist_04.png" },
+        "wrist_05": { n: "防禦手環(刻印)", type: "acc", slot: "wrist", ac: -6, hpPct: 0.04, req: "all", safe: 4, p: 300000, c: "blue", tier: 2, img: "assets/icons/accessories/wrist_05.png" },
+        "wrist_06": { n: "黃金手環(刻印)", type: "acc", slot: "wrist", con: 6, mhp: 1500, req: "all", safe: 4, p: 300000, c: "blue", tier: 2, img: "assets/icons/accessories/wrist_06.png" },
+        "wrist_07": { n: "收穫者手環", type: "acc", slot: "wrist", dex: 4, crit: 1, req: "all", safe: 4, p: 300000, c: "blue", tier: 2, img: "assets/icons/accessories/wrist_07.png" },
+        "wrist_08": { n: "惡魔手環", type: "acc", slot: "wrist", pdmgPct: 0.06, mdmgPct: 0.06, crit: 2, req: "all", safe: 4, p: 2000000, c: "blue", tier: 3, img: "assets/icons/accessories/wrist_08.png" },
+        "wrist_09": { n: "風之手環(刻印)", type: "acc", slot: "wrist", dex: 8, hit: 4, req: "all", safe: 4, p: 2000000, c: "blue", tier: 3, img: "assets/icons/accessories/wrist_09.png" },
+        "wrist_10": { n: "白金手環(刻印)", type: "acc", slot: "wrist", str: 6, int: 6, dex: 6, req: "all", safe: 4, p: 2000000, c: "blue", tier: 3, img: "assets/icons/accessories/wrist_10.png" },
+        "wrist_11": { n: "榮譽戰鬥手環", type: "acc", slot: "wrist", hit: 8, crit: 3, req: "all", safe: 4, p: 2000000, c: "blue", tier: 3, img: "assets/icons/accessories/wrist_11.png" },
+        "wrist_12": { n: "光之成長手環", type: "acc", slot: "wrist", str: 4, int: 4, dex: 4, hpPct: 0.05, req: "all", safe: 4, p: 15000000, c: "purple", tier: 4, img: "assets/icons/accessories/wrist_12.png" },
+        "wrist_13": { n: "光之防禦手環", type: "acc", slot: "wrist", ac: -12, hpPct: 0.08, mr: 20, req: "all", safe: 4, p: 15000000, c: "purple", tier: 4, img: "assets/icons/accessories/wrist_13.png" },
+        "wrist_14": { n: "賽尼斯的手環", type: "acc", slot: "wrist", str: 12, hpPct: 0.06, pdmgPct: 0.05, req: "all", safe: 4, p: 15000000, c: "purple", tier: 4, img: "assets/icons/accessories/wrist_14.png" },
+        "wrist_15": { n: "伊莎貝的手環", type: "acc", slot: "wrist", int: 12, mpPct: 0.08, mdmgPct: 0.05, req: "all", safe: 4, p: 15000000, c: "purple", tier: 4, img: "assets/icons/accessories/wrist_15.png" },
+        "wrist_16": { n: "龍之手環", type: "acc", slot: "wrist", str: 12, int: 12, dex: 12, con: 12, pdmgPct: 0.08, mdmgPct: 0.08, hpPct: 0.08, req: "all", safe: 4, p: 80000000, c: "red", tier: 5, img: "assets/icons/accessories/wrist_16.png" },
+        "wrist_17": { n: "光之英雄手環", type: "acc", slot: "wrist", str: 15, int: 15, dex: 15, con: 15, pdmgPct: 0.1, mdmgPct: 0.1, crit: 4, req: "all", safe: 4, p: 80000000, c: "red", tier: 5, img: "assets/icons/accessories/wrist_17.png" },
+        "wrist_18": { n: "亞丁之光(刻印)", type: "acc", slot: "wrist", str: 15, int: 15, dex: 15, con: 15, hpPct: 0.1, mpPct: 0.1, hit: 10, req: "all", safe: 4, p: 80000000, c: "red", tier: 5, img: "assets/icons/accessories/wrist_18.png" },
+        "tsx_01": { n: "T恤", type: "arm", slot: "tshirt", ac: -1, req: "all", safe: 4, p: 50000, c: "blue", tier: 1, img: "assets/icons/armors/tsx_01.png" },
+        "tsx_02": { n: "老舊的力量T恤", type: "arm", slot: "tshirt", str: 2, req: "all", safe: 4, p: 50000, c: "blue", tier: 1, img: "assets/icons/armors/tsx_02.png" },
+        "tsx_03": { n: "老舊的敏捷T恤", type: "arm", slot: "tshirt", dex: 2, req: "all", safe: 4, p: 50000, c: "blue", tier: 1, img: "assets/icons/armors/tsx_03.png" },
+        "tsx_04": { n: "老舊的智力T恤", type: "arm", slot: "tshirt", int: 2, req: "all", safe: 4, p: 50000, c: "blue", tier: 1, img: "assets/icons/armors/tsx_04.png" },
+        "tsx_05": { n: "力量T恤", type: "arm", slot: "tshirt", str: 4, ac: -2, req: "all", safe: 4, p: 300000, c: "blue", tier: 2, img: "assets/icons/armors/tsx_05.png" },
+        "tsx_06": { n: "敏捷T恤", type: "arm", slot: "tshirt", dex: 4, ac: -2, req: "all", safe: 4, p: 300000, c: "blue", tier: 2, img: "assets/icons/armors/tsx_06.png" },
+        "tsx_07": { n: "智力T恤", type: "arm", slot: "tshirt", int: 4, ac: -2, req: "all", safe: 4, p: 300000, c: "blue", tier: 2, img: "assets/icons/armors/tsx_07.png" },
+        "tsx_08": { n: "精靈T恤", type: "arm", slot: "tshirt", dex: 3, mr: 10, ac: -2, req: "elf", safe: 4, p: 300000, c: "blue", tier: 2, img: "assets/icons/armors/tsx_08.png" },
+        "tsx_09": { n: "光之力量皮夾克", type: "arm", slot: "tshirt", str: 8, ac: -4, req: "all", safe: 4, p: 2000000, c: "blue", tier: 3, img: "assets/icons/armors/tsx_09.png" },
+        "tsx_10": { n: "光之敏捷皮夾克", type: "arm", slot: "tshirt", dex: 8, ac: -4, req: "all", safe: 4, p: 2000000, c: "blue", tier: 3, img: "assets/icons/armors/tsx_10.png" },
+        "tsx_11": { n: "光之智力皮夾克", type: "arm", slot: "tshirt", int: 8, ac: -4, req: "all", safe: 4, p: 2000000, c: "blue", tier: 3, img: "assets/icons/armors/tsx_11.png" },
+        "tsx_12": { n: "光之成長皮夾克", type: "arm", slot: "tshirt", str: 4, int: 4, dex: 4, ac: -5, hpPct: 0.03, req: "all", safe: 4, p: 15000000, c: "purple", tier: 4, img: "assets/icons/armors/tsx_12.png" },
+        "tsx_13": { n: "光之黑貓皮夾克", type: "arm", slot: "tshirt", crit: 2, hit: 4, ac: -5, req: "all", safe: 4, p: 15000000, c: "purple", tier: 4, img: "assets/icons/armors/tsx_13.png" },
+        "tsx_14": { n: "英雄的光之力量皮夾克", type: "arm", slot: "tshirt", str: 12, ac: -8, hpPct: 0.05, req: "all", safe: 4, p: 80000000, c: "red", tier: 5, img: "assets/icons/armors/tsx_14.png" },
+        "tsx_15": { n: "英雄的光之成長皮夾克", type: "arm", slot: "tshirt", str: 6, int: 6, dex: 6, ac: -8, hpPct: 0.05, req: "all", safe: 4, p: 80000000, c: "red", tier: 5, img: "assets/icons/armors/tsx_15.png" },
+        "tsx_16": { n: "英雄的光之敏捷皮夾克", type: "arm", slot: "tshirt", dex: 12, ac: -8, hpPct: 0.05, req: "all", safe: 4, p: 80000000, c: "red", tier: 5, img: "assets/icons/armors/tsx_16.png" },
+        "tsx_17": { n: "英雄的光之智力皮夾克", type: "arm", slot: "tshirt", int: 12, ac: -8, hpPct: 0.05, req: "all", safe: 4, p: 80000000, c: "red", tier: 5, img: "assets/icons/armors/tsx_17.png" },
+        "tsx_18": { n: "英雄的光之黑貓皮夾克", type: "arm", slot: "tshirt", crit: 3, hit: 8, ac: -8, hpPct: 0.05, req: "all", safe: 4, p: 80000000, c: "red", tier: 5, img: "assets/icons/armors/tsx_18.png" },
         "ea_01": { n: "傑尼斯覺醒戒指", type: "acc", slot: "ring", int: 55, wis: 33, mr: 27, crit: 5, mdmgPct: 0.2, req: "all", safe: 8, p: 60000000, c: "amber", img: "assets/icons/accessories/ea_01.png" },
         "ea_02": { n: "貝利亞爾的戒指", type: "acc", slot: "ring", str: 55, hit: 20, crit: 5, pdmgPct: 0.2, hpPct: 0.12, req: "all", safe: 8, p: 60000000, c: "amber", img: "assets/icons/accessories/ea_02.png" },
         "ea_03": { n: "聖地戒指", type: "acc", slot: "ring", str: 55, hit: 20, crit: 5, pdmgPct: 0.2, hpPct: 0.12, req: "all", safe: 8, p: 60000000, c: "amber", img: "assets/icons/accessories/ea_03.png" },
@@ -2059,6 +2096,10 @@ const DB = {
         "esc_duperion": { n: "杜佩里恩", img: "assets/icons/monsters/esc_duperion.png", lv: 100, s: "L", beh: "主動", race: "艾斯卡洛斯", boss: true, e: "wind", hp: 450000000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [500, 72500], db: 68, hit: 43 },
         "esc_yonir": { n: "約尼爾", img: "assets/icons/monsters/esc_yonir.png", lv: 100, s: "L", beh: "主動", race: "艾斯卡洛斯", boss: true, e: "fire", hp: 600000000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [500, 78500], db: 68, hit: 43 },
         "esc_salah": { n: "薩拉赫", img: "assets/icons/monsters/esc_salah.png", lv: 100, s: "L", beh: "主動", race: "艾斯卡洛斯", boss: true, e: "dark", hp: 750000000, ac: -118, mr: 82, exp: 5000000, goldMin: 200000, goldMax: 800000, atkSpd: 1.6, dmg: [500, 85000], db: 68, hit: 43 },
+        "void_baltase": { n: "虛空魔法師-巴土瑟", img: "assets/icons/monsters/void_baltase.png", lv: 130, s: "L", beh: "主動", race: "虛空之境", e: "fire", hp: 420000000, ac: -130, mr: 90, exp: 7600000, goldMin: 100000, goldMax: 520000, atkSpd: 2.0, dmg: [50, 4000], db: 20, hit: 50, mag: { skn: "虛空爆裂", cd: 15, chance: 0.9, dmg: [600, 2400000], ele: "fire", alwaysHit: true } },
+        "void_kaspa": { n: "虛空魔法師-卡士伯", img: "assets/icons/monsters/void_kaspa.png", lv: 130, s: "L", beh: "主動", race: "虛空之境", e: "wind", hp: 450000000, ac: -130, mr: 90, exp: 7600000, goldMin: 100000, goldMax: 520000, atkSpd: 2.0, dmg: [50, 4000], db: 20, hit: 50, mag: { skn: "虛空風刃", cd: 15, chance: 0.9, dmg: [600, 2400000], ele: "wind", alwaysHit: true } },
+        "void_sema": { n: "虛空魔法師-西瑪", img: "assets/icons/monsters/void_sema.png", lv: 130, s: "L", beh: "主動", race: "虛空之境", e: "water", hp: 480000000, ac: -130, mr: 90, exp: 7600000, goldMin: 100000, goldMax: 520000, atkSpd: 2.0, dmg: [50, 4000], db: 20, hit: 50, mag: { skn: "虛空冰封", cd: 15, chance: 0.9, dmg: [600, 2400000], ele: "water", alwaysHit: true } },
+        "void_makur": { n: "虛空魔法師-瑪庫爾", img: "assets/icons/monsters/void_makur.png", lv: 130, s: "L", beh: "主動", race: "虛空之境", e: "dark", hp: 500000000, ac: -130, mr: 90, exp: 7600000, goldMin: 100000, goldMax: 520000, atkSpd: 2.0, dmg: [50, 4000], db: 20, hit: 50, mag: { skn: "虛空噬影", cd: 15, chance: 0.9, dmg: [600, 2400000], ele: "dark", alwaysHit: true } },
         "orc": { n: "妖魔", lv: 2, s: "S", beh: "被動", race: "妖魔", e: "fire", hp: 6, ac: 10, mr: 0, exp: 5, goldMin: 10, goldMax: 30, atkSpd: 2, dmg: [1, 2], db: 0, hit: 0 },
         "goblin": { n: "哥布林", lv: 2, s: "S", beh: "被動", race: "哥布林", e: "earth", hp: 3, ac: 10, mr: 2, exp: 5, goldMin: 10, goldMax: 30, atkSpd: 2, dmg: [1, 2], db: 0, hit: 0 },
         "esti_enemy": { n: "依詩蒂", img: "assets/icons/monsters/依詩蒂.png", lv: 1, s: "S", beh: "主動", race: "血盟", wild: true, e: "none", pledgeEnemy: true, excludeAvatar: "女騎士", seeInsight: true, hp: 20, ac: -10, mr: 0, exp: 100, goldMin: 1136, goldMax: 1136, atkSpd: 0.67, dmg: [1, 10], db: 0, hit: 2, regenHp: 15, scale: { hpC: 20, acBase: -10, acDiv: 3, mrBase: 0, mrDiv: 5, dmgSides: 10, dbDiv: 2, hitBase: 2, hitDiv: 3, atkSpd: 0.67 }, mag: { skn: "衝擊之暈", cd: 50, chance: 0.2, type: "extra_attack", stunChance: 10 } },
@@ -2576,6 +2617,7 @@ const DB = {
         "tikal_temple":["tk_snake","tk_monkey","tk_aztec","tk_yuka","tk_kaila","tk_bara","tk_aeto","tk_aeto2","tk_sadmud","tk_sadska","tk_sadtio","tk_jefreku_f","tk_jefreku_m"],
         "fallen_knights": ["fk_baphomet","fk_balrog","fk_kt","fk_deathknight","fk_aris","fk_vander"],
         "escaroth": ["esc_firebee","esc_deathherald","esc_deathscorpion","esc_bloodsuccubus","esc_abyssdevil","esc_blackknight","esc_larva","esc_steelworm","esc_bonespider","esc_mutantwasp","esc_moonspirit","esc_duperion","esc_yonir","esc_salah"],
+        "void_realm": ["void_baltase","void_kaspa","void_sema","void_makur"],
         "secret": ["esc_abyssdevil"],
         "graveyard": ["nw_038", "nw_051", "nw_052", "nw_053", "nw_064", "nw_117", "nw_119", "nw_181", "nw_043", "nw_044", "nw_045", "nw_046", "nw_088"],  // 骷髏墓地
         "demon_realm": ["nw_148", "nw_149", "nw_150", "nw_152", "nw_153", "nw_154", "nw_155", "nw_156", "nw_158", "nw_050", "nw_065", "nw_160"],  // 魔界
@@ -3088,7 +3130,7 @@ function flushAwaySummary() {
 let player = {
     cls: null, name: null, lv: 1, exp: 0, gold: 1000, hp: 0, mhp: 0, mp: 0, mmp: 0, blessings: {},
     base: { str:0, dex:0, con:0, int:0, wis:0, cha:8 }, bonus: 0, alloc: { str:0, dex:0, con:0, int:0, wis:0, cha:0 }, panacea: { str:0, dex:0, con:0, int:0, wis:0, cha:0 }, panaceaUsed: 0, junkPrefs: {}, bloodPledge: null, magicShieldCd: 0, lastMapByCat: {}, tracking: null, ismaelAccUsed: false, sherineWorld: false, siege: { active:false, gateKilled:false, towerKilled:false, endTime:0, kills:0, result:null, cooldownUntil:0, rewardPending:false, victoryUntil:0, accCdUntil:0 },
-    inv: [], eq: { wpn: null, arrow: null, helm: null, armor: null, shield: null, cloak: null, tshirt: null, gloves: null, boots: null, ring1: null, ring2: null, ring3: null, ring4: null, amulet: null, belt: null, earring1: null, earring2: null, earring3: null, earring4: null, rune1: null, rune2: null, soul: null },
+    inv: [], eq: { wpn: null, arrow: null, wrist1: null, wrist2: null, helm: null, armor: null, shield: null, cloak: null, tshirt: null, gloves: null, boots: null, ring1: null, ring2: null, ring3: null, ring4: null, amulet: null, belt: null, earring1: null, earring2: null, earring3: null, earring4: null, rune1: null, rune2: null, soul: null },
     skills: [], buffs: { haste: 0, brave: 0, blue: 0, cautious: 0, elfcookie: 0, poly: 0, shield: 0, sk_magic_shield: 0 }, poly: null, allies: [],
     summon: null, charmed: null, manualCd: {}, elfEle: null, hot: null,
     cds: { pot: 0, atkSk: 0, healSk: 0, purifySk: 0 }, dead: false, statuses: { stun: 0, freeze: 0, stone: 0, poison: 0, poisonDmg: 0, poisonTick: 0, burn: 0, burnDmg: 0, burnTick: 0, scald: 0, scaldDmg: 0, scaldTick: 0, silence: 0, paralyze: 0, magicseal: 0, armorBreak: 0, slowAtk: 0, cleave: 0 },
@@ -4473,8 +4515,8 @@ d.mr += (baseMr + bonusMr);
         if(ed.eff && ed.eff === 'haste') p._equipHaste = true;   // 不再借用 buffs.haste 計時通道，避免卸裝後永久加速殘留
         
         // 祝福的：防具→AC-1、傷害減免+1；飾品→AC-1、MR+1
-        applyBlessStats(d, e.bless, (ed.slot==='ring'||ed.slot==='amulet'||ed.slot==='belt') ? 'acc' : 'arm', (e.en||0));   // 祝福的/詛咒的
-        applyAncStats(d, e.anc, (ed.slot==='ring'||ed.slot==='amulet'||ed.slot==='belt') ? 'acc' : 'arm');   // 遠古系變體能力
+        applyBlessStats(d, e.bless, (ed.slot==='ring'||ed.slot==='amulet'||ed.slot==='belt'||ed.slot==='wrist') ? 'acc' : 'arm', (e.en||0));   // 祝福的/詛咒的
+        applyAncStats(d, e.anc, (ed.slot==='ring'||ed.slot==='amulet'||ed.slot==='belt'||ed.slot==='wrist') ? 'acc' : 'arm');   // 遠古系變體能力
         // 屬性詞綴（防具/飾品）：對應元素抗性 + MR，依階級 1/2/3
         let _aAff = getAttrAffix(e.attr);
         if(_aAff) {
@@ -7088,6 +7130,26 @@ function killMob(idx) {
         gainItem('scroll_weapon', _sQty, true);
         gainItem('scroll_armor', _sQty, true);
         logSys(`獲得 <span class="text-sky-200 font-bold">對武器施法的卷軸 ×${_sQty}、對盔甲施法的卷軸 ×${_sQty}</span>。`);
+        if ((player.reborn||0) >= 10) {
+            gainItem('scroll_weapon_b', _sQty, true);
+            gainItem('scroll_armor_b', _sQty, true);
+            gainItem('new_item_bless_acc', _sQty, true);
+            logSys(`獲得 <span class="text-amber-300 font-bold">祝福的 對武器/盔甲施法的卷軸 ×${_sQty}、賦予飾品祝福卷軸 ×${_sQty}</span>。`);
+        }
+    // === 虛空之境：手環/內衣按階機率掉落 ===
+    if (mapState.current === 'void_realm' && window.VOID_GEAR_TIER) {
+        var _vg = window.VOID_GEAR_TIER;
+        var _vrate = { 1: 0.30, 2: 0.20, 3: 0.10, 4: 0.02, 5: 0.00001 };
+        for (var _vt = 1; _vt <= 5; _vt++) {
+            var _pool = _vg[_vt] || [];
+            if (_pool.length && Math.random() < _vrate[_vt]) {
+                var _gid = _pool[Math.floor(Math.random() * _pool.length)];
+                gainItem(_gid, 1);
+                logSys(`虛空掉落：<span class="text-emerald-300 font-bold">${(DB.items[_gid]||{}).n||_gid}</span>！`);
+            }
+        }
+    }
+
     }
     // ===== 寶圖碎片掉落（打怪掉落；高階碎片需較高等級怪）：英雄 0.5%／傳說 0.1%(Lv40+)／神話 0.02%(Lv60+) =====
     {
@@ -8610,7 +8672,7 @@ function _charTipShow(ev, slot){
     }
     var brd=(typeof _bagBorder==='function')?_bagBorder(it):'#e7dfce';
     function sgn(v){ return (v>0?'+':'')+v; }
-    var SL={helm:'頭盔',armor:'盔甲',tshirt:'內甲',belt:'腰帶',boots:'長靴',wpn:'武器',shield:'盾牌',cloak:'斗篷',gloves:'手套',amulet:'項鍊',arrow:'箭矢',ring1:'戒指',ring2:'戒指',ring3:'戒指',ring4:'戒指',earring1:'耳環',earring2:'耳環',earring3:'耳環',earring4:'耳環',rune1:'符石',rune2:'符石',soul:'靈魂石'};
+    var SL={helm:'頭盔',armor:'盔甲',tshirt:'內甲',belt:'腰帶',boots:'長靴',wpn:'武器',shield:'盾牌',cloak:'斗篷',gloves:'手套',amulet:'項鍊',arrow:'箭矢',wrist1:'手環',wrist2:'手環',ring1:'戒指',ring2:'戒指',ring3:'戒指',ring4:'戒指',earring1:'耳環',earring2:'耳環',earring3:'耳環',earring4:'耳環',rune1:'符石',rune2:'符石',soul:'靈魂石'};
     var rows=[];
     if(d.type==='wpn'){
         if(d.dmgS!=null||d.dmgL!=null) rows.push('小型 '+(d.dmgS||0)+' ／ 大型 '+(d.dmgL||0));
@@ -8663,7 +8725,7 @@ function _renderCharUI(){
     var ST=[['近距離傷害','dt-mdmg'],['近距離命中','dt-mhit'],['遠距離傷害','dt-rdmg'],['遠距離命中','dt-rhit'],['額外傷害','dt-edmg'],['額外命中','dt-ehit'],['魔法傷害','dt-mgdmg'],['迴避率','dt-er'],['傷害減免','dt-dr'],['HP恢復','dt-hpr'],['MP恢復','dt-mpr'],['MP消耗減免','dt-mpreduce']];
     var stHtml=ST.map(function(s){var v=_dtv(s[1]); if(v==='-')return ''; return '<div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid #1a160e;"><span style="color:#9a9486;">'+s[0]+'</span><span style="color:#e7dfce;font-weight:700;">'+v+'</span></div>';}).join('');
     // 紙娃娃
-    var SLOTS={helm:'頭盔',armor:'盔甲',tshirt:'內甲',belt:'腰帶',boots:'長靴',wpn:'武器',shield:'盾牌',cloak:'斗篷',gloves:'手套',amulet:'項鍊',arrow:'箭矢',ring1:'戒指',ring2:'戒指',ring3:'戒指',ring4:'戒指',earring1:'耳環',earring2:'耳環',earring3:'耳環',earring4:'耳環',rune1:'符石',rune2:'符石',soul:'靈魂石'};
+    var SLOTS={helm:'頭盔',armor:'盔甲',tshirt:'內甲',belt:'腰帶',boots:'長靴',wpn:'武器',shield:'盾牌',cloak:'斗篷',gloves:'手套',amulet:'項鍊',arrow:'箭矢',wrist1:'手環',wrist2:'手環',ring1:'戒指',ring2:'戒指',ring3:'戒指',ring4:'戒指',earring1:'耳環',earring2:'耳環',earring3:'耳環',earring4:'耳環',rune1:'符石',rune2:'符石',soul:'靈魂石'};
     function cellHtml(slot){
         var it=P.eq?P.eq[slot]:null; var lab=SLOTS[slot]||slot;
         var inner, brd='#3a3018', bg='#120e08';
@@ -9396,6 +9458,11 @@ function equipItem(item) {
         var __free = __rk.find(function(k){ return !player.eq[k]; });
         slot = __free || __rk[__rk.length-1];   // 無空欄則替換最後一個已解鎖的戒指欄
     }
+    if (slot === 'wrist') {
+        var __wk = ['wrist1','wrist2'];
+        var __wf = __wk.find(function(k){ return !player.eq[k]; });
+        slot = __wf || __wk[__wk.length-1];   // 手環雙格
+    }
     if (slot === 'rune') {
         if(!player.eq.rune1) slot = 'rune1';
         else if(!player.eq.rune2) slot = 'rune2';
@@ -10081,7 +10148,7 @@ function renderTabs(force) {
     ['tab-items','tab-weapons','tab-armors','tab-equip','tab-skill'].forEach(id => { let el = document.getElementById(id); if(el) _scroll[id] = el.scrollTop; });
 
     let eDiv = document.getElementById('tab-equip'); eDiv.innerHTML = '';
-    const slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'legs',n:'腿甲'},{k:'amulet',n:'項鍊'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'ring3',n:'戒指'},{k:'ring4',n:'戒指'},{k:'belt',n:'腰帶'},{k:'earring1',n:'耳環'},{k:'earring2',n:'耳環'},{k:'earring3',n:'耳環'},{k:'earring4',n:'耳環'},{k:'rune1',n:'符石'},{k:'rune2',n:'符石'},{k:'soul',n:'靈魂石'},{k:'arrow',n:'箭矢'}].filter(__ringUnlockFilter);
+    const slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'legs',n:'腿甲'},{k:'amulet',n:'項鍊'},{k:'wrist1',n:'手環'},{k:'wrist2',n:'手環'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'ring3',n:'戒指'},{k:'ring4',n:'戒指'},{k:'belt',n:'腰帶'},{k:'earring1',n:'耳環'},{k:'earring2',n:'耳環'},{k:'earring3',n:'耳環'},{k:'earring4',n:'耳環'},{k:'rune1',n:'符石'},{k:'rune2',n:'符石'},{k:'soul',n:'靈魂石'},{k:'arrow',n:'箭矢'}].filter(__ringUnlockFilter);
     
     let setCheck = {}, _setSeen = {};
     for (let k in player.eq) {
@@ -10585,17 +10652,17 @@ function buildItemDescHTML(item) {
         if(item.bless === 'cursed') {
             let _ct;
             if(d.type === 'wpn') _ct = '額外傷害-1，命中-1，額外魔法點數-2';
-            else { let _acc = (d.slot==='ring'||d.slot==='amulet'||d.slot==='belt'); _ct = _acc ? '防禦(AC)+1，魔防(MR)-1' : '防禦(AC)+1，傷害減免-1'; }
+            else { let _acc = (d.slot==='ring'||d.slot==='amulet'||d.slot==='belt'||d.slot==='wrist'); _ct = _acc ? '防禦(AC)+1，魔防(MR)-1' : '防禦(AC)+1，傷害減免-1'; }
             desc += `<br><span class="c-cursed">詛咒的：${_ct}</span>`;
         } else {
             let _bt;
             if(d.type === 'wpn') _bt = '額外傷害+1，額外魔法點數+2，額外命中+1';
-            else { let _acc = (d.slot==='ring'||d.slot==='amulet'||d.slot==='belt'); _bt = _acc ? '防禦(AC)-1，魔防(MR)+1' : '防禦(AC)-1，傷害減免+1'; }
+            else { let _acc = (d.slot==='ring'||d.slot==='amulet'||d.slot==='belt'||d.slot==='wrist'); _bt = _acc ? '防禦(AC)-1，魔防(MR)+1' : '防禦(AC)-1，傷害減免+1'; }
             desc += `<br><span class="text-yellow-400">祝福的：${_bt}</span>`;
         }
     }
     if(item.anc) {
-        let _acc = (d.slot==='ring'||d.slot==='amulet'||d.slot==='belt');
+        let _acc = (d.slot==='ring'||d.slot==='amulet'||d.slot==='belt'||d.slot==='wrist');
         let _slot = (d.type === 'wpn') ? 'wpn' : (_acc ? 'acc' : 'arm');
         let _v = (item.anc === true) ? 'ancient' : item.anc;
         let _at;
@@ -10726,7 +10793,7 @@ function openModal(item, isEq, slot) {
     if(_cmp) {
         const SLOT_LABEL = { wpn:'武器', helm:'頭盔', armor:'盔甲', shield:'盾牌', cloak:'斗篷', tshirt:'內衣', gloves:'手套', boots:'鞋子', ring1:'戒指 1', ring2:'戒指 2', ring3:'戒指 3', ring4:'戒指 4', amulet:'項鍊', belt:'腰帶', legs:'腿甲', rune1:'符石 1', rune2:'符石 2', soul:'靈魂石', earring1:'耳環 1', earring2:'耳環 2', earring3:'耳環 3', earring4:'耳環 4' };
         if(!isEq && !d.isArrow && (d.type === 'wpn' || d.type === 'arm' || d.type === 'acc')) {
-            let slots = (d.type === 'wpn') ? ['wpn'] : (d.slot === 'ring' ? ringSlotKeys() : (d.slot === 'rune' ? ['rune1','rune2'] : [d.slot]));
+            let slots = (d.type === 'wpn') ? ['wpn'] : (d.slot === 'ring' ? ringSlotKeys() : (d.slot === 'wrist' ? ['wrist1','wrist2'] : (d.slot === 'rune' ? ['rune1','rune2'] : [d.slot])));
             let cards = slots.map(sl => {
                 let eq = player.eq[sl];
                 let label = SLOT_LABEL[sl] || sl;
@@ -12485,6 +12552,7 @@ const MAP_CATEGORIES = {
         {v:'dream_island',t:'夢幻之島（3轉）',c:'#22c55e'},
         {v:'fallen_knights',t:'墮落騎士團（5轉）',c:'#dc2626'},
         {v:'escaroth',t:'艾斯卡洛斯（20轉）',c:'#f97316'},
+        {v:'void_realm',t:'虛空之境（25轉）',c:'#7c3aed'},
         {v:'secret',t:'秘密（30轉）',c:'#a855f7'},
     ],
     tower: [
@@ -12939,7 +13007,7 @@ function doBianUncurse(slotKey) {
     let _e = document.getElementById('interaction-content'); if (_e) renderBianBless(_e);
 }
 function renderBianBless(el) {
-    let slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'legs',n:'腿甲'},{k:'amulet',n:'項鍊'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'ring3',n:'戒指'},{k:'ring4',n:'戒指'},{k:'belt',n:'腰帶'},{k:'earring1',n:'耳環'},{k:'earring2',n:'耳環'},{k:'earring3',n:'耳環'},{k:'earring4',n:'耳環'}].filter(__ringUnlockFilter);
+    let slots = [{k:'wpn',n:'武器'},{k:'shield',n:'盾牌'},{k:'helm',n:'頭盔'},{k:'armor',n:'盔甲'},{k:'tshirt',n:'T恤'},{k:'cloak',n:'斗篷'},{k:'gloves',n:'手套'},{k:'boots',n:'長靴'},{k:'legs',n:'腿甲'},{k:'amulet',n:'項鍊'},{k:'wrist1',n:'手環'},{k:'wrist2',n:'手環'},{k:'ring1',n:'戒指'},{k:'ring2',n:'戒指'},{k:'ring3',n:'戒指'},{k:'ring4',n:'戒指'},{k:'belt',n:'腰帶'},{k:'earring1',n:'耳環'},{k:'earring2',n:'耳環'},{k:'earring3',n:'耳環'},{k:'earring4',n:'耳環'}].filter(__ringUnlockFilter);
     let cnt = id => pledgeCountItem(id);
     let rows = slots.map(sl => {
         let it = player.eq[sl.k];
@@ -13824,6 +13892,7 @@ function changeMap(force) {
       } }
     { if (!force && document.getElementById('map-select').value === 'fallen_knights' && (player.reborn||0) < 5) { logSys('🔒 此地圖為「墮落騎士團」，需轉生 5 轉以上才能進入。'); syncMapSelectors(); return; } }
     { if (!force && document.getElementById('map-select').value === 'escaroth' && (player.reborn||0) < 20) { logSys('🔒 此地圖為「艾斯卡洛斯」，需轉生 20 轉以上才能進入。'); syncMapSelectors(); return; }
+            if (!force && document.getElementById('map-select').value === 'void_realm' && (player.reborn||0) < 25) { logSys('🔒 此地圖為「虛空之境」，需轉生 25 轉以上才能進入。'); syncMapSelectors(); return; }
             if (!force && document.getElementById('map-select').value === 'secret' && (player.reborn||0) < 30) { logSys('🔒 此地圖為「秘密」，需轉生 30 轉以上才能進入。'); syncMapSelectors(); return; } }
     { var _dt = document.getElementById('map-select').value;
       if (!force && _dt.indexOf('dom_')===0) {
@@ -17020,6 +17089,6 @@ window.onload = () => {
 /* ===== 支配塔探索模式 END ===== */
 
 </script>
-<script src="online.js?v=248"></script>
+<script src="online.js?v=228"></script>
 </body>
 </html>
