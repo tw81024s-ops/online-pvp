@@ -1454,7 +1454,29 @@
                 r.append(el('span', { style: 'color:#cbd5e1;' }, `${u.is_admin ? '👑 ' : ''}${u.username}`));
                 const eb = el('button', { style: 'background:#2563eb;color:#fff;border:none;border-radius:4px;padding:3px 10px;cursor:pointer;font-weight:bold;white-space:nowrap;' }, '✏️ 編輯角色');
                 eb.onclick = () => openPlayerEditor(u.username);
-                r.append(eb); userList.append(r);
+                r.append(eb);
+                const db = el('button', { style: 'background:#0d9488;color:#fff;border:none;border-radius:4px;padding:3px 10px;cursor:pointer;font-weight:bold;white-space:nowrap;margin-left:4px;' }, '\u2B07\uFE0F \u4E0B\u8F09\u5B58\u6A94');
+                db.onclick = async () => {
+                    try {
+                        const j = await api('/api/admin/player/' + encodeURIComponent(u.username));
+                        const out = { username: j.username, updatedAt: j.updatedAt, bestSlot: j.slot, slots: {} };
+                        const src = j.slots || {};
+                        for (const s in src) {
+                            let d = src[s] && src[s].data;
+                            try { d = JSON.parse(d); } catch (e) {}
+                            out.slots[s] = { updatedAt: src[s] && src[s].updatedAt, bytes: src[s] && src[s].bytes, data: d };
+                        }
+                        const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url; a.download = u.username + '_\u5B58\u6A94.json';
+                        document.body.appendChild(a); a.click(); a.remove();
+                        setTimeout(() => URL.revokeObjectURL(url), 1500);
+                        toast('\u5DF2\u4E0B\u8F09 ' + u.username + ' \u7684\u5B58\u6A94');
+                    } catch (e) { toast(e.message, '#7f1d1d'); }
+                };
+                r.append(db);
+                userList.append(r);
             });
         }).catch(e => userList.textContent = e.message);
         _secBody.append(userList);

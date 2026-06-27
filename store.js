@@ -9,17 +9,25 @@ try {
     if (fs.existsSync(FILE)) data = Object.assign(data, JSON.parse(fs.readFileSync(FILE, 'utf8')));
 } catch (e) { console.error('讀取資料檔失敗，使用空白資料庫：', e.message); }
 
-let flushTimer = null;
-function flush() {
-    clearTimeout(flushTimer);
-    flushTimer = setTimeout(() => {
-        try {
-            const tmp = FILE + '.tmp';
-            fs.writeFileSync(tmp, JSON.stringify(data));
-            fs.renameSync(tmp, FILE); // 原子寫入，避免寫到一半斷電壞檔
-        } catch (e) { console.error('寫入資料檔失敗：', e.message); }
-    }, 300);
+let flushTimer = null, _dirty = false;
+function _writeNow() {
+    try {
+        const tmp = FILE + '.tmp';
+        fs.writeFileSync(tmp, JSON.stringify(data));
+        fs.renameSync(tmp, FILE); // 原子寫入，避免寫到一半斷電壞檔
+        _dirty = false;
+    } catch (e) { console.error('寫入資料檔失敗：', e.message); }
 }
+function flush() {
+    _dirty = true;
+    if (flushTimer) return;              // 已排程就不重設，避免連續存檔把寫檔「餓死」永遠不落地
+    flushTimer = setTimeout(() => { flushTimer = null; if (_dirty) _writeNow(); }, 300);
+}
+setInterval(() => { if (_dirty) _writeNow(); }, 5000);   // 保底：每 5 秒若有未寫入就強制寫一次
+function _gracefulFlush() { try { if (_dirty) _writeNow(); } catch (e) {} }
+process.on('SIGTERM', () => { _gracefulFlush(); process.exit(0); });   // Render 部署/重啟前先寫入再退出
+process.on('SIGINT',  () => { _gracefulFlush(); process.exit(0); });
+process.on('beforeExit', _gracefulFlush);
 
 // 角色欄位：第 1 格沿用原本 key（userId），第 2~4 格用 userId:slot（純新增、不動到原存檔）
 function slotKey(userId, slot) {
