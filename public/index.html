@@ -6556,6 +6556,7 @@ function enemyPhysicalAttack(mob, idx, stunChance = 0) {
 
         totalDmg = Math.max(1, Math.floor(totalDmg * _takenMult()));
         if (mapState.current === 'secret') { var _dr0=Math.min(70,(player.d&&player.d.drPct)||0); if(_dr0>0) totalDmg=Math.round(totalDmg/(1-_dr0/100)); }   // 🗺️ 秘密：無視玩家減傷
+        if (mob._secret) { totalDmg = Math.min(totalDmg, Math.floor((player.mhp||1) * 0.50)); }   // 🩹 秘密怪不秒殺：單下最多扣 50% 最大HP（極難但保證留半血；要調改 0.50）
         player.hp -= totalDmg;
         { var _rf=((player.buffs&&player.buffs.sk_kn_counterbarrier>0&&DB.skills.sk_kn_counterbarrier.d&&DB.skills.sk_kn_counterbarrier.d.refl)||0)+((player.d&&player.d.tReflPct)||0)+((player.d&&player.d.refl)||0); if(_rf>0&&mob&&mob.curHp>0){ var _rd=Math.max(1,Math.floor(totalDmg*_rf)); mob.curHp=Math.max(1,mob.curHp-_rd); logCombat(`🛡️ <span class="text-amber-300">反擊屏障</span> 反彈 ${_rd} 點傷害給 <span class="${getMobColor(mob.lv)}">${mob.n}</span>。`); } }
 
