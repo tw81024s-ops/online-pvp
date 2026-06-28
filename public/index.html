@@ -4799,14 +4799,13 @@ d.mr += (baseMr + bonusMr);
         d.meleeCrit = (d.meleeCrit||0) + 5; d.rangedCrit = (d.rangedCrit||0) + 5; d.magicCrit = (d.magicCrit||0) + 5;
         d.aspd = Math.max(((window.__GAME_CONFIG&&window.__GAME_CONFIG.aspdFloor)||0.1), (d.aspd||1.0) * 0.9); // 攻速+10%
     }
-    p.hp = Math.min(p.hp, p.mhp);
-    p.mp = Math.min(p.mp, p.mmp);
     // 🔧 偵測衍生屬性異常(NaN)：不自動修正（避免遮蔽 bug），改為跳出提示請玩家回報管理員，方便抓根因
     (function(){
         applyTalentBonuses(d,p);
         { var _pp=(d._accPdmg||0)+(d.tPdmgPct||0); if(_pp){ d.dollDmgMult=(d.dollDmgMult||1)*(1+_pp); }   // 物理總傷%：飾品+天賦戰線
           var _mp=(d._accMdmg||0)+(d.tMdmgPct||0); if(_mp){ d.magicDmg=Math.round((d.magicDmg||0)*(1+_mp)); } }   // 魔法總傷%：飾品+天賦戰線
         if(typeof applyTameEleBonuses==='function') applyTameEleBonuses(d, p);   // 🐾 馴服圖鑑元素收集加乘
+        p.hp = Math.min(p.hp, p.mhp); p.mp = Math.min(p.mp, p.mmp);   // 🩹 夾血移到所有HP%加成(含馴養/天賦)之後，修正升級回扣/補不滿卡92%
         var _bad = [];
         ['mr','ac','dr','er','meleeDmg','rangedDmg','magicDmg','aspd','meleeHit','rangedHit','meleeCrit','rangedCrit','magicCrit'].forEach(function(k){ if(!Number.isFinite(d[k])) _bad.push(k); });
         if(_bad.length && !window.__statNaNAlerted){
