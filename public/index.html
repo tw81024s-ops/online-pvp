@@ -11910,7 +11910,7 @@ window.__adminGrantPoly = function(formName){
       if(m.refine){ if(typeof gainItem==='function') gainItem('dom_refine_stone',m.refine,true); msgs.push('精煉石+'+m.refine); }
       if(m.souls&&m.souls.length){ var BT=window.SOULSTONE_BY_TIER||{}; m.souls.forEach(function(t){ var a=BT[t]; if(a&&a.length&&typeof window.gainSoulStone==='function') window.gainSoulStone(a[Math.floor(Math.random()*a.length)],1,true); }); msgs.push('靈魂石×'+m.souls.length); }
       if(m.chests&&m.chests.length){ m.chests.forEach(function(t){ if(typeof gainItem==='function') gainItem('secret_box_t'+t,1,true); }); msgs.push('秘密寶箱×'+m.chests.length); }
-      if(msgs.length){ try{ if(typeof logSys==='function') logSys('🏴 戰場據點產出：'+msgs.join('、')); }catch(e){} try{ if(typeof updateUI==='function') updateUI(); }catch(e){} }
+      if(msgs.length){ try{ if(typeof logSys==='function') logSys('🏴 戰場據點產出：'+msgs.join('、')); }catch(e){} try{ if(typeof updateUI==='function') updateUI(); }catch(e){} try{ if(typeof renderMobileBag==='function') renderMobileBag(); }catch(e){} try{ if(typeof saveGame==='function') saveGame(); }catch(e){} }   // 🩹 領收後立即刷新背包並存檔，避免道具被雲端同步覆蓋而消失
     }catch(e){}
   };
   window.__territoryBattleResult=function(m){
