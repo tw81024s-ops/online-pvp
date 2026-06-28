@@ -434,7 +434,11 @@ function terrAddPending(username, res) {
     if (res.soul) (rec.souls = rec.souls || []).push(res.soul);
     if (res.chest) (rec.chests = rec.chests || []).push(res.chest);
     store.putTerrPend(u.id, rec);
-    terrFlushPending(username);
+}   // 🩹 改累積待領，不自動發，由玩家一鍵領收
+function terrPendPublic(username) {
+    const u = store.findUser(username); if (!u) return { gold: 0, refine: 0, souls: [], chests: [] };
+    const rec = store.getTerrPend(u.id) || {};
+    return { gold: Math.floor(rec.gold || 0), refine: Math.floor(rec.refine || 0), souls: (rec.souls || []).slice(), chests: (rec.chests || []).slice() };
 }
 function terrFlushPending(username) {
     const u = store.findUser(username); if (!u) return;
@@ -705,7 +709,6 @@ wss.on('connection', (ws) => {
                 const r0 = pvpGet(row.id, row.username); pvpRollover(r0); store.putPvp(row.id, r0);
                 try { wbRollover(); } catch (e) { }   // 世界王跨日結算（任何人登入都會觸發一次）
                 setTimeout(() => { try { const r = pvpGet(row.id, row.username); pvpFlushPending(r); store.putPvp(row.id, r); } catch (e) { } }, 2500);
-                setTimeout(() => { try { terrFlushPending(row.username); } catch (e) { } }, 2600);
             } catch (e) { }
             return;
         }
@@ -721,6 +724,12 @@ wss.on('connection', (ws) => {
         // ===== 🏴 資源爭奪戰場 =====
         if (msg.type === 'territory_get') {
             send(ws, { type: 'territory_state', points: terrPublic(), mult: TERR_MULT, log: territory.log || [] });
+            send(ws, { type: 'territory_pend', pend: terrPendPublic(ws.username) });   // 🩹 一併回傳本人待領物資
+            return;
+        }
+        if (msg.type === 'territory_claim') {   // 🩹 一鍵領收：發送待領並清空
+            terrFlushPending(ws.username);
+            send(ws, { type: 'territory_pend', pend: terrPendPublic(ws.username) });
             return;
         }
         if (msg.type === 'territory_capture') {   // 佔領空據點

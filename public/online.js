@@ -157,7 +157,8 @@
         get: function(){ try { ws.send(JSON.stringify({ type:'territory_get' })); } catch(e){} },
         capture: function(point){ try { ws.send(JSON.stringify({ type:'territory_capture', point:point, profile:buildProfile() })); } catch(e){} },
         challenge: function(point){ try { ws.send(JSON.stringify({ type:'territory_challenge', point:point, profile:buildProfile() })); } catch(e){} },
-        release: function(point){ try { ws.send(JSON.stringify({ type:'territory_release', point:point })); } catch(e){} }
+        release: function(point){ try { ws.send(JSON.stringify({ type:'territory_release', point:point })); } catch(e){} },
+        claim: function(){ try { ws.send(JSON.stringify({ type:'territory_claim' })); } catch(e){} }
     };
 
     function buildProfile() {
@@ -378,7 +379,8 @@
             if (m.type === 'inf_battle_start') onInfBattleStart(m);
             if (m.type === 'inf_announce') { try { toast('📢 ' + (m.name || '某玩家') + ' 已 ' + m.streak + ' 連勝，速來無界擂台踢館！', '#5b21b6'); } catch (e) { } }
             if (m.type === 'pvp_reward') { try { if (typeof window.__applyPvpReward === 'function') window.__applyPvpReward(m.gold || 0, m.tickets || 0, m.reason); } catch (e) { } }
-            if (m.type === 'territory_state') { window.__territory = { points: m.points || {}, mult: m.mult || {} }; if (Array.isArray(m.log)) window.__territoryLog = m.log; try { if (typeof window.__renderTerritory === 'function') window.__renderTerritory(); } catch (e) { } try { if (typeof window.__renderTerritoryLog === 'function') window.__renderTerritoryLog(); } catch (e) { } }
+            if (m.type === 'territory_state') { window.__territory = { points: m.points || {}, mult: m.mult || {} }; if (Array.isArray(m.log)) window.__territoryLog = m.log; try { if (typeof window.__renderTerritory === 'function') window.__renderTerritory(); } catch (e) { } try { if (m.pend) { window.__terrPend = m.pend; } } catch(e){} try { if (typeof window.__renderTerritoryLog === 'function') window.__renderTerritoryLog(); } catch (e) { } }
+            if (m.type === 'territory_pend') { try { window.__terrPend = m.pend || { gold:0, refine:0, souls:[], chests:[] }; if (typeof window.__renderTerritoryClaim === 'function') window.__renderTerritoryClaim(); } catch(e){} return; }
             if (m.type === 'territory_reward') { try { if (typeof window.__applyTerritoryReward === 'function') window.__applyTerritoryReward(m); } catch (e) { } }
             if (m.type === 'territory_battle') { _closeWait(); m.startAt = Date.now() + 800; try { playBattle(m); } catch (e) { } try { if (typeof logSys === 'function') logSys('🏴 ' + (m.won ? ('你擊敗 ' + ((m.b&&m.b.name)||'佔領者') + '，佔領「' + _terrName(m.point) + '」！') : ('挑戰「' + _terrName(m.point) + '」失敗'))); } catch (e) { } try { if (typeof window.__renderTerritory === 'function') setTimeout(window.__renderTerritory, 400); } catch (e) { } }
             if (m.type === 'territory_defended') { try { toast('🛡️ 你擊退了 ' + (m.by||'某玩家') + ' 對「' + _terrName(m.point) + '」的挑戰！', '#14532d'); } catch(e){} try { if(typeof logSys==='function') logSys('🏴 你成功守住「'+_terrName(m.point)+'」據點，擊退 '+(m.by||'某玩家')); } catch(e){} }
