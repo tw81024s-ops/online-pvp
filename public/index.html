@@ -847,6 +847,7 @@ function _skillReqLv(sk){
 }
 
 window.VOID_GEAR_TIER = {1:["wrist_01","wrist_02","wrist_03","tsx_01","tsx_02","tsx_03","tsx_04"],2:["wrist_04","wrist_05","wrist_06","wrist_07","tsx_05","tsx_06","tsx_07","tsx_08"],3:["wrist_08","wrist_09","wrist_10","wrist_11","tsx_09","tsx_10","tsx_11"],4:["wrist_12","wrist_13","wrist_14","wrist_15","tsx_12","tsx_13"],5:["wrist_16","wrist_17","wrist_18","tsx_14","tsx_15","tsx_16","tsx_17","tsx_18"]};
+        window.VOID_BELT_TIER = {1:["blt_v01","blt_v02","blt_v03","blt_v04"],2:["blt_v05","blt_v06","blt_v07","blt_v08","blt_v09"],3:["blt_v10","blt_v11","blt_v12","blt_v13","blt_v14"],4:["blt_v15","blt_v16","blt_v17","blt_v18","blt_v19","blt_v20","blt_v21","blt_v22","blt_v23","blt_v24"],5:["blt_v25","blt_v26","blt_v27"]};   // 🩹 25轉虛空：腰帶獨立掉落池(T1~T5)
         const DB = {
         items: {
         "wrist_01": { n: "力量手環", type: "acc", slot: "wrist", str: 5, req: "all", safe: 4, p: 50000, c: "blue", tier: 1, img: "assets/icons/accessories/wrist_01.png" },
@@ -1454,6 +1455,33 @@ window.VOID_GEAR_TIER = {1:["wrist_01","wrist_02","wrist_03","tsx_01","tsx_02","
         "acc_137": { n: "光明靈魂腰帶", type: "acc", slot: "belt", ac: 0, req: "all", safe: 0, p: 11000, mhp: 20, mmp: 20, hpR: 1, mpR: 1, gachaWeight: 1 },
         "acc_138": { n: "守護皮帶", type: "acc", slot: "belt", ac: 1, req: "all", safe: 0, p: 10000, gachaWeight: 1 },
 		"blt_mr": { n: "抗魔皮帶", type: "acc", slot: "belt", ac: 0, mr: 5, req: "all", safe: 0, p: 10000, gachaWeight: 1 },
+        "blt_v01": { n: "老舊的身體腰帶", type: "acc", slot: "belt", con: 2, req: "all", safe: 4, p: 50000, c: "blue", tier: 1, img: "assets/icons/accessories/blt_v01.png" },
+        "blt_v02": { n: "老舊的精神腰帶", type: "acc", slot: "belt", wis: 2, req: "all", safe: 4, p: 50000, c: "blue", tier: 1, img: "assets/icons/accessories/blt_v02.png" },
+        "blt_v03": { n: "老舊的靈魂腰帶", type: "acc", slot: "belt", mr: 4, req: "all", safe: 4, p: 50000, c: "blue", tier: 1, img: "assets/icons/accessories/blt_v03.png" },
+        "blt_v04": { n: "皮帶", type: "acc", slot: "belt", con: 1, ac: -1, req: "all", safe: 4, p: 50000, c: "blue", tier: 1, img: "assets/icons/accessories/blt_v04.png" },
+        "blt_v05": { n: "身體腰帶", type: "acc", slot: "belt", con: 4, req: "all", safe: 4, p: 300000, c: "blue", tier: 2, img: "assets/icons/accessories/blt_v05.png" },
+        "blt_v06": { n: "精神腰帶", type: "acc", slot: "belt", wis: 4, req: "all", safe: 4, p: 300000, c: "blue", tier: 2, img: "assets/icons/accessories/blt_v06.png" },
+        "blt_v07": { n: "靈魂腰帶", type: "acc", slot: "belt", mr: 7, req: "all", safe: 4, p: 300000, c: "blue", tier: 2, img: "assets/icons/accessories/blt_v07.png" },
+        "blt_v08": { n: "多羅腰帶", type: "acc", slot: "belt", str: 2, dex: 2, req: "all", safe: 4, p: 300000, c: "blue", tier: 2, img: "assets/icons/accessories/blt_v08.png" },
+        "blt_v09": { n: "歐吉皮帶", type: "acc", slot: "belt", con: 3, ac: -2, req: "all", safe: 4, p: 300000, c: "blue", tier: 2, img: "assets/icons/accessories/blt_v09.png" },
+        "blt_v10": { n: "勇敢皮帶", type: "acc", slot: "belt", str: 4, con: 3, req: "all", safe: 4, p: 2000000, c: "blue", tier: 3, img: "assets/icons/accessories/blt_v10.png" },
+        "blt_v11": { n: "成長的腰帶", type: "acc", slot: "belt", con: 6, ac: -2, req: "all", safe: 4, p: 2000000, c: "blue", tier: 3, img: "assets/icons/accessories/blt_v11.png" },
+        "blt_v12": { n: "閃亮的身體腰帶", type: "acc", slot: "belt", con: 6, mr: 5, req: "all", safe: 4, p: 2000000, c: "blue", tier: 3, img: "assets/icons/accessories/blt_v12.png" },
+        "blt_v13": { n: "閃亮的精神腰帶", type: "acc", slot: "belt", wis: 6, mr: 5, req: "all", safe: 4, p: 2000000, c: "blue", tier: 3, img: "assets/icons/accessories/blt_v13.png" },
+        "blt_v14": { n: "閃亮的靈魂腰帶", type: "acc", slot: "belt", mr: 12, req: "all", safe: 4, p: 2000000, c: "blue", tier: 3, img: "assets/icons/accessories/blt_v14.png" },
+        "blt_v15": { n: "歐吉王腰帶", type: "acc", slot: "belt", str: 7, con: 6, req: "all", safe: 4, p: 15000000, c: "purple", tier: 4, img: "assets/icons/accessories/blt_v15.png" },
+        "blt_v16": { n: "泰坦皮帶", type: "acc", slot: "belt", con: 9, ac: -3, req: "all", safe: 4, p: 15000000, c: "purple", tier: 4, img: "assets/icons/accessories/blt_v16.png" },
+        "blt_v17": { n: "底比斯歐西里斯腰帶", type: "acc", slot: "belt", int: 8, wis: 6, mr: 6, req: "all", safe: 4, p: 15000000, c: "purple", tier: 4, img: "assets/icons/accessories/blt_v17.png" },
+        "blt_v18": { n: "巴蘭卡骷髏腰帶", type: "acc", slot: "belt", con: 6, mr: 14, req: "all", safe: 4, p: 15000000, c: "purple", tier: 4, img: "assets/icons/accessories/blt_v18.png" },
+        "blt_v19": { n: "狂龍力量腰帶", type: "acc", slot: "belt", str: 10, con: 5, req: "all", safe: 4, p: 15000000, c: "purple", tier: 4, img: "assets/icons/accessories/blt_v19.png" },
+        "blt_v20": { n: "狂龍敏捷腰帶", type: "acc", slot: "belt", dex: 10, con: 5, req: "all", safe: 4, p: 15000000, c: "purple", tier: 4, img: "assets/icons/accessories/blt_v20.png" },
+        "blt_v21": { n: "狂龍智力腰帶", type: "acc", slot: "belt", con: 5, int: 10, req: "all", safe: 4, p: 15000000, c: "purple", tier: 4, img: "assets/icons/accessories/blt_v21.png" },
+        "blt_v22": { n: "飛龍皮帶", type: "acc", slot: "belt", dex: 8, ac: -4, req: "all", safe: 4, p: 15000000, c: "purple", tier: 4, img: "assets/icons/accessories/blt_v22.png" },
+        "blt_v23": { n: "飛龍皮帶②", type: "acc", slot: "belt", str: 8, ac: -4, req: "all", safe: 4, p: 15000000, c: "purple", tier: 4, img: "assets/icons/accessories/blt_v23.png" },
+        "blt_v24": { n: "黑暗腰帶", type: "acc", slot: "belt", int: 7, mr: 14, req: "all", safe: 4, p: 15000000, c: "purple", tier: 4, img: "assets/icons/accessories/blt_v24.png" },
+        "blt_v25": { n: "死神腰帶", type: "acc", slot: "belt", str: 12, dex: 12, con: 10, mr: 12, crit: 3, req: "all", safe: 4, p: 80000000, c: "red", tier: 5, img: "assets/icons/accessories/blt_v25.png" },
+        "blt_v26": { n: "波賽頓的腰帶", type: "acc", slot: "belt", con: 14, wis: 10, ac: -4, mr: 20, req: "all", safe: 4, p: 80000000, c: "red", tier: 5, img: "assets/icons/accessories/blt_v26.png" },
+        "blt_v27": { n: "榮譽戰鬥腰帶", type: "acc", slot: "belt", str: 14, dex: 12, con: 12, ac: -6, pdmgPct: 0.08, req: "all", safe: 4, p: 80000000, c: "red", tier: 5, img: "assets/icons/accessories/blt_v27.png" },
         "potion_heal": { n: "紅色藥水", type: "pot", p: 37, c: "text-red-300", d: "恢復 15 HP", val: 15, gachaWeight: 0 },
         "potion_strong": { n: "橙色藥水", type: "pot", req: "all", p: 200, c: "text-orange-300", d: "恢復 40 HP", val: 40, gachaWeight: 0 },
         "potion_ult": { n: "白色藥水", type: "pot", req: "all", p: 600, c: "text-white", d: "恢復 60 HP", val: 60, gachaWeight: 0 },
@@ -7148,6 +7176,17 @@ function killMob(idx) {
                 var _gid = _pool[Math.floor(Math.random() * _pool.length)];
                 gainItem(_gid, 1);
                 logSys(`虛空掉落：<span class="text-emerald-300 font-bold">${(DB.items[_gid]||{}).n||_gid}</span>！`);
+            }
+        }
+        if (window.VOID_BELT_TIER) {   // 🩹 腰帶獨立掉落(同機率，不稀釋手環/內衣)
+            var _bt = window.VOID_BELT_TIER;
+            for (var _bk = 1; _bk <= 5; _bk++) {
+                var _bp = _bt[_bk] || [];
+                if (_bp.length && Math.random() < _vrate[_bk]) {
+                    var _bid = _bp[Math.floor(Math.random() * _bp.length)];
+                    gainItem(_bid, 1);
+                    logSys(`虛空掉落：<span class="text-amber-300 font-bold">${(DB.items[_bid]||{}).n||_bid}</span>！`);
+                }
             }
         }
     }
