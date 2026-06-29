@@ -12410,7 +12410,7 @@ window.__adminGrantPoly = function(formName){
   var REEL = [['🍒',44],['🔔',30],['🍋',15],['⭐',7],['7️⃣',3],['💎',1]];   // 權重總和100（提高中獎率：常見符號加重）
   var REEL_PAY = { '🍒':4, '🔔':6, '🍋':12, '⭐':30, '7️⃣':120, '💎':200 };       // 三連賠率
   var POOL_CUT = 0.20;            // 每注撥 20% 進全服頭獎池
-  var JACK_BASE = 100000000;      // 頭獎底值 1 億（離線/領取失敗時的保底）
+  var JACK_BASE = 10000000000;      // 頭獎底值 100 億（離線/領取失敗時的保底）
 
   function fmt(n){ return Math.floor(n||0).toLocaleString(); }
   function gold(){ return player.gold||0; }
@@ -12779,7 +12779,7 @@ window.__adminGrantPoly = function(formName){
     h+='<div style="font-size:13px;line-height:1.7;color:#cbd5e1;">2 副牌，點數接近 21 點者勝。莊家 17 點停牌；21點賠 1:1；<b style="color:#fca5a5;">平手算莊家贏</b>；爆牌即輸。</div></div>';
     // 頭獎池
     h+='<div style="margin-bottom:12px;border:1px solid #92400e;background:rgba(120,53,15,.2);border-radius:10px;padding:8px 10px;"><div style="font-weight:800;color:#fde047;margin-bottom:2px;">🎉 全服累積頭獎池</div>';
-    h+='<div style="font-size:13px;line-height:1.7;color:#cbd5e1;">刮刮卡、拉霸、比大小<b>共用同一個全服頭獎池</b>，底值 1 億，每筆下注撥 20% 進池。<br>刮刮卡、拉霸、比大小下注時，都有機會 <b style="color:#fde047;">抱走整池</b>，中獎後歸零重新累積。（21點不參與）<br>🎯 也可直接 <b style="color:#fde047;">拚獎池</b>：每注 1 萬，搏一把全服頭獎。</div></div>';
+    h+='<div style="font-size:13px;line-height:1.7;color:#cbd5e1;">刮刮卡、拉霸、比大小<b>共用同一個全服頭獎池</b>，底值 100 億，每筆下注撥 20% 進池。<br>刮刮卡、拉霸、比大小下注時，都有機會 <b style="color:#fde047;">抱走整池</b>，中獎後歸零重新累積。（21點不參與）<br>🎯 也可直接 <b style="color:#fde047;">拚獎池</b>：每注 1 萬，搏一把全服頭獎。</div></div>';
     // 上限
     h+='<div style="margin-bottom:12px;font-size:13px;color:#cbd5e1;">💰 籌碼＝<b>金幣</b>，單注上限 <b style="color:#fcd34d;">10 億</b>。</div>';
     // 兌換
@@ -12804,7 +12804,7 @@ window.__adminGrantPoly = function(formName){
 (function(){
   var COST = 10000000;            // 刮一次 1000 萬
   var POOL_CUT = 0.20;            // 撥 20% 進全服頭獎池
-  var JACK_BASE = 100000000;      // 頭獎底值 1 億
+  var JACK_BASE = 10000000000;      // 頭獎底值 100 億
   // 中/高階獎池（皆可交易）
   var MID_LEGS = ['legs_irongate','legs_str','legs_int','legs_dex','legs_growth','legs_anubis','legs_magicdef'];
   var MID_RUNE = ['rune_rage','rune_will','rune_dominate','rune_rule'];

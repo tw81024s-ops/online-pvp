@@ -224,7 +224,7 @@ app.post('/api/admin/config', auth, adminOnly, (req, res) => {
 });
 
 // ====== 全服累積頭獎池（刮刮卡＋拉霸共用）======
-const JACKPOT_BASE = 100000000;   // 底值 1 億
+const JACKPOT_BASE = 10000000000;   // 底值 100 億
 const JACKPOT_MAX = 100000000000; // 池上限 1000 億（中獎換頭獎金幣捲，避免無限累積）
 function getJackpot() {
     const c = store.getConfig() || {};
