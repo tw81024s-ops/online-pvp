@@ -11804,7 +11804,7 @@ window.__adminGrantPoly = function(formName){
   window.__renderMailbox=function(){
     var st=window.__mailState||{terr:null,mails:[]};
     var hasAny=!!st.terr || ((st.mails||[]).length>0);
-    try{ var d=document.getElementById('terr-fab-dot'); if(d) d.style.display=hasAny?'block':'none'; var bb=document.getElementById('terr-claim-btn'); if(bb) bb.textContent=hasAny?'📦 物資 ●':'📦 物資'; }catch(e){}
+    try{ var d=document.getElementById('terr-fab-dot'); if(d) d.style.display=hasAny?'block':'none'; var mb=document.getElementById('mail-menu-btn'); if(mb) mb.textContent=hasAny?'📬 信箱 ●':'📬 信箱'; var bb=document.getElementById('terr-claim-btn'); if(bb) bb.textContent=hasAny?'📦 物資 ●':'📦 物資'; }catch(e){}
     var body=document.getElementById('mailbox-body'); if(!body) return;
     var html='';
     if(st.terr){ var t=st.terr;
@@ -17222,6 +17222,6 @@ window.onload = () => {
 /* ===== 支配塔探索模式 END ===== */
 
 </script>
-<script src="online.js?v=268"></script>
+<script src="online.js?v=269"></script>
 </body>
 </html>

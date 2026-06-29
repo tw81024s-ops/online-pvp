@@ -439,8 +439,9 @@
     const btnAdmin = el('button', { style: btnStyle('#7c3aed') + 'display:none;' }, '🛠️ 管理員');
     const btnEvents = el('button', { style: btnStyle('#9333ea') }, '🎉 每日活動');
     const btnOffline = el('button', { style: btnStyle('#0891b2') }, '🏕️ 離線練功');
+    const btnMail = el('button', { id: 'mail-menu-btn', style: btnStyle('#0e7490') }, '📬 信箱');
     function btnStyle(bg) { return `background:${bg};color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:bold;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.45);`; }
-    fab.append(statusEl, btnAdmin, btnSlots, btnOffline, btnEvents, btnArena, btnLoginFab);
+    fab.append(statusEl, btnAdmin, btnSlots, btnOffline, btnEvents, btnMail, btnArena, btnLoginFab);
     function setStatus(s, bad) { statusEl.style.display = 'block'; statusEl.textContent = s; statusEl.style.color = bad ? '#fca5a5' : '#86efac'; }
     function refreshAdminBtn() {
         // 雙重隱藏：必須是管理員帳號，且網址結尾加上 #admin 才顯示按鈕（朋友與一般情況都看不到）
@@ -1005,6 +1006,7 @@
     btnArena.onclick = showArena;
     btnEvents.onclick = showEvents;
     btnOffline.onclick = () => showOffline();
+    btnMail.onclick = () => { try { if (window.openMailbox) window.openMailbox(); } catch(e){} };
     function showOffline() {
         const _p = getPlayer(); if (!_p || !_p.cls) { toast('請先建立或載入角色再使用離線練功', '#7f1d1d'); return; }
         if (typeof window.__offlinePending !== 'function') { toast('離線練功尚未就緒，請重新整理', '#7f1d1d'); return; }
