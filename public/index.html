@@ -4342,7 +4342,7 @@ function applyTalentBonuses(d,p){
     d.mr=(d.mr||0)+talentVal('def','mr');
     d.dr=(d.dr||0)+talentVal('def','dr');
     d.er=(d.er||0)+talentVal('def','er');
-    d.hpR=(d.hpR||0)+Math.floor((d.hpR||0)*talentVal('def','hpr')/100);   // HP恢復 +%（以現有 hpR 為基底）
+    d.talentHpRegenPct=Math.min(talentVal('def','hpr'),25)*0.0008;   // 🩹 回血天賦：每階0.08%最大HP，點滿25階=2%最大HP/跳（取代原本以d.hpR為基底、永遠加0的失效公式）
     // —— %總傷 / 反傷 / 最大HP%：存成倍率欄位（下階段接進公式）——
     d.tPdmgPct=talentVal('war','pdmg'); d.tMdmgPct=talentVal('war','mdmg'); d.tSdmgPct=talentVal('war','sdmg');
     d.tHpPct=talentVal('def','hp'); d.tReflPct=talentVal('def','refl');
@@ -5655,6 +5655,7 @@ function regenTick() {
         let baseHpRegen = player.d.hpRegenMax > 0 ? roll(1, player.d.hpRegenMax) : 0;
         // 使用 Number() 強制轉換為數字，避免 10 + '1' = 101 的字串相加 Bug
         let totalHpRegen = Number(baseHpRegen) + Number(player.d.hpR || 0);
+        if (player.d.talentHpRegenPct > 0) { totalHpRegen += Math.floor((player.mhp || 0) * player.d.talentHpRegenPct); }   // 🩹 回血天賦：每跳回固定%最大HP
         if (totalHpRegen > 0) {
             player.hp = Math.min(player.mhp, player.hp + totalHpRegen);
         }
@@ -8849,7 +8850,7 @@ function _renderTalentUI(){
       html+='<div style="background:'+bg+';border:1px solid '+bd+';border-radius:8px;padding:6px 5px;margin-bottom:6px;position:relative;'+(locked?'opacity:.38;':'')+'">'
         +(nd.cap>1?'<span style="position:absolute;top:4px;right:5px;font-size:9px;font-weight:800;color:#ecd9a3;">'+cur+'/'+nd.cap+'</span>':(cur?'<span style="position:absolute;top:4px;right:5px;font-size:9px;color:#7fe39a;">✓</span>':''))
         +'<div style="font-size:11px;font-weight:700;color:#e7dfce;line-height:1.15;">'+_TUI_NAMES[nd.k]+'</div>'
-        +(nd.ks?'':'<div style="font-size:10px;color:#8b857a;margin-top:2px;">'+(cur?('+'+(nd.v*cur)+unit):('每階 +'+nd.v+unit))+'</div>')
+        +(nd.ks?'':'<div style="font-size:10px;color:#8b857a;margin-top:2px;">'+(nd.k==='hpr'?(cur?('+'+(nd.v*cur*0.08).toFixed(2)+'% 最大HP/跳'):'每階 +0.08% 最大HP/跳'):(cur?('+'+(nd.v*cur)+unit):('每階 +'+nd.v+unit)))+'</div>')
         +(locked?'':'<div style="display:flex;gap:4px;margin-top:5px;">'
            +'<button onclick="_tInvest(\''+line+'\',\''+nd.k+'\')" style="flex:1;background:#1f2a14;border:1px solid #3f5a2a;color:#bfe3a0;border-radius:5px;padding:3px;font-size:13px;cursor:pointer;'+(maxed?'opacity:.4;':'')+'">＋</button>'
            +(cur>0?'<button onclick="_tRemove(\''+line+'\',\''+nd.k+'\')" style="width:30px;background:#2a1414;border:1px solid #5a2a2a;color:#e3a0a0;border-radius:5px;padding:3px;font-size:13px;cursor:pointer;">－</button>':'')
