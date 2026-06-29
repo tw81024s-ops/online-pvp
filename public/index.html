@@ -11828,15 +11828,18 @@ window.__adminGrantPoly = function(formName){
     if(cb) cb.addEventListener('click',function(){
       if(!(typeof player!=='undefined' && player && player.cls)){ alert('請先進入角色再領取'); return; }
       cb.disabled=true; cb.textContent='領取中…請稍候';
+      try{ clearTimeout(window.__mailClaimTimer); }catch(e){}
       try{ if(window.__mailSend) window.__mailSend.claim(); }catch(e){ cb.disabled=false; cb.textContent='🎁 一鍵領取全部'; }
-      setTimeout(function(){ if(cb&&cb.textContent==='領取中…請稍候'){ cb.disabled=false; cb.textContent='🎁 重新領取'; alert('領取沒有回應（伺服器可能正在喚醒）。請等幾秒後再按一次「重新領取」；若仍不行，重新整理頁面再試。'); } },25000);
+      window.__mailClaimTimer=setTimeout(function(){ var b=document.getElementById('mailbox-claim'); if(b&&b.textContent==='領取中…請稍候'){ b.disabled=false; b.textContent='🎁 重新領取'; alert('領取沒有回應，請重新整理頁面後再試。'); } },25000);
     });
   };
   window.__mailClaimDone=function(m){
+    try{ clearTimeout(window.__mailClaimTimer); }catch(e){}
+    var b=null; try{ b=document.getElementById('mailbox-claim'); }catch(e){}
     try{
-      if(m&&m.ok&&!m.empty){ if(typeof toast==='function') toast('🎁 已領取並寫入存檔','#15803d'); }
-      else if(m&&m.empty){ if(typeof toast==='function') toast('目前沒有可領取的物資','#475569'); }
-      else { if(typeof toast==='function') toast('領取失敗，請重新整理後再試','#7f1d1d'); }
+      if(m&&m.ok&&!m.empty){ if(b){ b.disabled=true; b.textContent='✅ 已領取'; } if(typeof toast==='function') toast('🎁 已領取並寫入存檔（金幣+物品已進角色）','#15803d'); }
+      else if(m&&m.empty){ if(b){ b.disabled=false; b.textContent='🎁 一鍵領取全部'; } if(typeof toast==='function') toast('目前沒有可領取的物資','#475569'); }
+      else { if(b){ b.disabled=false; b.textContent='🎁 重新領取'; } if(typeof toast==='function') toast('領取失敗：'+((m&&m.reason)||'未知')+'，請重新整理後再試','#7f1d1d'); }
     }catch(e){}
   };
   window.openTerritory=function(){
@@ -17223,6 +17226,6 @@ window.onload = () => {
 /* ===== 支配塔探索模式 END ===== */
 
 </script>
-<script src="online.js?v=271"></script>
+<script src="online.js?v=272"></script>
 </body>
 </html>

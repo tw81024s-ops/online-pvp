@@ -163,19 +163,25 @@
     window.__mailSend = {
         get: function(){ try { if (ws && ws.readyState === 1) ws.send(JSON.stringify({ type:'mail_get' })); } catch(e){} },
         claim: async function(){
-            // 先上傳當前存檔，但最多等 6 秒：Render 冷啟動/慢網時不把領取卡死；逾時就直接領，伺服器會在現有存檔上注入
+            // 走 HTTP：一次請求完成 注入→落地→清空→回傳，完全不依賴 WebSocket（連線斷/互踢也能領）
+            var slot = activeSlot();
+            var body = { slot: slot };
+            try { var raw = localStorage.getItem(slotKey()); if (raw) body.data = JSON.parse(raw); } catch(e){}   // 帶上目前存檔，伺服器在最新存檔上注入，不丟進度
+            var r = null;
             try {
-                if (typeof uploadSave === 'function') {
-                    await Promise.race([ uploadSave(), new Promise(function(r){ setTimeout(r, 6000); }) ]);
-                }
-            } catch(e){}
-            // 送出 mail_claim；若連線斷了就重連後重送（最多 4 次、間隔 3 秒，涵蓋伺服器喚醒時間）
-            var _mt = 0;
-            (function _mailSendClaim(){
-                try { if (ws && ws.readyState === 1) { ws.send(JSON.stringify({ type:'mail_claim', slot: activeSlot() })); return; } } catch(e){}
-                try { if (typeof connectWS === 'function') connectWS(); } catch(e){}
-                if (_mt++ < 4) setTimeout(_mailSendClaim, 3000);
-            })();
+                var ctrl = new AbortController();
+                var to = setTimeout(function(){ try{ ctrl.abort(); }catch(e){} }, 20000);
+                var resp = await fetch('/api/mail/claim', { method:'POST', headers: Object.assign({ 'Content-Type':'application/json' }, token ? { 'x-token': token } : {}), body: JSON.stringify(body), signal: ctrl.signal });
+                clearTimeout(to);
+                r = await resp.json().catch(function(){ return { ok:false, reason:'bad_json' }; });
+            } catch(e){ r = { ok:false, reason:'http_err' }; }
+            if (r && r.ok && r.data) {
+                try { localStorage.setItem('lineage_idle_save_' + r.slot, (typeof r.data === 'string' ? r.data : JSON.stringify(r.data))); } catch(e){}
+                try { if (r.updatedAt && typeof _setSts === 'function') _setSts(r.slot, r.updatedAt); } catch(e){}
+                try { if (typeof loadGame === 'function') loadGame(); } catch(e){}
+            }
+            try { if (typeof window.__mailClaimDone === 'function') window.__mailClaimDone(r); } catch(e){}
+            try { if (window.__mailSend && ws && ws.readyState === 1) window.__mailSend.get(); } catch(e){}   // 重新整理信箱清單(有連線才送)
         }
     };
 

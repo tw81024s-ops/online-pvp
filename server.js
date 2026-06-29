@@ -279,6 +279,32 @@ app.post('/api/admin/sweep-saves', auth, adminOnly, (req, res) => {
 app.get('/api/admin/users', auth, adminOnly, (req, res) => {
     res.json({ users: store.allUsers() });
 });
+app.post('/api/mail/claim', auth, (req, res) => {   // 📬 HTTP 領取：不靠 WebSocket，一次完成 注入→落地→清空→回傳（連線再亂也能領）
+    try {
+        const u = req.user;
+        if (!u) return res.json({ ok: false, reason: 'no_user' });
+        let slot = parseInt(req.body && req.body.slot); slot = Math.min(4, Math.max(1, isFinite(slot) ? slot : 1));
+        // 基底存檔：優先用客戶端帶上的最新存檔（避免丟進度），否則用伺服器現有存檔
+        let saveStr = null;
+        const cd = req.body && req.body.data;
+        if (cd) { try { saveStr = (typeof cd === 'string') ? cd : JSON.stringify(cd); } catch (e) { saveStr = null; } }
+        if (!saveStr) { const row = store.getSave(u.id, slot); if (!row || !row.data) return res.json({ ok: false, reason: 'no_save' }); saveStr = (typeof row.data === 'string') ? row.data : JSON.stringify(row.data); }
+        // 蒐集：領地待領 + 所有信件
+        let totalGold = 0; let totalItems = [];
+        const rec = store.getTerrPend(u.id) || {};
+        const terr = _terrToItems(rec); totalGold += terr.gold; totalItems = totalItems.concat(terr.items);
+        const mails = store.getMail(u.id) || [];
+        mails.forEach(m2 => { const r = _mailToItems(m2); totalGold += r.gold; totalItems = totalItems.concat(r.items); });
+        if (totalGold <= 0 && totalItems.length === 0) { return res.json({ ok: true, empty: true }); }
+        const merged = _injectIntoSaveStr(saveStr, totalGold, totalItems);
+        if (!merged) return res.json({ ok: false, reason: 'inject_fail' });
+        store.putSave(u.id, merged, slot);
+        store.putTerrPend(u.id, { gold: 0, refine: 0, souls: [], chests: [] });
+        store.putMail(u.id, []);
+        const newRow = store.getSave(u.id, slot);
+        res.json({ ok: true, slot: slot, data: merged, updatedAt: newRow ? newRow.updated_at : null, gold: totalGold, itemCount: totalItems.length });
+    } catch (e) { res.json({ ok: false, reason: 'err' }); }
+});
 app.post('/api/admin/mail', auth, adminOnly, (req, res) => {   // 📬 管理員寄信(補償)：用同一套可靠注入投遞
     const b = req.body || {};
     const uname = String(b.user || '').trim();
