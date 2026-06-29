@@ -9427,6 +9427,7 @@ function useItem(u, silent = false) {
 function isTwoHandedWpn(d) {
     return !!(d && (d.isBow || d.w2h));
 }
+function isShieldItem(d) { return !!(d && (('block' in d) || ('ac' in d))); }   // 真盾牌(有 ac/block)；臂甲與法器(水晶球/魔法書/瞄準鏡)無此欄位，可與雙手武器並存
 // 隱身狀態：施放隱身術(buff)期間，或穿著隱身斗篷(arm_88)時皆成立；卸下斗篷即失效
 function isInvisible() {
     return player.buffs.sk_invisible > 0 || (player.eq.cloak && player.eq.cloak.id === 'arm_88');
@@ -9511,10 +9512,10 @@ function equipItem(item) {
     }
 
     // 雙手武器（弓 / w2h）無法與盾牌並存：裝雙手武器自動卸盾、裝盾自動卸雙手武器
-    if (slot === 'wpn' && isTwoHandedWpn(d) && player.eq.shield) {
+    if (slot === 'wpn' && isTwoHandedWpn(d) && player.eq.shield && isShieldItem(DB.items[player.eq.shield.id])) {
         returnEquipToInv('shield');
         logSys(`雙手武器無法持盾，已卸下盾牌。`);
-    } else if (slot === 'shield' && player.eq.wpn && isTwoHandedWpn(DB.items[player.eq.wpn.id])) {
+    } else if (slot === 'shield' && isShieldItem(d) && player.eq.wpn && isTwoHandedWpn(DB.items[player.eq.wpn.id])) {
         returnEquipToInv('wpn');
         logSys(`裝備盾牌，已卸下雙手武器。`);
     }
