@@ -279,6 +279,17 @@ app.post('/api/admin/sweep-saves', auth, adminOnly, (req, res) => {
 app.get('/api/admin/users', auth, adminOnly, (req, res) => {
     res.json({ users: store.allUsers() });
 });
+app.post('/api/admin/mail', auth, adminOnly, (req, res) => {   // 📬 管理員寄信(補償)：用同一套可靠注入投遞
+    const b = req.body || {};
+    const uname = String(b.user || '').trim();
+    const u = store.findUser(uname);
+    if (!u) return res.status(404).json({ error: 'user not found' });
+    const items = Array.isArray(b.items) ? b.items.map(it => ({ id: String(it.id), cnt: Math.max(1, Math.floor(it.cnt || 1)), soul: !!it.soul, lv: it.lv })) : [];
+    const mail = { mid: _mailUid(), ts: Date.now(), title: String(b.title || '系統補償'), gold: Math.max(0, Math.floor(b.gold || 0)), items: items };
+    store.addMail(u.id, mail);
+    try { const tw = online.get(uname); if (tw) send(tw, { type: 'mail_state', mail: mailPublic(uname) }); } catch (e) {}
+    res.json({ ok: true, mail });
+});
 app.post('/api/admin/reset-password', auth, adminOnly, (req, res) => {
     const { username, newPassword } = req.body || {};
     if (!newPassword || String(newPassword).length < 4) return res.status(400).json({ error: '密碼至少 4 碼' });
@@ -435,17 +446,59 @@ function terrAddPending(username, res) {
     if (res.chest) (rec.chests = rec.chests || []).push(res.chest);
     store.putTerrPend(u.id, rec);
 }   // 🩹 改累積待領，不自動發，由玩家一鍵領收
+// ===== 信箱/伺服器注入：把待領資源直接寫進伺服器端存檔（繞過客戶端存檔不可靠）=====
+const SOULSTONE_BY_TIER = {1:['soul_01','soul_02','soul_03','soul_04','soul_05','soul_06','soul_07'],2:['soul_08','soul_09','soul_10','soul_11','soul_12','soul_13','soul_14'],3:['soul_15','soul_16','soul_17','soul_18'],4:['soul_19','soul_20','soul_21','soul_22'],5:['soul_23']};
+function _mailUid(){ return Math.random().toString(36).slice(2,11); }
+function _terrToItems(rec){
+    let gold = Math.floor((rec && rec.gold) || 0); const items = [];
+    const refine = Math.floor((rec && rec.refine) || 0);
+    if (refine > 0) items.push({ id: 'dom_refine_stone', cnt: refine });
+    const chestCnt = {}; ((rec && rec.chests) || []).forEach(t => { chestCnt[t] = (chestCnt[t] || 0) + 1; });
+    Object.keys(chestCnt).forEach(t => items.push({ id: 'secret_box_t' + t, cnt: chestCnt[t] }));
+    ((rec && rec.souls) || []).forEach(t => { const a = SOULSTONE_BY_TIER[t] || []; if (a.length) items.push({ id: a[Math.floor(Math.random() * a.length)], cnt: 1, soul: true }); });
+    return { gold, items };
+}
+function _mailToItems(mail){
+    let gold = Math.floor((mail && mail.gold) || 0);
+    const items = ((mail && mail.items) || []).map(it => ({ id: it.id, cnt: Math.max(1, Math.floor(it.cnt || 1)), soul: !!it.soul, lv: it.lv }));
+    return { gold, items };
+}
+// 把 gold + items 注入存檔字串，回傳新字串(失敗回 null)
+function _injectIntoSaveStr(saveStr, gold, items){
+    let obj; try { obj = JSON.parse(saveStr); } catch (e) { return null; }
+    const p = obj && obj.p; if (!p || typeof p !== 'object') return null;
+    if (!Array.isArray(p.inv)) p.inv = [];
+    if (gold > 0) { const g = Number(p.gold || 0) + gold; p.gold = Math.min(isFinite(g) ? g : 0, 1e11); }
+    (items || []).forEach(function(it){
+        if (!it || !it.id) return;
+        if (it.soul) { p.inv.push({ id: it.id, uid: _mailUid(), cnt: 1, lv: it.lv || 1, en: 0, lock: false, junk: false, attr: false }); }
+        else {
+            let f = null; for (let i = 0; i < p.inv.length; i++) { if (p.inv[i] && p.inv[i].id === it.id) { f = p.inv[i]; break; } }
+            if (f) f.cnt = (f.cnt || 0) + it.cnt;
+            else p.inv.push({ id: it.id, uid: _mailUid(), cnt: it.cnt, en: 0, bless: false, anc: false, attr: false, lock: false, junk: false });
+        }
+    });
+    try { return JSON.stringify(obj); } catch (e) { return null; }
+}
+// 信箱內容(本人)：領地待領 + 信件清單
+function mailPublic(username){
+    const u = store.findUser(username); if (!u) return { terr: null, mails: [] };
+    const rec = store.getTerrPend(u.id) || {};
+    const terr = (Math.floor(rec.gold||0)>0 || Math.floor(rec.refine||0)>0 || (rec.souls||[]).length || (rec.chests||[]).length)
+        ? { gold: Math.floor(rec.gold||0), refine: Math.floor(rec.refine||0), souls: (rec.souls||[]).slice(), chests: (rec.chests||[]).slice() } : null;
+    return { terr, mails: (store.getMail(u.id) || []).slice() };
+}
 function terrPendPublic(username) {
     const u = store.findUser(username); if (!u) return { gold: 0, refine: 0, souls: [], chests: [] };
     const rec = store.getTerrPend(u.id) || {};
     return { gold: Math.floor(rec.gold || 0), refine: Math.floor(rec.refine || 0), souls: (rec.souls || []).slice(), chests: (rec.chests || []).slice() };
 }
-function terrFlushPending(username) {
+function terrFlushPending(username, targetWs) {
     const u = store.findUser(username); if (!u) return;
     let rec = store.getTerrPend(u.id); if (!rec) return;
     const has = Math.floor(rec.gold || 0) > 0 || Math.floor(rec.refine || 0) > 0 || (rec.souls || []).length || (rec.chests || []).length;
     if (!has) return;
-    const ws = online.get(username); if (!ws) return;
+    const ws = targetWs || online.get(username); if (!ws) return;   // 🩹 多裝置修正：優先發給按領收的那條連線，避免發到另一台(手機/電腦)
     const gInt = Math.floor(rec.gold || 0), rInt = Math.floor(rec.refine || 0);
     send(ws, { type: 'territory_reward', gold: gInt, refine: rInt, souls: rec.souls || [], chests: rec.chests || [] });
     store.putTerrPend(u.id, { gold: (rec.gold || 0) - gInt, refine: (rec.refine || 0) - rInt, souls: [], chests: [] });
@@ -728,8 +781,38 @@ wss.on('connection', (ws) => {
             return;
         }
         if (msg.type === 'territory_claim') {   // 🩹 一鍵領收：發送待領並清空
-            terrFlushPending(ws.username);
+            terrFlushPending(ws.username, ws);   // 🩹 多裝置修正：發給按領收的這條連線本身
             send(ws, { type: 'territory_pend', pend: terrPendPublic(ws.username) });
+            return;
+        }
+        if (msg.type === 'mail_get') {   // 📬 開啟信箱：回傳領地待領+信件
+            send(ws, { type: 'mail_state', mail: mailPublic(ws.username) });
+            return;
+        }
+        if (msg.type === 'mail_claim') {   // 📬 領取：伺服器直接注入存檔(可靠投遞)
+            try {
+                const u = store.findUser(ws.username);
+                if (!u) { send(ws, { type: 'mail_claim_result', ok: false, reason: 'no_user' }); return; }
+                let slot = parseInt(msg.slot); slot = Math.min(4, Math.max(1, isFinite(slot) ? slot : 1));
+                const row = store.getSave(u.id, slot);
+                if (!row || !row.data) { send(ws, { type: 'mail_claim_result', ok: false, reason: 'no_save' }); return; }
+                // 蒐集：領地待領 + 所有信件
+                let totalGold = 0; let totalItems = [];
+                const rec = store.getTerrPend(u.id) || {};
+                const terr = _terrToItems(rec); totalGold += terr.gold; totalItems = totalItems.concat(terr.items);
+                const mails = store.getMail(u.id) || [];
+                mails.forEach(m2 => { const r = _mailToItems(m2); totalGold += r.gold; totalItems = totalItems.concat(r.items); });
+                if (totalGold <= 0 && totalItems.length === 0) { send(ws, { type: 'mail_claim_result', ok: true, empty: true }); return; }
+                const saveStr = (typeof row.data === 'string') ? row.data : JSON.stringify(row.data);
+                const merged = _injectIntoSaveStr(saveStr, totalGold, totalItems);
+                if (!merged) { send(ws, { type: 'mail_claim_result', ok: false, reason: 'inject_fail' }); return; }
+                // 先寫進伺服器存檔(成功落地)，再清空待領/信件 → 任何失敗都不會丟
+                store.putSave(u.id, merged, slot);
+                store.putTerrPend(u.id, { gold: 0, refine: 0, souls: [], chests: [] });
+                store.putMail(u.id, []);
+                const newRow = store.getSave(u.id, slot);
+                send(ws, { type: 'mail_claim_result', ok: true, slot: slot, data: merged, updatedAt: newRow ? newRow.updated_at : null, gold: totalGold, itemCount: totalItems.length });
+            } catch (e) { try { send(ws, { type: 'mail_claim_result', ok: false, reason: 'err' }); } catch (e2) {} }
             return;
         }
         if (msg.type === 'territory_capture') {   // 佔領空據點

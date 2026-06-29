@@ -160,6 +160,13 @@
         release: function(point){ try { ws.send(JSON.stringify({ type:'territory_release', point:point })); } catch(e){} },
         claim: function(){ try { ws.send(JSON.stringify({ type:'territory_claim' })); } catch(e){} }
     };
+    window.__mailSend = {
+        get: function(){ try { ws.send(JSON.stringify({ type:'mail_get' })); } catch(e){} },
+        claim: async function(){
+            try { if (typeof uploadSave === 'function') await uploadSave(); } catch(e){}   // 先上傳當前存檔，伺服器在「最新存檔」上注入，不丟進度
+            try { ws.send(JSON.stringify({ type:'mail_claim', slot: activeSlot() })); } catch(e){}
+        }
+    };
 
     function buildProfile() {
         try { if (typeof calcStats === 'function') calcStats(); } catch (e) { }
@@ -381,6 +388,19 @@
             if (m.type === 'pvp_reward') { try { if (typeof window.__applyPvpReward === 'function') window.__applyPvpReward(m.gold || 0, m.tickets || 0, m.reason); } catch (e) { } }
             if (m.type === 'territory_state') { window.__territory = { points: m.points || {}, mult: m.mult || {} }; if (Array.isArray(m.log)) window.__territoryLog = m.log; try { if (typeof window.__renderTerritory === 'function') window.__renderTerritory(); } catch (e) { } try { if (m.pend) { window.__terrPend = m.pend; } } catch(e){} try { if (typeof window.__renderTerritoryLog === 'function') window.__renderTerritoryLog(); } catch (e) { } }
             if (m.type === 'territory_pend') { try { window.__terrPend = m.pend || { gold:0, refine:0, souls:[], chests:[] }; if (typeof window.__renderTerritoryClaim === 'function') window.__renderTerritoryClaim(); } catch(e){} return; }
+            if (m.type === 'mail_state') { try { window.__mailState = m.mail || { terr:null, mails:[] }; if (typeof window.__renderMailbox === 'function') window.__renderMailbox(); } catch(e){} return; }
+            if (m.type === 'mail_claim_result') {
+                try {
+                    if (m.ok && m.data) {
+                        try { localStorage.setItem('lineage_idle_save_' + m.slot, (typeof m.data === 'string' ? m.data : JSON.stringify(m.data))); } catch(e){}
+                        try { if (m.updatedAt && typeof _setSts === 'function') _setSts(m.slot, m.updatedAt); } catch(e){}
+                        try { if (typeof loadGame === 'function') loadGame(); } catch(e){}
+                    }
+                    try { if (typeof window.__mailClaimDone === 'function') window.__mailClaimDone(m); } catch(e){}
+                    try { ws.send(JSON.stringify({ type:'mail_get' })); } catch(e){}
+                } catch(e){}
+                return;
+            }
             if (m.type === 'territory_reward') { try { if (typeof window.__applyTerritoryReward === 'function') window.__applyTerritoryReward(m); } catch (e) { } }
             if (m.type === 'territory_battle') { _closeWait(); m.startAt = Date.now() + 800; try { playBattle(m); } catch (e) { } try { if (typeof logSys === 'function') logSys('🏴 ' + (m.won ? ('你擊敗 ' + ((m.b&&m.b.name)||'佔領者') + '，佔領「' + _terrName(m.point) + '」！') : ('挑戰「' + _terrName(m.point) + '」失敗'))); } catch (e) { } try { if (typeof window.__renderTerritory === 'function') setTimeout(window.__renderTerritory, 400); } catch (e) { } }
             if (m.type === 'territory_defended') { try { toast('🛡️ 你擊退了 ' + (m.by||'某玩家') + ' 對「' + _terrName(m.point) + '」的挑戰！', '#14532d'); } catch(e){} try { if(typeof logSys==='function') logSys('🏴 你成功守住「'+_terrName(m.point)+'」據點，擊退 '+(m.by||'某玩家')); } catch(e){} }
@@ -1509,6 +1529,36 @@
             if (!v || !confirm(`確定刪除帳號 ${v}？此動作無法復原`)) return;
             try { await api('/api/admin/delete-user', 'POST', { username: v }); toast('已刪除'); } catch (e) { toast(e.message, '#7f1d1d'); }
         }, true, '要刪除的帳號');
+        function openMailCompose(presetUser) {
+            const mbox = el('div', {});
+            const uIn = input('帳號（發給自己就填自己的帳號）'); if (presetUser) uIn.value = presetUser;
+            const gIn = input('金幣數量（可留空＝0）', 'number');
+            const iTa = el('textarea', { style: 'width:100%;min-height:96px;background:#1e293b;border:1px solid #475569;border-radius:8px;padding:10px;color:#fff;margin-bottom:8px;font-family:monospace;font-size:13px;' });
+            iTa.placeholder = '道具，每行一個：道具id 數量\n例如：\nsecret_box_t3 5\ndom_refine_stone 1000\nsoul_19 1';
+            const hint = el('div', { style: 'font-size:12px;color:#94a3b8;margin-bottom:10px;line-height:1.6;' }, '常用id：寶箱 secret_box_t1~t5、紋樣精煉石 dom_refine_stone、靈魂石 soul_01~soul_23（soul_ 開頭自動視為靈魂石，每個一顆）');
+            const sbtn = el('button', { style: 'width:100%;background:#15803d;color:#fff;border:none;border-radius:8px;padding:11px;font-weight:800;cursor:pointer;' }, '📬 發送');
+            mbox.append(uIn, gIn, iTa, hint, sbtn);
+            sbtn.onclick = async () => {
+                const user = (uIn.value || '').trim(); if (!user) return toast('請填帳號', '#7f1d1d');
+                const gold = Math.max(0, parseInt(gIn.value) || 0);
+                const items = [];
+                (iTa.value || '').split(/\n/).forEach(line => {
+                    const t = (line || '').trim(); if (!t) return;
+                    const parts = t.split(/[\s*]+/).filter(Boolean);
+                    const id = parts[0]; const cnt = Math.max(1, parseInt(parts[1]) || 1);
+                    if (id) items.push({ id: id, cnt: cnt, soul: /^soul_/.test(id) });
+                });
+                if (gold <= 0 && items.length === 0) return toast('請填金幣或道具', '#7f1d1d');
+                sbtn.disabled = true; sbtn.textContent = '發送中…';
+                try {
+                    await api('/api/admin/mail', 'POST', { user: user, title: '測試信件', gold: gold, items: items });
+                    toast('✅ 已發送給 ' + user + '（請至信箱領取）', '#15803d');
+                    sbtn.textContent = '✅ 已發送'; setTimeout(() => { sbtn.disabled = false; sbtn.textContent = '📬 發送'; }, 1500);
+                } catch (e) { toast((e && e.message) || '發送失敗', '#7f1d1d'); sbtn.disabled = false; sbtn.textContent = '📬 發送'; }
+            };
+            modal('📬 發送信件（測試）', mbox, { w: '420px' });
+        }
+        row('📬 發送信件（可附道具）', '開啟', () => openMailCompose(''), false);
         modal('🛠️ 管理員面板', wrap, { w: '480px' });
     };
 

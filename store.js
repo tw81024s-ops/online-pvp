@@ -135,6 +135,10 @@ module.exports = {
     putTerritory(t) { data.territory = t; flush(); return t; },
     getTerrPend(userId) { if (!data.terrPend) data.terrPend = {}; return data.terrPend[userId] || null; },
     putTerrPend(userId, rec) { if (!data.terrPend) data.terrPend = {}; data.terrPend[userId] = rec; flush(); return rec; },
+    // ===== 信箱：每帳號的待領信件(持久、伺服器權威) =====
+    getMail(userId) { if (!data.mail) data.mail = {}; return data.mail[userId] || []; },
+    putMail(userId, arr) { if (!data.mail) data.mail = {}; data.mail[userId] = arr || []; flush(); return data.mail[userId]; },
+    addMail(userId, mail) { if (!data.mail) data.mail = {}; const a = data.mail[userId] || []; a.push(mail); data.mail[userId] = a; flush(); return a; },
     // 全域遊戲設定（所有玩家生效）：經驗倍率 / 攻速倍率
     getConfig() { return data.config || {}; },
     setConfig(cfg) { data.config = Object.assign({}, data.config, cfg); flush(); return data.config; }

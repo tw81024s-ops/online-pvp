@@ -734,7 +734,7 @@
                 
             </div>
 
-            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic" onclick="openSkillUI()"><span class="ic">⚔️</span><span class="tx">技能</span></button><button class="fn-ic" onclick="openCharUI()"><span class="ic">🛡️</span><span class="tx">角色</span></button><button class="fn-ic" onclick="openTalentUI()"><span class="ic">🌳</span><span class="tx">天賦</span></button><button class="fn-ic casino-marquee" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openTreasurePanel()"><span class="ic">🗺️</span><span class="tx">奪寶</span></button><button class="fn-ic" onclick="openMapFragPanel()"><span class="ic">🧩</span><span class="tx">寶圖</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="openDomTpPanel()"><span class="ic">🔑</span><span class="tx">傳送石</span></button><button class="fn-ic" onclick="openSigilPanel()"><span class="ic">🔯</span><span class="tx">紋樣</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="openInfiniteArena()"><span class="ic">🏟️</span><span class="tx">無界擂台</span></button><button class="fn-ic" onclick="openTerritory()"><span class="ic">🏴</span><span class="tx">資源戰場</span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
+            <div id="fn-iconrow" class="panel p-2 bg-slate-800"><button class="fn-ic" onclick="openSetMonitor()"><span class="ic">🛡️</span><span class="tx">套裝監視</span></button><button class="fn-ic" onclick="openSoulStonePanel()"><span class="ic">⚜️</span><span class="tx">靈魂石</span></button><button class="fn-ic" onclick="openSkillUI()"><span class="ic">⚔️</span><span class="tx">技能</span></button><button class="fn-ic" onclick="openCharUI()"><span class="ic">🛡️</span><span class="tx">角色</span></button><button class="fn-ic" onclick="openTalentUI()"><span class="ic">🌳</span><span class="tx">天賦</span></button><button class="fn-ic casino-marquee" onclick="openCasinoPanel()"><span class="ic">🎲</span><span class="tx">賭場</span></button><button class="fn-ic" onclick="openTreasurePanel()"><span class="ic">🗺️</span><span class="tx">奪寶</span></button><button class="fn-ic" onclick="openMapFragPanel()"><span class="ic">🧩</span><span class="tx">寶圖</span></button><button class="fn-ic" onclick="openDollWindow()"><span class="ic">🧸</span><span class="tx">娃娃</span></button><button class="fn-ic" onclick="openPolyGacha()"><span class="ic">🔮</span><span class="tx">變身</span></button><button class="fn-ic" onclick="openTowerWindow()"><span class="ic">🗼</span><span class="tx">爬塔</span></button><button class="fn-ic" onclick="openDomTpPanel()"><span class="ic">🔑</span><span class="tx">傳送石</span></button><button class="fn-ic" onclick="openSigilPanel()"><span class="ic">🔯</span><span class="tx">紋樣</span></button><button class="fn-ic" onclick="showAnnouncements()"><span class="ic">📢</span><span class="tx">公告</span></button><button class="fn-ic" onclick="_hubClickFab(/每日活動/)"><span class="ic">🎉</span><span class="tx">每日活動</span></button><button class="fn-ic" onclick="_hubClickFab(/離線練功/)"><span class="ic">🏕️</span><span class="tx">離線練功</span></button><button class="fn-ic" onclick="openInfiniteArena()"><span class="ic">🏟️</span><span class="tx">無界擂台</span></button><button class="fn-ic" id="terr-fab-btn" onclick="openTerritory()" style="position:relative;"><span class="ic">🏴</span><span class="tx">資源戰場</span><span id="terr-fab-dot" style="display:none;position:absolute;top:1px;right:3px;width:9px;height:9px;border-radius:50%;background:#ef4444;box-shadow:0 0 5px #ef4444;"></span></button><button class="fn-ic" onclick="_hubClickFab(/競技場/)"><span class="ic">⚔️</span><span class="tx">競技場</span></button><button class="fn-ic" onclick="_hubClickFab(/登入|登出/)"><span class="ic">🌐</span><span class="tx">登入</span></button></div>
 
             <div class="panel flex-1 flex flex-col overflow-hidden relative">
                 <!-- 能力 -->
@@ -11785,6 +11785,59 @@ window.__adminGrantPoly = function(formName){
   var _terrTimer=null;
   function _fmtDur(ms){ if(ms<0)ms=0; var s=Math.floor(ms/1000); var h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60; return (h>0?h+'時':'')+m+'分'+ss+'秒'; }
   function _myName(){ try{ return (window.player&&player.name)||''; }catch(e){ return ''; } }
+  window.openMailbox=function(){
+    var ov=document.getElementById('mailbox-ov');
+    if(!ov){
+      ov=document.createElement('div'); ov.id='mailbox-ov';
+      ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;';
+      ov.innerHTML='<div style="background:linear-gradient(160deg,#1a1712,#0e0b07);border:1px solid #3a3326;border-radius:14px;max-width:440px;width:100%;max-height:82vh;overflow:auto;padding:16px;box-shadow:0 12px 40px rgba(0,0,0,.5);">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div style="font-size:17px;font-weight:800;color:#f5e6c8;">📬 信箱</div><button id="mailbox-close" style="background:#475569;color:#e2e8f0;border:none;border-radius:8px;padding:5px 12px;font-weight:700;">關閉</button></div>'
+        +'<div id="mailbox-body" style="color:#cbd5e1;font-size:13px;">載入中…</div></div>';
+      document.body.appendChild(ov);
+      ov.addEventListener('click',function(e){ if(e.target===ov) ov.style.display='none'; });
+      document.getElementById('mailbox-close').addEventListener('click',function(){ ov.style.display='none'; });
+    }
+    ov.style.display='flex';
+    var b=document.getElementById('mailbox-body'); if(b) b.innerHTML='載入中…';
+    try{ if(window.__mailSend) window.__mailSend.get(); }catch(e){}
+  };
+  window.__renderMailbox=function(){
+    var st=window.__mailState||{terr:null,mails:[]};
+    var hasAny=!!st.terr || ((st.mails||[]).length>0);
+    try{ var d=document.getElementById('terr-fab-dot'); if(d) d.style.display=hasAny?'block':'none'; var bb=document.getElementById('terr-claim-btn'); if(bb) bb.textContent=hasAny?'📦 物資 ●':'📦 物資'; }catch(e){}
+    var body=document.getElementById('mailbox-body'); if(!body) return;
+    var html='';
+    if(st.terr){ var t=st.terr;
+      html+='<div style="background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.15);border-radius:10px;padding:10px;margin-bottom:8px;"><div style="font-weight:700;color:#fcd34d;margin-bottom:4px;">🏴 領地戰場物資</div><div style="font-size:12px;line-height:1.8;">'
+        +(t.gold>0?('💰 金幣 +'+Number(t.gold).toLocaleString()+'<br>'):'')
+        +(t.refine>0?('🔧 紋樣精煉石 ×'+t.refine+'<br>'):'')
+        +((t.souls&&t.souls.length)?('🔮 靈魂石 ×'+t.souls.length+'<br>'):'')
+        +((t.chests&&t.chests.length)?('📦 秘密寶箱 ×'+t.chests.length):'')+'</div></div>';
+    }
+    (st.mails||[]).forEach(function(m){
+      var itemsTxt=(m.items||[]).map(function(it){ return it.id+' ×'+(it.cnt||1); }).join('、');
+      html+='<div style="background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.15);border-radius:10px;padding:10px;margin-bottom:8px;"><div style="font-weight:700;color:#a7f3d0;margin-bottom:4px;">✉️ '+(m.title||'系統信件')+'</div><div style="font-size:12px;line-height:1.8;">'
+        +(m.gold>0?('💰 金幣 +'+Number(m.gold).toLocaleString()+'<br>'):'')+(itemsTxt||'')+'</div></div>';
+    });
+    if(!hasAny){ body.innerHTML='<div style="text-align:center;color:#94a3b8;padding:26px 0;">目前沒有待領取的物資</div>'; return; }
+    body.innerHTML=html
+      +'<button id="mailbox-claim" style="width:100%;background:#15803d;color:#fff;border:none;border-radius:10px;padding:11px;font-weight:800;font-size:15px;margin-top:6px;">🎁 一鍵領取全部</button>'
+      +'<div style="font-size:11px;color:#94a3b8;margin-top:8px;line-height:1.6;">領取會直接寫入伺服器存檔並重新載入角色，確保一定拿到、不會消失。</div>';
+    var cb=document.getElementById('mailbox-claim');
+    if(cb) cb.addEventListener('click',function(){
+      if(!(window.player&&window.player.cls)){ alert('請先進入角色再領取'); return; }
+      cb.disabled=true; cb.textContent='領取中…請稍候';
+      try{ if(window.__mailSend) window.__mailSend.claim(); }catch(e){ cb.disabled=false; cb.textContent='🎁 一鍵領取全部'; }
+      setTimeout(function(){ if(cb&&cb.textContent==='領取中…請稍候'){ cb.disabled=false; cb.textContent='🎁 重新領取'; alert('領取沒有回應，請重新整理頁面後再試'); } },8000);
+    });
+  };
+  window.__mailClaimDone=function(m){
+    try{
+      if(m&&m.ok&&!m.empty){ if(typeof toast==='function') toast('🎁 已領取並寫入存檔','#15803d'); }
+      else if(m&&m.empty){ if(typeof toast==='function') toast('目前沒有可領取的物資','#475569'); }
+      else { if(typeof toast==='function') toast('領取失敗，請重新整理後再試','#7f1d1d'); }
+    }catch(e){}
+  };
   window.openTerritory=function(){
     var ov=document.getElementById('terr-overlay');
     if(!ov){
@@ -11794,7 +11847,7 @@ window.__adminGrantPoly = function(formName){
       document.body.appendChild(ov);
       document.getElementById('terr-close').addEventListener('click',function(){ ov.style.display='none'; });
       document.getElementById('terr-log-btn').addEventListener('click',function(){ window.openTerritoryLog(); });
-      document.getElementById('terr-claim-btn').addEventListener('click',function(){ window.openTerritoryClaim(); });
+      document.getElementById('terr-claim-btn').addEventListener('click',function(){ window.openMailbox(); });
     }
     ov.style.display='flex';
     try{ if(window.__territorySend) window.__territorySend.get(); }catch(e){}
@@ -11832,7 +11885,10 @@ window.__adminGrantPoly = function(formName){
     try{ if(window.__territorySend) window.__territorySend.get(); }catch(e){}
     window.__renderTerritoryLog();
   };
+  window.__updateTerrClaimDot=function(){ try{ var pd=window.__terrPend||{}; var has=(Math.floor(pd.gold||0)>0)||(Math.floor(pd.refine||0)>0)||((pd.souls||[]).length>0)||((pd.chests||[]).length>0); var d=document.getElementById('terr-fab-dot'); if(d) d.style.display=has?'block':'none'; var b=document.getElementById('terr-claim-btn'); if(b) b.textContent=has?'📦 物資 ●':'📦 物資'; }catch(e){} };
+  try{ if(!window.__terrPollSet){ window.__terrPollSet=1; setInterval(function(){ try{ if(window.__mailSend && typeof window.__mailSend.get==='function') window.__mailSend.get(); }catch(e){} }, 60000); setTimeout(function(){ try{ if(window.__mailSend && typeof window.__mailSend.get==='function') window.__mailSend.get(); }catch(e){} }, 6000); } }catch(e){}
   window.__renderTerritoryClaim=function(){
+    try{ if(window.__updateTerrClaimDot) window.__updateTerrClaimDot(); }catch(e){}
     var box=document.getElementById('terr-claim-body'); if(!box) return;
     var P=window.__terrPend||{gold:0,refine:0,souls:[],chests:[]};
     var g=Math.floor(P.gold||0), r=Math.floor(P.refine||0), sc=(P.souls||[]).length, cc=(P.chests||[]).length;
@@ -11852,7 +11908,7 @@ window.__adminGrantPoly = function(formName){
       +'📦 秘密寶箱：連續持有滿 <b>6 小時</b> 起，每 30 分 1 個（中央 T1-5／側翼 T2-3）<br>'
       +'<span style="color:#fca5a5;">※ 靈魂石／寶箱需連續持有達標；被打走會中斷「正在累積中」的那一輪，但已產出的都安全保留。</span></div>';
     var btn=document.getElementById('terr-claim-go');
-    if(btn&&!empty){ btn.addEventListener('click',function(){ try{ if(window.__territorySend) window.__territorySend.claim(); }catch(e){} btn.disabled=true; btn.textContent='領取中…'; }); }
+    if(btn&&!empty){ btn.addEventListener('click',function(){ if(!window.__territorySend || typeof window.__territorySend.claim!=='function'){ alert('⚠️ 版本過舊，請完全重新整理頁面後再試\n(電腦 Ctrl+Shift+R；手機請清除瀏覽器快取後重開)'); return; } try{ window.__territorySend.claim(); }catch(e){ alert('領取失敗，請重新整理頁面後再試'); return; } btn.disabled=true; btn.textContent='領取中…'; setTimeout(function(){ if(btn && btn.textContent==='領取中…'){ btn.disabled=false; btn.textContent='🎁 重新領取'; alert('⚠️ 領取沒有回應，可能是連線中斷或版本過舊\n請完全重新整理頁面 (Ctrl+Shift+R / 手機清快取) 後再試一次'); } },5000); }); }
   };
   window.openTerritoryClaim=function(){
     var ov=document.getElementById('terr-claim-ov');
@@ -17166,6 +17222,6 @@ window.onload = () => {
 /* ===== 支配塔探索模式 END ===== */
 
 </script>
-<script src="online.js?v=261"></script>
+<script src="online.js?v=268"></script>
 </body>
 </html>
