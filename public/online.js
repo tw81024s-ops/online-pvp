@@ -161,10 +161,21 @@
         claim: function(){ try { ws.send(JSON.stringify({ type:'territory_claim' })); } catch(e){} }
     };
     window.__mailSend = {
-        get: function(){ try { ws.send(JSON.stringify({ type:'mail_get' })); } catch(e){} },
+        get: function(){ try { if (ws && ws.readyState === 1) ws.send(JSON.stringify({ type:'mail_get' })); } catch(e){} },
         claim: async function(){
-            try { if (typeof uploadSave === 'function') await uploadSave(); } catch(e){}   // 先上傳當前存檔，伺服器在「最新存檔」上注入，不丟進度
-            try { ws.send(JSON.stringify({ type:'mail_claim', slot: activeSlot() })); } catch(e){}
+            // 先上傳當前存檔，但最多等 6 秒：Render 冷啟動/慢網時不把領取卡死；逾時就直接領，伺服器會在現有存檔上注入
+            try {
+                if (typeof uploadSave === 'function') {
+                    await Promise.race([ uploadSave(), new Promise(function(r){ setTimeout(r, 6000); }) ]);
+                }
+            } catch(e){}
+            // 送出 mail_claim；若連線斷了就重連後重送（最多 4 次、間隔 3 秒，涵蓋伺服器喚醒時間）
+            var _mt = 0;
+            (function _mailSendClaim(){
+                try { if (ws && ws.readyState === 1) { ws.send(JSON.stringify({ type:'mail_claim', slot: activeSlot() })); return; } } catch(e){}
+                try { if (typeof connectWS === 'function') connectWS(); } catch(e){}
+                if (_mt++ < 4) setTimeout(_mailSendClaim, 3000);
+            })();
         }
     };
 

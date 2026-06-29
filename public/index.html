@@ -11829,7 +11829,7 @@ window.__adminGrantPoly = function(formName){
       if(!(typeof player!=='undefined' && player && player.cls)){ alert('請先進入角色再領取'); return; }
       cb.disabled=true; cb.textContent='領取中…請稍候';
       try{ if(window.__mailSend) window.__mailSend.claim(); }catch(e){ cb.disabled=false; cb.textContent='🎁 一鍵領取全部'; }
-      setTimeout(function(){ if(cb&&cb.textContent==='領取中…請稍候'){ cb.disabled=false; cb.textContent='🎁 重新領取'; alert('領取沒有回應，請重新整理頁面後再試'); } },8000);
+      setTimeout(function(){ if(cb&&cb.textContent==='領取中…請稍候'){ cb.disabled=false; cb.textContent='🎁 重新領取'; alert('領取沒有回應（伺服器可能正在喚醒）。請等幾秒後再按一次「重新領取」；若仍不行，重新整理頁面再試。'); } },25000);
     });
   };
   window.__mailClaimDone=function(m){
@@ -17223,6 +17223,6 @@ window.onload = () => {
 /* ===== 支配塔探索模式 END ===== */
 
 </script>
-<script src="online.js?v=270"></script>
+<script src="online.js?v=271"></script>
 </body>
 </html>
