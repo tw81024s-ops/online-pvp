@@ -4527,6 +4527,7 @@ function applyHallowStats(){
 
 function _hallowRollGrade(){ var r=Math.random(), acc=0; for(var k=0;k<HALLOW_ODDS.length;k++){ acc+=HALLOW_ODDS[k][1]; if(r<acc) return HALLOW_ODDS[k][0]; } return '一般'; }
 function _hallowRollOne(){ var g=_hallowRollGrade(); var pool=HALLOWS.filter(function(h){return h.g===g;}); var h=pool[Math.floor(Math.random()*pool.length)]; _hallowInit(); var isNew=false; if(player.hallows[h.i]==null){ player.hallows[h.i]=0; isNew=true; } else { player.hallowDupe[h.i]=(player.hallowDupe[h.i]||0)+1; } player.hallowPulls++; return {h:h,isNew:isNew}; }
+function hallowAutoUpgradeAll(){ _hallowInit(); var any=false; for(var id in player.hallows){ var s=player.hallows[id]||0; while(s<HALLOW_STAR_MAX && (player.hallowDupe[id]||0)>=HALLOW_STAR_COST[s]){ player.hallowDupe[id]-=HALLOW_STAR_COST[s]; s++; any=true; } player.hallows[id]=s; } return any; }
 function hallowPull(n){
   _hallowInit();
   var have=_hallowTicketCount();
@@ -4534,6 +4535,7 @@ function hallowPull(n){
   _hallowSpendTickets(n);
   var results=[], sinceSave=0;
   for(var k=0;k<n;k++){ results.push(_hallowRollOne()); sinceSave++; if(sinceSave>=25){ sinceSave=0; try{ (window.saveGame||saveGame)(); }catch(e){} } }   // 100連分批：每25抽存檔一次，避免一次性大量寫入卡死
+  hallowAutoUpgradeAll();   // 🏆 自動升階：重複品湊夠立即升星
   try{ calcStats(); }catch(e){}
   try{ (window.saveGame||saveGame)(); }catch(e){}
   return results;
@@ -4560,6 +4562,7 @@ function _hallowTab(t){ window.__hallowTab=t; renderHallowPanel(); }
 function renderHallowPanel(){
   var body=document.getElementById('hallow-body'); if(!body) return;
   _hallowInit();
+  try{ if(hallowAutoUpgradeAll()){ calcStats(); } }catch(e){}   // 🏆 進面板時補升舊重複品
   var tab=window.__hallowTab||'draw';
   var tk=_hallowTicketCount(), owned=hallowOwnedCount();
   var tabBtn=function(id,label){ return '<button onclick="_hallowTab(\''+id+'\')" style="flex:1;padding:8px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;background:'+(tab===id?'#b06bff':'#1e2530')+';color:'+(tab===id?'#0d1117':'#cbd5e1')+';">'+label+'</button>'; };
@@ -4573,7 +4576,7 @@ function renderHallowPanel(){
       +'<button onclick="_hallowDoPull(100)" style="'+dis(100)+'padding:14px 4px;border:none;border-radius:10px;background:linear-gradient(180deg,#ffce3a,#b45309);color:#1a1206;font-weight:bold;cursor:pointer;">100 連<br><span style="font-size:11px;opacity:.85;">100 張</span></button></div>';
     h+='<div id="hallow-result" style="margin-bottom:14px;"></div>';
     // odds
-    h+='<div style="font-size:11px;color:#8b97a4;line-height:1.7;"><b>機率</b>：'+HALLOW_ODDS.map(function(o){return '<span style="color:'+HALLOW_GCOLOR[o[0]]+';">'+o[0]+' '+(o[1]*100)+'%</span>';}).join('　')+'<br>重複 → 自動轉該聖物升階素材（最高 ★5，每星 +10%）。無保底。</div>';
+    h+='<div style="font-size:11px;color:#8b97a4;line-height:1.7;"><b>機率</b>：'+HALLOW_ODDS.map(function(o){return '<span style="color:'+HALLOW_GCOLOR[o[0]]+';">'+o[0]+' '+(o[1]*100)+'%</span>';}).join('　')+'<br>重複 → <b style="color:#3ddc84;">自動升階</b>（湊夠立即升星，最高 ★5，每星 +10%）。無保底。</div>';
     h+=_hallowBonusBox();
   } else {
     h+=_hallowBonusBox();
@@ -4590,7 +4593,7 @@ function renderHallowPanel(){
           +'<div style="font-size:11px;font-weight:bold;margin:4px 0 2px;min-height:28px;">'+(own?x.n:'？？？')+'</div>'
           +(own?'<div style="font-size:11px;color:#ffce3a;">'+_hallowStars(star)+'</div><div style="font-size:10px;color:#7aa2ff;">'+ss+'</div>'
               +(dup?'<div style="font-size:10px;color:#8b97a4;">素材 '+dup+'</div>':'')
-              +(can?'<button onclick="hallowUpgrade(\''+x.i+'\')" style="margin-top:4px;width:100%;padding:3px;border:none;border-radius:6px;background:#3ddc84;color:#06281a;font-weight:bold;font-size:11px;cursor:pointer;">升 ★'+(star+1)+'</button>':(star<HALLOW_STAR_MAX&&own?'<div style="font-size:10px;color:#64748b;margin-top:3px;">需素材 '+HALLOW_STAR_COST[star]+'</div>':''))
+              +(own&&star<HALLOW_STAR_MAX?'<div style="font-size:10px;color:#64748b;margin-top:3px;">升階素材 '+dup+' / '+HALLOW_STAR_COST[star]+'</div>':(own?'<div style="font-size:10px;color:#3ddc84;margin-top:3px;font-weight:bold;">★ MAX</div>':''))
             :'<div style="font-size:10px;color:#475569;">'+x.t+'</div>')
           +'</div>';
       });
@@ -4620,7 +4623,7 @@ function _hallowDoPull(n){
   var cards=res.slice().sort(function(a,b){return HALLOW_GRADES.indexOf(a.h.g)-HALLOW_GRADES.indexOf(b.h.g);}).map(function(r){
     return '<div style="display:inline-block;width:64px;text-align:center;vertical-align:top;margin:3px;"><div style="width:64px;height:64px;background:#0a0e13;border:2px solid '+HALLOW_GCOLOR[r.h.g]+';border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;"><img src="'+HALLOW_IMG(r.h.i)+'" style="max-width:100%;max-height:100%;object-fit:contain;"></div><div style="font-size:9px;margin-top:2px;color:'+HALLOW_GCOLOR[r.h.g]+';">'+(r.isNew?'<b>NEW</b>':'升階')+'</div></div>';
   }).join('');
-  if(box) box.innerHTML='<div style="background:#161b22;border:1px solid #2a313a;border-radius:10px;padding:10px;"><div style="font-size:13px;margin-bottom:6px;">🎉 抽到：'+summary+'　<span style="color:#8b97a4;">（新 '+newCnt+'，重複轉素材 '+(res.length-newCnt)+'）</span></div><div style="max-height:200px;overflow:auto;">'+cards+'</div></div>';
+  if(box) box.innerHTML='<div style="background:#161b22;border:1px solid #2a313a;border-radius:10px;padding:10px;"><div style="font-size:13px;margin-bottom:6px;">🎉 抽到：'+summary+'　<span style="color:#8b97a4;">（新 '+newCnt+'，重複自動升階 '+(res.length-newCnt)+'）</span></div><div style="max-height:200px;overflow:auto;">'+cards+'</div></div>';
   if(typeof renderMobileBag==='function') try{ renderMobileBag(); }catch(e){}
 }
 
