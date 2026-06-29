@@ -11825,7 +11825,7 @@ window.__adminGrantPoly = function(formName){
       +'<div style="font-size:11px;color:#94a3b8;margin-top:8px;line-height:1.6;">領取會直接寫入伺服器存檔並重新載入角色，確保一定拿到、不會消失。</div>';
     var cb=document.getElementById('mailbox-claim');
     if(cb) cb.addEventListener('click',function(){
-      if(!(window.player&&window.player.cls)){ alert('請先進入角色再領取'); return; }
+      if(!(typeof player!=='undefined' && player && player.cls)){ alert('請先進入角色再領取'); return; }
       cb.disabled=true; cb.textContent='領取中…請稍候';
       try{ if(window.__mailSend) window.__mailSend.claim(); }catch(e){ cb.disabled=false; cb.textContent='🎁 一鍵領取全部'; }
       setTimeout(function(){ if(cb&&cb.textContent==='領取中…請稍候'){ cb.disabled=false; cb.textContent='🎁 重新領取'; alert('領取沒有回應，請重新整理頁面後再試'); } },8000);
@@ -15505,7 +15505,7 @@ function loadGame() {
     let s = localStorage.getItem('lineage_idle_save_' + currentSlot);
     if (s) {
         let d = JSON.parse(s);
-        player = d.p; mapState = d.ms;
+        player = d.p; mapState = d.ms; try{ window.player = player; }catch(e){}
         if (player.eq && player.eq.rune1 === undefined) { player.eq.rune1 = null; player.eq.rune2 = null; } if (player.eq && player.eq.legs === undefined) player.eq.legs = null;
         try { _dollSyncLocal(); } catch (e) { }   // 🧸 套用帳號層級娃娃（跨角色共用）
         try { _polySyncLocal(); } catch (e) { }   // 🧬 套用帳號層級變身
@@ -17222,6 +17222,6 @@ window.onload = () => {
 /* ===== 支配塔探索模式 END ===== */
 
 </script>
-<script src="online.js?v=269"></script>
+<script src="online.js?v=270"></script>
 </body>
 </html>
