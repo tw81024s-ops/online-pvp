@@ -17503,6 +17503,37 @@ window.onload = () => {
 (function(){
 function openExplore(){
   if(document.getElementById("exploreOv"))return;
+  try{ if(window.player && player.cls){
+    var P=player, D=P.d||{};
+    var W=(P.eq&&P.eq.wpn)?(DB.items[P.eq.wpn.id]||null):null;
+    var isRanged=!!(W&&W.ranged), isMage=(P.cls==='mage');
+    var atkType=isMage?'magic':(isRanged?'ranged':'melee');
+    var dice=W?(W.dmgS!=null?W.dmgS:2):2;
+    var dmgBonus,critRate,critDmg;
+    if(atkType==='magic'){ dmgBonus=D.magicDmg||0; critRate=D.magicCrit||0; critDmg=(D.magicCritDmg!=null?D.magicCritDmg:50); if(dice<8)dice=8; }
+    else if(isRanged){ dmgBonus=D.rangedDmg||0; critRate=D.rangedCrit||0; critDmg=(D.rangedCritDmg!=null?D.rangedCritDmg:50); }
+    else { dmgBonus=D.meleeDmg||0; critRate=D.meleeCrit||0; critDmg=(D.meleeCritDmg!=null?D.meleeCritDmg:50); }
+    var extra=D.extraDmg||0, doll=D.dollDmgMult||1;
+    var hitMin=(1+dmgBonus+extra)*doll, hitMax=(dice+dmgBonus+extra)*doll;
+    var avgHit=(hitMin+hitMax)/2;
+    var cRate=Math.min(0.95,Math.max(0,(critRate||0)/100));
+    var critMult=1+((critDmg!=null?critDmg:50)/100);
+    var expCrit=1+cRate*(critMult-1);
+    var aspd=D.aspd||1.0, atkPerSec=1.4*aspd;
+    var dps=avgHit*expCrit*atkPerSec*1.6;
+    var ac=(D.ac==null?10:D.ac);
+    var acRed=Math.max(-0.5,(10-ac)*0.015);
+    var physMitig=Math.min(1.5,Math.max(0.15,1-acRed));
+    var AVMAP={'男騎士':'knight','女騎士':'fknight','男法師':'mage','女法師':'fmage','男妖精':'elf','女妖精':'felf','darkelf_m':'darkelf','darkelf_f':'fdarkelf','dragon_m':'dragon','dragon_f':'fdragon'};
+    var spr=AVMAP[P.avatar]||(P.dragon?'dragon':(P.darkelf?'darkelf':(P.cls==='mage'?'mage':(P.cls==='elf'?'elf':'knight'))));
+    var snap={ spr:spr, avatar:P.avatar||'', name:P.name||'', lv:P.lv||1,
+      mhp:Math.max(1,Math.round(P.mhp||P.hp||1)), mmp:Math.round(P.mmp||0),
+      atkType:atkType, hitMin:Math.max(1,Math.round(hitMin)), hitMax:Math.max(1,Math.round(hitMax)),
+      critRate:Math.round(cRate*1000)/1000, critMult:Math.round(critMult*1000)/1000,
+      atkPerSec:Math.round(atkPerSec*1000)/1000, dps:Math.max(1,Math.round(dps)),
+      drFlat:D.dr||0, physMitig:Math.round(physMitig*1000)/1000, mr:D.mr||0, er:D.er||0 };
+    localStorage.setItem('explore_char', JSON.stringify(snap));
+  }}catch(e){}
   var ov=document.createElement("div");ov.id="exploreOv";
   ov.style.cssText="position:fixed;inset:0;z-index:99999;background:#04060a";
   var fr=document.createElement("iframe");fr.src="explore/index.html";fr.style.cssText="border:0;width:100%;height:100%";fr.setAttribute("allow","autoplay");
