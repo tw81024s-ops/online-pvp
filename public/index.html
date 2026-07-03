@@ -12089,7 +12089,7 @@ window.__adminGrantPoly = function(formName){
         +((t.chests&&t.chests.length)?('📦 秘密寶箱 ×'+t.chests.length):'')+'</div></div>';
     }
     (st.mails||[]).forEach(function(m){
-      var itemsTxt=(m.items||[]).map(function(it){ return it.id+' ×'+(it.cnt||1); }).join('、');
+      var itemsTxt=(m.items||[]).map(function(it){ var _d=(typeof DB!=='undefined'&&DB.items&&DB.items[it.id])||null; return (_d&&_d.n?_d.n:it.id)+' ×'+(it.cnt||1); }).join('、');
       html+='<div style="background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.15);border-radius:10px;padding:10px;margin-bottom:8px;"><div style="font-weight:700;color:#a7f3d0;margin-bottom:4px;">✉️ '+(m.title||'系統信件')+'</div><div style="font-size:12px;line-height:1.8;">'
         +(m.gold>0?('💰 金幣 +'+Number(m.gold).toLocaleString()+'<br>'):'')+(itemsTxt||'')+'</div></div>';
     });
