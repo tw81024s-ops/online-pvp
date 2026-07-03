@@ -305,6 +305,17 @@ app.post('/api/mail/claim', auth, (req, res) => {   // 📬 HTTP 領取：不靠
         res.json({ ok: true, slot: slot, data: merged, updatedAt: newRow ? newRow.updated_at : null, gold: totalGold, itemCount: totalItems.length });
     } catch (e) { res.json({ ok: false, reason: 'err' }); }
 });
+app.post('/api/explore/mail', auth, (req, res) => {   // 🧭 未知探索戰利品寄信（本人專用，只寄給自己）
+    const b = req.body || {};
+    const raw = (b.items && typeof b.items === 'object' && !Array.isArray(b.items)) ? b.items : {};
+    const items = Object.keys(raw).map(id => ({ id: String(id), cnt: Math.max(1, Math.floor(Number(raw[id]) || 1)) })).filter(x => x.cnt > 0).slice(0, 200);
+    if (!items.length) return res.json({ ok: true, empty: true });
+    const mail = { mid: _mailUid(), ts: Date.now(), title: '🧭 未知探索戰利品', gold: 0, items: items };
+    store.addMail(req.user.id, mail);
+    try { const tw = online.get(req.user.username); if (tw) send(tw, { type: 'mail_state', mail: mailPublic(req.user.username) }); } catch (e) {}
+    res.json({ ok: true, count: items.length });
+});
+
 app.post('/api/admin/mail', auth, adminOnly, (req, res) => {   // 📬 管理員寄信(補償)：用同一套可靠注入投遞
     const b = req.body || {};
     const uname = String(b.user || '').trim();

@@ -5,6 +5,11 @@
     const LS_TOKEN = 'lineage_online_token';
     const LS_USER = 'lineage_online_user';
     let token = localStorage.getItem(LS_TOKEN) || null;
+// 🧭 未知探索戰利品：暫存 iframe 回報的 loot，關閉時一次寄成信件（HTTP，不靠 WS）
+window.__exploreLoot = null;
+window.addEventListener('message', function(_e){ try{ if(_e && _e.data && _e.data.type==='explore-loot'){ window.__exploreLoot = _e.data.loot || null; } }catch(_x){} });
+window.__flushExploreLoot = function(){ try{ var _loot = window.__exploreLoot; window.__exploreLoot = null; if(!_loot || !Object.keys(_loot).length) return; fetch('/api/explore/mail', { method:'POST', headers: Object.assign({ 'Content-Type':'application/json' }, token ? { 'x-token': token } : {}), body: JSON.stringify({ items: _loot }) }); }catch(_x){} };
+
     let myName = localStorage.getItem(LS_USER) || null;
     let isAdmin = false;
     let ws = null, wsReady = false;

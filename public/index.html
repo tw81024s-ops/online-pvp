@@ -17541,8 +17541,8 @@ function openExplore(){
   var fr=document.createElement("iframe");fr.src="explore/index.html";fr.style.cssText="border:0;width:100%;height:100%";fr.setAttribute("allow","autoplay");
   var cl=document.createElement("button");cl.textContent="✕ 關閉";
   cl.style.cssText="position:fixed;top:10px;right:12px;z-index:100000;padding:8px 14px;border-radius:10px;background:#3a2b55;border:1px solid #8a63d6;color:#f0e6ff;font-weight:800";
-  cl.onclick=function(){ov.remove();window.__explorePaused=false;};
-  ov.appendChild(fr);ov.appendChild(cl);document.body.appendChild(ov);if(!window.__exploreExitBound){window.__exploreExitBound=1;window.addEventListener('message',function(e){if(e&&e.data&&e.data.type==='explore-exit'){var o=document.getElementById('exploreOv');if(o)o.remove();window.__explorePaused=false;}});}
+  cl.onclick=function(){if(window.__flushExploreLoot)window.__flushExploreLoot();ov.remove();window.__explorePaused=false;};
+  ov.appendChild(fr);ov.appendChild(cl);document.body.appendChild(ov);if(!window.__exploreExitBound){window.__exploreExitBound=1;window.addEventListener('message',function(e){if(e&&e.data&&e.data.type==='explore-exit'){if(window.__flushExploreLoot)window.__flushExploreLoot();var o=document.getElementById('exploreOv');if(o)o.remove();window.__explorePaused=false;}});}
 }
 window.openExplore=openExplore;
 function addBtn(){
