@@ -8,7 +8,7 @@
     <style>
         body { 
     background-color: #374151; 
-    background-image: url('assets/background/background.png'); /* 👈 在這裡填入你的圖片檔名 */
+    background-image: url('https://cdn.jsdelivr.net/gh/tw81024s-ops/online-pvp@main/public/assets/background/background.png'); /* 👈 在這裡填入你的圖片檔名 */
     background-size: cover; 
     background-position: center; 
     background-repeat: no-repeat;
@@ -17,7 +17,7 @@
     overflow: hidden; 
     user-select: none; 
 }
-        body.game-bg-dim { background-image: linear-gradient(rgba(55,65,81,0.8), rgba(55,65,81,0.8)), url('assets/background/background.png'); }  /* 正式開始遊戲後：背景淡化 */
+        body.game-bg-dim { background-image: linear-gradient(rgba(55,65,81,0.8), rgba(55,65,81,0.8)), url('https://cdn.jsdelivr.net/gh/tw81024s-ops/online-pvp@main/public/assets/background/background.png'); }  /* 正式開始遊戲後：背景淡化 */
         .log-bg { border: 3px solid transparent; border-bottom-width: 1px; background: linear-gradient(180deg, #23282e 0%, #3e4651 50%, #1d2025 100%) padding-box, linear-gradient(135deg, #4a3613 0%, #b89243 20%, #6e5220 42%, #e6c474 60%, #5c4318 80%, #c9a14a 100%) border-box; }  /* 日誌訊息區：較深灰底 + 黃褐不規則漸層邊框 */
         .panel { background: #1e293b padding-box, linear-gradient(135deg, #4a3613 0%, #b89243 20%, #6e5220 42%, #e6c474 60%, #5c4318 80%, #c9a14a 100%) border-box; border: 2px solid transparent; border-bottom-width: 1px; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; }
         .panel-header { background: linear-gradient(135deg, #7e6630 0%, #a07f3c 18%, #6e5828 40%, #927535 58%, #5f4d22 78%, #876d31 100%); border-bottom: 1px solid #334155; padding: 0.75rem 1.25rem; font-size: 1.125rem; font-weight: bold; color: #e2e8f0; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; border-top-left-radius: 0.75rem; border-top-right-radius: 0.75rem; }
@@ -54,7 +54,7 @@
         .mob-target.active { border-color: #ef4444; background: #450a0a; }
         .mob-target:hover:not(.active) { background: #1e293b; }
         /* 🔮 席琳的世界：暗紅底色＋黑紅怪物框（透明度結構與原樣式一致） */
-        body.sherine-world, body.game-bg-dim.sherine-world { background-image: linear-gradient(rgba(64,8,12,0.8), rgba(38,4,8,0.8)), url('assets/background/background.png'); }
+        body.sherine-world, body.game-bg-dim.sherine-world { background-image: linear-gradient(rgba(64,8,12,0.8), rgba(38,4,8,0.8)), url('https://cdn.jsdelivr.net/gh/tw81024s-ops/online-pvp@main/public/assets/background/background.png'); }
         body.sherine-world .mob-target { background: #1a0508; border-color: #7f1d1d; }
         body.sherine-world .mob-target.active { background: #450a0a; border-color: #ef4444; }
         body.sherine-world .mob-target:hover:not(.active) { background: #2c0a10; }
@@ -538,7 +538,7 @@
         <div id="creation-panel" class="hidden flex flex-row gap-6 items-start">
             
             <div class="w-[340px] h-[480px] border-4 border-amber-800 p-2 bg-slate-950/40 rounded-lg shadow-[0_0_30px_rgba(0,0,0,0.9)] outline outline-1 outline-offset-4 outline-amber-700/40 flex items-center justify-center shrink-0 overflow-hidden">
-                <img id="class-preview-img" src="assets/start/m_knight.png" alt="職業預覽" class="w-full h-full object-cover object-top rounded pointer-events-none drop-shadow-[0_10px_15px_rgba(0,0,0,0.8)]">
+                <img id="class-preview-img" src="https://cdn.jsdelivr.net/gh/tw81024s-ops/online-pvp@main/public/assets/start/m_knight.png" alt="職業預覽" class="w-full h-full object-cover object-top rounded pointer-events-none drop-shadow-[0_10px_15px_rgba(0,0,0,0.8)]">
             </div>
             
             <div class="flex-1 h-[480px] flex flex-col justify-between min-w-0">
@@ -811,7 +811,7 @@
 
 <script>
 /** 遊戲核心資料庫 */
-console.log('%c大肌肌天堂 build 287 · 2026-07-03 · 探索戰利品信件顯示中文名','color:#7c3aed;font-weight:bold;font-size:13px');
+console.log('%c大肌肌天堂 build 288 · 2026-07-03 · 背景/開場圖改 CDN(jsDelivr) 省 Render 流量','color:#7c3aed;font-weight:bold;font-size:13px');
 const EXP_T = [0, 125, 175, 200, 250, 546, 1105, 1695, 2465, 3439, 4641, 6095, 7825, 9855, 12209, 14911, 17985, 21455, 25345, 29679, 34481, 40033, 45585, 51935, 58849, 66351, 74465, 83215, 92625, 102719, 113521, 125055, 137345, 150415, 164289, 178991, 194545, 210975, 228305, 246559, 265761, 285935, 307105, 329817, 352529, 729360, 1508416, 3495263, 9912189, 36065092];
 function getExpReq(lv) { return lv >= 100 ? Infinity : 5 * (lv >= 49 ? 36065092 : EXP_T[lv]); }   // 升級所需經驗 ×5
 // 高等級打怪經驗衰減：50~69 ×1/2、70~79 ×1/3、80~89 ×1/4、90~99 ×1/5、100滿等不獲得
@@ -15240,13 +15240,13 @@ function applyAreaBackground() {
     let bv = document.getElementById('battle-view');
     if (bv) {
         let img = SPECIAL_AREA_BG[cur] || CATEGORY_AREA_BG[cat] || null;   // 特殊地圖逐張優先，否則依分類(野外/地監/攻城)
-        if (img) { bv.style.backgroundImage = `${ov(0.68)}, url("assets/background/${img}")`; bv.classList.add('has-bg'); }
+        if (img) { bv.style.backgroundImage = `${ov(0.68)}, url("https://cdn.jsdelivr.net/gh/tw81024s-ops/online-pvp@main/public/assets/background/${img}")`; bv.classList.add('has-bg'); }
         else { bv.style.backgroundImage = ''; bv.classList.remove('has-bg'); }
     }
     let tv = document.getElementById('town-view');
     if (tv) {
         let timg = TOWN_AREA_BG[cat] || null;
-        if (timg) { tv.style.backgroundImage = `${ov(0.7)}, url("assets/background/${timg}")`; tv.classList.add('has-bg'); }
+        if (timg) { tv.style.backgroundImage = `${ov(0.7)}, url("https://cdn.jsdelivr.net/gh/tw81024s-ops/online-pvp@main/public/assets/background/${timg}")`; tv.classList.add('has-bg'); }
         else { tv.style.backgroundImage = ''; tv.classList.remove('has-bg'); }
     }
 }
@@ -15530,7 +15530,7 @@ function selectClass(c) {
     // 🎯 解除隱形死結：即時切換圖片路徑，並強制指定 display = 'block'
     let previewImg = document.getElementById('class-preview-img');
     if (previewImg) {
-        previewImg.src = `assets/start/${c}.png`; // 改成 png
+        previewImg.src = `https://cdn.jsdelivr.net/gh/tw81024s-ops/online-pvp@main/public/assets/start/${c}.png`; // 改成 png
         previewImg.style.display = 'block'; 
     }
 
