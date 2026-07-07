@@ -811,7 +811,7 @@
 
 <script>
 /** 遊戲核心資料庫 */
-console.log('%c大肌肌天堂 build 295 · 元素聖域35轉系統(魔眼/憑證/製作/圖鑑/欄位)','color:#7c3aed;font-weight:bold;font-size:13px');
+console.log('%c大肌肌天堂 build 296 · 修正魔眼配方材料為頭獎金幣捲','color:#7c3aed;font-weight:bold;font-size:13px');
 const EXP_T = [0, 125, 175, 200, 250, 546, 1105, 1695, 2465, 3439, 4641, 6095, 7825, 9855, 12209, 14911, 17985, 21455, 25345, 29679, 34481, 40033, 45585, 51935, 58849, 66351, 74465, 83215, 92625, 102719, 113521, 125055, 137345, 150415, 164289, 178991, 194545, 210975, 228305, 246559, 265761, 285935, 307105, 329817, 352529, 729360, 1508416, 3495263, 9912189, 36065092];
 function getExpReq(lv) { return lv >= 100 ? Infinity : 5 * (lv >= 49 ? 36065092 : EXP_T[lv]); }   // 升級所需經驗 ×5
 // 高等級打怪經驗衰減：50~69 ×1/2、70~79 ×1/3、80~89 ×1/4、90~99 ×1/5、100滿等不獲得
@@ -16070,20 +16070,20 @@ function resetStatsCandle() {
 // 1. 定義製作配方
 const CRAFT_RECIPES = {
     eye_craft: [
-        { result: 'eye_dominator', req: [{ id: 'cert_myth', cnt: 3000 }, { id: 'new_item_239', cnt: 20000 }] },
-        { result: 'eye_flameawaken', req: [{ id: 'cert_legend', cnt: 8000 }, { id: 'new_item_239', cnt: 6000 }] },
-        { result: 'eye_guardian', req: [{ id: 'cert_legend', cnt: 8000 }, { id: 'new_item_239', cnt: 6000 }] },
-        { result: 'eye_immortal1', req: [{ id: 'cert_legend', cnt: 8000 }, { id: 'new_item_239', cnt: 6000 }] },
-        { result: 'eye_immortal2', req: [{ id: 'cert_legend', cnt: 8000 }, { id: 'new_item_239', cnt: 6000 }] },
-        { result: 'eye_courage', req: [{ id: 'cert_legend', cnt: 8000 }, { id: 'new_item_239', cnt: 6000 }] },
-        { result: 'eye_will', req: [{ id: 'cert_legend', cnt: 8000 }, { id: 'new_item_239', cnt: 6000 }] },
-        { result: 'eye_faith', req: [{ id: 'cert_legend', cnt: 8000 }, { id: 'new_item_239', cnt: 6000 }] },
-        { result: 'eye_belief', req: [{ id: 'cert_legend', cnt: 8000 }, { id: 'new_item_239', cnt: 6000 }] },
-        { result: 'eye_flame', req: [{ id: 'cert_hero', cnt: 30000 }, { id: 'new_item_239', cnt: 2000 }] },
-        { result: 'eye_earthdragon', req: [{ id: 'cert_hero', cnt: 30000 }, { id: 'new_item_239', cnt: 2000 }] },
-        { result: 'eye_waterdragon', req: [{ id: 'cert_hero', cnt: 30000 }, { id: 'new_item_239', cnt: 2000 }] },
-        { result: 'eye_firedragon', req: [{ id: 'cert_hero', cnt: 30000 }, { id: 'new_item_239', cnt: 2000 }] },
-        { result: 'eye_winddragon', req: [{ id: 'cert_hero', cnt: 30000 }, { id: 'new_item_239', cnt: 2000 }] }
+        { result: 'eye_dominator', req: [{ id: 'cert_myth', cnt: 3000 }, { id: 'jackpot_scroll', cnt: 20000 }] },
+        { result: 'eye_flameawaken', req: [{ id: 'cert_legend', cnt: 8000 }, { id: 'jackpot_scroll', cnt: 6000 }] },
+        { result: 'eye_guardian', req: [{ id: 'cert_legend', cnt: 8000 }, { id: 'jackpot_scroll', cnt: 6000 }] },
+        { result: 'eye_immortal1', req: [{ id: 'cert_legend', cnt: 8000 }, { id: 'jackpot_scroll', cnt: 6000 }] },
+        { result: 'eye_immortal2', req: [{ id: 'cert_legend', cnt: 8000 }, { id: 'jackpot_scroll', cnt: 6000 }] },
+        { result: 'eye_courage', req: [{ id: 'cert_legend', cnt: 8000 }, { id: 'jackpot_scroll', cnt: 6000 }] },
+        { result: 'eye_will', req: [{ id: 'cert_legend', cnt: 8000 }, { id: 'jackpot_scroll', cnt: 6000 }] },
+        { result: 'eye_faith', req: [{ id: 'cert_legend', cnt: 8000 }, { id: 'jackpot_scroll', cnt: 6000 }] },
+        { result: 'eye_belief', req: [{ id: 'cert_legend', cnt: 8000 }, { id: 'jackpot_scroll', cnt: 6000 }] },
+        { result: 'eye_flame', req: [{ id: 'cert_hero', cnt: 30000 }, { id: 'jackpot_scroll', cnt: 2000 }] },
+        { result: 'eye_earthdragon', req: [{ id: 'cert_hero', cnt: 30000 }, { id: 'jackpot_scroll', cnt: 2000 }] },
+        { result: 'eye_waterdragon', req: [{ id: 'cert_hero', cnt: 30000 }, { id: 'jackpot_scroll', cnt: 2000 }] },
+        { result: 'eye_firedragon', req: [{ id: 'cert_hero', cnt: 30000 }, { id: 'jackpot_scroll', cnt: 2000 }] },
+        { result: 'eye_winddragon', req: [{ id: 'cert_hero', cnt: 30000 }, { id: 'jackpot_scroll', cnt: 2000 }] }
     ],
     npc_tas: [
         { result: 'panacea_str', req: [{ id: 'panacea_white', cnt: 3 }] },
