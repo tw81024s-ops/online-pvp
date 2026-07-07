@@ -811,7 +811,7 @@
 
 <script>
 /** 遊戲核心資料庫 */
-console.log('%c大肌肌天堂 build 297 · 修正角色面板魔眼欄位','color:#7c3aed;font-weight:bold;font-size:13px');
+console.log('%c大肌肌天堂 build 301 · 紋樣面板5階顯示修正','color:#7c3aed;font-weight:bold;font-size:13px');
 const EXP_T = [0, 125, 175, 200, 250, 546, 1105, 1695, 2465, 3439, 4641, 6095, 7825, 9855, 12209, 14911, 17985, 21455, 25345, 29679, 34481, 40033, 45585, 51935, 58849, 66351, 74465, 83215, 92625, 102719, 113521, 125055, 137345, 150415, 164289, 178991, 194545, 210975, 228305, 246559, 265761, 285935, 307105, 329817, 352529, 729360, 1508416, 3495263, 9912189, 36065092];
 function getExpReq(lv) { return lv >= 100 ? Infinity : 5 * (lv >= 49 ? 36065092 : EXP_T[lv]); }   // 升級所需經驗 ×5
 // 高等級打怪經驗衰減：50~69 ×1/2、70~79 ×1/3、80~89 ×1/4、90~99 ×1/5、100滿等不獲得
@@ -4545,7 +4545,7 @@ function applyHallowStats(){
   if(b.hitFlat){ d.meleeHit=(d.meleeHit||0)+b.hitFlat; d.rangedHit=(d.rangedHit||0)+b.hitFlat; d.magicHit=(d.magicHit||0)+b.hitFlat; }
   if(b.mrFlat) d.mr=(d.mr||0)+b.mrFlat;
   if(b.evaFlat) d.er=(d.er||0)+b.evaFlat;
-  d._hallowDrPct=b.drPct||0; d._hallowHpRegen=b.hpRegen||0; d._hallowMove=b.moveSpd||0;
+  d._hallowDrPct=b.drPct||0; d._hallowHpRegen=b.hpRegen||0; d._hallowMove=(d._hallowMove||0)+(b.moveSpd||0);
 }
 
 function _hallowRollGrade(){ var r=Math.random(), acc=0; for(var k=0;k<HALLOW_ODDS.length;k++){ acc+=HALLOW_ODDS[k][1]; if(r<acc) return HALLOW_ODDS[k][0]; } return '一般'; }
@@ -5082,7 +5082,7 @@ d.mr += (baseMr + bonusMr);
                 d.meleeDmg+=_sb.meleeDmg; d.rangedDmg+=_sb.rangedDmg; d.extraDmg+=_sb.extraDmg; d.magicDmg+=_sb.magicDmg; d.extraMp+=_sb.extraMp;
                 if(_sb.hit){ d.meleeHit+=_sb.hit; d.rangedHit+=_sb.hit; d.magicHit+=_sb.hit; }
                 d.meleeCrit+=_sb.meleeCrit; d.rangedCrit+=_sb.rangedCrit; d.magicCrit+=_sb.magicCrit;
-                d.ac+=_sb.ac; d.dr=(d.dr||0)+_sb.dr;
+                d.ac+=_sb.ac; d.dr=(d.dr||0)+_sb.dr; if(_sb.evaFlat) d.er=(d.er||0)+_sb.evaFlat; if(_sb.moveSpd) d._hallowMove=(d._hallowMove||0)+_sb.moveSpd; if(_sb.critDmg){ d.meleeCritDmg=(d.meleeCritDmg||0)+_sb.critDmg; d.rangedCritDmg=(d.rangedCritDmg||0)+_sb.critDmg; d.magicCritDmg=(d.magicCritDmg||0)+_sb.critDmg; } if(_sb.pen) d._sigPen=(d._sigPen||0)+_sb.pen;
                 _sgP+=_sb.physPct; _sgA+=_sb.aspdPct; _sgHp+=_sb.hpPct;
             }
             if(_sgP) d.dollDmgMult=(d.dollDmgMult||1)*(1+_sgP);
@@ -5928,7 +5928,7 @@ function tick() {
                     let hv = Math.max(1, Math.min(20, player.lv + cha + pd.hitOff - target.lv + mobEffAC(target)));
                     let r = roll(1, 20);
                     if (r === 20 || (r !== 1 && hv >= r)) {
-                        let dmg = Math.max(1, roll(1, Math.max(1, player.lv + pd.diceOff)) + cha - (target.dr || 0));
+                        let dmg = Math.max(1, roll(1, Math.max(1, player.lv + pd.diceOff)) + cha - (target.dr || 0)*(1-Math.min(0.75,(player.d&&player.d._sigPen)||0)));
                         target.curHp -= dmg; target.justHit = pd.ele; mobWake(target);
                         logCombat(`夥伴 [${nm}] 撕咬 <span class="${getMobColor(target.lv)}">${target.n}</span>，造成 ${dmg} 點${pd.eleName}屬性傷害！`, 'player-crit');
                     } else {
@@ -6274,7 +6274,7 @@ function getPhysicalDmg(diceStr, target, wpn, arrowData, forceHeavy, forceHit, f
 
     // [（遠/近距離傷害 x 爆擊係數） + 額外傷害 - 敵人傷害減免]，計算過程最低為1
     let nearFar = weaponRoll + dmgBonus;
-    let inner = Math.floor((Math.floor(nearFar * critMult) + player.d.extraDmg) * (player.d.dollDmgMult || 1)) - ((target.dr || 0) + ((target._siegeDrEnd > state.ticks) ? (target._siegeDrVal || 0) : 0));   // 娃娃全傷害%：真·總傷倍率   // 堅固防護：怪物傷害減免
+    let inner = Math.floor((Math.floor(nearFar * critMult) + player.d.extraDmg) * (player.d.dollDmgMult || 1)) - ((target.dr || 0)*(1-Math.min(0.75,(player.d&&player.d._sigPen)||0)) + ((target._siegeDrEnd > state.ticks) ? (target._siegeDrVal || 0) : 0));   // 娃娃全傷害%：真·總傷倍率   // 堅固防護：怪物傷害減免
     inner = Math.max(1, inner);
     if(player.buffs.sk_dragon_deadlybody > 0 && Math.random() < 0.3) inner = Math.floor(inner * 1.3);   // 致命身軀：命中30%追加傷害
 
@@ -7330,39 +7330,51 @@ var MAP_REWARD_MULT = { jp_field:5, aden:2, rasta:3, rasta_1:3, rasta_2:3, rasta
    {k:'antaras', n:'安塔瑞斯', th:'防禦‧坦', col:'#cbd5e1', img:'assets/icons/sigil_antaras.png'},
    {k:'tikal',   n:'提卡爾',  th:'命中‧爆擊',col:'#22d3ee', img:'assets/icons/sigil_tikal.png'},
    {k:'reaper',  n:'鐮刀死神', th:'攻速‧爆發',col:'#ef4444', img:'assets/icons/sigil_reaper.png'},
-   {k:'sherine', n:'席林',    th:'全能',     col:'#c084fc', img:'assets/icons/sigil_sherine.png'}
+   {k:'sherine', n:'席林',    th:'全能',     col:'#c084fc', img:'assets/icons/sigil_sherine.png'},
+   {k:'lindbyr', n:'林德拜爾', th:'爆擊‧穿透',col:'#378add', img:'assets/icons/sigil_lindbyr.png'}
   ];
-  window.SIGILS=SIG; var SIGBYK={}; SIG.forEach(function(s){SIGBYK[s.k]=s;}); function __sigCost(L){ return L>=60?window.sigilCost(L-60)*10:(L>=30?window.sigilCost(L-30)*3:window.sigilCost(L)); } function __sigLvTxt(x){ return x>60?('覺醒二Lv'+(x-60)):(x>30?('覺醒一Lv'+(x-30)):('Lv'+x)); } window.__sigCost=__sigCost;
+  window.SIGILS=SIG; var SIGBYK={}; SIG.forEach(function(s){SIGBYK[s.k]=s;}); function __sigCost(L){ return L>=120?window.sigilCost(L-120)*40:(L>=90?window.sigilCost(L-90)*20:(L>=60?window.sigilCost(L-60)*10:(L>=30?window.sigilCost(L-30)*3:window.sigilCost(L)))); } function __sigLvTxt(x){ return x>120?('覺醒四Lv'+(x-120)):(x>90?('覺醒三Lv'+(x-90)):(x>60?('覺醒二Lv'+(x-60)):(x>30?('覺醒一Lv'+(x-30)):('Lv'+x)))); } window.__sigCost=__sigCost;
   function mil(L,a,b,c){ return L>=30?c:(L>=20?b:(L>=10?a:0)); }
-  window.sigilBonus=function(k,L){ L=L||0; if(L>30){ var _b=window.sigilBonus(k,30), _r1=Math.min(L-30,30), _r2=Math.max(0,L-60), _a1=window.sigilBonus(k,_r1), _a2=window.sigilBonus(k,_r2), _o={}; for(var _f in _b){ _o[_f]=_b[_f]+2*(_a1[_f]||0)+2*(_a2[_f]||0); } return _o; } var o={meleeDmg:0,rangedDmg:0,extraDmg:0,magicDmg:0,extraMp:0,hit:0,meleeCrit:0,rangedCrit:0,magicCrit:0,ac:0,dr:0,hpPct:0,physPct:0,aspdPct:0,allStat:0}; if(L<=0) return o;
-    if(k==='balakas'){ o.meleeDmg=Math.ceil(L*4/3); o.rangedDmg=Math.ceil(L*4/3); o.extraDmg=L; o.physPct=mil(L,0.05,0.10,0.15); }
-    else if(k==='falion'){ o.magicDmg=L*2; o.extraMp=Math.ceil(L*4/3); o.magicCrit=mil(L,4,8,12); }
-    else if(k==='antaras'){ o.ac=-Math.ceil(L*4/3); o.dr=Math.floor(L/2); o.hpPct=mil(L,0.07,0.14,0.20); }
-    else if(k==='tikal'){ o.hit=Math.ceil(L*4/3); o.meleeCrit=Math.floor(L*2/3); o.rangedCrit=Math.floor(L*2/3); }
-    else if(k==='reaper'){ o.extraDmg=Math.ceil(L*7/6); o.meleeDmg=Math.ceil(L*5/6); o.aspdPct=mil(L,0.05,0.10,0.15); }
-    else if(k==='sherine'){ o.allStat=Math.floor(L*2/3); o.aspdPct=(L>=30?0.08:0); o.dr=(L>=30?8:(L>=15?4:0)); }
+  window.sigilBonus=function(k,L){ L=L||0;
+    function _bt(x){ var o={meleeDmg:0,rangedDmg:0,extraDmg:0,magicDmg:0,extraMp:0,hit:0,meleeCrit:0,rangedCrit:0,magicCrit:0,ac:0,dr:0,hpPct:0,physPct:0,aspdPct:0,allStat:0,critDmg:0}; if(x<=0) return o;
+      if(k==='balakas'){ o.meleeDmg=Math.ceil(x*4/3); o.rangedDmg=Math.ceil(x*4/3); o.extraDmg=x; o.physPct=mil(x,0.05,0.10,0.15); }
+      else if(k==='falion'){ o.magicDmg=x*2; o.extraMp=Math.ceil(x*4/3); o.magicCrit=mil(x,4,8,12); }
+      else if(k==='antaras'){ o.ac=-Math.ceil(x*4/3); o.dr=Math.floor(x/2); o.hpPct=mil(x,0.07,0.14,0.20); }
+      else if(k==='tikal'){ o.hit=Math.ceil(x*4/3); o.meleeCrit=Math.floor(x*2/3); o.rangedCrit=Math.floor(x*2/3); }
+      else if(k==='reaper'){ o.extraDmg=Math.ceil(x*7/6); o.meleeDmg=Math.ceil(x*5/6); o.aspdPct=mil(x,0.05,0.10,0.15); }
+      else if(k==='sherine'){ o.allStat=Math.floor(x*2/3); o.aspdPct=(x>=30?0.08:0); o.dr=(x>=30?8:(x>=15?4:0)); }
+      else if(k==='lindbyr'){ o.critDmg=Math.ceil(x*2/3); }
+      return o; }
+    var out={meleeDmg:0,rangedDmg:0,extraDmg:0,magicDmg:0,extraMp:0,hit:0,meleeCrit:0,rangedCrit:0,magicCrit:0,ac:0,dr:0,hpPct:0,physPct:0,aspdPct:0,allStat:0,evaFlat:0,moveSpd:0,critDmg:0,pen:0};
+    if(L<=0) return out;
+    var T=[Math.min(L,30),Math.min(Math.max(0,L-30),30),Math.min(Math.max(0,L-60),30),Math.min(Math.max(0,L-90),30),Math.min(Math.max(0,L-120),30)];
+    var W=[1,2,2,3,4]; var B=[_bt(T[0]),_bt(T[1]),_bt(T[2]),_bt(T[3]),_bt(T[4])];
+    ['meleeDmg','rangedDmg','extraDmg','magicDmg','extraMp','hit','meleeCrit','rangedCrit','magicCrit','ac','hpPct','physPct','allStat','critDmg'].forEach(function(f){ for(var i=0;i<5;i++) out[f]+=W[i]*B[i][f]; });
+    for(var i=0;i<4;i++) out.dr+=W[i]*B[i].dr; out.evaFlat+=W[4]*B[4].dr;
+    for(var i=0;i<3;i++) out.aspdPct+=W[i]*B[i].aspdPct; out.moveSpd+=(W[3]*B[3].aspdPct+W[4]*B[4].aspdPct)*0.5;
+    if(k==='lindbyr') out.pen=Math.min(0.75,L*0.005);
     var _sp=(window.__GAME_CONFIG&&window.__GAME_CONFIG.sigilPower)||1;
-    if(_sp!==1){ ['meleeDmg','rangedDmg','extraDmg','magicDmg','extraMp','hit','meleeCrit','rangedCrit','magicCrit','ac','dr','allStat'].forEach(function(f){ if(o[f]) o[f]=Math.round(o[f]*_sp); }); }
-    return o; };
+    if(_sp!==1){ ['meleeDmg','rangedDmg','extraDmg','magicDmg','extraMp','hit','meleeCrit','rangedCrit','magicCrit','ac','dr','allStat','evaFlat'].forEach(function(f){ if(out[f]) out[f]=Math.round(out[f]*_sp); }); }
+    return out; };
   window.sigilCost=function(L){ return Math.round((100 + (L)*30) * ((window.__GAME_CONFIG&&window.__GAME_CONFIG.sigilCostMult)||1)); };
   window.sigilLv=function(k){ var s=player.sigils||{}; return s[k]||0; };
   function refCnt(){ var n=0; (player.inv||[]).forEach(function(i){ if(i.id==='dom_refine_stone') n+=i.cnt; }); return n; }
   function refRm(c){ for(var k=0;k<player.inv.length&&c>0;k++){ var i=player.inv[k]; if(i.id==='dom_refine_stone'){ var t=Math.min(i.cnt,c); i.cnt-=t; c-=t; } } player.inv=player.inv.filter(function(i){return i.cnt>0;}); }
-  window.refineSigil=function(k){ if(!SIGBYK[k]) return; if(!player.sigils) player.sigils={}; var L=player.sigils[k]||0; if(L>=90){ if(typeof logSys==='function') logSys('該紋樣已達覺醒最高（覺醒二階 Lv30）。'); return; } var cost=__sigCost(L); if(refCnt()<cost){ if(typeof logSys==='function') logSys('紋樣精煉石不足（需 '+cost+'，現有 '+refCnt()+'）。'); return; } refRm(cost); if(Math.random()<((window.__GAME_CONFIG&&window.__GAME_CONFIG.sigilSuccess)||0.30)){ var r=Math.random(), jump=(r<0.90?1:(r<0.98?2:3)); var _cap=(L<30?30:(L<60?60:90)); var nl=Math.min(_cap,L+jump); player.sigils[k]=nl; if(L<31&&nl>30&&typeof logSys==='function')logSys('🌟 '+SIGBYK[k].n+'紋樣覺醒！進入覺醒一階。'); if(L<61&&nl>60&&typeof logSys==='function')logSys('🌟🌟 '+SIGBYK[k].n+'紋樣二次覺醒！進入覺醒二階。'); if(typeof logSys==='function') logSys('✨ '+SIGBYK[k].n+'紋樣精煉成功：'+__sigLvTxt(L)+' → <b style="color:'+SIGBYK[k].col+'">'+__sigLvTxt(nl)+'</b>（+'+(nl-L)+'）！'); } else { if(typeof logSys==='function') logSys('<span class="text-rose-300">'+SIGBYK[k].n+'紋樣精煉失敗…</span>（消耗 '+cost+' 顆精煉石，等級不退）'); } try{ calcStats(); }catch(e){} try{ if(typeof saveGame==='function') saveGame(); }catch(e){} try{ refreshSigilPanel(); }catch(e){} };
+  window.refineSigil=function(k){ if(!SIGBYK[k]) return; if(!player.sigils) player.sigils={}; var L=player.sigils[k]||0; if(L>=150){ if(typeof logSys==='function') logSys('該紋樣已達覺醒最高（覺醒四階 Lv30）。'); return; } var cost=__sigCost(L); if(refCnt()<cost){ if(typeof logSys==='function') logSys('紋樣精煉石不足（需 '+cost+'，現有 '+refCnt()+'）。'); return; } refRm(cost); if(Math.random()<((window.__GAME_CONFIG&&window.__GAME_CONFIG.sigilSuccess)||0.30)){ var r=Math.random(), jump=(r<0.90?1:(r<0.98?2:3)); var _cap=(L<30?30:(L<60?60:90)); var nl=Math.min(_cap,L+jump); player.sigils[k]=nl; if(L<31&&nl>30&&typeof logSys==='function')logSys('🌟 '+SIGBYK[k].n+'紋樣覺醒！進入覺醒一階。'); if(L<61&&nl>60&&typeof logSys==='function')logSys('🌟🌟 '+SIGBYK[k].n+'紋樣二次覺醒！進入覺醒二階。'); if(L<91&&nl>90&&typeof logSys==='function')logSys('🌟🌟🌟 '+SIGBYK[k].n+'紋樣三次覺醒！進入覺醒三階。'); if(L<121&&nl>120&&typeof logSys==='function')logSys('🌟🌟🌟🌟 '+SIGBYK[k].n+'紋樣四次覺醒！進入覺醒四階。');  if(typeof logSys==='function') logSys('✨ '+SIGBYK[k].n+'紋樣精煉成功：'+__sigLvTxt(L)+' → <b style="color:'+SIGBYK[k].col+'">'+__sigLvTxt(nl)+'</b>（+'+(nl-L)+'）！'); } else { if(typeof logSys==='function') logSys('<span class="text-rose-300">'+SIGBYK[k].n+'紋樣精煉失敗…</span>（消耗 '+cost+' 顆精煉石，等級不退）'); } try{ calcStats(); }catch(e){} try{ if(typeof saveGame==='function') saveGame(); }catch(e){} try{ refreshSigilPanel(); }catch(e){} };
   var _sigCur='balakas';
   window._sigSel=function(k){ _sigCur=k; refreshSigilPanel(); };
   window.openSigilPanel=function(){ var old=document.getElementById('sig-ov'); if(old) old.remove(); var ov=document.createElement('div'); ov.id='sig-ov'; ov.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(2,6,23,.82);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:16px;'; ov.addEventListener('click',function(e){ if(e.target===ov) ov.remove(); }); var box=document.createElement('div'); box.id='sig-box'; box.style.cssText='width:100%;max-width:560px;background:linear-gradient(160deg,#15110a,#0a0c12);border:1px solid #6b5316;border-radius:18px;box-shadow:0 0 40px rgba(212,170,40,.18);padding:14px;color:#e8e0cc;'; ov.appendChild(box); document.body.appendChild(ov); refreshSigilPanel(); };
-  function bText(k,L){ var b=window.sigilBonus(k,L); var a=[]; if(b.meleeDmg)a.push('近距+'+b.meleeDmg); if(b.rangedDmg)a.push('遠距+'+b.rangedDmg); if(b.extraDmg)a.push('額外傷害+'+b.extraDmg); if(b.magicDmg)a.push('魔法傷害+'+b.magicDmg); if(b.extraMp)a.push('額外魔力+'+b.extraMp); if(b.hit)a.push('命中+'+b.hit); if(b.meleeCrit)a.push('物爆+'+b.meleeCrit+'%'); if(b.rangedCrit)a.push('遠爆+'+b.rangedCrit+'%'); if(b.magicCrit)a.push('魔爆+'+b.magicCrit+'%'); if(b.ac)a.push('AC'+b.ac); if(b.dr)a.push('減傷+'+b.dr); if(b.hpPct)a.push('最大HP+'+Math.round(b.hpPct*100)+'%'); if(b.physPct)a.push('物理總傷+'+Math.round(b.physPct*100)+'%'); if(b.aspdPct)a.push('攻速+'+Math.round(b.aspdPct*100)+'%'); if(b.allStat)a.push('全屬性+'+b.allStat); return a.join('、')||'—'; }
-  window.refreshSigilPanel=function(){ var box=document.getElementById('sig-box'); if(!box) return; if(!player.sigils) player.sigils={}; var cur=SIGBYK[_sigCur], L=player.sigils[_sigCur]||0, cost=__sigCost(L), have=refCnt(), canR=L<90&&have>=cost;
-    var tabs=SIG.map(function(s){ var on=s.k===_sigCur, lv=player.sigils[s.k]||0; return '<div onclick="_sigSel(\''+s.k+'\')" style="flex:0 0 auto;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;width:78px;padding:5px 3px;border-radius:9px;opacity:'+(on?1:0.55)+';'+(on?'background:linear-gradient(180deg,#2a200a,transparent);box-shadow:0 2px 0 '+s.col+';':'')+'"><img src="'+s.img+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1px solid #6b5316" onerror="this.style.opacity=0"><span style="font-size:11px;color:'+(on?s.col:'#bda35a')+'">'+s.n+'</span><span style="font-size:10px;color:#caa64a">'+(lv>60?'覺二'+(lv-60):lv>30?'覺一'+(lv-30):'Lv'+lv)+'</span></div>'; }).join('');
-    var _rnd=L>60?2:(L>30?1:0), _litN=_rnd?(L-30*_rnd):L, _nc=(_rnd===2?'#c084fc':(_rnd===1?'#ff6a3d':cur.col)); var nodes=''; for(var i=0;i<30;i++){ var a=(-90+i*12)*Math.PI/180, cx=130,cy=130,rr=98, x=cx+rr*Math.cos(a), y=cy+rr*Math.sin(a), on=i<_litN; nodes+='<rect x="'+(x-5).toFixed(1)+'" y="'+(y-5).toFixed(1)+'" width="10" height="10" rx="2" transform="rotate(45 '+x.toFixed(1)+' '+y.toFixed(1)+')" fill="'+(on?_nc:'#2a2212')+'" stroke="'+(on?'#fff3cc':'#4a3a12')+'" stroke-width="1"/>'; }
-    var _curR=L>60?(L-60):(L>30?(L-30):L), _baseR=L>60?60:(L>30?30:0); var list=''; for(var lv=1;lv<=30;lv++){ var cl=(lv===_curR)?'color:#fff1c0;background:linear-gradient(90deg,#2a200a,transparent);':((lv<_curR)?'color:#9a8a55;':'color:#5a5340;'); var _lb=(L>60?'覺二'+lv:(L>30?'覺一'+lv:'Lv'+lv)); list+='<div style="font-size:11px;padding:1px 6px;border-radius:4px;'+cl+'"><b style="color:#caa64a;margin-right:4px">'+_lb+'</b>'+bText(_sigCur,_baseR+lv)+((lv===_curR)?' ◄':'')+'</div>'; }
+  function bText(k,L){ var b=window.sigilBonus(k,L); var a=[]; if(b.meleeDmg)a.push('近距+'+b.meleeDmg); if(b.rangedDmg)a.push('遠距+'+b.rangedDmg); if(b.extraDmg)a.push('額外傷害+'+b.extraDmg); if(b.magicDmg)a.push('魔法傷害+'+b.magicDmg); if(b.extraMp)a.push('額外魔力+'+b.extraMp); if(b.hit)a.push('命中+'+b.hit); if(b.meleeCrit)a.push('物爆+'+b.meleeCrit+'%'); if(b.rangedCrit)a.push('遠爆+'+b.rangedCrit+'%'); if(b.magicCrit)a.push('魔爆+'+b.magicCrit+'%'); if(b.critDmg)a.push('爆擊傷害+'+b.critDmg+'%'); if(b.pen)a.push('穿透'+Math.round(b.pen*100)+'%'); if(b.evaFlat)a.push('迴避+'+b.evaFlat); if(b.moveSpd)a.push('移動+'+Math.round(b.moveSpd*100)+'%'); if(b.ac)a.push('AC'+b.ac); if(b.dr)a.push('減傷+'+b.dr); if(b.hpPct)a.push('最大HP+'+Math.round(b.hpPct*100)+'%'); if(b.physPct)a.push('物理總傷+'+Math.round(b.physPct*100)+'%'); if(b.aspdPct)a.push('攻速+'+Math.round(b.aspdPct*100)+'%'); if(b.allStat)a.push('全屬性+'+b.allStat); return a.join('、')||'—'; }
+  window.refreshSigilPanel=function(){ var box=document.getElementById('sig-box'); if(!box) return; if(!player.sigils) player.sigils={}; var cur=SIGBYK[_sigCur], L=player.sigils[_sigCur]||0, cost=__sigCost(L), have=refCnt(), canR=L<150&&have>=cost;
+    var tabs=SIG.map(function(s){ var on=s.k===_sigCur, lv=player.sigils[s.k]||0; return '<div onclick="_sigSel(\''+s.k+'\')" style="flex:0 0 auto;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;width:78px;padding:5px 3px;border-radius:9px;opacity:'+(on?1:0.55)+';'+(on?'background:linear-gradient(180deg,#2a200a,transparent);box-shadow:0 2px 0 '+s.col+';':'')+'"><img src="'+s.img+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:1px solid #6b5316" onerror="this.style.opacity=0"><span style="font-size:11px;color:'+(on?s.col:'#bda35a')+'">'+s.n+'</span><span style="font-size:10px;color:#caa64a">'+(lv>120?'覺四'+(lv-120):lv>90?'覺三'+(lv-90):lv>60?'覺二'+(lv-60):lv>30?'覺一'+(lv-30):'Lv'+lv)+'</span></div>'; }).join('');
+    var _rnd=L>120?4:L>90?3:L>60?2:(L>30?1:0), _litN=_rnd?(L-30*_rnd):L, _nc=(_rnd===4?'#f0abfc':_rnd===3?'#5eead4':_rnd===2?'#c084fc':(_rnd===1?'#ff6a3d':cur.col)); var nodes=''; for(var i=0;i<30;i++){ var a=(-90+i*12)*Math.PI/180, cx=130,cy=130,rr=98, x=cx+rr*Math.cos(a), y=cy+rr*Math.sin(a), on=i<_litN; nodes+='<rect x="'+(x-5).toFixed(1)+'" y="'+(y-5).toFixed(1)+'" width="10" height="10" rx="2" transform="rotate(45 '+x.toFixed(1)+' '+y.toFixed(1)+')" fill="'+(on?_nc:'#2a2212')+'" stroke="'+(on?'#fff3cc':'#4a3a12')+'" stroke-width="1"/>'; }
+    var _rnd2=L>120?4:L>90?3:L>60?2:(L>30?1:0); var _curR=L-30*_rnd2, _baseR=30*_rnd2; var list=''; for(var lv=1;lv<=30;lv++){ var cl=(lv===_curR)?'color:#fff1c0;background:linear-gradient(90deg,#2a200a,transparent);':((lv<_curR)?'color:#9a8a55;':'color:#5a5340;'); var _lb=(L>120?'覺四'+lv:L>90?'覺三'+lv:L>60?'覺二'+lv:(L>30?'覺一'+lv:'Lv'+lv)); list+='<div style="font-size:11px;padding:1px 6px;border-radius:4px;'+cl+'"><b style="color:#caa64a;margin-right:4px">'+_lb+'</b>'+bText(_sigCur,_baseR+lv)+((lv===_curR)?' ◄':'')+'</div>'; }
     var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div style="font-size:20px;font-weight:800;color:#ffd24a;">🔯 紋樣</div><button onclick="document.getElementById(\'sig-ov\').remove()" style="background:#334155;color:#fff;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">✕</button></div>';
     h+='<div style="display:flex;gap:5px;overflow:auto;border-bottom:1px solid #3a2e10;padding-bottom:8px;margin-bottom:10px;">'+tabs+'</div>';
-    h+='<div style="display:grid;grid-template-columns:260px 1fr;gap:12px;"><div style="position:relative;"><svg viewBox="0 0 260 260" style="width:260px;height:260px;"><circle cx="130" cy="130" r="98" fill="rgba(58,44,10,.3)" stroke="#4a3a12" stroke-width="1"/><circle cx="130" cy="130" r="72" fill="none" stroke="#6b5316" stroke-width="1" stroke-dasharray="2 4" opacity="0.6"/>'+nodes+'</svg><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;"><div style="width:108px;height:108px;border-radius:50%;overflow:hidden;border:2px solid #6b5316;box-shadow:0 0 24px '+cur.col+'"><img src="'+cur.img+'" style="width:100%;height:100%;object-fit:cover" onerror="this.style.opacity=0"></div><div style="margin-top:5px;font-size:15px;font-weight:800;color:'+cur.col+';text-shadow:0 0 8px rgba(0,0,0,.8)">'+cur.n+'紋樣</div><div style="font-size:11px;color:#caa64a">'+(L>60?'覺醒二 Lv '+(L-60):L>30?'覺醒一 Lv '+(L-30):'Lv '+L)+' / 30</div></div></div>';
+    h+='<div style="display:grid;grid-template-columns:260px 1fr;gap:12px;"><div style="position:relative;"><svg viewBox="0 0 260 260" style="width:260px;height:260px;"><circle cx="130" cy="130" r="98" fill="rgba(58,44,10,.3)" stroke="#4a3a12" stroke-width="1"/><circle cx="130" cy="130" r="72" fill="none" stroke="#6b5316" stroke-width="1" stroke-dasharray="2 4" opacity="0.6"/>'+nodes+'</svg><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;"><div style="width:108px;height:108px;border-radius:50%;overflow:hidden;border:2px solid #6b5316;box-shadow:0 0 24px '+cur.col+'"><img src="'+cur.img+'" style="width:100%;height:100%;object-fit:cover" onerror="this.style.opacity=0"></div><div style="margin-top:5px;font-size:15px;font-weight:800;color:'+cur.col+';text-shadow:0 0 8px rgba(0,0,0,.8)">'+cur.n+'紋樣</div><div style="font-size:11px;color:#caa64a">'+(L>120?'覺醒四 Lv '+(L-120):L>90?'覺醒三 Lv '+(L-90):L>60?'覺醒二 Lv '+(L-60):L>30?'覺醒一 Lv '+(L-30):'Lv '+L)+' / 30</div></div></div>';
     h+='<div style="background:#0d1016;border:1px solid #232634;border-radius:10px;padding:8px;max-height:300px;overflow:auto;">'+list+'</div></div>';
     h+='<div style="margin-top:6px;font-size:12px;color:#cbd5e1;background:#0d1016;border:1px solid #232634;border-radius:8px;padding:8px;">目前生效：<span style="color:'+cur.col+'">'+bText(_sigCur,L)+'</span></div>';
-    h+='<div style="display:flex;align-items:center;gap:10px;margin-top:10px;border-top:1px solid #3a2e10;padding-top:10px;"><div style="font-size:12px;color:#94a3b8;">精煉成功 <b style="color:#ffd24a">30%</b>（+1~3：90/8/2 · 失敗不退級）</div><div style="flex:1"></div><div style="font-size:12px;color:#cbd5e1;">🔹精煉石 <b style="color:'+(have>=cost?'#5eead4':'#f87171')+'">'+have+'</b>/'+cost+(L>=60?' <span style=\'color:#fff;background:#7c3aed;padding:0 5px;border-radius:8px;font-size:10px\'>×10</span>':(L>=30?' <span style=\'color:#fff;background:#b03418;padding:0 5px;border-radius:8px;font-size:10px\'>×3</span>':''))+'</div><button onclick="refineSigil(\''+_sigCur+'\')" '+(canR?'':'disabled')+' style="background:'+(canR?'linear-gradient(180deg,#caa033,#8a6a18)':'#334155')+';color:'+(canR?'#1a1405':'#94a3b8')+';border:'+(canR?'1px solid #f0c040':'none')+';padding:9px 18px;border-radius:10px;font-weight:800;cursor:'+(canR?'pointer':'not-allowed')+';'+(canR?'':'opacity:.6;')+'">'+(L>=90?'覺醒已滿':(L>=60?'覺醒二精煉':(L>=30?'覺醒一精煉':'紋樣精煉')))+'</button></div>';
+    h+='<div style="display:flex;align-items:center;gap:10px;margin-top:10px;border-top:1px solid #3a2e10;padding-top:10px;"><div style="font-size:12px;color:#94a3b8;">精煉成功 <b style="color:#ffd24a">30%</b>（+1~3：90/8/2 · 失敗不退級）</div><div style="flex:1"></div><div style="font-size:12px;color:#cbd5e1;">🔹精煉石 <b style="color:'+(have>=cost?'#5eead4':'#f87171')+'">'+have+'</b>/'+cost+(L>=120?' <span style=\'color:#fff;background:#c026d3;padding:0 5px;border-radius:8px;font-size:10px\'>×40</span>':L>=90?' <span style=\'color:#fff;background:#0d9488;padding:0 5px;border-radius:8px;font-size:10px\'>×20</span>':L>=60?' <span style=\'color:#fff;background:#7c3aed;padding:0 5px;border-radius:8px;font-size:10px\'>×10</span>':(L>=30?' <span style=\'color:#fff;background:#b03418;padding:0 5px;border-radius:8px;font-size:10px\'>×3</span>':''))+'</div><button onclick="refineSigil(\''+_sigCur+'\')" '+(canR?'':'disabled')+' style="background:'+(canR?'linear-gradient(180deg,#caa033,#8a6a18)':'#334155')+';color:'+(canR?'#1a1405':'#94a3b8')+';border:'+(canR?'1px solid #f0c040':'none')+';padding:9px 18px;border-radius:10px;font-weight:800;cursor:'+(canR?'pointer':'not-allowed')+';'+(canR?'':'opacity:.6;')+'">'+(L>=150?'覺醒已滿':(L>=120?'覺醒四精煉':L>=90?'覺醒三精煉':L>=60?'覺醒二精煉':(L>=30?'覺醒一精煉':'紋樣精煉')))+'</button></div>';
     box.innerHTML=h; };
 })();
 
@@ -7565,9 +7577,10 @@ function killMob(idx) {
                     if (Math.random() < 0.01 * _sm) gainItem('secret_box_t4', 1, false);
                     if (Math.random() < 0.00001 * _sm) gainItem('secret_box_t5', 1, false);
                     if (mapState.current === 'secret2') {   // 🗺️ 元素聖域(35轉)：聖靈憑證掉落
-                        if (Math.random() < 0.015 * _sm) gainItem('cert_hero', 1, false);
-                        if (Math.random() < 0.003 * _sm) gainItem('cert_legend', 1, false);
-                        if (Math.random() < 0.0003 * _sm) gainItem('cert_myth', 1, false);
+                        if (Math.random() < 0.50 * _sm) gainItem('cert_hero', 1, false);
+                        if (Math.random() < 0.12 * _sm) gainItem('cert_legend', 1, false);
+                        if (Math.random() < 0.02 * _sm) gainItem('cert_myth', 1, false);
+                        gainItem('dom_refine_stone', 5 + Math.floor(Math.random() * 11), false);
                     }
                     if (Math.random() < 0.00001 * _sm) gainItem('secret_box_book', 1, false);
                 }
