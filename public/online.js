@@ -133,7 +133,7 @@ window.__flushExploreLoot = function(){ try{ var _loot = window.__exploreLoot; w
         } catch (e) { }
     }
     syncGameConfig();
-    setInterval(syncGameConfig, 20000);
+    setInterval(syncGameConfig, 60000);
     try {
         document.addEventListener('visibilitychange', function () { if (!document.hidden) syncGameConfig(); });
         window.addEventListener('focus', function () { syncGameConfig(); });
@@ -755,7 +755,7 @@ window.__flushExploreLoot = function(){ try{ var _loot = window.__exploreLoot; w
 
         // ===== 世界王 =====
         wrap.append(el('div', { style: 'font-weight:bold;color:#f87171;font-size:15px;margin-bottom:6px;' }, '🐉 世界王 — 火龍巴拉卡斯'));
-        wrap.append(el('div', { style: 'color:#94a3b8;font-size:12px;margin-bottom:8px;line-height:1.6;' }, '每日 1 次，對火龍巴拉卡斯全力輸出 60 秒比拚累積傷害。每日 00:00 結算，前 10 名發金幣：1名 10億／2名 5億／3名 3億／4–10名 各 1億。'));
+        wrap.append(el('div', { style: 'color:#94a3b8;font-size:12px;margin-bottom:8px;line-height:1.6;' }, '每日 1 次，對火龍巴拉卡斯全力輸出 60 秒比拚累積傷害。每次挑戰即得精煉石×10000＋頭獎卷×100；每日 00:00 結算排名獎（信箱發放）：1名 精煉石50000·神話憑證×10·頭獎卷1000，2名 40000·神話×5·800，3名 30000·傳說×50·600，4–10名 20000·傳說×30·400，11名以後 10000·傳說×15·200。'));
         const wbStat = el('div', { style: 'background:#0f172a;border:1px solid #334155;border-radius:8px;padding:10px;margin-bottom:8px;font-size:13px;color:#cbd5e1;' }, '讀取中…');
         wrap.append(wbStat);
         const wbBtn = el('button', { style: 'width:100%;background:#b91c1c;color:#fff;border:none;border-radius:8px;padding:11px;font-weight:bold;cursor:pointer;margin-bottom:10px;font-size:15px;' }, '⚔️ 挑戰世界王');
