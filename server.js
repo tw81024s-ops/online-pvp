@@ -269,8 +269,19 @@ app.get('/api/gamble/board', auth, (req, res) => {
     const c = store.getConfig() || {};
     const gb = c.gambleBoard || {};
     const vals = Object.values(gb);
-    const topWin = vals.filter(x => (x.won || 0) > 0).map(x => ({ name: x.name, amt: x.won })).sort((a, b) => b.amt - a.amt).slice(0, 20);
-    const topLoss = vals.filter(x => (x.lost || 0) > 0).map(x => ({ name: x.name, amt: x.lost })).sort((a, b) => b.amt - a.amt).slice(0, 20);
+    // 依暱稱去重、取最大值：同名多筆（連點/舊髒資料造成）只留最高一筆，不再重複洗榜
+    function dedupTop(field) {
+        const best = {};
+        for (const x of vals) {
+            const v = (x && x[field]) || 0;
+            if (v <= 0) continue;
+            const key = (x.name || '').trim();
+            if (!best[key] || v > best[key].amt) best[key] = { name: x.name, amt: v };
+        }
+        return Object.values(best).sort((a, b) => b.amt - a.amt).slice(0, 20);
+    }
+    const topWin = dedupTop('won');
+    const topLoss = dedupTop('lost');
     res.json({ topWin, topLoss });
 });
 
