@@ -275,14 +275,23 @@ app.get('/api/gamble/board', auth, (req, res) => {
         for (const x of vals) {
             const v = (x && x[field]) || 0;
             if (v <= 0) continue;
-            const key = (x.name || '').trim();
+            // 最強正規化：NFKC(全形半形統一) + 移除所有空白/零寬/隱藏字元，避免看不見的差異被當成不同人
+            const key = String(x.name || '').normalize('NFKC').replace(/[\s\u200B-\u200D\uFEFF\u00A0\u3000]/g, '');
             if (!best[key] || v > best[key].amt) best[key] = { name: x.name, amt: v };
         }
         return Object.values(best).sort((a, b) => b.amt - a.amt).slice(0, 20);
     }
     const topWin = dedupTop('won');
     const topLoss = dedupTop('lost');
-    res.json({ topWin, topLoss });
+    // 🔍 暫時性 debug：印出原始資料，找出為什麼去重沒效（key=帳號、name=暱稱、codes=每個字的編碼）
+    const _raw = Object.entries(gb).map(([k, x]) => ({
+        key: k,
+        name: (x && x.name) || '',
+        codes: [...String((x && x.name) || '')].map(ch => ch.codePointAt(0)),
+        won: (x && x.won) || 0,
+        lost: (x && x.lost) || 0
+    })).sort((a, b) => b.won - a.won).slice(0, 12);
+    res.json({ topWin, topLoss, _v: 'dedup3', _rawCount: Object.keys(gb).length, _raw });
 });
 
 app.post('/api/admin/sweep-saves', auth, adminOnly, (req, res) => {
