@@ -710,13 +710,20 @@ function wbRankOf(w, username) {
 function settleWorldBoss(scores) {
     const ranked = Object.keys(scores).map(uid => ({ uid: Number(uid), name: scores[uid].name, username: scores[uid].username, dmg: scores[uid].dmg || 0 }))
         .sort((a, b) => b.dmg - a.dmg);
-    for (let i = 0; i < ranked.length && i < WB_REWARDS.length; i++) {
-        const uid = ranked[i].uid;
-        const r = pvpGet(uid, ranked[i].username);
-        r.pendingGold = (r.pendingGold || 0) + WB_REWARDS[i];
-        store.putPvp(uid, r);
-        pvpFlushPending(r);   // 在線即時發、離線登入時補發
-        store.putPvp(uid, r);
+    for (let i = 0; i < ranked.length; i++) {
+        const rk = i + 1;
+        let refine, certId, certCnt, jack;
+        if (rk === 1) { refine = 50000; certId = 'cert_myth'; certCnt = 10; jack = 1000; }
+        else if (rk === 2) { refine = 40000; certId = 'cert_myth'; certCnt = 5; jack = 800; }
+        else if (rk === 3) { refine = 30000; certId = 'cert_legend'; certCnt = 50; jack = 600; }
+        else if (rk <= 10) { refine = 20000; certId = 'cert_legend'; certCnt = 30; jack = 400; }
+        else { refine = 10000; certId = 'cert_legend'; certCnt = 15; jack = 200; }
+        const uid = ranked[i].uid; const uname = ranked[i].username;
+        try {
+            const mail = { mid: _mailUid(), ts: Date.now(), title: '🏆 世界王 排名獎勵（第' + rk + '名）', gold: 0, items: [{ id: 'dom_refine_stone', cnt: refine }, { id: certId, cnt: certCnt }, { id: 'jackpot_scroll', cnt: jack }] };
+            store.addMail(uid, mail);
+            const tw = online.get(uname); if (tw) send(tw, { type: 'mail_state', mail: mailPublic(uname) });
+        } catch (e) {}
     }
 }
 function wbRollover() {
@@ -744,6 +751,12 @@ app.post('/api/worldboss/challenge', auth, (req, res) => {
     const name = (req.body && req.body.name) ? String(req.body.name).slice(0, 20) : u.username;
     w.scores[u.id] = { username: u.username, name, dmg };
     store.putWB(w);
+    // ⚔️ 世界王參與獎（每次挑戰固定給）
+    try {
+        const _pm = { mid: _mailUid(), ts: Date.now(), title: '⚔️ 世界王 挑戰參與獎', gold: 0, items: [{ id: 'dom_refine_stone', cnt: 10000 }, { id: 'jackpot_scroll', cnt: 100 }] };
+        store.addMail(u.id, _pm);
+        const _tw = online.get(u.username); if (_tw) send(_tw, { type: 'mail_state', mail: mailPublic(u.username) });
+    } catch (e) {}
     res.json({ ok: true, dmg, rank: wbRankOf(w, u.username) });
 });
 app.get('/api/worldboss/me', auth, (req, res) => {
