@@ -283,15 +283,7 @@ app.get('/api/gamble/board', auth, (req, res) => {
     }
     const topWin = dedupTop('won');
     const topLoss = dedupTop('lost');
-    // 🔍 暫時性 debug：印出原始資料，找出為什麼去重沒效（key=帳號、name=暱稱、codes=每個字的編碼）
-    const _raw = Object.entries(gb).map(([k, x]) => ({
-        key: k,
-        name: (x && x.name) || '',
-        codes: [...String((x && x.name) || '')].map(ch => ch.codePointAt(0)),
-        won: (x && x.won) || 0,
-        lost: (x && x.lost) || 0
-    })).sort((a, b) => b.won - a.won).slice(0, 12);
-    res.json({ topWin, topLoss, _v: 'dedup3', _rawCount: Object.keys(gb).length, _raw });
+    res.json({ topWin, topLoss });
 });
 
 app.post('/api/admin/sweep-saves', auth, adminOnly, (req, res) => {
