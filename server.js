@@ -1,6 +1,7 @@
 // server.js — 放置天堂 線上對戰伺服器
 // 功能：帳號註冊/登入、雲端存檔、WebSocket 在線狀態與即時對戰、管理員 API、遊戲靜態檔案
 const express = require('express');
+const compression = require('compression');
 const http = require('http');
 const { WebSocketServer } = require('ws');
 const bcrypt = require('bcryptjs');
@@ -14,6 +15,7 @@ const store = require('./store');
 
 // ====== App ======
 const app = express();
+app.use(compression());   // gzip 壓縮所有回應，大幅降低頻寬
 app.use(express.json({ limit: '5mb' }));
 app.use(express.static(path.join(__dirname, 'public'), {
     setHeaders: (res, filePath) => {
